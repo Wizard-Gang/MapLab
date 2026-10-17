@@ -83,7 +83,7 @@ declared schema under the reader's own evaluator.
 
 Tests copy only the reader folder and `schemas/` into a scratch folder and spawn the
 reader there. It must read both maps and resolve the reciprocal portals. Each of the
-88 inert edit records changes a temporary copy of the export bundle. JSON edits
+104 inert edit records changes a temporary copy of the export bundle. JSON edits
 re-encode the edited file as JCS, using the helper's own encoder, and re-hash it,
 unless the record says otherwise, so each negative record isolates one defect. It
 must then produce exactly its expected diagnostic code, file and JSON path. The
@@ -94,13 +94,19 @@ records cover:
 - manifest: tampering, order, duplicate keys, non-canonical bytes, unindexed or
   non-authored documents, schema mismatch;
 - document bytes: malformed JSON, UTF-8, BOM, duplicate members, lone surrogates;
-- negotiation: versions, formats, contracts, the camera model, external maps;
-- closure: missing, duplicate or mismatched dependencies, unreachable documents;
+- document limits: out-of-range numbers and nesting deeper than 64 containers;
+- negotiation: versions, formats, contracts, external maps, and contracts bound to
+  the wrong role (collision contract, camera model, required feature, controller),
+  including a duplicate required feature;
+- closure: missing, duplicate or mismatched dependencies, unreachable documents,
+  absent optional dependencies with two paths or aliasing another file;
 - references: duplicates outside maps, dangling, wrong-kind, wrong-owner and
-  out-of-closure references, catalog entries without params, movement-profile uses;
+  out-of-closure references, catalog entries without params, movement-profile uses,
+  profile refs that dangle in any map whose closure holds the profile, and terrain
+  naming a tileset its map does not declare;
 - asset paths: reserved, traversal, media mismatch, unbundled.
 
-Nine positive records must still be accepted:
+Ten positive records must still be accepted:
 
 - a listed asset;
 - the five pinned schemas in the F4 layout;
@@ -108,10 +114,15 @@ Nine positive records must still be accepted:
 - a third map with a transitive portal;
 - an in-closure cross-map ref;
 - a declared profile catalog use;
-- reference-like parameter names.
+- reference-like parameter names;
+- a map-scoped profile ref used from a map that does not declare the profile;
+- terrain naming a directly declared tileset;
+- a group-kind layer as a `group` target.
 
 A test requires every diagnostic code the reader can emit to have a record, or one of
-eight named in-process tests for codes no valid v1 export can reach. A differential
+six named in-process tests for codes no bundle edit can produce: a non-directory
+input, schema-directory defects, unclassified members and non-map dependency cycles.
+On a case-insensitive host the case-alias record is reported as skipped. A differential
 test runs the reader's parser and evaluator against `src/contracts` on every owned
 conformance file and R1 example. The two must agree on byte acceptance and
 closed-schema validity.

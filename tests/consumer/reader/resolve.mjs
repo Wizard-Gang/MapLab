@@ -1,5 +1,5 @@
-// G1 step 4 references: every reference in a bundled map, in the movement profiles that map declares,
-// and in tilesets resolves to its expected kind inside the referencing map's dependency closure.
+// G1 step 4 references: every reference in a bundled map, in each movement profile inside that map's
+// dependency closure, and in tilesets resolves to its expected kind inside the referencing map's closure.
 // Catalog entries are checked for existence only; handler kinds and parameter semantics are not.
 import { ASSET_TYPES, pathProblem } from './bundle.mjs';
 import { CONTRACT_MEMBERS, closureOf, dependencyEdges, isContractRef, isObject, pathOf, scan } from './references.mjs';
@@ -21,7 +21,7 @@ const FIELDS = {
   shapeId: 'shape', visualId: 'visual', regionId: 'region', approachRegionId: 'region', patrolRegionId: 'region',
   pursuitRegionId: 'region', leashRegionId: 'region', aggroRegionId: 'region', waypointIds: 'waypoint', routeId: 'route',
   presentationId: 'presentation', expandedIds: 'any', movementId: 'doc:movement', profileIds: 'doc:movement',
-  tilesetId: 'doc:tileset', mapId: 'doc:map', prefabId: 'dep:prefab', bundleDependencyId: 'dep:riglab',
+  tilesetId: 'decl:tileset', mapId: 'doc:map', prefabId: 'dep:prefab', bundleDependencyId: 'dep:riglab',
   tileId: 'tile', fallbackTileId: 'tile', outputTileIds: 'tile', terrainId: 'terrain',
   parentId: 'parent', groupId: 'implicit', dropGroupId: 'implicit', suggestedMaterialId: 'advisory',
 };
@@ -40,16 +40,18 @@ function namespace(value, report, file) {
   }
   (value.bodies ?? []).forEach((body, i) => body.shapes.forEach((s, j) => add(s.id, 'shape', `$.bodies[${i}].shapes[${j}].id`)));
   (value.traversals ?? []).forEach((t, i) => (t.access ?? []).forEach((a, j) => add(a.id, 'access', `$.traversals[${i}].access[${j}].id`)));
-  const groups = new Set();
+  // Group-kind layers are `group` targets too, and an entity or encounter group may share one's ID (ML-006).
+  const groupLayers = new Set((value.layers ?? []).filter((l) => l.kind === 'group').map((l) => l.id));
+  const groups = new Set(groupLayers);
   for (const c of ['entities', 'encounters']) (value[c] ?? []).forEach((o, i) => {
     if (typeof o.groupId !== 'string') return;
-    if (ids.has(o.groupId)) report('object.duplicate', file, `$.${c}[${i}].groupId`, `Group ${o.groupId} collides with an object ID`);
+    if (ids.has(o.groupId) && !groupLayers.has(o.groupId)) report('object.duplicate', file, `$.${c}[${i}].groupId`, `Group ${o.groupId} collides with an object ID`);
     groups.add(o.groupId);
   });
   return { ids, groups };
 }
 
-/** Resolves references in every bundled map, the movement documents each map declares, and tilesets. Returns resolved portals. */
+/** Resolves references in every bundled map, the movement documents in each map's closure, and tilesets. Returns resolved portals. */
 export function checkReferences(manifest, docs, diagnostics) {
   const seen = new Set();
   const report = (code, file, path, message) => {
@@ -96,6 +98,12 @@ export function checkReferences(manifest, docs, diagnostics) {
       if (kind === 'tile' || kind === 'terrain' || (mode === 'tileset' && kind === 'asset')) { if (!ctx.tileset?.[kind].has(id)) fail(at, `Unknown tileset ${kind} ${id}`); return; }
       if (kind === 'any') { if (!scope.ids.has(id)) fail(at, `Unknown object ${id}`); return; }
       if (kind.startsWith('doc:')) { docRef(scope, id, `maplab.${kind.slice(4)}`, at); return; }
+      // Terrain names its tileset directly (ML-004): transitive reachability is not enough.
+      if (kind === 'decl:tileset') {
+        if (docs.get(id)?.value.format !== 'maplab.tileset') fail(at, `${id} is not a bundled maplab.tileset document`);
+        else if (!scope.value.dependencies.some((d) => d.id === id && d.kind === 'tileset')) fail(at, `Tileset ${id} is not a declared dependency of ${scope.id}`, 'reference.undeclared');
+        return;
+      }
       if (kind.startsWith('dep:')) { if (!(scope.value.dependencies ?? []).some((d) => d.id === id && d.kind === kind.slice(4))) fail(at, `${id} is not a declared ${kind.slice(4)} dependency`); return; }
       if (kind === 'parent') kind = ctx.collection === 'layers' ? 'layer' : ctx.collection === 'visuals' ? 'visual' : null;
       if (kind === null) { fail(at, 'Unclassified parent reference', 'reference.unclassified'); return; }
@@ -168,8 +176,9 @@ export function checkReferences(manifest, docs, diagnostics) {
     const file = docs.get(scope.id).entry.path;
     walk(scope.value, file, 'map', scope);
     assetPaths(scope.value, file);
-    // Profiles resolve their catalog entries and typed parameter refs in each map that declares them.
-    for (const d of scope.value.dependencies) if (d.kind === 'movement' && docs.get(d.id)?.value.format === 'maplab.movement') walk(docs.get(d.id).value, docs.get(d.id).entry.path, 'movement', scope);
+    // Profiles have no dependency list: like ML-006, each one resolves its catalog entries and typed
+    // parameter refs in every map whose closure contains it, whether or not that map declares it.
+    for (const id of [...scope.closure].sort()) if (docs.get(id).value.format === 'maplab.movement') walk(docs.get(id).value, docs.get(id).entry.path, 'movement', scope);
   }
   return portals;
 }

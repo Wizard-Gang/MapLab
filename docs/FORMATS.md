@@ -84,11 +84,16 @@ the following parts of adopted G1 steps 1–4:
 - a canonical JCS manifest with complete inventory, exact sizes, SHA-256 and the
   bundle digest;
 - exact format/version and contract negotiation, for closed bundles only (external
-  maps are deferred);
-- independent closed-schema evaluation and dependency closure;
+  maps are deferred). Each contract member is checked for its role: `requiredFeatures`
+  names distinct semantic contracts, `collisionContract` only `maplab.collision` v1,
+  the camera `model` only `maplab.camera` v1 and a profile `controller` only
+  `maplab.reference-controller` v1;
+- independent closed-schema evaluation and dependency closure, where an absent
+  optional dependency still names one path per ID and one ID per case-folded path;
 - reference resolution inside each map's dependency closure, including portals,
-  typed parameter refs, every catalog entry a map or its declared movement profiles
-  use, and asset paths.
+  typed parameter refs, every catalog entry a map uses, and asset paths. Every
+  movement profile in a map's closure is resolved in that map, whether or not the
+  map declares it, and terrain must declare its tileset directly.
 
 Every `*Id`/`*Ids` member and every `{key, version}` member of the published v1
 schemas is classified explicitly: as a contract, a catalog entry or a solver

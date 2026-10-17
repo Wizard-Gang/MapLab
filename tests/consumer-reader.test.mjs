@@ -82,8 +82,12 @@ test('the conformance index is closed: unique case IDs, every group covered, gol
 mkdirSync(join(scratch, 'fs-case'));
 const caseInsensitiveFs = existsSync(join(scratch, 'FS-CASE'));
 
-test.each(index.cases.map((c) => [c.id, c]))('conformance case %s', (id, record) => {
-  if (record.requiresCaseSensitiveFs && caseInsensitiveFs) return; // The host cannot hold both names; Linux CI runs it.
+// A case-insensitive host cannot hold both names of a case-alias record, so it reports them skipped; Linux CI runs them.
+const hostCannotHold = (c) => c.requiresCaseSensitiveFs === true && caseInsensitiveFs;
+const skipped = index.cases.filter(hostCannotHold);
+if (skipped.length) test.skip.each(skipped.map((c) => [c.id]))('conformance case %s (needs a case-sensitive file system)', () => {});
+
+test.each(index.cases.filter((c) => !hostCannotHold(c)).map((c) => [c.id, c]))('conformance case %s', (id, record) => {
   const dir = join(scratch, 'cases', id);
   materialize(golden, dir, record, join(root, 'schemas'));
   const { status, report, stderr } = run(dir, record.trustedDigest ? ['--expect-digest', index.golden.export.bundleSha256] : []);
@@ -148,8 +152,10 @@ test('a schema directory missing any supported format fails as a reader error, n
   expect(out.stderr).toContain('schema.missing: The pinned maplab.tileset@1 schema is required');
 });
 
-// Codes no valid v1 export can reach, each asserted by an in-process test in this file.
-const IN_PROCESS_ONLY = new Set(['bundle.root', 'json.limit', 'json.number', 'schema.missing', 'schema.identity', 'schema.unsupported', 'reference.unclassified', 'dependency.cycle']);
+// Codes no bundle edit record can produce, each asserted by an in-process test in this file: a non-directory
+// input, defects of the schema directory rather than the bundle, members the published schemas do not define,
+// and non-map dependency cycles (no non-map v1 export format carries dependencies).
+const IN_PROCESS_ONLY = new Set(['bundle.root', 'schema.missing', 'schema.identity', 'schema.unsupported', 'reference.unclassified', 'dependency.cycle']);
 
 test('every diagnostic code the reader can emit has a separate-process record or a named in-process test', () => {
   const emitted = new Set();

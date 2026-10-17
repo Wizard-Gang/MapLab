@@ -7,8 +7,18 @@ import { validate } from './schema.mjs';
 export const SUPPORTED_FORMATS = Object.freeze(['maplab.catalog@1', 'maplab.map@1', 'maplab.movement@1', 'maplab.tileset@1']);
 export const SUPPORTED_CONTRACTS = Object.freeze(['maplab.camera@1', 'maplab.catalog@1', 'maplab.climb@1', 'maplab.collision@1',
   'maplab.map@1', 'maplab.movement@1', 'maplab.reference-controller@1', 'maplab.tileset@1']);
+/** The contracts each `{key, version}` member may bind, by document format and member name (F1). A supported
+ * contract outside its role (a camera model naming `maplab.collision`) is unsupported for that role. */
+export const CONTRACT_ROLES = Object.freeze({
+  'maplab.map': Object.freeze({
+    requiredFeatures: ['maplab.camera@1', 'maplab.climb@1', 'maplab.collision@1', 'maplab.reference-controller@1'],
+    collisionContract: ['maplab.collision@1'],
+    model: ['maplab.camera@1'],
+  }),
+  'maplab.movement': Object.freeze({ controller: ['maplab.reference-controller@1'] }),
+});
 /** `{key, version}` members, by member name, that name a semantic contract the consumer must support. */
-export const CONTRACT_MEMBERS = new Set(['requiredFeatures', 'collisionContract', 'model', 'controller']);
+export const CONTRACT_MEMBERS = new Set(Object.values(CONTRACT_ROLES).flatMap((roles) => Object.keys(roles)));
 
 export const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 export const isContractRef = (v) => isObject(v) && Object.keys(v).sort().join() === 'key,version' && typeof v.key === 'string' && Number.isInteger(v.version);
@@ -57,11 +67,18 @@ export function loadDocuments(manifest, files, schemas, diagnostics) {
     const violations = validate(schemas.get(identity), value);
     for (const v of violations) report(`schema.${v.keyword}`, entry.path, v.path, `Violates ${identity}`);
     if (violations.length) continue;
+    const roles = CONTRACT_ROLES[value.format] ?? {};
+    const features = new Set();
     scan(value, (v, at, name) => {
       if (!isContractRef(v) || !CONTRACT_MEMBERS.has(name)) return {};
       const id = `${v.key}@${v.version}`;
       if (!SUPPORTED_CONTRACTS.includes(id)) report('contract.unsupported', entry.path, pathOf(at), `Unsupported contract ${id}`);
+      else if (!roles[name]?.includes(id)) report('contract.role', entry.path, pathOf(at), `${id} cannot bind ${name}`);
       else required.add(id);
+      if (name === 'requiredFeatures') {
+        if (features.has(v.key)) report('contract.duplicate', entry.path, pathOf(at), `${v.key} is required twice`);
+        features.add(v.key);
+      }
       return false;
     });
     docs.set(entry.id, { entry, value });
@@ -89,6 +106,8 @@ export function checkClosure(manifest, docs, diagnostics) {
   const report = (code, file, path, message) => diagnostics.push({ code, file, path, message });
   const entry = docs.get(manifest.entryMapId);
   if (entry?.value.format !== 'maplab.map') { report('closure.entry', 'manifest.json', '$.entryMapId', 'entryMapId must name a bundled map'); return; }
+  const paths = new Map([...docs].map(([id, d]) => [id, d.entry.path]));
+  const owners = new Map([...docs].map(([id, d]) => [d.entry.path.toLowerCase(), id]));
   for (const { entry: e, value } of docs.values()) {
     const seen = new Set();
     (value.dependencies ?? []).forEach((dep, i) => {
@@ -96,7 +115,16 @@ export function checkClosure(manifest, docs, diagnostics) {
       if (seen.has(dep.id)) report('dependency.duplicate', e.path, at, `Dependency ${dep.id} is listed twice`);
       seen.add(dep.id);
       const target = docs.get(dep.id);
-      if (!target) { if (dep.required) report('dependency.missing', e.path, at, `Required dependency ${dep.id} is not in the bundle`); return; }
+      if (!target) {
+        if (dep.required) { report('dependency.missing', e.path, at, `Required dependency ${dep.id} is not in the bundle`); return; }
+        // An absent optional dependency still names one file: one path per ID, one ID per case-folded path.
+        const known = paths.get(dep.id), owner = owners.get(dep.path.toLowerCase());
+        if (known !== undefined && known !== dep.path) report('dependency.path-identity', e.path, `${at}.path`, `${dep.id} is listed with another path, ${known}`);
+        else if (owner !== undefined && owner !== dep.id) report('dependency.path-alias', e.path, `${at}.path`, `${dep.path} aliases the file of ${owner}`);
+        paths.set(dep.id, known ?? dep.path);
+        owners.set(dep.path.toLowerCase(), owner ?? dep.id);
+        return;
+      }
       if (target.entry.path !== dep.path || target.value.format !== `maplab.${dep.kind}`) report('dependency.identity', e.path, at, `Dependency ${dep.id} disagrees with the bundled document`);
     });
   }
