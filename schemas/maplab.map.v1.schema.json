@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:maplab:schema:maplab.map:1",
-  "title": "maplab.map v1: header and base subset",
-  "description": "Published by ML-003 from the R1 contract. Closed header, identity, coordinate, bounds, dependency and asset rules. Geometry, layer, gameplay, camera, environment and navigation members are typed only and are validated from ML-004 to ML-006. Every reference is local; validators must never fetch a schema.",
+  "title": "maplab.map v1: base and geometry subset",
+  "description": "ML-003/004 R1 contracts. Closed base, geometry, layers, visuals, terrain and prefab provenance. Gameplay, catalog calls/conditions, camera, environment and navigation remain deferred to ML-006. Local references only.",
   "type": "object",
   "properties": {
     "format": {
@@ -51,25 +51,60 @@
       "$ref": "#/$defs/deferred-array"
     },
     "layers": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/layer"
+      }
     },
     "terrain": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/terrain"
+      }
     },
     "visuals": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/visual"
+      }
     },
     "materials": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/material"
+      }
     },
     "bodies": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/body"
+      }
     },
     "footholds": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/foothold"
+      }
     },
     "traversals": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/traversal"
+      }
     },
     "regions": {
       "$ref": "#/$defs/deferred-array"
@@ -102,7 +137,12 @@
       "$ref": "#/$defs/deferred-array"
     },
     "prefabPlacements": {
-      "$ref": "#/$defs/deferred-array"
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/prefab-placement"
+      }
     }
   },
   "required": [
@@ -394,6 +434,1548 @@
     "deferred-object": {
       "$comment": "Contents validated from ML-004 to ML-006; ML-003 checks only the JSON type.",
       "type": "object"
+    },
+    "vec": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/coordinate"
+        },
+        {
+          "$ref": "#/$defs/coordinate"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false
+    },
+    "positive-vec": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/length"
+        },
+        {
+          "$ref": "#/$defs/length"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false
+    },
+    "unit": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "multipleOf": 0.0000152587890625
+    },
+    "alpha": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "multipleOf": 0.00390625
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$"
+    },
+    "body-shape": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/rect-shape"
+        },
+        {
+          "$ref": "#/$defs/polygon-shape"
+        },
+        {
+          "$ref": "#/$defs/segment-shape"
+        }
+      ]
+    },
+    "rect-shape": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "const": "rect"
+        },
+        "rect": {
+          "$ref": "#/$defs/rect"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "rect"
+      ],
+      "additionalProperties": false
+    },
+    "polygon-shape": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "const": "polygon"
+        },
+        "points": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/vec"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "segment-shape": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "const": "segment"
+        },
+        "a": {
+          "$ref": "#/$defs/vec"
+        },
+        "b": {
+          "$ref": "#/$defs/vec"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "a",
+        "b"
+      ],
+      "additionalProperties": false
+    },
+    "region-shape": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/rect-region"
+        },
+        {
+          "$ref": "#/$defs/polygon-region"
+        },
+        {
+          "$ref": "#/$defs/circle-region"
+        }
+      ]
+    },
+    "rect-region": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "rect"
+        },
+        "rect": {
+          "$ref": "#/$defs/rect"
+        }
+      },
+      "required": [
+        "kind",
+        "rect"
+      ],
+      "additionalProperties": false
+    },
+    "polygon-region": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "polygon"
+        },
+        "points": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/vec"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "circle-region": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "circle"
+        },
+        "center": {
+          "$ref": "#/$defs/vec"
+        },
+        "radius": {
+          "$ref": "#/$defs/length"
+        }
+      },
+      "required": [
+        "kind",
+        "center",
+        "radius"
+      ],
+      "additionalProperties": false
+    },
+    "anchor": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/world-anchor"
+        },
+        {
+          "$ref": "#/$defs/surface-anchor"
+        },
+        {
+          "$ref": "#/$defs/body-anchor"
+        },
+        {
+          "$ref": "#/$defs/entity-anchor"
+        }
+      ]
+    },
+    "world-anchor": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "world"
+        },
+        "point": {
+          "$ref": "#/$defs/vec"
+        }
+      },
+      "required": [
+        "kind",
+        "point"
+      ],
+      "additionalProperties": false
+    },
+    "surface-anchor": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "surface"
+        },
+        "footholdId": {
+          "$ref": "#/$defs/id"
+        },
+        "u": {
+          "$ref": "#/$defs/unit"
+        },
+        "normalOffset": {
+          "$ref": "#/$defs/coordinate"
+        }
+      },
+      "required": [
+        "kind",
+        "footholdId",
+        "u",
+        "normalOffset"
+      ],
+      "additionalProperties": false
+    },
+    "body-anchor": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "body"
+        },
+        "bodyId": {
+          "$ref": "#/$defs/id"
+        },
+        "point": {
+          "$ref": "#/$defs/vec"
+        }
+      },
+      "required": [
+        "kind",
+        "bodyId",
+        "point"
+      ],
+      "additionalProperties": false
+    },
+    "entity-anchor": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "entity"
+        },
+        "entityId": {
+          "$ref": "#/$defs/id"
+        },
+        "point": {
+          "$ref": "#/$defs/vec"
+        }
+      },
+      "required": [
+        "kind",
+        "entityId",
+        "point"
+      ],
+      "additionalProperties": false
+    },
+    "call": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/key"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "params": {
+          "$ref": "#/$defs/deferred-object"
+        }
+      },
+      "required": [
+        "key",
+        "version",
+        "params"
+      ],
+      "additionalProperties": false
+    },
+    "condition": {
+      "$ref": "#/$defs/deferred-object"
+    },
+    "transform": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/vec"
+        },
+        "rotation": {
+          "type": "number",
+          "minimum": -35184372088831.996,
+          "maximum": 35184372088831.996,
+          "multipleOf": 0.00390625
+        },
+        "scale": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/asset-scale"
+            },
+            {
+              "$ref": "#/$defs/asset-scale"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        },
+        "mirrorX": {
+          "type": "boolean"
+        },
+        "mirrorY": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "position",
+        "rotation",
+        "scale",
+        "mirrorX",
+        "mirrorY"
+      ],
+      "additionalProperties": false
+    },
+    "visual-source": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/asset-source"
+        },
+        {
+          "$ref": "#/$defs/shape-source"
+        },
+        {
+          "$ref": "#/$defs/frames-source"
+        }
+      ]
+    },
+    "asset-source": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "asset"
+        },
+        "assetId": {
+          "$ref": "#/$defs/id"
+        },
+        "pivot": {
+          "$ref": "#/$defs/vec"
+        }
+      },
+      "required": [
+        "kind",
+        "assetId",
+        "pivot"
+      ],
+      "additionalProperties": false
+    },
+    "shape-source": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "shape"
+        },
+        "shape": {
+          "$ref": "#/$defs/region-shape"
+        },
+        "fill": {
+          "$ref": "#/$defs/color"
+        }
+      },
+      "required": [
+        "kind",
+        "shape",
+        "fill"
+      ],
+      "additionalProperties": false
+    },
+    "frames-source": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "frames"
+        },
+        "assetIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "pivot": {
+          "$ref": "#/$defs/vec"
+        },
+        "frameTicks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20000,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "loop": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "assetIds",
+        "pivot",
+        "frameTicks",
+        "loop"
+      ],
+      "additionalProperties": false
+    },
+    "layer": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/group-layer"
+        },
+        {
+          "$ref": "#/$defs/paint-layer"
+        },
+        {
+          "$ref": "#/$defs/background-layer"
+        }
+      ]
+    },
+    "group-layer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "parentId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "opacity": {
+          "$ref": "#/$defs/alpha"
+        },
+        "kind": {
+          "enum": [
+            "group",
+            "actors"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "parentId",
+        "order",
+        "visible",
+        "opacity",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "paint-layer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "parentId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "opacity": {
+          "$ref": "#/$defs/alpha"
+        },
+        "kind": {
+          "enum": [
+            "tile",
+            "sprite"
+          ]
+        },
+        "occlusionFade": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/alpha"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "parentId",
+        "order",
+        "visible",
+        "opacity",
+        "kind",
+        "occlusionFade"
+      ],
+      "additionalProperties": false
+    },
+    "background-layer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "parentId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "opacity": {
+          "$ref": "#/$defs/alpha"
+        },
+        "kind": {
+          "const": "background"
+        },
+        "space": {
+          "enum": [
+            "world",
+            "camera"
+          ]
+        },
+        "parallax": {
+          "$ref": "#/$defs/vec"
+        },
+        "origin": {
+          "$ref": "#/$defs/vec"
+        },
+        "repeat": {
+          "enum": [
+            "none",
+            "x",
+            "y",
+            "xy"
+          ]
+        },
+        "repeatSize": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/asset-extent"
+            },
+            {
+              "$ref": "#/$defs/asset-extent"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        },
+        "scrollWUPerTick": {
+          "$ref": "#/$defs/vec"
+        },
+        "phase": {
+          "$ref": "#/$defs/vec"
+        },
+        "occlusionFade": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/alpha"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "parentId",
+        "order",
+        "visible",
+        "opacity",
+        "kind",
+        "space",
+        "parallax",
+        "origin",
+        "repeat",
+        "repeatSize",
+        "scrollWUPerTick",
+        "phase",
+        "occlusionFade"
+      ],
+      "additionalProperties": false
+    },
+    "visual": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "layerId": {
+          "$ref": "#/$defs/id"
+        },
+        "parentId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "transform": {
+          "$ref": "#/$defs/transform"
+        },
+        "source": {
+          "$ref": "#/$defs/visual-source"
+        },
+        "bodyId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "layerId",
+        "parentId",
+        "order",
+        "transform",
+        "source",
+        "bodyId"
+      ],
+      "additionalProperties": false
+    },
+    "material": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "traction": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "conveyorSu": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "effect": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/call"
+            }
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "traction",
+        "conveyorSu",
+        "effect",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "motion": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/vec"
+          }
+        },
+        "legTicks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 19999,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "mode": {
+          "enum": [
+            "once",
+            "loop",
+            "pingPong"
+          ]
+        },
+        "initialPhaseTicks": {
+          "$ref": "#/$defs/ticks"
+        },
+        "easing": {
+          "const": "linear"
+        },
+        "carry": {
+          "const": "delta"
+        },
+        "departure": {
+          "enum": [
+            "none",
+            "addPlatformVelocity"
+          ]
+        },
+        "crushAction": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/call"
+            }
+          ]
+        }
+      },
+      "required": [
+        "points",
+        "legTicks",
+        "mode",
+        "initialPhaseTicks",
+        "easing",
+        "carry",
+        "departure",
+        "crushAction"
+      ],
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "position": {
+          "$ref": "#/$defs/vec"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mobility": {
+          "enum": [
+            "static",
+            "kinematic"
+          ]
+        },
+        "category": {
+          "$ref": "#/$defs/key"
+        },
+        "mask": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "uniqueItems": true
+        },
+        "materialId": {
+          "$ref": "#/$defs/id"
+        },
+        "shapes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/body-shape"
+          }
+        },
+        "motion": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/motion"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "position",
+        "enabled",
+        "mobility",
+        "category",
+        "mask",
+        "materialId",
+        "shapes",
+        "motion"
+      ],
+      "additionalProperties": false
+    },
+    "edge-ref": {
+      "type": "object",
+      "properties": {
+        "bodyId": {
+          "$ref": "#/$defs/id"
+        },
+        "shapeId": {
+          "$ref": "#/$defs/id"
+        },
+        "edgeIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "bodyId",
+        "shapeId",
+        "edgeIndex"
+      ],
+      "additionalProperties": false
+    },
+    "endpoint-link": {
+      "type": "object",
+      "properties": {
+        "footholdId": {
+          "$ref": "#/$defs/id"
+        },
+        "endpoint": {
+          "enum": [
+            "a",
+            "b"
+          ]
+        }
+      },
+      "required": [
+        "footholdId",
+        "endpoint"
+      ],
+      "additionalProperties": false
+    },
+    "foothold": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "ownerBodyId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "a": {
+          "$ref": "#/$defs/vec"
+        },
+        "b": {
+          "$ref": "#/$defs/vec"
+        },
+        "normal": {
+          "const": "up"
+        },
+        "mode": {
+          "enum": [
+            "solid",
+            "oneWay"
+          ]
+        },
+        "solidEdge": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/edge-ref"
+            }
+          ]
+        },
+        "dropAllowed": {
+          "type": "boolean"
+        },
+        "dropGroupId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "materialId": {
+          "$ref": "#/$defs/id"
+        },
+        "direction": {
+          "enum": [
+            "both",
+            "aToB",
+            "bToA"
+          ]
+        },
+        "category": {
+          "$ref": "#/$defs/key"
+        },
+        "mask": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "uniqueItems": true
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "connections": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 20000,
+              "items": {
+                "$ref": "#/$defs/endpoint-link"
+              },
+              "uniqueItems": true
+            },
+            "b": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 20000,
+              "items": {
+                "$ref": "#/$defs/endpoint-link"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "a",
+            "b"
+          ],
+          "additionalProperties": false
+        },
+        "planeId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "ownerBodyId",
+        "a",
+        "b",
+        "normal",
+        "mode",
+        "solidEdge",
+        "dropAllowed",
+        "dropGroupId",
+        "materialId",
+        "direction",
+        "category",
+        "mask",
+        "enabled",
+        "connections",
+        "planeId"
+      ],
+      "additionalProperties": false
+    },
+    "access-point": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "pathU": {
+          "$ref": "#/$defs/unit"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "entry": {
+          "enum": [
+            "grounded",
+            "airborne",
+            "either",
+            "none"
+          ]
+        },
+        "exit": {
+          "enum": [
+            "grounded",
+            "airborne",
+            "either",
+            "none"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "pathU",
+        "anchor",
+        "entry",
+        "exit",
+        "conditions"
+      ],
+      "additionalProperties": false
+    },
+    "traversal": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/climb-traversal"
+        },
+        {
+          "$ref": "#/$defs/edge-traversal"
+        },
+        {
+          "$ref": "#/$defs/scripted-traversal"
+        }
+      ]
+    },
+    "climb-traversal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "ladder",
+            "rope"
+          ]
+        },
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/vec"
+          }
+        },
+        "grabRadius": {
+          "$ref": "#/$defs/length"
+        },
+        "direction": {
+          "enum": [
+            "both",
+            "up",
+            "down"
+          ]
+        },
+        "access": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/access-point"
+          }
+        },
+        "requiredAbilities": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "uniqueItems": true
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "planeId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "points",
+        "grabRadius",
+        "direction",
+        "access",
+        "requiredAbilities",
+        "visualId",
+        "planeId"
+      ],
+      "additionalProperties": false
+    },
+    "edge-traversal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "wall",
+            "ledge",
+            "grapple"
+          ]
+        },
+        "edge": {
+          "$ref": "#/$defs/edge-ref"
+        },
+        "points": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/vec"
+          }
+        },
+        "approachRegionId": {
+          "$ref": "#/$defs/id"
+        },
+        "requiredAbilities": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "edge",
+        "points",
+        "approachRegionId",
+        "requiredAbilities"
+      ],
+      "additionalProperties": false
+    },
+    "scripted-traversal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "scripted"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "from": {
+          "$ref": "#/$defs/anchor"
+        },
+        "to": {
+          "$ref": "#/$defs/anchor"
+        },
+        "action": {
+          "$ref": "#/$defs/call"
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "bidirectional": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "from",
+        "to",
+        "action",
+        "conditions",
+        "bidirectional"
+      ],
+      "additionalProperties": false
+    },
+    "cell": {
+      "type": "object",
+      "properties": {
+        "tileId": {
+          "$ref": "#/$defs/id"
+        },
+        "quarterTurns": {
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "mirrorX": {
+          "type": "boolean"
+        },
+        "mirrorY": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tileId",
+        "quarterTurns",
+        "mirrorX",
+        "mirrorY"
+      ],
+      "additionalProperties": false
+    },
+    "chunk": {
+      "type": "object",
+      "properties": {
+        "column": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "row": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 1024,
+          "maxItems": 1024,
+          "items": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/cell"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "column",
+        "row",
+        "cells"
+      ],
+      "additionalProperties": false
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "layerId": {
+          "$ref": "#/$defs/id"
+        },
+        "tilesetId": {
+          "$ref": "#/$defs/id"
+        },
+        "origin": {
+          "$ref": "#/$defs/vec"
+        },
+        "cellSize": {
+          "$ref": "#/$defs/positive-vec"
+        },
+        "chunkSize": {
+          "const": 32
+        },
+        "chunks": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/chunk"
+          }
+        },
+        "terrainIntent": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1000000,
+          "items": {
+            "type": "object",
+            "properties": {
+              "column": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "row": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "terrainId": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "required": [
+              "column",
+              "row",
+              "terrainId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "rulesVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "variationSeed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "layerId",
+        "tilesetId",
+        "origin",
+        "cellSize",
+        "chunkSize",
+        "chunks",
+        "terrainIntent",
+        "rulesVersion",
+        "variationSeed"
+      ],
+      "additionalProperties": false
+    },
+    "layer-binding": {
+      "type": "object",
+      "properties": {
+        "slot": {
+          "$ref": "#/$defs/key"
+        },
+        "layerId": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "slot",
+        "layerId"
+      ],
+      "additionalProperties": false
+    },
+    "prefab-placement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "prefabId": {
+          "$ref": "#/$defs/id"
+        },
+        "position": {
+          "$ref": "#/$defs/vec"
+        },
+        "mirrorX": {
+          "type": "boolean"
+        },
+        "layerBindings": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/layer-binding"
+          }
+        },
+        "expandedIds": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "prefabId",
+        "position",
+        "mirrorX",
+        "layerBindings",
+        "expandedIds"
+      ],
+      "additionalProperties": false
     }
   }
 }

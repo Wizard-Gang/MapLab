@@ -1,7 +1,7 @@
 {
-  "id": "ML-003",
+  "id": "ML-004",
   "type": "FEATURE",
-  "title": "[ML-003] [FEATURE] Adopt R1 and add base schemas and bounded parser",
-  "record": "docs/changes/ML-003.md",
-  "branch": "ml-003-base-schemas-parser"
+  "title": "[ML-004] [FEATURE] Add geometry and reusable content contracts",
+  "record": "docs/changes/ML-004.md",
+  "branch": "ml-004-geometry-contracts"
 }

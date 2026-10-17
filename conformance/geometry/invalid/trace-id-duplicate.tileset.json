@@ -1,0 +1,182 @@
+{
+  "format": "maplab.tileset",
+  "version": 1,
+  "id": "tileset.forest",
+  "name": "Forest placeholder tiles",
+  "cellSize": [
+    32,
+    32
+  ],
+  "assets": [],
+  "tiles": [
+    {
+      "id": "tile.grass",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#4f7a36"
+      },
+      "allowedQuarterTurns": [
+        0
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": false,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": "material.earth",
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.dirt",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#6b4f2f"
+      },
+      "allowedQuarterTurns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": true,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": "material.earth",
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.slope.up",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "polygon",
+          "points": [
+            [
+              0,
+              32
+            ],
+            [
+              32,
+              16
+            ],
+            [
+              32,
+              32
+            ]
+          ]
+        },
+        "fill": "#4f7a36"
+      },
+      "allowedQuarterTurns": [
+        0
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": false,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": "material.earth",
+      "traceShapes": [
+        {
+          "id": "trace.slope",
+          "kind": "polygon",
+          "points": [
+            [
+              0,
+              32
+            ],
+            [
+              32,
+              16
+            ],
+            [
+              32,
+              32
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "terrains": [
+    {
+      "id": "terrain.forest",
+      "name": "Forest ground",
+      "biome": "forest",
+      "fallbackTileId": "tile.dirt"
+    }
+  ],
+  "rulesVersion": 1,
+  "rules": [
+    {
+      "id": "rule.top",
+      "terrainId": "terrain.forest",
+      "neighborMask": 124,
+      "priority": 10,
+      "outputTileIds": [
+        "tile.grass"
+      ],
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "rule.fill",
+      "terrainId": "terrain.forest",
+      "neighborMask": 255,
+      "priority": 5,
+      "outputTileIds": [
+        "tile.dirt"
+      ],
+      "weights": [
+        1
+      ]
+    }
+  ]
+}

@@ -1,11 +1,37 @@
-# Planned format authority
+# Format contracts
 
 [Specification D, F, and G](specifications/2026-10-16-maplab.md), amended by
 [R1](specifications/2026-10-17-maplab-r1/F-formats.md), are adopted design material.
 ML-003 implements the bounded parser in `src/contracts/` and the `maplab.map` v1 header
-subset in `schemas/maplab.map.v1.schema.json`: IDs, 1/16 WU coordinates within
-±131,072 WU, 60 Hz tick fields, safe paths, dependencies, assets and bounds.
-ML-004–006 complete the contracts; ML-007 adds the independent byte reader.
+subset: IDs, 1/16 WU coordinates within ±131,072 WU, 60 Hz tick fields, safe paths,
+dependencies, assets and bounds. ML-004 extends `schemas/maplab.map.v1.schema.json`
+with geometry, layers, visuals, terrain and prefab provenance, and publishes
+`schemas/maplab.tileset.v1.schema.json` and `schemas/maplab.prefab.v1.schema.json`.
+ML-005–006 complete movement and gameplay contracts; ML-007 adds the complete
+independent bundle reader.
+
+Use `loadMapGeometry`, `loadTileset` and `loadPrefab` from `src/contracts/` for
+bounded parsing, structural validation and semantic validation of these scopes.
+Their `validate…` counterparts accept already parsed JSON. Successful results
+contain a detached, deeply frozen document, an explicit `deferred` list and
+`unresolved` external tileset/prefab IDs; failures contain diagnostics only.
+`loadMapHeader` remains a base-header API: its use of the expanded published
+schema does not establish semantic geometry validity.
+
+Geometry checks include clockwise simple polygons, stable shape-edge ownership,
+exact source-edge equality, reciprocal endpoint welds, layer/visual parent cycles,
+actor-plane references, anchor reference cycles and access-point attachment.
+Visuals paint only in sprite/background layers. Tileset trace shapes remain
+tile-local suggestions. Prefab provenance preserves expanded object kinds and
+visual/actor-plane slot bindings. Motion paths validate durations, loops and
+initial phase, without running a moving-platform solver.
+
+Pass only validated tileset/prefab documents as `GeometryContext`. With those
+documents present, map validation checks terrain cell permissions and prefab
+namespaces/bindings. Missing context is named as unresolved, and is never fetched.
+Gameplay collections, catalog-bound calls/conditions and profile-specific stance,
+support and clearance remain explicitly deferred. A successful geometry result is
+not a claim of gameplay validity, dependency closure or controller compatibility.
 
 Future formats use closed versioned headers, stable IDs, bounded X-right/Y-down
 world coordinates, explicit asset/dependency references, and independent authored

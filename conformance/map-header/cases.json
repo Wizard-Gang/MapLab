@@ -216,10 +216,10 @@
     },
     {
       "file": "conformance/map-header/invalid/deferred-member-type.map.json",
-      "sha256": "35902a78786ddcde19ca543c8fdaa96860263c41d8a161e72b7a3bfbe583248e",
+      "sha256": "2a98f69035428d7fed8659754fae915bfdede7716ffaaad1022ba0c5fe215192",
       "expect": {
         "code": "deferred-array.type",
-        "jsonPath": "$.traversals"
+        "jsonPath": "$.regions"
       }
     },
     {

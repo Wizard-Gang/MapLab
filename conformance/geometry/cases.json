@@ -1,0 +1,509 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/forest.map.json",
+      "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest-export/maps/forest.map.json",
+      "sha256": "a12b1c44623198210ed6c65b0730c1c904fd0810723fff852baf5919a28ed965",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest-export/maps/clearing.map.json",
+      "sha256": "df8fbd67f05353c7ece21d211434bbd3db70f55a8bb2889dd5dd6630b56ac26e",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest-export/tilesets/forest.tileset.json",
+      "sha256": "1df657676298fea2e54d6f0925dc4f232c9934ce175965f29b625bc8920f20ab",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/forest.map.json",
+      "sha256": "8d134bcdea76a200f52b7b1f60e3f2e3b985ab43ce9e6f433b95da047aba2677",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/tileset.tileset.json",
+      "sha256": "80b996af2f3cf213233bc4e61e0bc00aad911acfeefb38e166642226334815d2",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/prefab.prefab.json",
+      "sha256": "262ed20467508d7b7e7321ae9cd0f8ed279ba863bcb5eb395046d23f8e5759e8",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/shape-order.map.json",
+      "sha256": "c34e0171afc6d7c4e7333e5b6f3cd20a34287dbd3020b47cd672c3f61551997d",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/body-translation.map.json",
+      "sha256": "666053c707a45d821fd9267736203c190ab20643ca2dfd7e47b30f694b7c4a3c",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/explicit-plane.map.json",
+      "sha256": "20d60f982dd62de211b672ed1aa8777eee958c4dbca00b90f562b1ac2ac23682",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/group-parent.map.json",
+      "sha256": "6ba7a459e345356cd28b496f38e6d2c0d1d0c188d5241efb1b6233c640a709f3",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/concave-polygon.prefab.json",
+      "sha256": "1ec217acf1f2a96ca1caf1eaf2d2163718c0736a7a9f7ba2faf15b504e493f04",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/valid/frames.prefab.json",
+      "sha256": "7cf41f7f6abe5ce7f6f37251348d93c25fc8b49a911b7cffdb3d2ce8c7568064",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/missing-shape-id.map.json",
+      "sha256": "41ddac8abd3cee1ed5a6ad93684d43b34f8167f004cc25fe5a53cfb8fc618000",
+      "expect": {
+        "code": "rect-shape.required",
+        "jsonPath": "$.bodies[0].shapes[0].id"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/legacy-shape-index.map.json",
+      "sha256": "5cd81737ce5a4dbe7cda7a24efd0279aee39c2a80e24f0dd157c1f871670b0a9",
+      "expect": {
+        "code": "edge-ref.additional-property",
+        "jsonPath": "$.footholds[0].solidEdge.shapeIndex"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/shape-kind.map.json",
+      "sha256": "1557c74d6517baf3470bffdaf7a6f1f9e8e7326d03c7357eda9b58ce00af1ae3",
+      "expect": {
+        "code": "body-shape.one-of",
+        "jsonPath": "$.bodies[0].shapes[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/extra-shape-member.map.json",
+      "sha256": "7cac4ed5793d946834861dca8c299a458e0d6c7417e4c9e18aa557881a53de04",
+      "expect": {
+        "code": "rect-shape.additional-property",
+        "jsonPath": "$.bodies[0].shapes[0].rotation"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/coordinate-quantum.map.json",
+      "sha256": "6d2eb82038972ef8e363ca1a19231718de93b69179f8f1ea8389f7389288e12d",
+      "expect": {
+        "code": "coordinate.multiple-of",
+        "jsonPath": "$.bodies[0].position[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/wrong-shape-owner.map.json",
+      "sha256": "24b78762d05a57b3a172412e364385bbb10f6886ce8f357c7830f8bdfe51e87c",
+      "expect": {
+        "code": "edge-ref.reference",
+        "jsonPath": "$.footholds[0].solidEdge"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/edge-index.map.json",
+      "sha256": "3b926d75bdb5473d00de0ee08e3409afe477b689aeb8593dd48e8dcdc84185bf",
+      "expect": {
+        "code": "edge-ref.reference",
+        "jsonPath": "$.footholds[0].solidEdge"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/edge-equality.map.json",
+      "sha256": "cdf48c696a6da6dbf79bf4ad41758e710b09b86e2751f9f8aa088b4ddccaae6c",
+      "expect": {
+        "code": "foothold.edge-equality",
+        "jsonPath": "$.footholds[0].solidEdge"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/owner.map.json",
+      "sha256": "fad7b9102526739bda00601417cd2c0bd3c207e018aa150bee379033ec251532",
+      "expect": {
+        "code": "foothold.owner",
+        "jsonPath": "$.footholds[0].ownerBodyId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/collision-mask.map.json",
+      "sha256": "2bd44f031e0c015fc50cda6b285bb6b14f898382cdb2c2eb6fe86c1470d39b81",
+      "expect": {
+        "code": "foothold.collision",
+        "jsonPath": "$.footholds[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/solid-drop.map.json",
+      "sha256": "11e1884cd9836e759b862086e716c584e50aa31ca16669f44cf2690715a69cbf",
+      "expect": {
+        "code": "foothold.drop",
+        "jsonPath": "$.footholds[0].dropAllowed"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/missing-solid-edge.map.json",
+      "sha256": "b89e95e182349b61587cf46b64dfa80fb8ed5b51598e0f8a56db0d4293bddd05",
+      "expect": {
+        "code": "foothold.solid-edge",
+        "jsonPath": "$.footholds[0].solidEdge"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/clockwise.prefab.json",
+      "sha256": "d03762a6d44b881e9d59f666404890f0ee32ad1fdffac0859e6a0f839d7c5479",
+      "expect": {
+        "code": "polygon-shape.geometry",
+        "jsonPath": "$.content.visuals[0].source.shape"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/self-intersection.prefab.json",
+      "sha256": "0698f0afadaa95fa76cf11e862d803c832728ebd3bab52bbce7ae4f3a1e483d1",
+      "expect": {
+        "code": "polygon-shape.geometry",
+        "jsonPath": "$.content.visuals[0].source.shape"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/degenerate-segment.map.json",
+      "sha256": "2d12cd70cbfc08b2f842d78b9b9f77858dd2e0eadcdf0a85017f2a79fde44dc2",
+      "expect": {
+        "code": "segment-shape.geometry",
+        "jsonPath": "$.bodies[1].shapes[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/vertical-foothold.map.json",
+      "sha256": "efe4d0983080f3648e974d11d2d66cde4c2ae282d2c1dfc38d24c8fc7d4c37ff",
+      "expect": {
+        "code": "foothold.x-monotone",
+        "jsonPath": "$.footholds[4].b"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/weld-reciprocity.map.json",
+      "sha256": "48e46d79ddc008c7238e786323daba536696cd43e704f485b7c354b84f1b798e",
+      "expect": {
+        "code": "endpoint-link.reciprocity",
+        "jsonPath": "$.footholds[1].connections.b[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/weld-frame.map.json",
+      "sha256": "3bc246882353f164b3282045da1ffd7032b20e6e93c393e55ec21d8745ee0196",
+      "expect": {
+        "code": "endpoint-link.weld",
+        "jsonPath": "$.footholds[1].connections.a[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/weld-dangling.map.json",
+      "sha256": "d7ea8dcaf02060f54134d974949b75a29806c0c30e2784b1c15d951f67968ad9",
+      "expect": {
+        "code": "endpoint-link.reference",
+        "jsonPath": "$.footholds[0].connections.a[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/actors.map.json",
+      "sha256": "e1322cc7501c0e3369ec90fe5c8b0e58eea9a1dd9d108ebb564e5a510b6c8bc7",
+      "expect": {
+        "code": "layer.actors",
+        "jsonPath": "$.layers"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/plane-kind.map.json",
+      "sha256": "9833991b344328c1c73799c702a5e517c1581f1aeee0435afe3fada21c75a646",
+      "expect": {
+        "code": "foothold.reference",
+        "jsonPath": "$.footholds[0].planeId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/layer-cycle.map.json",
+      "sha256": "590b13a1abda20771d1ab7fb4444598bbc8b27506117208706beff089b9b2f8b",
+      "expect": {
+        "code": "layer.parent-cycle",
+        "jsonPath": "$.layers[3].parentId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/layer-parent-kind.map.json",
+      "sha256": "5060ba85d9a3e2f2320370c8bea14e471b28325b69e618555c3ce8938af56e17",
+      "expect": {
+        "code": "layer.parent",
+        "jsonPath": "$.layers[0].parentId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/visual-cycle.prefab.json",
+      "sha256": "d163938f8fbf71caf90f6bf0cb63a0acb0c74b5a68dda97515e4ea125ff52184",
+      "expect": {
+        "code": "visual.parent-cycle",
+        "jsonPath": "$.content.visuals[0].parentId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/visual-layer.map.json",
+      "sha256": "9f0e5b2ef5e72eded8ebb9382f2a091013b6b13de6fc1414a11dcbeb83723456",
+      "expect": {
+        "code": "visual.reference",
+        "jsonPath": "$.visuals[0].layerId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/visual-body.prefab.json",
+      "sha256": "c882b6e5cbf17ad19c4d3f133ad02c0ea176ef524b7d84f482e6dd81b6184f0f",
+      "expect": {
+        "code": "visual.reference",
+        "jsonPath": "$.content.visuals[0].bodyId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/anchor-dangling.map.json",
+      "sha256": "5ea5756f46a93151139d9e5db25dafe5613c059c7e3a69868996298c1ee3d063",
+      "expect": {
+        "code": "anchor.reference",
+        "jsonPath": "$.entities[0].anchor.footholdId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/anchor-kind.map.json",
+      "sha256": "3808419d718b073201defb0a0817d6743497936fb08cf5444609137fdaaf379c",
+      "expect": {
+        "code": "anchor.reference",
+        "jsonPath": "$.entities[0].anchor.footholdId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/anchor-quantum.map.json",
+      "sha256": "2c71486be8758857bac80a0ad40a2c0222ef1e761c9a3cd06611f3b8e44b2ae6",
+      "expect": {
+        "code": "anchor.anchor",
+        "jsonPath": "$.entities[0].anchor"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/access-attachment.map.json",
+      "sha256": "a80422d34a199b98fc3e679e80b96c7bf2f1afd4c6ad905f73acc691b803bbdb",
+      "expect": {
+        "code": "access-point.attachment",
+        "jsonPath": "$.traversals[0].access[0].anchor"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/climb-vertical.map.json",
+      "sha256": "1cc01dd348fc4b3a882107663948085bda16430377dc32cf073494ea2335b77d",
+      "expect": {
+        "code": "climb-traversal.vertical",
+        "jsonPath": "$.traversals[0].points"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/visual-rotation-quantum.prefab.json",
+      "sha256": "2176eb103de888420f39d5e20e7cd365d1d633a6861febce0e09373e7f2644d8",
+      "expect": {
+        "code": "transform.multiple-of",
+        "jsonPath": "$.content.visuals[0].transform.rotation"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/visual-scale.prefab.json",
+      "sha256": "f8f606e2c878eedb8fc0759b2cc13a8427ca002af493ca9b3eb8ea97dea24f70",
+      "expect": {
+        "code": "asset-scale.exclusive-minimum",
+        "jsonPath": "$.content.visuals[0].transform.scale[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/color.prefab.json",
+      "sha256": "58076a5973f251b604fcdc6385f13a8b02b74a0edc689fd1f45a350eddd48ba2",
+      "expect": {
+        "code": "color.pattern",
+        "jsonPath": "$.content.visuals[0].source.fill"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/slot-unknown.prefab.json",
+      "sha256": "5d8f550dd22374d40d3c941b3a4ac14fd1b8941f0720f4be5834063babbfc11a",
+      "expect": {
+        "code": "visual.layer-slot",
+        "jsonPath": "$.content.visuals[0].layerId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/slot-collision.map.json",
+      "sha256": "67cc87c9cfc539bca38c877165e3771b875615d1f8195e0336f68bbb2a016362",
+      "expect": {
+        "code": "layer-binding.slot",
+        "jsonPath": "$.prefabPlacements[0].layerBindings[1].slot"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/slot-incomplete.map.json",
+      "sha256": "5eec123804ac2c1eca137eb3fc0aa4dadd01c7c3c5033482bfdbea271bdcf2eb",
+      "expect": {
+        "code": "prefab-placement.layer-slots",
+        "jsonPath": "$.prefabPlacements[0].layerBindings"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/binding-layer.map.json",
+      "sha256": "673ea65df5287596359cb5cb936821332f46c6e8763b268fed5bc6d053621671",
+      "expect": {
+        "code": "layer-binding.reference",
+        "jsonPath": "$.prefabPlacements[0].layerBindings[0].layerId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/expanded-layer.map.json",
+      "sha256": "1cff0cd671428902b95ad41aacdcb277501098a40a76be9ba666459875605549",
+      "expect": {
+        "code": "prefab-placement.layer-binding",
+        "jsonPath": "$.prefabPlacements[0].layerBindings"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/expanded-id.map.json",
+      "sha256": "c0494896d27221ed482f5f9e6dc6142dbe3c612c0602b4418723d402ac392469",
+      "expect": {
+        "code": "prefab-placement.expanded-ids",
+        "jsonPath": "$.prefabPlacements[0].expandedIds"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/trace-clockwise.tileset.json",
+      "sha256": "1334ba9ff0a10da108a8edc130fcf7eba13b3c1e4601add30680ef76c3261d79",
+      "expect": {
+        "code": "polygon-shape.geometry",
+        "jsonPath": "$.tiles[2].traceShapes[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/trace-id-duplicate.tileset.json",
+      "sha256": "028c17e8020f7851086808502dd9396bd5d5a26ff66481e96cf054ca5f1babcc",
+      "expect": {
+        "code": "body-shape.identity",
+        "jsonPath": "$.tiles[0].traceShapes[1].id"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/rule-weight.tileset.json",
+      "sha256": "a3607cfe578d4c2b8ca450b348945bc511356d000b5aa1b5b2fa212b00815b31",
+      "expect": {
+        "code": "tile-rule.weights",
+        "jsonPath": "$.rules[0].weights"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/fallback-tile.tileset.json",
+      "sha256": "8b05ce070e7c7e66319445a7f49f3bdac511505c451cafe553d59ba440a9c091",
+      "expect": {
+        "code": "tileset-terrain.reference",
+        "jsonPath": "$.terrains[0].fallbackTileId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/tile-terrain.tileset.json",
+      "sha256": "684a845eca0bf36271bfd0e606e7c335f5f0eff6be4073a91f164ea80b282e90",
+      "expect": {
+        "code": "tile.reference",
+        "jsonPath": "$.tiles[0].terrainId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/chunk-length.map.json",
+      "sha256": "b86642047b58736162ab2ca10c18d341680d9cd298882dbe1595271c3834d8a2",
+      "expect": {
+        "code": "chunk.min-items",
+        "jsonPath": "$.terrain[0].chunks[0].cells"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/chunk-empty.map.json",
+      "sha256": "534a3d68baf7a4b82c416630a67663adef8f1a293c22fa83edfccf8a678d186a",
+      "expect": {
+        "code": "chunk.empty",
+        "jsonPath": "$.terrain[0].chunks[0]"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/tileset-kind.map.json",
+      "sha256": "101d78a9747a82f3c3971250d2d73c87d96fab2925e9a3be47334cb13880e907",
+      "expect": {
+        "code": "terrain.reference",
+        "jsonPath": "$.terrain[0].tilesetId"
+      }
+    },
+    {
+      "file": "conformance/geometry/invalid/duplicate-id.prefab.json",
+      "sha256": "39d506ef17f7752f6aef4f16b06247bacfd9e65e7a726157b94af57ebd0d7f35",
+      "expect": {
+        "code": "visual.identity",
+        "jsonPath": "$.content.visuals[1].id"
+      }
+    }
+  ]
+}

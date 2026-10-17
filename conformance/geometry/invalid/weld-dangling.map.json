@@ -1,0 +1,432 @@
+{
+  "format": "maplab.map",
+  "version": 1,
+  "id": "map.clearing",
+  "metadata": {
+    "name": "Clearing destination",
+    "description": "Portal arrival map with a return portal.",
+    "authors": [
+      "MapLab R1 specification"
+    ],
+    "license": "CC0-1.0",
+    "tags": [
+      "acceptance",
+      "r1"
+    ]
+  },
+  "requiredFeatures": [
+    {
+      "key": "maplab.collision",
+      "version": 1
+    },
+    {
+      "key": "maplab.camera",
+      "version": 1
+    }
+  ],
+  "coordinates": {
+    "units": "WU",
+    "x": "right",
+    "y": "down",
+    "rotation": "clockwiseDegrees",
+    "quantum": 0.0625,
+    "ticksPerSecond": 60
+  },
+  "bounds": [
+    0,
+    0,
+    640,
+    640
+  ],
+  "collisionContract": {
+    "key": "maplab.collision",
+    "version": 1
+  },
+  "dependencies": [
+    {
+      "id": "map.forest",
+      "kind": "map",
+      "path": "maps/forest.map.json",
+      "required": true
+    },
+    {
+      "id": "movement.player",
+      "kind": "movement",
+      "path": "movement/player.movement.json",
+      "required": true
+    },
+    {
+      "id": "catalog.core",
+      "kind": "catalog",
+      "path": "catalogs/core.catalog.json",
+      "required": true
+    }
+  ],
+  "assets": [],
+  "presentations": [],
+  "layers": [
+    {
+      "id": "layer.sky",
+      "name": "Sky",
+      "parentId": null,
+      "order": 0,
+      "visible": true,
+      "opacity": 1,
+      "kind": "background",
+      "space": "camera",
+      "parallax": [
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "repeat": "none",
+      "repeatSize": [
+        0,
+        0
+      ],
+      "scrollWUPerTick": [
+        0,
+        0
+      ],
+      "phase": [
+        0,
+        0
+      ],
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.world",
+      "name": "Ground art",
+      "parentId": null,
+      "order": 1,
+      "visible": true,
+      "opacity": 1,
+      "kind": "sprite",
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.actors",
+      "name": "Actors",
+      "parentId": null,
+      "order": 2,
+      "visible": true,
+      "opacity": 1,
+      "kind": "actors"
+    }
+  ],
+  "terrain": [],
+  "visuals": [
+    {
+      "id": "visual.sky",
+      "name": "Sky",
+      "layerId": "layer.sky",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            640,
+            360
+          ]
+        },
+        "fill": "#cfe6da"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.floor",
+      "name": "Clearing ground art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          576
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            640,
+            64
+          ]
+        },
+        "fill": "#5b7a3c"
+      },
+      "bodyId": null
+    }
+  ],
+  "materials": [
+    {
+      "id": "material.earth",
+      "name": "Earth",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "ground"
+      ]
+    }
+  ],
+  "bodies": [
+    {
+      "id": "body.floor",
+      "name": "Clearing ground",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.floor",
+          "kind": "rect",
+          "rect": [
+            0,
+            576,
+            640,
+            64
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.edges",
+      "name": "World edges",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.edge.left",
+          "kind": "segment",
+          "a": [
+            0,
+            0
+          ],
+          "b": [
+            0,
+            576
+          ]
+        },
+        {
+          "id": "shape.edge.right",
+          "kind": "segment",
+          "a": [
+            640,
+            0
+          ],
+          "b": [
+            640,
+            576
+          ]
+        }
+      ],
+      "motion": null
+    }
+  ],
+  "footholds": [
+    {
+      "id": "fh.floor",
+      "name": "Clearing floor",
+      "ownerBodyId": "body.floor",
+      "a": [
+        0,
+        576
+      ],
+      "b": [
+        640,
+        576
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.floor",
+        "shapeId": "shape.floor",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [
+          {
+            "footholdId": "missing",
+            "endpoint": "b"
+          }
+        ],
+        "b": []
+      },
+      "planeId": null
+    }
+  ],
+  "traversals": [],
+  "regions": [
+    {
+      "id": "region.back",
+      "name": "Return portal",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          32,
+          512,
+          32,
+          64
+        ]
+      },
+      "role": "trigger"
+    }
+  ],
+  "entities": [
+    {
+      "id": "start.arrival",
+      "name": "Forest arrival",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.floor",
+        "u": 0.25,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "playerStart",
+      "movementId": "movement.player",
+      "default": true
+    },
+    {
+      "id": "portal.forest",
+      "name": "Back to the forest",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.floor",
+        "u": 0.0625,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "left",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "portal",
+      "regionId": "region.back",
+      "activation": "interact",
+      "destination": {
+        "mapId": "map.forest",
+        "entityId": "checkpoint.east"
+      },
+      "delayTicks": 30,
+      "conditions": []
+    }
+  ],
+  "waypoints": [],
+  "routes": [],
+  "triggers": [],
+  "encounters": [],
+  "camera": {
+    "model": {
+      "key": "maplab.camera",
+      "version": 1
+    },
+    "defaults": {
+      "viewWU": [
+        640,
+        360
+      ],
+      "zoom": 1,
+      "bounds": [
+        0,
+        0,
+        640,
+        640
+      ],
+      "followX": true,
+      "followY": true,
+      "deadZone": [
+        0.375,
+        0.25,
+        0.25,
+        0.5
+      ],
+      "dampingTicks": [
+        8,
+        12
+      ],
+      "lookaheadWU": [
+        80,
+        64
+      ],
+      "verticalPolicy": "platformSnap",
+      "climbFollow": true,
+      "transitionTicks": 15,
+      "transition": "smoothstep"
+    },
+    "zones": [],
+    "shakeEffects": []
+  },
+  "environment": {
+    "ambientColor": "#ffffff",
+    "effects": [],
+    "zones": []
+  },
+  "navigation": {
+    "modeVolumes": [],
+    "links": [],
+    "overrides": []
+  },
+  "flags": [],
+  "prefabPlacements": []
+}

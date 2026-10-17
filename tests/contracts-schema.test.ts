@@ -85,10 +85,29 @@ test('src/contracts stays pure: relative imports and the local schema only, no I
     const source = readFileSync(join(dir, file), 'utf8');
     for (const [, specifier] of source.matchAll(/^(?:import|export)\b[^;]*?\bfrom\s+'([^']+)'/gm)) {
       specifiers++;
-      expect(specifier === '../../schemas/maplab.map.v1.schema.json' || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
+      expect(/^\.\.\/\.\.\/schemas\/maplab\.(?:map|tileset|prefab)\.v1\.schema\.json$/.test(specifier ?? '') || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
     }
     expect(source, file).not.toMatch(/\bfetch\(|XMLHttpRequest|WebSocket|\bimport\(|\brequire\(|process\.|document\.|window\.|localStorage|indexedDB/);
     expect(source.replaceAll(SCHEMA_DIALECT, ''), file).not.toMatch(/https?:\/\//);
   }
   expect(specifiers).toBeGreaterThanOrEqual(12);
+});
+
+test('oneOf validates every branch, rejects ambiguity and preserves discriminated field diagnostics', () => {
+  const schema = compileSchema(tiny({ properties: { shape: { oneOf: [
+    { type: 'object', properties: { kind: { const: 'rect' }, width: { type: 'number', exclusiveMinimum: 0 } }, required: ['kind', 'width'], additionalProperties: false },
+    { type: 'object', properties: { kind: { const: 'circle' }, radius: { type: 'number' } }, required: ['kind', 'radius'], additionalProperties: false },
+  ] } } }), 'union');
+  expect(evaluate(schema, { shape: { kind: 'rect', width: 1 } })).toEqual([]);
+  expect(evaluate(schema, { shape: { kind: 'rect', width: 0 } }).map((d) => d.code)).toEqual(['union.exclusive-minimum']);
+  expect(evaluate(schema, { shape: { kind: 'missing' } }).map((d) => d.code)).toEqual(['union.one-of']);
+  expect(evaluate(schema, { shape: { kind: 'rect', width: 1, radius: 1 } }).map((d) => d.code)).toEqual(['union.additional-property']);
+  const ambiguous = compileSchema(tiny({ properties: { x: { oneOf: [{ type: 'number' }, { type: 'integer' }] } } }), 'union');
+  expect(evaluate(ambiguous, { x: 2 }).map((d) => d.code)).toEqual(['union.one-of']);
+  expect(evaluate(ambiguous, { x: 2.5 })).toEqual([]);
+  expect(refusal(tiny({ oneOf: [] }))).toBe('schema.invalid');
+  expect(refusal(tiny({ oneOf: [7] }))).toBe('schema.invalid');
+  expect(refusal(tiny({ oneOf: [{ unknown: true }] }))).toBe('schema.unsupported-keyword');
+  expect(refusal(tiny({ oneOf: [{ $ref: 'https://example.com/schema' }] }))).toBe('schema.remote-ref');
+  expect(evaluate(schema, { shape: { kind: 'rect' } }, 1)).toHaveLength(1);
 });
