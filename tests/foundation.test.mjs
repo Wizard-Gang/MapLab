@@ -47,7 +47,7 @@ test.each([
   ['missing authority', (p) => rmSync(join(p, 'SECURITY.md')), 'Missing or empty'],
   ['extra active task', (p) => {
     const f = join(p, 'implementation_plan.md');
-    writeFileSync(f, readFileSync(f, 'utf8').replace('<!-- active-queue:end -->', '- ML-003\n<!-- active-queue:end -->'));
+    writeFileSync(f, readFileSync(f, 'utf8').replace('<!-- active-queue:end -->', '### ML-003 / P0\n<!-- active-queue:end -->'));
   }, 'Active queue'],
   ['malformed ID', (p) => editJson(p, 'config/change.json', (v) => { v.id = 'RL-001'; }), 'Malformed controlled change'],
   ['malformed title', (p) => editJson(p, 'config/change.json', (v) => { v.title = 'Uncontrolled task title'; }), 'Malformed controlled change title'],

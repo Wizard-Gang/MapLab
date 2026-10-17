@@ -36,7 +36,19 @@ test('real CLI accepts another reserved task without a fixed current identity', 
   json(p, 'config/change.json', (v) => { v.id = otherId; v.type = 'SECURITY'; v.title = `[${otherId}] [SECURITY] Exercise future task fixture`; v.branch = `${otherId.toLowerCase()}-fixture`; v.record = `docs/changes/${otherId}.md`; });
   const c = JSON.parse(readFileSync(join(p, 'config/change.json')));
   writeFileSync(join(p, c.record), `# ${c.title}\n\n` + sections.map((s) => `## ${s}\n\nSynthetic test data only.\n`).join('\n'));
-  edit(p, 'implementation_plan.md', (s) => s.replace(`- **${change.id}**`, `- **${otherId}**`));
+  edit(p, 'implementation_plan.md', (s) => {
+    const active = s.match(/<!-- active-queue:start -->([\s\S]*?)<!-- active-queue:end -->/)[1].trim();
+    const future = s.match(/<!-- future-queue:start -->([\s\S]*?)<!-- future-queue:end -->/)[1].trim();
+    const start = future.indexOf('### ' + otherId + ' /');
+    const end = future.indexOf('\n### ML-', start + 6);
+    const next = future.slice(start, end < 0 ? undefined : end).trim();
+    const rest = end < 0 ? '' : future.slice(end).trim();
+    const done = '- **' + change.id + '** — completed in synthetic test ledger; see docs/changes/' + change.id + '.md.';
+    return s.replace('<!-- completed-history:end -->', done + '\n<!-- completed-history:end -->')
+      .replace(active, next)
+      .replace('<!-- future-queue:start -->\n' + future + '\n<!-- future-queue:end -->',
+        '<!-- future-queue:start -->\n' + rest + '\n<!-- future-queue:end -->');
+  });
   json(p, 'docs/deliveries.json', (v) => {
     if (currentNumber === 44) v.pop();
     else v.push({ id: change.id, pr: 1, commit: 'a'.repeat(40), testedHeads: ['b'.repeat(40)], mainCi: { head: 'a'.repeat(40), conclusion: 'success', url: 'https://github.com/Wizard-Gang/MapLab/actions/runs/1' } });
@@ -51,8 +63,8 @@ test.each([
   ['record path escape', (p) => json(p, 'config/change.json', (v) => { v.record = '../ML-002.md'; }), 'record identity'],
   ['record title mismatch', (p) => edit(p, change.record, (s) => s.replace(`# ${change.title}`, '# Mismatched record title')), 'record title'],
   ['missing record section', (p) => edit(p, change.record, (s) => s.replace('## Controls', '## Control')), 'sections disagree'],
-  ['duplicate roadmap ID', (p) => edit(p, 'docs/IMPLEMENTATION-ROADMAP.md', (s) => s.replace('**ML-003 /', '**ML-002 /')), 'Reserved roadmap'],
-  ['queue mismatch', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`- **${change.id}**`, `- **${otherId}**`)), 'Active queue'],
+  ['duplicate future ID', (p) => edit(p, 'implementation_plan.md', (s) => s.replace('### ML-003 /', '### ML-002 /')), 'Reserved future tasks'],
+  ['queue mismatch', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${change.id} /`, `### ${otherId} /`)), 'Active queue'],
   ['missing predecessor', (p) => writeFileSync(join(p, 'docs/deliveries.json'), '[]\n'), 'Predecessor delivery chain'],
   ['failed predecessor CI', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.conclusion = 'failure'; }), 'main CI evidence'],
   ['different predecessor SHA', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.head = 'f'.repeat(40); }), 'main CI evidence'],

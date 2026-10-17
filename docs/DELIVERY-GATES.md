@@ -91,3 +91,9 @@ the external resumable ledger. On the next controlled activation, append that
 completed evidence to `docs/deliveries.json` and synchronize queue/roadmap. A commit
 cannot include its own final squash hash. Stop sequential activation on any
 failed predecessor, main CI, access or protection gate; preserve work and evidence.
+
+## Permanent plan and J2 traceability
+
+`implementation_plan.md` is the sole current/future task queue. Each reserved J2 ID retains exact scope, exclusions and acceptance and now has executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `docs/IMPLEMENTATION-ROADMAP.md` is a historical pointer only. `scripts/check-queue.mjs` enforces sequential first-open selection, uninterrupted delivered predecessor chain, retirement of completed IDs, future preservation, exact J2 fields, section link validity and no duplicate legacy roadmap definitions. `check:change` and canonical `check` invoke it. Synthetic next-task and malformed-queue tests demonstrate generic selection rather than ML-002-only parsing.
+
+This is governance-only ML-002 scope; the adopted full specification, world shell, lockfile, ML-001 evidence and all later task implementations remain untouched.
