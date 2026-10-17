@@ -1,10 +1,10 @@
 // `maplab.map` v1 header and base subset (ML-003): format dispatch, closed schema, then
 // semantic rules the schema cannot express. Geometry, layers, gameplay, camera, environment
 // and navigation members are only type-checked here and are reported as deferred.
-import mapSchema from '../../schemas/maplab.map.v1.schema.json';
+import mapSchema from '../../schemas/maplab.map.v1.schema.json' with { type: 'json' };
 import { error, type Diagnostic, type PathSegment } from './diagnostics';
 import {
-  ASSET_EXTENSIONS, COORDINATE_LIMIT, DEPENDENCY_EXTENSIONS, checkSafePath, pathAliasKey,
+  ASSET_EXTENSIONS, COORDINATE_LIMIT, DEPENDENCY_EXTENSIONS, checkSafePath, isId, pathAliasKey,
 } from './grammar';
 import { parseJson, type JsonLimits, type JsonValue } from './json';
 import { compileSchema, evaluate } from './schema';
@@ -59,7 +59,10 @@ export function validateMapHeader(value: JsonValue): MapHeaderResult {
   const dispatch = checkFormat(value);
   if (dispatch) return { ok: false, diagnostics: [dispatch] };
   const structural = evaluate(MAP_SCHEMA, value);
-  if (structural.length > 0) return { ok: false, diagnostics: structural };
+  if (structural.length > 0) {
+    const documentId = isId((value as { id?: JsonValue }).id) ? (value as { id: string }).id : null;
+    return { ok: false, diagnostics: structural.map((d) => ({ ...d, documentId })) };
+  }
   const document = value as unknown as MapHeader;
   const semantic = checkSemantics(document);
   if (semantic.length > 0) return { ok: false, diagnostics: semantic };
@@ -99,13 +102,18 @@ function checkSemantics(doc: MapHeader): Diagnostic[] {
     report('collision.unsupported', ['collisionContract'], `Collision contract ${collision.key} v${collision.version} is not supported`);
   }
 
-  const paths = new Map<string, string>();
+  // Files and the directories that contain them, case-folded: a name may be one or the other, once.
+  const files = new Map<string, string>();
+  const directories = new Map<string, string>();
   const checkPath = (path: string, at: readonly PathSegment[], objectId: string): void => {
     const problem = checkSafePath(path);
     if (problem) report(`path.${problem}`, at, `Unsafe path ${JSON.stringify(path)} (${problem})`, objectId);
-    const prior = paths.get(pathAliasKey(path));
-    if (prior !== undefined) report('path.alias', at, `Path ${JSON.stringify(path)} aliases ${JSON.stringify(prior)}`, objectId);
-    else paths.set(pathAliasKey(path), path);
+    const key = pathAliasKey(path);
+    const parents = key.split('/').slice(0, -1).map((_, i, parts) => parts.slice(0, i + 1).join('/'));
+    const prior = files.get(key) ?? directories.get(key) ?? parents.map((p) => files.get(p)).find((p) => p !== undefined);
+    if (prior !== undefined) report('path.alias', at, `Path ${JSON.stringify(path)} collides with ${JSON.stringify(prior)}`, objectId);
+    files.set(key, path);
+    for (const parent of parents) directories.set(parent, path);
   };
   const dependencies = new Set<string>();
   doc.dependencies.forEach((dependency, i) => {

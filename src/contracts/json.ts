@@ -5,7 +5,7 @@ import { error, type Diagnostic, type PathSegment } from './diagnostics';
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
-/** Initial budgets (specification H4: 64 MiB per JSON document). Callers may only lower them. */
+/** Initial budgets (specification H4: 64 MiB per JSON document). Callers may only lower them; larger values are clamped. */
 export interface JsonLimits {
   readonly maxBytes: number;
   readonly maxDepth: number;
@@ -57,7 +57,27 @@ export function utf8Length(text: string): number {
 }
 
 /** Parses UTF-8 bytes or an already-decoded string. Never throws; never returns partial values. */
-export function parseJson(input: Uint8Array | string, limits: JsonLimits = defaultJsonLimits): JsonResult {
+/** Wider budgets than the defaults are ignored, so the recursion depth and allocations stay bounded. */
+function effective(requested: JsonLimits): JsonLimits {
+  const clamp = (key: keyof JsonLimits): number => Math.max(0, Math.min(defaultJsonLimits[key], requested[key]));
+  return { maxBytes: clamp('maxBytes'), maxDepth: clamp('maxDepth'), maxStringLength: clamp('maxStringLength'),
+    maxObjectKeys: clamp('maxObjectKeys'), maxArrayItems: clamp('maxArrayItems'), maxValues: clamp('maxValues') };
+}
+
+/** Well-formed UTF-16: every surrogate is part of a high-low pair. */
+function wellFormed(text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (c < 0xd800 || c > 0xdfff) continue;
+    const low = text.charCodeAt(i + 1);
+    if (c > 0xdbff || !(low >= 0xdc00 && low <= 0xdfff)) return false;
+    i++;
+  }
+  return true;
+}
+
+export function parseJson(input: Uint8Array | string, requested: JsonLimits = defaultJsonLimits): JsonResult {
+  const limits = effective(requested);
   let text: string;
   if (typeof input === 'string') {
     if (utf8Length(input) > limits.maxBytes) return fail('json.too-large', `Document exceeds ${limits.maxBytes} bytes`);
@@ -171,12 +191,6 @@ class Parser {
       const c = s.charCodeAt(this.i);
       if (c === 0x22) break;
       if (c < 0x20) this.syntax('Unescaped control character in a string');
-      if (c >= 0xd800 && c <= 0xdfff) {
-        const low = s.charCodeAt(this.i + 1);
-        if (c > 0xdbff || !(low >= 0xdc00 && low <= 0xdfff)) this.fail('json.lone-surrogate', 'Unpaired UTF-16 surrogate in a string');
-        this.i += 2;
-        continue;
-      }
       if (c !== 0x5c) { this.i++; continue; }
       out += s.slice(start, this.i);
       out += this.escape();
@@ -185,6 +199,8 @@ class Parser {
     }
     out += s.slice(start, this.i);
     if (out.length > this.limits.maxStringLength) this.fail('json.string-too-long', `String longer than ${this.limits.maxStringLength} code units`);
+    // Checked on the decoded string, so a pair split across an escape and a raw unit is accepted.
+    if (!wellFormed(out)) this.fail('json.lone-surrogate', 'Unpaired UTF-16 surrogate in a string');
     this.i++;
     return out;
   }
@@ -194,14 +210,7 @@ class Parser {
     this.i += 2;
     if (e !== undefined && e !== 'u' && Object.hasOwn(SIMPLE_ESCAPES, e)) return SIMPLE_ESCAPES[e] as string;
     if (e !== 'u') return this.syntax('Invalid escape sequence', 2);
-    const unit = this.hex4();
-    if (unit >= 0xdc00 && unit <= 0xdfff) this.fail('json.lone-surrogate', 'Unpaired UTF-16 surrogate escape');
-    if (unit < 0xd800 || unit > 0xdbff) return String.fromCharCode(unit);
-    if (this.s[this.i] !== '\\' || this.s[this.i + 1] !== 'u') this.fail('json.lone-surrogate', 'Unpaired UTF-16 surrogate escape');
-    this.i += 2;
-    const low = this.hex4();
-    if (low < 0xdc00 || low > 0xdfff) this.fail('json.lone-surrogate', 'Unpaired UTF-16 surrogate escape');
-    return String.fromCharCode(unit, low);
+    return String.fromCharCode(this.hex4());
   }
 
   private hex4(): number {

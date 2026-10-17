@@ -415,6 +415,14 @@
       }
     },
     {
+      "file": "conformance/map-header/invalid/path-file-directory.map.json",
+      "sha256": "23f760769f4cc6d13605d46818fa904fb8471d5669c99428b8a6197f81f0e911",
+      "expect": {
+        "code": "path.alias",
+        "jsonPath": "$.assets[0].path"
+      }
+    },
+    {
       "file": "conformance/map-header/invalid/dependency-self.map.json",
       "sha256": "60f03db82c407db6fc0b9c6249f117125f23c1b4b416e2185ccc7f6ccb61d1cf",
       "expect": {

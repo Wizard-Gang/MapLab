@@ -104,6 +104,20 @@ test('budgets stop input at the boundary, for strings and bytes alike', () => {
   expect(codeOf('[1,2,3]', limits({ maxValues: 3 }))).toBe('json.too-many-values');
 });
 
+test('wider budgets are clamped to the defaults, so deep input still fails cleanly', () => {
+  const deep = '['.repeat(100_000) + ']'.repeat(100_000);
+  expect(codeOf(deep, limits({ maxDepth: 1e9, maxBytes: Infinity }))).toBe('json.depth');
+  const r = parseJson('[[1]]', limits({ maxDepth: -5 }));
+  expect(r.ok ? 'ok' : r.diagnostic.code).toBe('json.depth');
+});
+
+test('a surrogate pair split across an escape and a raw code unit is accepted like JSON.parse', () => {
+  for (const text of ['"\\ud83d\ude00"', '"\ud83d\\ude00"']) {
+    expect(parseJson(text)).toEqual({ ok: true, value: JSON.parse(text) });
+  }
+  expect(codeOf('"\\ud83d\\ud83d"')).toBe('json.lone-surrogate');
+});
+
 test('"__proto__" stays an own data property and nothing global is touched', () => {
   const result = parseJson('{"__proto__":{"polluted":true},"constructor":{"prototype":1}}');
   if (!result.ok) throw new Error(result.diagnostic.message);

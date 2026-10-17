@@ -62,6 +62,10 @@ test('codes name the innermost definition, stop at the cap and treat key order a
   expect(evaluate(compiled, { a: 2, c: 1 }, 1)).toHaveLength(1);
   expect(canonical({ b: 1, a: [1, { d: 0, c: -0 }] })).toBe(canonical({ a: [1, { c: 0, d: 0 }], b: 1 }));
   expect(evaluate(MAP_SCHEMA, [])).toEqual([expect.objectContaining({ code: 'map.type', jsonPath: '$' })]);
+  const tuple = compileSchema(tiny({ properties: { t: { type: 'array', prefixItems: [true], items: false }, f: false } }), 'root');
+  expect(evaluate(tuple, { t: [1, 2], f: 1 }).map((d) => `${d.code}@${d.jsonPath}`)).toEqual(['root.items@$.t[1]', 'root.forbidden@$.f']);
+  const extra = loadMapHeader(readFileSync(join(root, 'conformance/map-header/invalid/extra-member.map.json')));
+  expect(extra.ok ? null : extra.diagnostics[0]?.documentId).toBe('map.conformance.header');
 });
 
 test('loading never touches the network', () => {

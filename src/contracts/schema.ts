@@ -115,14 +115,15 @@ export function evaluate(schema: CompiledSchema, value: JsonValue, limit = 100):
   };
   const visit = (n: SchemaNode, v: JsonValue, path: PathSegment[], prefix: string): void => {
     if (out.length >= limit || n === true) return;
-    if (n === false) return report(prefix, 'items', path, 'No value is allowed here');
+    if (n === false) return report(prefix, 'forbidden', path, 'No value is allowed here');
     if (typeof n.$ref === 'string') {
       const name = (LOCAL_REF.exec(n.$ref) as RegExpExecArray)[1] as string;
       visit(schema.defs.get(name) as SchemaNode, v, path, name);
     }
     if (typeof n.type === 'string' && !typeMatches(n.type, v)) return report(prefix, 'type', path, `Expected ${n.type}`);
-    if (n.const !== undefined && canonical(v) !== canonical(n.const)) report(prefix, 'const', path, `Expected ${JSON.stringify(n.const)}`);
-    if (Array.isArray(n.enum) && !n.enum.some((e) => canonical(e) === canonical(v))) report(prefix, 'enum', path, `Expected one of ${n.enum.map((e) => JSON.stringify(e)).join(', ')}`);
+    const text = n.const !== undefined || Array.isArray(n.enum) ? canonical(v) : '';
+    if (n.const !== undefined && text !== canonical(n.const)) report(prefix, 'const', path, `Expected ${JSON.stringify(n.const)}`);
+    if (Array.isArray(n.enum) && !n.enum.some((e) => canonical(e) === text)) report(prefix, 'enum', path, `Expected one of ${n.enum.map((e) => JSON.stringify(e)).join(', ')}`);
     if (typeof v === 'number') {
       if (typeof n.minimum === 'number' && v < n.minimum) report(prefix, 'minimum', path, `Below minimum ${n.minimum}`);
       if (typeof n.maximum === 'number' && v > n.maximum) report(prefix, 'maximum', path, `Above maximum ${n.maximum}`);
@@ -143,7 +144,8 @@ export function evaluate(schema: CompiledSchema, value: JsonValue, limit = 100):
       const tuple = Array.isArray(n.prefixItems) ? n.prefixItems : [];
       v.forEach((item, i) => {
         const sub = i < tuple.length ? tuple[i] : n.items;
-        if (sub !== undefined) visit(sub as SchemaNode, item, [...path, i], prefix);
+        if (sub === false) report(prefix, 'items', [...path, i], 'No further items are allowed');
+        else if (sub !== undefined) visit(sub as SchemaNode, item, [...path, i], prefix);
       });
     }
     if (isObject(v)) {
