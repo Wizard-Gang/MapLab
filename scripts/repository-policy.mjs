@@ -38,7 +38,9 @@ export function desiredRules(p) {
     },
     { ...base, name: 'MapLab immutable versions', target: 'tag',
       conditions: { ref_name: { include: ['refs/tags/v*'], exclude: [] } },
-      rules: [{ type: 'update', parameters: { update_allows_fetch_and_merge: false } }, { type: 'deletion' }],
+      // update_allows_fetch_and_merge is a branch-only option: GitHub stores tag
+      // rulesets' update rule without parameters, so expecting it breaks read-back.
+      rules: [{ type: 'update' }, { type: 'deletion' }],
     },
   ];
 }

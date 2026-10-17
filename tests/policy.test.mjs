@@ -11,6 +11,13 @@ test('policy requires strict app-bound checks and immutable version updates, whi
   expect(tags.rules.map((r) => r.type)).toEqual(['update', 'deletion']);
   expect(tags.bypass_actors).toEqual([]);
 });
+test('tag read-back matches the form GitHub stores, without branch-only update parameters', () => {
+  const tags = desiredRules(policy)[1];
+  const stored = { ...structuredClone(tags), id: 1, source: 'Wizard-Gang/MapLab', rules: [{ type: 'update' }, { type: 'deletion' }] };
+  expect(() => requireMatch(stored, tags)).not.toThrow();
+  expect(tags.rules.every((r) => r.parameters === undefined)).toBe(true);
+  expect(() => requireMatch({ ...stored, rules: [{ type: 'deletion' }] }, tags)).toThrow();
+});
 test.each([
   ['bypass', (p) => { p.main.bypassActors.push(1); }],
   ['missing check', (p) => { p.main.requiredChecks.pop(); }],
