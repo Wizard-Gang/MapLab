@@ -1,21 +1,23 @@
 // ML-007: the independent final-byte reader runs as its own Node process from a scratch copy that
-// holds only consumer/ and the published schemas, so it cannot reach src/, the editor or the repo.
+// holds only tests/consumer/reader/ and the published schemas, so it cannot reach src/, the editor or the repo.
 import { expect, test } from 'vitest';
-import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { materialize } from './consumer/mutate.mjs';
-import { parseStrict, jcs } from '../consumer/json.mjs';
-import { compile, validate } from '../consumer/schema.mjs';
-import { checkReferences } from '../consumer/references.mjs';
+import { parseStrict, jcs } from './consumer/reader/json.mjs';
+import { compile, validate } from './consumer/reader/schema.mjs';
+import { checkReferences } from './consumer/reader/resolve.mjs';
+import { checkClosure } from './consumer/reader/references.mjs';
+import { loadSchemas } from './consumer/reader/read-bundle.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const index = JSON.parse(readFileSync(join(root, 'conformance/bundle/cases.json'), 'utf8'));
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const scratch = mkdtempSync(join(tmpdir(), 'maplab-reader-'));
-cpSync(join(root, 'consumer'), join(scratch, 'reader/consumer'), { recursive: true });
+cpSync(join(root, 'tests/consumer/reader'), join(scratch, 'reader/consumer'), { recursive: true });
 cpSync(join(root, 'schemas'), join(scratch, 'reader/schemas'), { recursive: true });
 const golden = join(root, index.golden.export.path);
 
@@ -26,10 +28,10 @@ const run = (bundle, extra = []) => {
 };
 
 test('the reader source imports only Node built-ins and its own folder: no src/, editor, React or network', () => {
-  const files = readdirSync(join(root, 'consumer')).sort();
-  expect(files).toEqual(['bundle.mjs', 'json.mjs', 'read-bundle.mjs', 'references.mjs', 'schema.mjs']);
+  const files = readdirSync(join(root, 'tests/consumer/reader')).sort();
+  expect(files).toEqual(['bundle.mjs', 'json.mjs', 'read-bundle.mjs', 'references.mjs', 'resolve.mjs', 'schema.mjs']);
   for (const file of files) {
-    const source = readFileSync(join(root, 'consumer', file), 'utf8');
+    const source = readFileSync(join(root, 'tests/consumer/reader', file), 'utf8');
     const specifiers = [...source.matchAll(/^import\b[^;]*?\bfrom\s+'([^']+)'/gm)].map((m) => m[1]);
     for (const s of specifiers) expect(/^node:(?:fs|crypto|path|url)$/.test(s) || /^\.\/[a-z-]+\.mjs$/.test(s), `${file}: ${s}`).toBe(true);
     expect(source, file).not.toMatch(/\bimport\(|\brequire\(|\bfetch\(|node:(?:http|https|net|child_process|vm|worker_threads)|\beval\(|new Function/);
@@ -77,7 +79,11 @@ test('the conformance index is closed: unique case IDs, every group covered, gol
   }
 });
 
+mkdirSync(join(scratch, 'fs-case'));
+const caseInsensitiveFs = existsSync(join(scratch, 'FS-CASE'));
+
 test.each(index.cases.map((c) => [c.id, c]))('conformance case %s', (id, record) => {
+  if (record.requiresCaseSensitiveFs && caseInsensitiveFs) return; // The host cannot hold both names; Linux CI runs it.
   const dir = join(scratch, 'cases', id);
   materialize(golden, dir, record, join(root, 'schemas'));
   const { status, report, stderr } = run(dir, record.trustedDigest ? ['--expect-digest', index.golden.export.bundleSha256] : []);
@@ -140,4 +146,41 @@ test('a schema directory missing any supported format fails as a reader error, n
   expect(out.status).toBe(2);
   expect(out.stdout).toBe('');
   expect(out.stderr).toContain('schema.missing: The pinned maplab.tileset@1 schema is required');
+});
+
+// Codes no valid v1 export can reach, each asserted by an in-process test in this file.
+const IN_PROCESS_ONLY = new Set(['bundle.root', 'json.limit', 'json.number', 'schema.missing', 'schema.identity', 'schema.unsupported', 'reference.unclassified', 'dependency.cycle']);
+
+test('every diagnostic code the reader can emit has a separate-process record or a named in-process test', () => {
+  const emitted = new Set();
+  for (const file of readdirSync(join(root, 'tests/consumer/reader'))) {
+    for (const m of readFileSync(join(root, 'tests/consumer/reader', file), 'utf8').matchAll(/'((?:bundle|inventory|manifest|json|schema|document|contract|closure|dependency|object|reference|portal|catalog|asset)\.[a-z-]+)'/g)) if (m[1] !== 'manifest.json') emitted.add(m[1]);
+  }
+  const recorded = new Set(index.cases.map((c) => c.expect.code).filter(Boolean));
+  expect([...emitted].filter((c) => !recorded.has(c) && !IN_PROCESS_ONLY.has(c)).sort()).toEqual([]);
+  expect([...IN_PROCESS_ONLY].filter((c) => recorded.has(c))).toEqual([]);
+  expect(emitted.size).toBeGreaterThan(45);
+});
+
+test('pinned schema directories fail closed on identity drift and unsupported keywords', () => {
+  const drift = join(scratch, 'drift-schemas');
+  cpSync(join(root, 'schemas'), drift, { recursive: true });
+  const map = JSON.parse(readFileSync(join(drift, 'maplab.map.v1.schema.json'), 'utf8'));
+  writeFileSync(join(drift, 'maplab.map.v1.schema.json'), JSON.stringify({ ...map, $id: 'urn:maplab:schema:maplab.map:2' }));
+  expect(() => loadSchemas(drift)).toThrow(expect.objectContaining({ code: 'schema.identity' }));
+  writeFileSync(join(drift, 'maplab.map.v1.schema.json'), JSON.stringify({ ...map, if: { type: 'object' } }));
+  expect(() => loadSchemas(drift)).toThrow(expect.objectContaining({ code: 'schema.unsupported' }));
+  expect(() => compile({ $schema: 'https://json-schema.org/draft/2020-12/schema', $ref: 'https://example.invalid/x' }, 'remote')).toThrow(expect.objectContaining({ code: 'schema.unsupported' }));
+});
+
+test('non-map dependency cycles reject, although no v1 export format other than maps carries dependencies', () => {
+  const doc = (id, format, deps) => ({ entry: { id, path: `${id}.json` }, value: { format, id, dependencies: deps.map((d) => ({ id: d.id, kind: d.kind, path: `${d.id}.json`, required: true })) } });
+  const docs = new Map([
+    ['map.a', doc('map.a', 'maplab.map', [{ id: 'catalog.x', kind: 'catalog' }])],
+    ['catalog.x', doc('catalog.x', 'maplab.catalog', [{ id: 'catalog.y', kind: 'catalog' }])],
+    ['catalog.y', doc('catalog.y', 'maplab.catalog', [{ id: 'catalog.x', kind: 'catalog' }])],
+  ]);
+  const diagnostics = [];
+  checkClosure({ entryMapId: 'map.a' }, docs, diagnostics);
+  expect(diagnostics.map((d) => [d.code, d.file])).toEqual([['dependency.cycle', 'catalog.x.json'], ['dependency.cycle', 'catalog.y.json']]);
 });

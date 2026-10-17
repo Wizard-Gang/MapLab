@@ -2,9 +2,13 @@
 // JSON edits re-encode the edited file as RFC 8785 and re-hash it in the manifest unless the
 // record says `"rehash": false`, so each record isolates exactly one defect.
 import { cpSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
-import { jcs, parseStrict } from '../../consumer/json.mjs';
+// The helper's own RFC 8785 encoder for ASCII/BMP fixture data, independent of the reader's.
+const jcs = (v) => (Array.isArray(v) ? `[${v.map(jcs).join(',')}]`
+  : v !== null && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${jcs(v[k])}`).join(',')}}` : JSON.stringify(v));
+const parseStrict = (bytes) => JSON.parse(Buffer.from(bytes).toString('utf8'));
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const tokens = (pointer) => pointer.split('/').slice(1).map((t) => t.replaceAll('~1', '/').replaceAll('~0', '~'));
@@ -16,6 +20,7 @@ function edit(value, pointer, op, replacement) {
   if (op === 'set') parent[Array.isArray(parent) ? Number(last) : last] = replacement;
   else if (op === 'remove') { if (Array.isArray(parent)) parent.splice(Number(last), 1); else delete parent[last]; }
   else if (op === 'append') parent[last].push(replacement);
+  else if (op === 'swap') { const list = parent[last]; [list[replacement[0]], list[replacement[1]]] = [list[replacement[1]], list[replacement[0]]]; }
   else if (op === 'insertSorted') { parent[last].push(replacement); parent[last].sort((a, b) => (jcs(a.key ?? a.path ?? a.id) < jcs(b.key ?? b.path ?? b.id) ? -1 : 1)); }
 }
 
@@ -33,7 +38,7 @@ export function materialize(source, dir, record, schemaDir) {
   };
   for (const e of record.edits) {
     if (e.file !== undefined) {
-      const op = ['set', 'remove', 'append', 'insertSorted'].find((k) => e[k] !== undefined);
+      const op = ['set', 'remove', 'append', 'insertSorted', 'swap'].find((k) => e[k] !== undefined);
       if (op) {
         const v = parseStrict(read(e.file));
         edit(v, e[op], op, e.value);
@@ -74,6 +79,10 @@ export function materialize(source, dir, record, schemaDir) {
       }
     } else if (e.symlink !== undefined) {
       symlinkSync(e.target, join(dir, e.symlink));
+    } else if (e.mkdir !== undefined) {
+      mkdirSync(join(dir, e.mkdir), { recursive: true });
+    } else if (e.fifo !== undefined) {
+      if (spawnSync('mkfifo', [join(dir, e.fifo)]).status !== 0) throw new Error(`${record.id}: mkfifo failed`);
     } else throw new Error(`${record.id}: unknown edit`);
   }
 }

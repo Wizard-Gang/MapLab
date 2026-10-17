@@ -33,7 +33,9 @@ export function readInventory(root) {
   let total = 0;
   const walk = (dir, prefix, depth) => {
     if (depth > BUNDLE_LIMITS.depth) throw new ReaderError('bundle.limit', `Directory nesting exceeds ${BUNDLE_LIMITS.depth}`, prefix);
-    for (const name of readdirSync(dir).sort()) {
+    const names = readdirSync(dir).sort();
+    if (prefix && names.length === 0) throw new ReaderError('bundle.empty-directory', `Empty directory ${prefix}; folder bundles carry files only`, prefix);
+    for (const name of names) {
       const rel = prefix ? `${prefix}/${name}` : name;
       const stat = lstatSync(join(dir, name));
       if (stat.isSymbolicLink()) throw new ReaderError('bundle.symlink', `Symbolic links are refused: ${rel}`, rel);

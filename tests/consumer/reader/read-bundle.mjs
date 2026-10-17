@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Independent MapLab bundle reader (ML-007). Usage:
-//   node consumer/read-bundle.mjs --schemas SCHEMA_DIR [--expect-digest SHA256] BUNDLE_DIR
+//   node tests/consumer/reader/read-bundle.mjs --schemas SCHEMA_DIR [--expect-digest SHA256] BUNDLE_DIR
 // Reads final bytes from disk and the pinned published schemas only; imports Node built-ins and
-// this folder, never MapLab's src/, editor, React or build output. Runs G1 steps 1–4 and prints a
-// JSON report. Exit 0 = accepted, 1 = rejected with diagnostics, 2 = usage or reader failure.
+// this folder, never MapLab's src/, editor, React or build output. Runs the byte, manifest,
+// negotiation, schema, closure and reference parts of G1 steps 1–4 (not the F3 semantic rules)
+// and prints a JSON report. Exit 0 = accepted, 1 = rejected with diagnostics, 2 = usage or reader failure.
 // It constructs no world, renderer, engine, controller or navigation, and certifies none of them.
 import { readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
@@ -11,7 +12,8 @@ import { pathToFileURL } from 'node:url';
 import { ReaderError, parseStrict } from './json.mjs';
 import { compile } from './schema.mjs';
 import { readInventory, sha256, verifyManifest } from './bundle.mjs';
-import { SUPPORTED_FORMATS, checkClosure, checkReferences, loadDocuments } from './references.mjs';
+import { SUPPORTED_FORMATS, checkClosure, loadDocuments } from './references.mjs';
+import { checkReferences } from './resolve.mjs';
 
 export const READER = Object.freeze({ name: 'maplab-independent-reader', version: 1 });
 

@@ -73,16 +73,26 @@ actor planes, anchor cycles, motion legs, terrain permissions and prefab provena
 Profile-dependent resting stance/full-body clearance and controller replay remain
 explicitly deferred.
 
-ML-007 adds the independent final-byte reader in `consumer/`. It is a separate
-Node program that imports only Node built-ins and its own folder, never `src/`.
-It reads a folder bundle plus the pinned `schemas/` from disk and performs adopted
-G1 steps 1–4. Step 1 is the bounded safe-path inventory: symlinks, hidden, reserved
-and aliased names, special files and nested archives are refused. Step 2 is
-duplicate-key-rejecting strict UTF-8 JSON, a canonical JCS manifest, complete
-inventory, exact sizes, SHA-256 and the bundle digest. Step 3 is exact format/version
-and required-contract negotiation (closed bundles only; external maps deferred).
-Step 4 is independent closed-schema evaluation, dependency closure and reference,
-portal, catalog-call and asset-path resolution. Every `*Id`/`*Ids` member of the
-published v1 schemas is classified explicitly; an unknown one fails closed. The
-reader checks call existence, not handler-kind or parameter semantics. It constructs
-no world, renderer, engine or navigation, and its report says so.
+ML-007 adds the independent final-byte reader in `tests/consumer/reader/`. It is a
+separate Node program that imports only Node built-ins and its own folder, never
+`src/`. It reads a folder bundle plus the pinned `schemas/` from disk and performs
+the following parts of adopted G1 steps 1–4:
+
+- a bounded safe-path inventory that refuses symlinks, special files, empty
+  directories, hidden, reserved and aliased names, and nested archives;
+- duplicate-key-rejecting strict UTF-8 JSON;
+- a canonical JCS manifest with complete inventory, exact sizes, SHA-256 and the
+  bundle digest;
+- exact format/version and contract negotiation, for closed bundles only (external
+  maps are deferred);
+- independent closed-schema evaluation and dependency closure;
+- reference resolution inside each map's dependency closure, including portals,
+  typed parameter refs, every catalog entry a map or its declared movement profiles
+  use, and asset paths.
+
+Every `*Id`/`*Ids` member and every `{key, version}` member of the published v1
+schemas is classified explicitly: as a contract, a catalog entry or a solver
+declaration. An unknown member fails closed. The reader checks that catalog entries
+exist. It does not check handler kinds, parameter semantics or the F3 semantic
+rules, which remain `src/contracts` validation. It constructs no world, renderer,
+engine or navigation, and its report says so.

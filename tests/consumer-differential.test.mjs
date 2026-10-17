@@ -4,8 +4,8 @@
 import { expect, test } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { parseStrict } from '../consumer/json.mjs';
-import { compile, validate } from '../consumer/schema.mjs';
+import { parseStrict } from './consumer/reader/json.mjs';
+import { compile, validate } from './consumer/reader/schema.mjs';
 import { DOCUMENT_SCHEMAS, evaluate, parseJson } from '../src/contracts/index.ts';
 
 const root = resolve(import.meta.dirname, '..');

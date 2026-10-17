@@ -74,30 +74,44 @@ the editor. Full independent bundle/fixture loading is ML-007's `bundle/` below.
 
 ## `bundle/` (ML-007)
 
-`cases.json` pins the golden inputs for the independent reader `consumer/read-bundle.mjs`.
-The inputs are the unchanged R1 forest source documents and `maplab.project.json` index,
-each listed with its declared schema, and the R1 export bundle with bundle digest
-`0a39dafd…`. The source digests must equal the project index digests. Each source
-document must validate against its declared schema under the reader's own evaluator.
+`cases.json` pins the golden inputs for the independent reader
+`tests/consumer/reader/read-bundle.mjs`. The inputs are the unchanged R1 forest
+source documents and `maplab.project.json` index, each listed with its declared
+schema, and the R1 export bundle with bundle digest `0a39dafd…`. The source digests
+must equal the project index digests. Each source document must validate against its
+declared schema under the reader's own evaluator.
 
-Tests copy only `consumer/` and `schemas/` into a scratch folder and spawn the reader
-there. It must read both maps and resolve the reciprocal portals. Each of the 55 inert
-edit records changes a temporary copy of the export bundle. JSON edits re-encode the
-edited file as JCS and re-hash it, unless the record says otherwise, so each negative
-record isolates one defect. It must then produce exactly its expected diagnostic code,
-file and JSON path. The records cover:
+Tests copy only the reader folder and `schemas/` into a scratch folder and spawn the
+reader there. It must read both maps and resolve the reciprocal portals. Each of the
+88 inert edit records changes a temporary copy of the export bundle. JSON edits
+re-encode the edited file as JCS, using the helper's own encoder, and re-hash it,
+unless the record says otherwise, so each negative record isolates one defect. It
+must then produce exactly its expected diagnostic code, file and JSON path. The
+records cover:
 
-- inventory: symlinks, unsafe or reserved names, nested archives, unlisted or missing files;
-- manifest: tampering, duplicate keys, non-canonical bytes, case aliases, schema mismatch;
+- inventory: symlinks, FIFOs, empty directories, depth, unsafe or reserved names,
+  case aliases (case-sensitive hosts only), nested archives, unlisted or missing files;
+- manifest: tampering, order, duplicate keys, non-canonical bytes, unindexed or
+  non-authored documents, schema mismatch;
 - document bytes: malformed JSON, UTF-8, BOM, duplicate members, lone surrogates;
-- negotiation: future, older and unknown versions and formats, unsupported or undeclared
-  contracts, external maps;
-- closure: missing dependencies and unreachable documents;
-- references: duplicate object IDs, dangling or wrong-kind references, portal map and
-  entity, movement profiles, undeclared calls;
+- negotiation: versions, formats, contracts, the camera model, external maps;
+- closure: missing, duplicate or mismatched dependencies, unreachable documents;
+- references: duplicates outside maps, dangling, wrong-kind, wrong-owner and
+  out-of-closure references, catalog entries without params, movement-profile uses;
 - asset paths: reserved, traversal, media mismatch, unbundled.
 
-Two positive records add a listed asset file and the five pinned schemas in the F4
-layout; both must still be accepted. A differential test runs the reader's parser and
-evaluator against `src/contracts` on every owned conformance file and R1 example. The
-two must agree on byte acceptance and closed-schema validity.
+Nine positive records must still be accepted:
+
+- a listed asset;
+- the five pinned schemas in the F4 layout;
+- a self portal;
+- a third map with a transitive portal;
+- an in-closure cross-map ref;
+- a declared profile catalog use;
+- reference-like parameter names.
+
+A test requires every diagnostic code the reader can emit to have a record, or one of
+eight named in-process tests for codes no valid v1 export can reach. A differential
+test runs the reader's parser and evaluator against `src/contracts` on every owned
+conformance file and R1 example. The two must agree on byte acceptance and
+closed-schema validity.
