@@ -88,7 +88,7 @@ Verify all three resulting-main CI checks on the squash SHA. GitHub's authorized
 automatic branch deletion occurs at merge; remove the local completed branch
 after successful main CI. Record final SHA, PR, checks and independent review in
 the external resumable ledger. On the next controlled activation, append that
-completed evidence to `docs/deliveries.json` and synchronize queue/roadmap. A commit
+completed evidence to `docs/deliveries.json` and synchronize the permanent implementation plan's completed/current/future blocks. A commit
 cannot include its own final squash hash. Stop sequential activation on any
 failed predecessor, main CI, access or protection gate; preserve work and evidence.
 

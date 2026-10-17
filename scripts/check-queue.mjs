@@ -82,7 +82,7 @@ export function checkQueue(root) {
   const sections = new Map([...spec.matchAll(/^### ([A-K]\d+)\. ([^\n]+)/gm)].map((m) => [m[1],m[2]]));
   ensure(Array.isArray(history) && history.length >= 1 && history.length < 44
     && history.every((h,i) => h.id === makeId(i+1)),
-    'Contiguous completed predecessor chain missing');
+    'Predecessor delivery chain incomplete or non-contiguous');
   const historical = block(plan,'completed-history');
   const closed = [...historical.matchAll(/^- \*\*(ML-\d{3})\*\* — /gm)].map((m) => m[1]);
   ensure(closed.length === history.length && closed.every((n,i) => n === history[i].id),
@@ -98,6 +98,8 @@ export function checkQueue(root) {
     && future.every((e,i) => e.id === makeId(history.length+i+2)),
     'Reserved future tasks must be preserved exactly once in order');
   const live = [...current,...future];
+  ensure([...plan.matchAll(/^### ML-\d{3} \/ /gm)].length === live.length,
+    'Duplicate task definition outside current/future blocks');
   ensure(new Set(live.map((t) => t.id)).size === live.length,
     'Duplicate live task definition');
   live.forEach((t,i) => verify(t, rows[history.length+i], sections));

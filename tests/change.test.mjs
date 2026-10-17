@@ -46,7 +46,7 @@ test('real CLI accepts another reserved task without a fixed current identity', 
     const done = '- **' + change.id + '** — completed in synthetic test ledger; see docs/changes/' + change.id + '.md.';
     return s.replace('<!-- completed-history:end -->', done + '\n<!-- completed-history:end -->')
       .replace(active, next)
-      .replace('<!-- future-queue:start -->\n' + future + '\n<!-- future-queue:end -->',
+      .replace(/<!-- future-queue:start -->([\s\S]*?)<!-- future-queue:end -->/,
         '<!-- future-queue:start -->\n' + rest + '\n<!-- future-queue:end -->');
   });
   json(p, 'docs/deliveries.json', (v) => {
