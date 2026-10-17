@@ -38,6 +38,7 @@ export function loadDocuments(manifest, files, schemas, diagnostics) {
   }
   if (manifest.externalMaps.length) report('contract.external-maps', 'manifest.json', '$.externalMaps', 'External-map bundles are deferred; this reader accepts closed bundles only');
   const declared = new Set(manifest.requiredContracts.map((c) => `${c.key}@${c.version}`));
+  const required = new Set();
   for (const entry of manifest.documents) {
     const bytes = files.get(entry.path);
     let value;
@@ -55,9 +56,14 @@ export function loadDocuments(manifest, files, schemas, diagnostics) {
     for (const v of violations) report(`schema.${v.keyword}`, entry.path, v.path, `Violates ${identity}`);
     if (violations.length) continue;
     const contracts = [...(value.requiredFeatures ?? []), ...(value.collisionContract ? [value.collisionContract] : []), ...(value.controller ? [value.controller] : [])];
-    for (const c of contracts) if (!SUPPORTED_CONTRACTS.includes(`${c.key}@${c.version}`)) report('contract.unsupported', entry.path, '$', `Unsupported contract ${c.key}@${c.version}`);
+    for (const c of contracts) {
+      if (!SUPPORTED_CONTRACTS.includes(`${c.key}@${c.version}`)) report('contract.unsupported', entry.path, '$', `Unsupported contract ${c.key}@${c.version}`);
+      else required.add(`${c.key}@${c.version}`);
+    }
     docs.set(entry.id, { entry, value });
   }
+  // F6: requiredContracts names every semantic contract a bundled document requires.
+  for (const c of [...required].sort()) if (!declared.has(c)) report('contract.undeclared', 'manifest.json', '$.requiredContracts', `${c} is required by a document but not declared`);
   return docs;
 }
 

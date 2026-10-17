@@ -81,7 +81,7 @@ each listed with its declared schema, and the R1 export bundle with bundle diges
 document must validate against its declared schema under the reader's own evaluator.
 
 Tests copy only `consumer/` and `schemas/` into a scratch folder and spawn the reader
-there. It must read both maps and resolve the reciprocal portals. Each of the 54 inert
+there. It must read both maps and resolve the reciprocal portals. Each of the 55 inert
 edit records changes a temporary copy of the export bundle. JSON edits re-encode the
 edited file as JCS and re-hash it, unless the record says otherwise, so each negative
 record isolates one defect. It must then produce exactly its expected diagnostic code,

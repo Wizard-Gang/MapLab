@@ -131,3 +131,13 @@ test('the strict parser enforces exact byte boundaries independently of the bund
   expect({}.polluted).toBeUndefined();
   expect(jcs(parseStrict(Buffer.from('{"b":[1,0.5,-0],"a":"é"}')))).toBe('{"a":"é","b":[1,0.5,0]}');
 });
+
+test('a schema directory missing any supported format fails as a reader error, not a crash or an accept', () => {
+  const partial = join(scratch, 'partial-schemas');
+  cpSync(join(root, 'schemas'), partial, { recursive: true });
+  rmSync(join(partial, 'maplab.tileset.v1.schema.json'));
+  const out = spawnSync(process.execPath, [join(scratch, 'reader/consumer/read-bundle.mjs'), '--schemas', partial, golden], { encoding: 'utf8' });
+  expect(out.status).toBe(2);
+  expect(out.stdout).toBe('');
+  expect(out.stderr).toContain('schema.missing: The pinned maplab.tileset@1 schema is required');
+});

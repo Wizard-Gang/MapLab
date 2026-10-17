@@ -11,7 +11,7 @@ import { pathToFileURL } from 'node:url';
 import { ReaderError, parseStrict } from './json.mjs';
 import { compile } from './schema.mjs';
 import { readInventory, sha256, verifyManifest } from './bundle.mjs';
-import { checkClosure, checkReferences, loadDocuments } from './references.mjs';
+import { SUPPORTED_FORMATS, checkClosure, checkReferences, loadDocuments } from './references.mjs';
 
 export const READER = Object.freeze({ name: 'maplab-independent-reader', version: 1 });
 
@@ -28,7 +28,7 @@ export function loadSchemas(dir) {
     schemas.set(`${m[1]}@${m[2]}`, compile(schema, `${m[1]}@${m[2]}`));
     bytes.set(`${m[1]}@${m[2]}`, raw);
   }
-  if (!schemas.has('maplab.export@1')) throw new ReaderError('schema.missing', 'The pinned maplab.export v1 schema is required');
+  for (const f of ['maplab.export@1', ...SUPPORTED_FORMATS]) if (!schemas.has(f)) throw new ReaderError('schema.missing', `The pinned ${f} schema is required`);
   return { schemas, bytes };
 }
 

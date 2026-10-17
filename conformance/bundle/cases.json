@@ -639,6 +639,22 @@
       }
     },
     {
+      "id": "undeclared-semantic-contract",
+      "group": "document",
+      "edits": [
+        {
+          "file": "manifest.json",
+          "remove": "/requiredContracts/6"
+        }
+      ],
+      "expect": {
+        "ok": false,
+        "code": "contract.undeclared",
+        "file": "manifest.json",
+        "path": "$.requiredContracts"
+      }
+    },
+    {
       "id": "unsupported-map-feature",
       "group": "document",
       "edits": [
