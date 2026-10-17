@@ -111,6 +111,24 @@
       "maxLength": 240,
       "pattern": "^[A-Za-z0-9_](?:[A-Za-z0-9._-]*[A-Za-z0-9_-])?(?:/[A-Za-z0-9_](?:[A-Za-z0-9._-]*[A-Za-z0-9_-])?)*$"
     },
+    "contract-ref": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/key"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "key",
+        "version"
+      ],
+      "additionalProperties": false
+    },
     "dependency": {
       "type": "object",
       "properties": {
@@ -203,14 +221,6 @@
       "multipleOf": 0.0625,
       "minimum": 0,
       "maximum": 131072
-    },
-    "deferred-array": {
-      "$comment": "Contents validated from ML-004 to ML-006; ML-003 checks only the JSON type.",
-      "type": "array"
-    },
-    "deferred-object": {
-      "$comment": "Contents validated from ML-004 to ML-006; ML-003 checks only the JSON type.",
-      "type": "object"
     },
     "vec": {
       "type": "array",
@@ -496,7 +506,7 @@
           "maximum": 9007199254740991
         },
         "params": {
-          "$ref": "#/$defs/deferred-object"
+          "$ref": "#/$defs/params"
         }
       },
       "required": [
@@ -507,7 +517,23 @@
       "additionalProperties": false
     },
     "condition": {
-      "$ref": "#/$defs/deferred-object"
+      "oneOf": [
+        {
+          "$ref": "#/$defs/flag-condition"
+        },
+        {
+          "$ref": "#/$defs/ability-condition"
+        },
+        {
+          "$ref": "#/$defs/state-condition"
+        },
+        {
+          "$ref": "#/$defs/terms-condition"
+        },
+        {
+          "$ref": "#/$defs/not-condition"
+        }
+      ]
     },
     "transform": {
       "type": "object",
@@ -1305,6 +1331,1353 @@
       ],
       "additionalProperties": false
     },
+    "ratio": {
+      "type": "object",
+      "properties": {
+        "num": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "den": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      },
+      "required": [
+        "num",
+        "den"
+      ],
+      "additionalProperties": false
+    },
+    "params": {
+      "type": "object",
+      "maxProperties": 256,
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 96
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 4096
+          },
+          {
+            "type": "number",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "$ref": "#/$defs/object-ref"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "object-ref": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "layer",
+            "visual",
+            "body",
+            "shape",
+            "foothold",
+            "traversal",
+            "region",
+            "entity",
+            "waypoint",
+            "route",
+            "trigger",
+            "encounter",
+            "asset",
+            "movement",
+            "flag",
+            "group",
+            "presentation",
+            "material"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "mapId": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "flag-condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "flag"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "equals": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "equals"
+      ],
+      "additionalProperties": false
+    },
+    "ability-condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "ability"
+        },
+        "tag": {
+          "$ref": "#/$defs/key"
+        }
+      },
+      "required": [
+        "kind",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "state-condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "entityState"
+        },
+        "entityId": {
+          "$ref": "#/$defs/id"
+        },
+        "state": {
+          "$ref": "#/$defs/key"
+        }
+      },
+      "required": [
+        "kind",
+        "entityId",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "terms-condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "not-condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "not"
+        },
+        "term": {
+          "$ref": "#/$defs/condition"
+        }
+      },
+      "required": [
+        "kind",
+        "term"
+      ],
+      "additionalProperties": false
+    },
+    "flag": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "initial": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "initial"
+      ],
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "shape": {
+          "$ref": "#/$defs/region-shape"
+        },
+        "role": {
+          "enum": [
+            "trigger",
+            "encounter",
+            "audio",
+            "camera",
+            "patrol",
+            "pursuit",
+            "leash",
+            "aggro",
+            "swim",
+            "flight",
+            "launch",
+            "hazard",
+            "environment",
+            "checkpoint"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "shape",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "waypoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "waitTicks": {
+          "$ref": "#/$defs/ticks"
+        }
+      },
+      "required": [
+        "id",
+        "anchor",
+        "waitTicks"
+      ],
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "waypointIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "mode": {
+          "enum": [
+            "once",
+            "loop",
+            "pingPong"
+          ]
+        },
+        "requiredAbilities": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/key"
+          },
+          "uniqueItems": true
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "waypointIds",
+        "mode",
+        "requiredAbilities",
+        "conditions"
+      ],
+      "additionalProperties": false
+    },
+    "respawn": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "never",
+            "timer",
+            "checkpoint",
+            "event"
+          ]
+        },
+        "delayTicks": {
+          "$ref": "#/$defs/ticks"
+        },
+        "maxAlive": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "event": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/contract-ref"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "delayTicks",
+        "maxAlive",
+        "event"
+      ],
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/call"
+        },
+        "routeId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "guard": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/anchor"
+            }
+          ]
+        },
+        "patrolRegionId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "pursuitRegionId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "home": {
+          "$ref": "#/$defs/anchor"
+        },
+        "leashRegionId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "aggroRegionId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "invalidRoute": {
+          "enum": [
+            "wait",
+            "safeStop",
+            "returnHome",
+            "registeredFallback"
+          ]
+        },
+        "fallback": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/call"
+            }
+          ]
+        }
+      },
+      "required": [
+        "behavior",
+        "routeId",
+        "guard",
+        "patrolRegionId",
+        "pursuitRegionId",
+        "home",
+        "leashRegionId",
+        "aggroRegionId",
+        "invalidRoute",
+        "fallback"
+      ],
+      "additionalProperties": false
+    },
+    "destination": {
+      "type": "object",
+      "properties": {
+        "mapId": {
+          "$ref": "#/$defs/id"
+        },
+        "entityId": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "mapId",
+        "entityId"
+      ],
+      "additionalProperties": false
+    },
+    "player-start": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "playerStart"
+          ]
+        },
+        "movementId": {
+          "$ref": "#/$defs/id"
+        },
+        "default": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "movementId",
+        "default"
+      ],
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "checkpoint"
+          ]
+        },
+        "regionId": {
+          "$ref": "#/$defs/id"
+        },
+        "activate": {
+          "$ref": "#/$defs/call"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "regionId",
+        "activate"
+      ],
+      "additionalProperties": false
+    },
+    "actor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "enemySpawn",
+            "npc"
+          ]
+        },
+        "archetype": {
+          "$ref": "#/$defs/call"
+        },
+        "movementId": {
+          "$ref": "#/$defs/id"
+        },
+        "ai": {
+          "$ref": "#/$defs/ai"
+        },
+        "respawn": {
+          "$ref": "#/$defs/respawn"
+        },
+        "groupId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "archetype",
+        "movementId",
+        "ai",
+        "respawn",
+        "groupId"
+      ],
+      "additionalProperties": false
+    },
+    "portal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "portal"
+          ]
+        },
+        "regionId": {
+          "$ref": "#/$defs/id"
+        },
+        "activation": {
+          "enum": [
+            "touch",
+            "interact"
+          ]
+        },
+        "destination": {
+          "$ref": "#/$defs/destination"
+        },
+        "delayTicks": {
+          "$ref": "#/$defs/ticks"
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "regionId",
+        "activation",
+        "destination",
+        "delayTicks",
+        "conditions"
+      ],
+      "additionalProperties": false
+    },
+    "door": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "door"
+          ]
+        },
+        "bodyIds": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "interaction": {
+          "$ref": "#/$defs/call"
+        },
+        "destination": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/destination"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "bodyIds",
+        "interaction",
+        "destination"
+      ],
+      "additionalProperties": false
+    },
+    "prop": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "building",
+            "chest",
+            "destructible",
+            "pickup",
+            "interactive"
+          ]
+        },
+        "archetype": {
+          "$ref": "#/$defs/call"
+        },
+        "bodyIds": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "interaction": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/call"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "archetype",
+        "bodyIds",
+        "interaction"
+      ],
+      "additionalProperties": false
+    },
+    "hazard": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "hazard"
+          ]
+        },
+        "regionId": {
+          "$ref": "#/$defs/id"
+        },
+        "effect": {
+          "$ref": "#/$defs/call"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "regionId",
+        "effect"
+      ],
+      "additionalProperties": false
+    },
+    "marker": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "facing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "visualId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "presentationId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "questMarker",
+            "objective",
+            "cutsceneMarker"
+          ]
+        },
+        "definition": {
+          "$ref": "#/$defs/call"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "anchor",
+        "enabled",
+        "facing",
+        "visualId",
+        "presentationId",
+        "kind",
+        "definition"
+      ],
+      "additionalProperties": false
+    },
+    "entity": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/player-start"
+        },
+        {
+          "$ref": "#/$defs/checkpoint"
+        },
+        {
+          "$ref": "#/$defs/actor"
+        },
+        {
+          "$ref": "#/$defs/portal"
+        },
+        {
+          "$ref": "#/$defs/door"
+        },
+        {
+          "$ref": "#/$defs/prop"
+        },
+        {
+          "$ref": "#/$defs/hazard"
+        },
+        {
+          "$ref": "#/$defs/marker"
+        }
+      ]
+    },
+    "trigger": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "regionId": {
+          "$ref": "#/$defs/id"
+        },
+        "event": {
+          "enum": [
+            "enter",
+            "exit",
+            "interact"
+          ]
+        },
+        "actorCategories": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "enum": [
+              "player",
+              "enemy",
+              "npc"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "once": {
+          "type": "boolean"
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/call"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "regionId",
+        "event",
+        "actorCategories",
+        "once",
+        "conditions",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
+    "encounter": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "regionId": {
+          "$ref": "#/$defs/id"
+        },
+        "groupId": {
+          "$ref": "#/$defs/id"
+        },
+        "spawnIds": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "waves": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/contract-ref"
+          }
+        },
+        "completionEvent": {
+          "$ref": "#/$defs/contract-ref"
+        },
+        "onComplete": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/call"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "regionId",
+        "groupId",
+        "spawnIds",
+        "waves",
+        "completionEvent",
+        "onComplete"
+      ],
+      "additionalProperties": false
+    },
+    "presentation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "const": "riglab"
+        },
+        "bundleDependencyId": {
+          "$ref": "#/$defs/id"
+        },
+        "expectedExportVersion": {
+          "const": 1
+        },
+        "rigGroundAnchor": {
+          "$ref": "#/$defs/vec"
+        },
+        "worldUnitsPerRigUnit": {
+          "$ref": "#/$defs/ratio"
+        },
+        "nativeFacing": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "rootMotion": {
+          "const": "visualOnly"
+        },
+        "groundContact": {
+          "enum": [
+            "supportLine",
+            "footReference"
+          ]
+        },
+        "artSlots": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "$ref": "#/$defs/key"
+              },
+              "assetId": {
+                "$ref": "#/$defs/id"
+              },
+              "pivot": {
+                "$ref": "#/$defs/vec"
+              }
+            },
+            "required": [
+              "slot",
+              "assetId",
+              "pivot"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "type": "object",
+            "properties": {
+              "semantic": {
+                "$ref": "#/$defs/key"
+              },
+              "animation": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/key"
+                  }
+                ]
+              },
+              "fallbackSemantic": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/key"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "semantic",
+              "animation",
+              "fallbackSemantic"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "bundleDependencyId",
+        "expectedExportVersion",
+        "rigGroundAnchor",
+        "worldUnitsPerRigUnit",
+        "nativeFacing",
+        "rootMotion",
+        "groundContact",
+        "artSlots",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
     "prefab-content": {
       "type": "object",
       "properties": {
@@ -1316,10 +2689,20 @@
           }
         },
         "presentations": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/presentation"
+          }
         },
         "flags": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/flag"
+          }
         },
         "visuals": {
           "type": "array",
@@ -1362,22 +2745,52 @@
           }
         },
         "regions": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/region"
+          }
         },
         "entities": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/entity"
+          }
         },
         "waypoints": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/waypoint"
+          }
         },
         "routes": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/route"
+          }
         },
         "triggers": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/trigger"
+          }
         },
         "encounters": {
-          "$ref": "#/$defs/deferred-array"
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 20000,
+          "items": {
+            "$ref": "#/$defs/encounter"
+          }
         }
       },
       "required": [

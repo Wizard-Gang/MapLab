@@ -8,6 +8,7 @@ import {
 } from './grammar';
 import { parseJson, type JsonLimits, type JsonValue } from './json';
 import { compileSchema, evaluate } from './schema';
+import { geometryStage } from './staged';
 
 export type DependencyKind = keyof typeof DEPENDENCY_EXTENSIONS;
 export type AssetMediaType = keyof typeof ASSET_EXTENSIONS;
@@ -43,6 +44,7 @@ export const SUPPORTED_CONTRACTS: ReadonlyMap<string, readonly number[]> = new M
 ]);
 
 export const MAP_SCHEMA = compileSchema(mapSchema as JsonValue, 'map');
+const PARTIAL_MAP_SCHEMA = compileSchema(geometryStage(mapSchema as JsonValue), 'map');
 
 export type MapHeaderResult =
   | { readonly ok: true; readonly header: MapHeader; readonly deferred: readonly string[] }
@@ -58,7 +60,7 @@ export function loadMapHeader(input: Uint8Array | string, limits?: JsonLimits): 
 export function validateMapHeader(value: JsonValue): MapHeaderResult {
   const dispatch = checkFormat(value);
   if (dispatch) return { ok: false, diagnostics: [dispatch] };
-  const structural = evaluate(MAP_SCHEMA, value);
+  const structural = evaluate(PARTIAL_MAP_SCHEMA, value);
   if (structural.length > 0) {
     const documentId = isId((value as { id?: JsonValue }).id) ? (value as { id: string }).id : null;
     return { ok: false, diagnostics: structural.map((d) => ({ ...d, documentId })) };

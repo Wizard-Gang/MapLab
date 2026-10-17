@@ -3,6 +3,7 @@ import tilesetSchema from '../../schemas/maplab.tileset.v1.schema.json' with { t
 import prefabSchema from '../../schemas/maplab.prefab.v1.schema.json' with { type: 'json' };
 import { error, type Diagnostic, type PathSegment } from './diagnostics';
 import { isId, COORDINATE_LIMIT } from './grammar';
+import { geometryStage } from './staged';
 import { parseJson, type JsonLimits, type JsonValue } from './json';
 import { MAP_SCHEMA, validateMapHeader, type MapHeader } from './map-header';
 import { canonical, compileSchema, evaluate, type CompiledSchema } from './schema';
@@ -44,6 +45,7 @@ const CONTENT_KINDS = { assets: 'asset', visuals: 'visual', materials: 'material
   routes: 'route', triggers: 'trigger', encounters: 'encounter', flags: 'flag' } as const;
 export const TILESET_SCHEMA = compileSchema(tilesetSchema as JsonValue, 'tileset');
 export const PREFAB_SCHEMA = compileSchema(prefabSchema as JsonValue, 'prefab');
+const PARTIAL_PREFAB_SCHEMA = compileSchema(geometryStage(prefabSchema as JsonValue), 'prefab');
 export const GEOMETRY_DEFERRED = Object.freeze(['presentations', 'flags', 'regions', 'entities', 'waypoints', 'routes', 'triggers',
   'encounters', 'camera', 'environment', 'navigation', 'catalog calls/conditions', 'profile support/clearance'] as const);
 export type GeometryResult<T> = { readonly ok: true; readonly document: T; readonly deferred: readonly string[]; readonly unresolved: readonly string[] }
@@ -394,7 +396,7 @@ function contentKinds(content: GeometryContent): Map<string, string> {
   content.traversals.forEach((t) => { if ('access' in t) t.access.forEach((a) => ids.set(a.id, 'access-point')); }); return ids;
 }
 export function validatePrefab(value: JsonValue): GeometryResult<PrefabDocument> {
-  const ds = structural(value, PREFAB_SCHEMA); if (ds.length) return { ok: false, diagnostics: ds };
+  const ds = structural(value, PARTIAL_PREFAB_SCHEMA); if (ds.length) return { ok: false, diagnostics: ds };
   const doc = value as unknown as PrefabDocument; const out = baseChecks(doc.id, doc.content.assets, doc.dependencies).map((d) => ({ ...d, jsonPath: d.jsonPath.startsWith('$.assets') ? d.jsonPath.replace('$.assets', '$.content.assets') : d.jsonPath }));
   contentChecks(doc.content, doc.layerSlots, reporter(doc.id, out), ['content'], true);
   return result(doc, out, new Set());

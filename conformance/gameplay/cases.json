@@ -1,0 +1,445 @@
+{
+  "license": "CC0-1.0",
+  "fixtures": [
+    {
+      "file": "conformance/gameplay/all-kinds.catalog.json",
+      "sha256": "9507d9f9b890313731b481c731460b62ca0762afd4afdffe706d392adebe8572"
+    },
+    {
+      "file": "conformance/gameplay/all-kinds.map.json",
+      "sha256": "d8d3779a3514adfeb9abdc8770985363f72d6f14a13951cd717040dbf2b82b05"
+    }
+  ],
+  "cases": [
+    {
+      "name": "wrong-handler",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "key"
+      ],
+      "value": "core.patrol",
+      "code": "catalog.kind"
+    },
+    {
+      "name": "unknown-handler",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "key"
+      ],
+      "value": "core.unknown",
+      "code": "catalog.missing"
+    },
+    {
+      "name": "unknown-param",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "params",
+        "surprise"
+      ],
+      "value": true,
+      "code": "param.unknown"
+    },
+    {
+      "name": "wrong-param-kind",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "params",
+        "target",
+        "ref",
+        "kind"
+      ],
+      "value": "entity",
+      "code": "param.reference-kind"
+    },
+    {
+      "name": "wrong-target-kind",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "params",
+        "target",
+        "ref",
+        "id"
+      ],
+      "value": "spawn.boss",
+      "code": "reference.kind"
+    },
+    {
+      "name": "unknown-flag",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "conditions"
+      ],
+      "value": [
+        {
+          "kind": "flag",
+          "id": "flag.missing",
+          "equals": true
+        }
+      ],
+      "code": "reference.kind"
+    },
+    {
+      "name": "dangling-portal",
+      "document": 0,
+      "path": [
+        "entities",
+        8,
+        "destination",
+        "entityId"
+      ],
+      "value": "portal.missing",
+      "code": "reference.kind"
+    },
+    {
+      "name": "missing-portal-map",
+      "document": 0,
+      "path": [
+        "entities",
+        8,
+        "destination",
+        "mapId"
+      ],
+      "value": "map.missing",
+      "code": "portal.map"
+    },
+    {
+      "name": "wrong-route-kind",
+      "document": 0,
+      "path": [
+        "entities",
+        2,
+        "ai",
+        "routeId"
+      ],
+      "value": "region.boss",
+      "code": "reference.kind"
+    },
+    {
+      "name": "unknown-camera-region",
+      "document": 0,
+      "path": [
+        "camera",
+        "zones",
+        0,
+        "regionId"
+      ],
+      "value": "region.missing",
+      "code": "reference.kind"
+    },
+    {
+      "name": "unknown-nav-profile",
+      "document": 0,
+      "path": [
+        "navigation",
+        "modeVolumes",
+        0,
+        "profileIds"
+      ],
+      "value": [
+        "movement.missing"
+      ],
+      "code": "reference.kind"
+    },
+    {
+      "name": "wrong-mode-profile",
+      "document": 0,
+      "path": [
+        "navigation",
+        "modeVolumes",
+        0,
+        "profileIds"
+      ],
+      "value": [
+        "movement.ground"
+      ],
+      "code": "navigation.mode-capability"
+    },
+    {
+      "name": "script-injection",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        0,
+        "params",
+        "script"
+      ],
+      "value": {
+        "source": "never executed"
+      },
+      "code": "params.required"
+    },
+    {
+      "name": "entity-payload",
+      "document": 0,
+      "path": [
+        "entities",
+        0,
+        "script"
+      ],
+      "value": "never executed",
+      "code": "player-start.additional-property"
+    },
+    {
+      "name": "unknown-entity-kind",
+      "document": 0,
+      "path": [
+        "entities",
+        0,
+        "kind"
+      ],
+      "value": "code",
+      "code": "entity.one-of"
+    },
+    {
+      "name": "bad-camera-policy",
+      "document": 0,
+      "path": [
+        "camera",
+        "defaults",
+        "verticalPolicy"
+      ],
+      "value": "groundedHysteresis",
+      "code": "camera-settings.enum"
+    },
+    {
+      "name": "dead-zone-outside",
+      "document": 0,
+      "path": [
+        "camera",
+        "defaults",
+        "deadZone"
+      ],
+      "value": [
+        0.75,
+        0,
+        0.5,
+        1
+      ],
+      "code": "camera.dead-zone"
+    },
+    {
+      "name": "fractional-ticks",
+      "document": 0,
+      "path": [
+        "camera",
+        "defaults",
+        "dampingTicks"
+      ],
+      "value": [
+        0.5,
+        0
+      ],
+      "code": "ticks.type"
+    },
+    {
+      "name": "unknown-entity-state",
+      "document": 0,
+      "path": [
+        "navigation",
+        "links",
+        0,
+        "conditions"
+      ],
+      "value": [
+        {
+          "kind": "entityState",
+          "entityId": "spawn.boss",
+          "state": "unknown"
+        }
+      ],
+      "code": "condition.state"
+    },
+    {
+      "name": "fallback-policy",
+      "document": 0,
+      "path": [
+        "entities",
+        2,
+        "ai",
+        "invalidRoute"
+      ],
+      "value": "registeredFallback",
+      "code": "ai.fallback"
+    },
+    {
+      "name": "respawn-event-policy",
+      "document": 0,
+      "path": [
+        "entities",
+        2,
+        "respawn",
+        "mode"
+      ],
+      "value": "event",
+      "code": "respawn.event"
+    },
+    {
+      "name": "encounter-spawn-kind",
+      "document": 0,
+      "path": [
+        "encounters",
+        0,
+        "spawnIds"
+      ],
+      "value": [
+        "start.player"
+      ],
+      "code": "encounter.spawn"
+    },
+    {
+      "name": "route-capability",
+      "document": 0,
+      "path": [
+        "routes",
+        0,
+        "requiredAbilities"
+      ],
+      "value": [
+        "unavailable"
+      ],
+      "code": "route.capability"
+    },
+    {
+      "name": "bad-audio-asset",
+      "document": 0,
+      "path": [
+        "environment",
+        "zones",
+        0,
+        "trackAssetId"
+      ],
+      "value": "asset.missing",
+      "code": "audio.asset"
+    },
+    {
+      "name": "duplicate-zone-id",
+      "document": 0,
+      "path": [
+        "environment",
+        "zones",
+        0,
+        "id"
+      ],
+      "value": "region.boss",
+      "code": "object.identity"
+    },
+    {
+      "name": "integer-param",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        2,
+        "params",
+        "count"
+      ],
+      "value": 0.5,
+      "code": "param.type"
+    },
+    {
+      "name": "number-param-quantum",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        2,
+        "params",
+        "weight"
+      ],
+      "value": 0.1,
+      "code": "param.type"
+    },
+    {
+      "name": "string-param",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        2,
+        "params",
+        "label"
+      ],
+      "value": "too-long-label",
+      "code": "param.type"
+    },
+    {
+      "name": "boolean-param",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        2,
+        "params",
+        "enabled"
+      ],
+      "value": 1,
+      "code": "param.type"
+    },
+    {
+      "name": "enum-param",
+      "document": 0,
+      "path": [
+        "triggers",
+        0,
+        "actions",
+        2,
+        "params",
+        "choice"
+      ],
+      "value": "z",
+      "code": "param.type"
+    },
+    {
+      "name": "catalog-duplicate",
+      "document": 2,
+      "path": [
+        "entries",
+        1,
+        "key"
+      ],
+      "value": "enemy.slime",
+      "code": "catalog.identity"
+    },
+    {
+      "name": "catalog-range",
+      "document": 2,
+      "path": [
+        "entries",
+        23,
+        "fields",
+        0,
+        "min"
+      ],
+      "value": 9,
+      "code": "catalog.range"
+    }
+  ]
+}

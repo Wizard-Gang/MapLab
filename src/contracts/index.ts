@@ -13,3 +13,8 @@ export * from './capabilities';
 export type { Ability, MovementDocument } from './movement-types';
 export type { Anchor, BodyShape, RegionShape, Vec2, Transform } from './common-types';
 export type { Layer, VisualSource, Visual, Material, Motion, CollisionBody, EdgeRef, EndpointLink, Foothold, AccessPoint, Traversal, Cell, TerrainChunk, TerrainLayer } from './geometry-types';
+
+export * from './gameplay';
+export type { MapDocument, CatalogDocument, Field, ProjectDocument, ExportManifest, NavigationCache, NavState } from './document-types';
+export type { Region, Waypoint, Route, Respawn, AIConfig, Destination, Entity, Trigger, Encounter, CameraSettings, CameraConfig, EnvironmentZone, Environment, NavigationIntent, RigPresentationBinding } from './gameplay-types';
+export type { ObjectKind, ObjectRef, Call, Condition, ParamValue, Params } from './common-types';

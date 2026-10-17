@@ -36,7 +36,7 @@ test('all 44 J2 IDs and original scope/acceptance preserved; first open follows 
 });
 test.each([
   ['missing future ML-044', 'implementation_plan.md', (s) => s.replace(/### ML-044 \/[\s\S]*?(?=<!-- future-queue:end -->)/, ''), 'Reserved future tasks'],
-  ['duplicate future ID', 'implementation_plan.md', (s) => s.replace('### ML-006 /', '### ML-005 /'), 'Reserved future tasks'],
+  ['duplicate future ID', 'implementation_plan.md', (s) => s.replace('### ' + next + ' /', '### ' + next + ' / P0\n\n### ' + next + ' /'), 'Reserved future tasks'],
   ['skipped first open', 'implementation_plan.md', (s) => s.replace('### ' + active + ' /', '### ' + next + ' /'), 'Active queue'],
   ['tampered scope', 'implementation_plan.md', (s) => s.replace('**Source scope:** ' + scope, '**Source scope:** Replaced ' + scope), 'Specification J2 Source scope drift'],
   ['relaxed acceptance', 'implementation_plan.md', (s) => s.replace('**Acceptance:** ' + acceptance, '**Acceptance:** ' + acceptance.slice(0, -1) + ' unless waived.'), 'Specification J2 Acceptance drift'],
