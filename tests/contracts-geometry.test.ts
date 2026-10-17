@@ -188,6 +188,7 @@ test('a separate consumer process imports only published contracts and resolves 
   const dir = mkdtempSync(join(tmpdir(), 'maplab-geometry-consumer-'));
   try {
     mkdirSync(join(dir, 'src/contracts'), { recursive: true }); cpSync(join(root, 'schemas'), join(dir, 'schemas'), { recursive: true });
+    cpSync(join(root, 'contracts'), join(dir, 'contracts'), { recursive: true });
     writeFileSync(join(dir, 'package.json'), '{"type":"module"}');
     for (const file of readdirSync(join(root, 'src/contracts')).filter((f) => f.endsWith('.ts'))) {
       const js = stripTypeScriptTypes(read(`src/contracts/${file}`))

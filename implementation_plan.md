@@ -4,7 +4,7 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** ML-001–003 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-004 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-005–044 are reserved, not active.
+**Completion status:** ML-001–004 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-005 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-006–044 are reserved, not active.
 
 ## Completed history
 
@@ -12,30 +12,12 @@
 - **ML-001** — completed at `b0b1ff57859371be5aef7071394cb50c405d4794` (successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/38990031757)); original [change record](docs/changes/ML-001.md) and [delivery chain](docs/deliveries.json) remain authoritative historical evidence. ML-001's empty-repository root exception is permanently closed.
 - **ML-002** — completed at `3e2709307c31ad15075d62d3a76e2557b860b943` by protected squash of PR #1 (tested head `f122e730a8c9ce1e719566119549843499130367`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39062228164)); exact-head `verify`/`change-id`/`security` gates and both live rulesets were read back before merge. Its [change record](docs/changes/ML-002.md) and the [delivery chain](docs/deliveries.json) are the historical evidence.
 - **ML-003** — completed at `cb3ba448881651457489bd4aa9c126d44d15e3ee` by protected squash of PR #2 (tested head `4b80851be3f8fd9d2c09fdfb33c84307736f5aac`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39065336427)); its [change record](docs/changes/ML-003.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
+- **ML-004** — completed at `5a35bf9fd85b0b06c38ac373e3915fa85d25fc3d` by protected squash of PR #3 (tested head `1532da73a63219b94d4942a2a3ec96b9df5152e6`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39068702093)); exact-head review and authenticated delivery verification passed with no bypass. Its [change record](docs/changes/ML-004.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-004 / P0
-
-- **Source scope:** Complete geometry, layer/visual, tileset and prefab schemas plus ownership/reference validators.
-- **Non-goals:** No editor painting/scene implementation.
-- **Acceptance:** F types represented; source-edge, parent-cycle, layer-slot and anchor tests; published schemas validate fixtures.
-- **Depends on:** ML-003 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D2](docs/specifications/2026-10-16-maplab.md#d2-physical-geometry-and-authority), [D3](docs/specifications/2026-10-16-maplab.md#d3-traversal-and-anchors), [C3](docs/specifications/2026-10-16-maplab.md#c3-visual-layers-and-reusable-content), [F2](docs/specifications/2026-10-16-maplab.md#f2-normative-typescript-contract-sketch), [F4](docs/specifications/2026-10-16-maplab.md#f4-tileset-prefab-and-export-examples), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Publish the complete geometry/layers/visuals/tileset/prefab v1 schemas preserving source authority separation.
-  2. Implement body/foothold solid-edge verification, connected endpoint reciprocity, layer-slot/parent-cycle and anchored reference checks.
-  3. Create owned fixture(s): Forest geometry, shared seams, invalid owner edges, parent cycles, dangling anchors and prefab slot collisions.
-  4. Add executable checks: Closed-schema and semantic validation fixtures; renderer/collision data never inferred from tile art.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-005 / P0
 
 - **Source scope:** Full movement schema including every advanced ability family; controller/collision contract document and capability registry.
@@ -50,6 +32,11 @@
   4. Add executable checks: Ability-by-ability valid/invalid schemas and same-version coefficient-hash regression.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-006 / P0
 
 - **Source scope:** Gameplay/catalog/camera/environment/nav-intent schemas, all typed entity kinds and cross-map references; finalize full F schema set.

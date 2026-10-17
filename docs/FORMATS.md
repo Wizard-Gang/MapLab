@@ -7,8 +7,9 @@ subset: IDs, 1/16 WU coordinates within ±131,072 WU, 60 Hz tick fields, safe pa
 dependencies, assets and bounds. ML-004 extends `schemas/maplab.map.v1.schema.json`
 with geometry, layers, visuals, terrain and prefab provenance, and publishes
 `schemas/maplab.tileset.v1.schema.json` and `schemas/maplab.prefab.v1.schema.json`.
-ML-005–006 complete movement and gameplay contracts; ML-007 adds the complete
-independent bundle reader.
+ML-005 publishes the full movement schema, all ability families and profile
+digests described in the [controller contract](CONTROLLER-CONTRACT.md). ML-006
+completes gameplay contracts; ML-007 adds the complete independent bundle reader.
 
 Use `loadMapGeometry`, `loadTileset` and `loadPrefab` from `src/contracts/` for
 bounded parsing, structural validation and semantic validation of these scopes.

@@ -1,0 +1,132 @@
+{
+  "format": "maplab.controller-capabilities",
+  "version": 1,
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1
+  },
+  "collision": {
+    "key": "maplab.collision",
+    "version": 1
+  },
+  "units": {
+    "subunitsPerWU": 256,
+    "ticksPerSecond": 60
+  },
+  "arithmetic": "safeInteger",
+  "colliders": [
+    "rect"
+  ],
+  "support": [
+    "fullFootprint"
+  ],
+  "runtimeImplemented": false,
+  "canCertify": false,
+  "abilities": [
+    {
+      "kind": "jump",
+      "mode": null,
+      "contractSupported": true,
+      "implementationTask": "ML-018"
+    },
+    {
+      "kind": "climb",
+      "mode": null,
+      "contractSupported": true,
+      "implementationTask": "ML-019"
+    },
+    {
+      "kind": "dash",
+      "mode": "ground",
+      "contractSupported": false,
+      "implementationTask": "ML-034"
+    },
+    {
+      "kind": "dash",
+      "mode": "air",
+      "contractSupported": false,
+      "implementationTask": "ML-034"
+    },
+    {
+      "kind": "wall",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-035"
+    },
+    {
+      "kind": "ledge",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-036"
+    },
+    {
+      "kind": "swim",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-037"
+    },
+    {
+      "kind": "fly",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-027"
+    },
+    {
+      "kind": "grapple",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-038"
+    },
+    {
+      "kind": "teleport",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-039"
+    },
+    {
+      "kind": "launch",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-039"
+    },
+    {
+      "kind": "modifier",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "ML-039"
+    },
+    {
+      "kind": "registered",
+      "mode": null,
+      "contractSupported": false,
+      "implementationTask": "consumer-defined"
+    }
+  ],
+  "resourceRules": {
+    "airJumps": {
+      "initial": "jump.airJumps",
+      "consume": "one per airborne jump",
+      "reset": "ground contact"
+    },
+    "dashCharges": {
+      "initial": "dash.charges",
+      "consume": "one per dash",
+      "reset": "dash.reset: ground contact or cooldownTicks timer"
+    },
+    "cooldowns": {
+      "unit": "ticks",
+      "reset": "decrement to zero per tick"
+    },
+    "wallStamina": {
+      "initial": "wall.staminaTicks",
+      "consume": "one per active wall-climb tick",
+      "reset": "ground contact"
+    }
+  },
+  "unsupportedSolvers": {
+    "policy": "report unsupported; never certify; never execute source strings",
+    "externalSolverLoading": false
+  },
+  "maximumAdditionalAirJumps": 0,
+  "collisionCategoryPolicy": "explicitKeysWithSymmetricMasks"
+}

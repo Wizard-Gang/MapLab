@@ -16,8 +16,9 @@ const CODES: Readonly<Record<string, string>> = {
   maximum: 'maximum', exclusiveMinimum: 'exclusive-minimum', exclusiveMaximum: 'exclusive-maximum',
   multipleOf: 'multiple-of', pattern: 'pattern', minLength: 'min-length', maxLength: 'max-length',
   oneOf: 'one-of',
+  maxProperties: 'max-properties',
 };
-const ANNOTATIONS = new Set(['$schema', '$id', '$comment', 'title', 'description', '$defs', '$ref', 'properties', 'prefixItems']);
+const ANNOTATIONS = new Set(['$schema', '$id', '$comment', 'title', 'description', '$defs', '$ref', 'properties', 'prefixItems', 'propertyNames']);
 const TYPES = new Set(['null', 'boolean', 'object', 'array', 'number', 'integer', 'string']);
 const LOCAL_REF = /^#\/\$defs\/([A-Za-z0-9_-]+)$/;
 const count = (v: JsonValue): boolean => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0;
@@ -25,6 +26,7 @@ const SHAPES: Readonly<Record<string, (v: JsonValue) => boolean>> = {
   minimum: (v) => typeof v === 'number', maximum: (v) => typeof v === 'number',
   exclusiveMinimum: (v) => typeof v === 'number', exclusiveMaximum: (v) => typeof v === 'number',
   minItems: count, maxItems: count, minLength: count, maxLength: count,
+  maxProperties: count,
   uniqueItems: (v) => typeof v === 'boolean', enum: Array.isArray, prefixItems: Array.isArray,
   oneOf: (v) => Array.isArray(v) && v.length > 0,
   required: (v) => Array.isArray(v) && v.every((name) => typeof name === 'string'),
@@ -69,7 +71,7 @@ export function compileSchema(schema: JsonValue, rootName: string): CompiledSche
         if (!defs.has(local[1] as string)) throw new SchemaError('schema.unresolved-ref', `Unknown definition ${String(value)} at ${at}`);
       }
       if (keyword === 'type' && !(typeof value === 'string' && TYPES.has(value))) throw new SchemaError('schema.invalid', `Invalid type at ${at}`);
-      if (keyword === 'additionalProperties' && value !== false) throw new SchemaError('schema.invalid', `additionalProperties must be false at ${at}`);
+      if (keyword === 'additionalProperties' && value !== false && !isObject(value)) throw new SchemaError('schema.invalid', `additionalProperties must be false or a value schema at ${at}`);
       if (keyword === 'multipleOf' && !(typeof value === 'number' && value > 0 && value === 2 ** Math.round(Math.log2(value)))) {
         throw new SchemaError('schema.invalid', `multipleOf must be an exact power of two at ${at}`);
       }
@@ -82,6 +84,8 @@ export function compileSchema(schema: JsonValue, rootName: string): CompiledSche
     if (Array.isArray(n.prefixItems)) n.prefixItems.forEach((sub, i) => check(node(sub, `${at}/prefixItems/${i}`), `${at}/prefixItems/${i}`));
     if (n.items !== undefined) check(node(n.items, `${at}/items`), `${at}/items`);
     if (Array.isArray(n.oneOf)) n.oneOf.forEach((sub, i) => check(node(sub, `${at}/oneOf/${i}`), `${at}/oneOf/${i}`));
+    if (isObject(n.additionalProperties)) check(n.additionalProperties, `${at}/additionalProperties`);
+    if (n.propertyNames !== undefined) check(node(n.propertyNames, `${at}/propertyNames`), `${at}/propertyNames`);
   };
   const root = node(schema, '#');
   check(root, '#');
@@ -105,6 +109,7 @@ function typeMatches(type: string, v: JsonValue): boolean {
   switch (type) {
     case 'null': return v === null;
     case 'integer': return typeof v === 'number' && Number.isInteger(v);
+    case 'number': return typeof v === 'number' && Number.isFinite(v);
     case 'object': return isObject(v);
     case 'array': return Array.isArray(v);
     default: return typeof v === type;
@@ -180,13 +185,18 @@ export function evaluate(schema: CompiledSchema, value: JsonValue, limit = 100):
       });
     }
     if (isObject(v)) {
+      if (typeof n.maxProperties === 'number' && Object.keys(v).length > n.maxProperties) report(prefix, 'maxProperties', path, `More than ${n.maxProperties} properties`);
       if (Array.isArray(n.required)) {
         for (const name of n.required) if (typeof name === 'string' && !Object.hasOwn(v, name)) report(prefix, 'required', [...path, name], `Missing required member ${JSON.stringify(name)}`);
       }
       const properties = isObject(n.properties) ? n.properties : {};
       for (const [name, sub] of Object.entries(properties)) if (Object.hasOwn(v, name)) visit(sub as SchemaNode, v[name] as JsonValue, [...path, name], prefix);
-      if (n.additionalProperties === false) {
-        for (const name of Object.keys(v)) if (!Object.hasOwn(properties, name)) report(prefix, 'additionalProperties', [...path, name], `Unknown member ${JSON.stringify(name)}`);
+      for (const name of Object.keys(v)) {
+        if (n.propertyNames !== undefined) visit(n.propertyNames as SchemaNode, name, [...path, name], prefix);
+        if (!Object.hasOwn(properties, name)) {
+          if (n.additionalProperties === false) report(prefix, 'additionalProperties', [...path, name], `Unknown member ${JSON.stringify(name)}`);
+          else if (isObject(n.additionalProperties)) visit(n.additionalProperties, v[name] as JsonValue, [...path, name], prefix);
+        }
       }
     }
   };
