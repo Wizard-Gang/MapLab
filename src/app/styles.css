@@ -1,0 +1,20 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #e7f0ed;
+  background: #101b19;
+}
+
+body { margin: 0; }
+main {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+h1 { font-size: clamp(3rem, 8vw, 5rem); margin: 0; letter-spacing: -0.05em; }
+p { color: #a5bbb3; line-height: 1.6; }

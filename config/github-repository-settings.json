@@ -1,0 +1,28 @@
+{
+  "repository": "Wizard-Gang/MapLab",
+  "status": "desired-only; apply and verify in ML-002",
+  "defaultBranch": "main",
+  "visibility": "private",
+  "merge": {
+    "allowSquashMerge": true,
+    "allowMergeCommit": false,
+    "allowRebaseMerge": false,
+    "deleteBranchOnMerge": true
+  },
+  "main": {
+    "requirePullRequest": true,
+    "requireCurrentWithMain": true,
+    "requiredChecks": ["verify", "change-id", "security"],
+    "requireExactHeadEvidence": true,
+    "bypassActors": [],
+    "allowDeletion": false,
+    "allowNonFastForward": false
+  },
+  "tags": {
+    "pattern": "v*",
+    "immutable": true,
+    "bypassActors": []
+  },
+  "releases": { "immutable": true },
+  "deployment": "not configured or authorized"
+}

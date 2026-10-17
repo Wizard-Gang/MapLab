@@ -1,0 +1,5 @@
+{
+  "default": "deny",
+  "allowedDependencies": [],
+  "reason": "ML-001 installs prebuilt optional tooling binaries without dependency lifecycle execution. Any exception requires a controlled security review."
+}

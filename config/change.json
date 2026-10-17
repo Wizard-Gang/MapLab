@@ -1,0 +1,7 @@
+{
+  "id": "ML-001",
+  "type": "CHORE",
+  "title": "[ML-001] [CHORE] Establish governed planning foundation",
+  "record": "docs/changes/ML-001.md",
+  "bootstrap": "empty-repository-root-commit"
+}

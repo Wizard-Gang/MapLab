@@ -1,0 +1,41 @@
+# Architecture authority
+
+ML-001 adopts the supplied [16 October 2026 specification](specifications/2026-10-16-maplab.md)
+as the planning baseline. Its original research status and pinned external source
+claims remain historical; this adoption does not claim to re-audit those sources.
+Future controlled changes must record deviations explicitly. Only the static
+React/TypeScript/Vite shell exists today.
+
+MapLab owns authored world data. Engines own live physics, AI, combat, progression,
+and mutable state. RigLab is an optional validated presentation source; Hexframe
+is not a runtime dependency. No third-party editor/engine code is copied here.
+
+The planned world is orthogonal side-view, X-right/Y-down in world units. Artwork,
+explicit foothold support geometry, and solid collision bodies are separate
+authorities. Profile-dependent body stance must avoid slope penetration. Stable
+source IDs and explicit anchors survive transformations and dependency export.
+Advanced ability families belong in the initial versioned movement contracts;
+unsupported solvers remain visible rather than silently approximated.
+
+Planned dependency direction is UI → application/domain → pure contracts/math.
+Contracts and independent consumers must never import the editor. Authored state,
+ephemeral view state, derived navigation, and engine runtime state stay separate.
+Edits use reversible deltas/checkpoints and one gesture per transaction. Canvas 2D
+handles bulk art/overlays; DOM handles controls; workers handle expensive validation
+and navigation. Viewport math uses one world-to-CSS transform with DPR separated.
+
+Navigation is capability-specific and rebuildable. Ground actions carry finite-body
+witnesses and are replayed with the same named controller used by Test. Flight and
+swim use free-space representations. Finite sampling may miss legal routes; budget,
+unsupported, stale, conditional, and no-result states must remain honest. A future
+engine rebuilds under its solver or reports fixture-qualified compatibility.
+
+Browser import/download plus transactional IndexedDB recovery is the baseline.
+Picker/OPFS adapters are optional later work. Save writes authored data; export
+creates dependency-closed deterministic consumer bytes. Closed data-only catalogs,
+bounded inert assets, canonical domain ordering and hashes are required. No hosted
+write authority or implicit gameplay server is part of the architecture.
+
+Specification C–I and K remain the detailed product/data/controller/validation
+authority. The [roadmap](IMPLEMENTATION-ROADMAP.md) preserves their delivery order.
+No performance target or conformance fixture is claimed to pass before its task.
