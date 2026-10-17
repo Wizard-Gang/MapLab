@@ -29,10 +29,17 @@ export function checkHeadChecks(checks, head, appId, requirements = ['verify', '
       continue;
     }
     demand(matching.length > 0, `Missing current check: ${name}`);
-    for (const c of matching) {
-      demand(c.head_sha === head && c.status === 'completed' && c.conclusion === 'success', `Check is not successful on exact current head: ${name}`);
-      evidence.push({ name, head: c.head_sha, url: c.html_url, id: c.id });
-    }
+    // A PR body edit can cancel an older workflow attempt on the same SHA.
+    // GitHub's filter=latest still returns both check runs, so identify the
+    // current run by immutable provider ID instead of rejecting old history.
+    // Ambiguous duplicates fail closed; skipped/pending/failed *current* runs
+    // remain hard failures. Do not trust array ordering from the provider.
+    demand(matching.length === 1 || matching.every((c) => Number.isSafeInteger(c.id) && c.id > 0),
+      `Ambiguous same-name check history: ${name}`);
+    const current = matching.reduce((latest, c) => !latest || c.id > latest.id ? c : latest, null);
+    demand(current.head_sha === head && current.status === 'completed' && current.conclusion === 'success',
+      `Check is not successful on exact current head: ${name}`);
+    evidence.push({ name, head: current.head_sha, url: current.html_url, id: current.id });
   }
   return evidence;
 }

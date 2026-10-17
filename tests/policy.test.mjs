@@ -32,6 +32,20 @@ test.each([
 const head = 'a'.repeat(40);
 const checks = () => ['verify', 'change-id', 'security'].map((name) => ({ name, head_sha: head, status: 'completed', conclusion: 'success', app: { id: 15368 }, html_url: `https://github.com/fixture/${name}` }));
 test('delivery accepts successful exact-head checks', () => expect(checkHeadChecks(checks(), head, 15368)).toHaveLength(3));
+
+test('latest exact-head check supersedes older cancelled metadata-triggered run', () => {
+  const current = checks().map((c, i) => ({ ...c, id: 400 + i }));
+  const cancelled = current.map((c, i) => ({ ...c, id: 200 + i, conclusion: 'cancelled' }));
+  const all = [...cancelled, ...current];
+  expect(checkHeadChecks(all, head, 15368)).toHaveLength(3);
+  // Even with a prior success, the newest skipped/cancelled run cannot pass.
+  const laterCancelled = { ...current[1], id: 900, conclusion: 'cancelled' };
+  expect(() => checkHeadChecks([...current, laterCancelled], head, 15368)).toThrow();
+  const laterSkipped = { ...current[1], id: 901, conclusion: 'skipped' };
+  expect(() => checkHeadChecks([...current, laterSkipped], head, 15368)).toThrow();
+  const ambiguous = [...checks(), { ...checks()[0], conclusion: 'cancelled' }];
+  expect(() => checkHeadChecks(ambiguous, head, 15368)).toThrow();
+});
 test.each(['failure', 'pending', 'error'])('same-name commit status %s blocks a successful check run', (state) => {
   expect(() => checkHeadChecks(checks(), head, 15368, undefined, [{ context: 'security', state }])).toThrow();
 });
