@@ -71,4 +71,18 @@ scope boundaries; only the full graph reader establishes gameplay/catalog closur
 Geometry checks retain stable shape/edge ownership, exact welds, polygons,
 actor planes, anchor cycles, motion legs, terrain permissions and prefab provenance.
 Profile-dependent resting stance/full-body clearance and controller replay remain
-explicitly deferred. ML-007 owns the complete independent final-byte fixture reader.
+explicitly deferred.
+
+ML-007 adds the independent final-byte reader in `consumer/`. It is a separate
+Node program that imports only Node built-ins and its own folder, never `src/`.
+It reads a folder bundle plus the pinned `schemas/` from disk and performs adopted
+G1 steps 1–4. Step 1 is the bounded safe-path inventory: symlinks, hidden, reserved
+and aliased names, special files and nested archives are refused. Step 2 is
+duplicate-key-rejecting strict UTF-8 JSON, a canonical JCS manifest, complete
+inventory, exact sizes, SHA-256 and the bundle digest. Step 3 is exact format/version
+and required-contract negotiation (closed bundles only; external maps deferred).
+Step 4 is independent closed-schema evaluation, dependency closure and reference,
+portal, catalog-call and asset-path resolution. Every `*Id`/`*Ids` member of the
+published v1 schemas is classified explicitly; an unknown one fails closed. The
+reader checks call existence, not handler-kind or parameter semantics. It constructs
+no world, renderer, engine or navigation, and its report says so.

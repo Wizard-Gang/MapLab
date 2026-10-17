@@ -50,10 +50,11 @@ export function parseStrict(bytes, limits = LIMITS) {
     if (!out.isWellFormed()) fail('json.surrogate', 'Lone surrogate in string');
     return out;
   };
+  // `depth` counts open containers, the outermost being 1; at most `limits.depth` may nest.
   const value = (depth) => {
-    if (depth > limits.depth) fail('json.limit', 'Nesting too deep');
     space();
     const c = text[i];
+    if ((c === '{' || c === '[') && depth > limits.depth) fail('json.limit', 'Nesting too deep');
     if (c === '{') {
       i++;
       const out = {};
@@ -107,7 +108,7 @@ export function parseStrict(bytes, limits = LIMITS) {
     if (!Number.isFinite(n)) fail('json.number', 'Number is not finite');
     return n;
   };
-  const result = value(0);
+  const result = value(1);
   space();
   if (i !== text.length) fail('json.syntax', 'Trailing content');
   return result;

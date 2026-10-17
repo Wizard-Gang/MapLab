@@ -70,4 +70,34 @@ Additional executable regressions cover every ObjectRef kind, cross-map scopes,
 non-map cycles, decimal quanta, unused-profile extensions, resolved nav-anchor
 ranges, compatibility reports, warning saturation and immutable outputs. A separate
 process checks final catalog bytes and closed schema rejection without importing
-the editor. Full independent bundle/fixture loading remains ML-007.
+the editor. Full independent bundle/fixture loading is ML-007's `bundle/` below.
+
+## `bundle/` (ML-007)
+
+`cases.json` pins the golden inputs for the independent reader `consumer/read-bundle.mjs`.
+The inputs are the unchanged R1 forest source documents and `maplab.project.json` index,
+each listed with its declared schema, and the R1 export bundle with bundle digest
+`0a39dafd…`. The source digests must equal the project index digests. Each source
+document must validate against its declared schema under the reader's own evaluator.
+
+Tests copy only `consumer/` and `schemas/` into a scratch folder and spawn the reader
+there. It must read both maps and resolve the reciprocal portals. Each of the 54 inert
+edit records changes a temporary copy of the export bundle. JSON edits re-encode the
+edited file as JCS and re-hash it, unless the record says otherwise, so each negative
+record isolates one defect. It must then produce exactly its expected diagnostic code,
+file and JSON path. The records cover:
+
+- inventory: symlinks, unsafe or reserved names, nested archives, unlisted or missing files;
+- manifest: tampering, duplicate keys, non-canonical bytes, case aliases, schema mismatch;
+- document bytes: malformed JSON, UTF-8, BOM, duplicate members, lone surrogates;
+- negotiation: future, older and unknown versions and formats, unsupported or undeclared
+  contracts, external maps;
+- closure: missing dependencies and unreachable documents;
+- references: duplicate object IDs, dangling or wrong-kind references, portal map and
+  entity, movement profiles, undeclared calls;
+- asset paths: reserved, traversal, media mismatch, unbundled.
+
+Two positive records add a listed asset file and the five pinned schemas in the F4
+layout; both must still be accepted. A differential test runs the reader's parser and
+evaluator against `src/contracts` on every owned conformance file and R1 example. The
+two must agree on byte acceptance and closed-schema validity.

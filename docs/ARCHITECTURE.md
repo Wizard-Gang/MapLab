@@ -18,7 +18,8 @@ Advanced ability families belong in the initial versioned movement contracts;
 unsupported solvers remain visible rather than silently approximated.
 
 Planned dependency direction is UI → application/domain → pure contracts/math.
-Contracts and independent consumers must never import the editor. Authored state,
+Contracts and independent consumers must never import the editor; `consumer/` (ML-007)
+imports neither the editor nor `src/contracts`. Authored state,
 ephemeral view state, derived navigation, and engine runtime state stay separate.
 Edits use reversible deltas/checkpoints and one gesture per transaction. Canvas 2D
 handles bulk art/overlays; DOM handles controls; workers handle expensive validation

@@ -5,8 +5,8 @@
 // this folder, never MapLab's src/, editor, React or build output. Runs G1 steps 1–4 and prints a
 // JSON report. Exit 0 = accepted, 1 = rejected with diagnostics, 2 = usage or reader failure.
 // It constructs no world, renderer, engine, controller or navigation, and certifies none of them.
-import { readFileSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { readFileSync, readdirSync, realpathSync } from 'node:fs';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { ReaderError, parseStrict } from './json.mjs';
 import { compile } from './schema.mjs';
@@ -90,4 +90,4 @@ function main(argv) {
   return report.ok ? 0 : 1;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) process.exitCode = main(process.argv.slice(2));
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) process.exitCode = main(process.argv.slice(2));
