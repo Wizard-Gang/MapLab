@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { checkQueue } from './check-queue.mjs';
 
 export const sections = ['Change', 'Reason', 'Impact', 'Risk', 'Controls', 'Validation', 'Evidence', 'Source', 'Release'];
 export const demand = (ok, message) => { if (!ok) throw new Error(message); };
@@ -26,13 +27,7 @@ export function checkChange(root) {
   const record = read(change.record);
   demand(record.startsWith(`# ${change.title}\n`), 'Change record title disagrees');
   checkSections(record);
-  const plan = read('implementation_plan.md');
-  demand((plan.match(/<!-- active-queue:start -->/g) ?? []).length === 1 && (plan.match(/<!-- active-queue:end -->/g) ?? []).length === 1, 'Active queue markers disagree');
-  const queue = plan.match(/<!-- active-queue:start -->([\s\S]*?)<!-- active-queue:end -->/);
-  const ids = queue?.[1].match(/\bML-\d{3}\b/g) ?? [];
-  demand(ids.length === 1 && ids[0] === change.id, 'Active queue must contain only the controlled task');
-  const rows = [...read('docs/IMPLEMENTATION-ROADMAP.md').matchAll(/^\| \*\*(ML-\d{3}) \/[^\n]+/gm)].map((m) => m[1]);
-  demand(rows.length === 44 && rows.every((id, i) => id === `ML-${String(i + 1).padStart(3, '0')}`), 'Reserved roadmap must contain ML-001–044 exactly once in order');
+  checkQueue(root);
   const deliveries = readJson(root, 'docs/deliveries.json');
   demand(Array.isArray(deliveries) && deliveries.length === number - 1, 'Predecessor delivery chain is incomplete');
   for (const [i, entry] of deliveries.entries()) {

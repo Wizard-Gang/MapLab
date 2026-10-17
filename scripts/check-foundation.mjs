@@ -17,7 +17,7 @@ export const requiredFiles = [
   'tests/app.test.tsx', 'tests/foundation.test.mjs', 'scripts/check-foundation.mjs',
   'scripts/check-build.mjs', '.github/workflows/verify.yml',
   '.github/pull_request_template.md', 'docs/deliveries.json',
-  'scripts/check-change.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
+  'scripts/check-change.mjs', 'scripts/check-queue.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
   'tests/change.test.mjs', 'tests/policy.test.mjs', 'docs/DELIVERY-GATES.md',
 ];
 
@@ -122,7 +122,7 @@ export function checkFoundation(root) {
         `Broken local authority link in ${file}: ${target}`);
     }
   }
-  return 'Foundation verified: pins, lockfile, policies, authorities, current task identity, closed bootstrap and reserved roadmap';
+  return 'Foundation verified: pins, lockfile, policies, authorities, current task identity, closed bootstrap and traced first-open/current/future queue';
 }
 
 const self = fileURLToPath(import.meta.url);
