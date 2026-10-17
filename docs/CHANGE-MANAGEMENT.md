@@ -3,9 +3,7 @@
 Use one controlled `ML-###` task, one branch, one scoped PR, and one squash commit
 per delivery after bootstrap. Title form:
 `[ML-###] [FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY] Imperative summary`.
-IDs never get reused. The permanent active queue holds one executable task; the
-roadmap reserves future tasks. Adjust oversized scope through reviewed roadmap
-changes before implementation. Unrelated cleanup/upgrades are excluded.
+IDs never get reused. The permanent implementation plan is the sole current/future queue; the first open ID follows the contiguous delivered chain. All later reserved IDs stay in that file with their full scope and acceptance. Adjust oversized scope through separately reviewed plan/spec changes before implementation. Unrelated cleanup/upgrades are excluded.
 
 PR records contain Change, Reason, Impact, Risk, Controls, Validation, Evidence,
 Source, and Release. Evidence scales to risk. Format/physics work needs fixtures

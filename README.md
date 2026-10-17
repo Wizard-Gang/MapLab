@@ -25,7 +25,7 @@ The [architecture](docs/ARCHITECTURE.md), [formats](docs/FORMATS.md), and
 contracts describe future work; no map schema, editor, importer, physics,
 navigation, persistence, or engine integration is implemented.
 
-See [the active task](implementation_plan.md), [reserved roadmap](docs/IMPLEMENTATION-ROADMAP.md),
+See [the permanent current/future queue](implementation_plan.md),
 [contribution rules](CONTRIBUTING.md), and [ML-001 evidence](docs/changes/ML-001.md).
 Desired repository protections are committed in
 [`config/github-repository-settings.json`](config/github-repository-settings.json).
