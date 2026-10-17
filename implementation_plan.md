@@ -1,39 +1,21 @@
 # Permanent implementation plan — current and future delivery queue
 
-**Delivery authority:** this file is the *only live queue*. [The complete 16 October 2026 specification](docs/specifications/2026-10-16-maplab.md) is authoritative for product design, exact contracts, numerical examples, conformance limits and section J2's original scope/non-goal/acceptance baseline. The specification is not an alternative execution queue. [The former roadmap](docs/IMPLEMENTATION-ROADMAP.md) is now only a pointer; it contains no active or future task definitions. Do not edit the specification simply to disguise scope drift.
+**Delivery authority:** this file is the *only live queue*. [The complete 16 October 2026 specification](docs/specifications/2026-10-16-maplab.md) is authoritative for product design, exact contracts, numerical examples, conformance limits and section J2's original scope/non-goal/acceptance baseline. The specification is not an alternative execution queue. At ML-003 the owner-approved [R1 revision](docs/specifications/2026-10-17-maplab-r1/README.md) revised the affected section bodies and the ML-009 J2 row in place; every heading, reserved ID and order is unchanged. [The former roadmap](docs/IMPLEMENTATION-ROADMAP.md) is now only a pointer; it contains no active or future task definitions. Do not edit the specification simply to disguise scope drift.
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** only ML-001 has delivered. ML-002 is in draft PR #1 and **blocked** by absent main/tag rulesets after the repository changed to public; the GitHub App cannot apply administrator settings. Passing CI is not delivery. There is no release or deployment. ML-003–044 are reserved, not active.
+**Completion status:** ML-001 and ML-002 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-003 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-004–044 are reserved, not active.
 
 ## Completed history
 
 <!-- completed-history:start -->
 - **ML-001** — completed at `b0b1ff57859371be5aef7071394cb50c405d4794` (successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/38990031757)); original [change record](docs/changes/ML-001.md) and [delivery chain](docs/deliveries.json) remain authoritative historical evidence. ML-001's empty-repository root exception is permanently closed.
+- **ML-002** — completed at `3e2709307c31ad15075d62d3a76e2557b860b943` by protected squash of PR #1 (tested head `f122e730a8c9ce1e719566119549843499130367`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39062228164)); exact-head `verify`/`change-id`/`security` gates and both live rulesets were read back before merge. Its [change record](docs/changes/ML-002.md) and the [delivery chain](docs/deliveries.json) are the historical evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-002 / P0
-
-- **Source scope:** CI/change/security jobs and live repository/tag/release settings verification; depends ML-001.
-- **Non-goals:** No hosting/deployment or world features.
-- **Acceptance:** Required check names run on exact head; read-back matches desired settings; rejected malformed change-ID fixture; documented bootstrap closure.
-- **Depends on:** ML-001 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [I3](docs/specifications/2026-10-16-maplab.md#i3-validation-layers-and-release-gates); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Preserve the already implemented exact-head verify/change-id/security checks, strict policy apply/read-back, predecessor/PR validation and closed root exception.
-  2. Add permanent queue lineage validation against J2 without changing ML-002 product scope.
-  3. Create owned fixture(s): Malformed change ID, skipped predecessor, stale PR head, denied main/tag ruleset and preserved ML-001 root evidence.
-  4. Add executable checks: Run negative CLI copies, exact-head CI jobs and independent provider read-back; do not merge on 403.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-003 / P0
 
 - **Source scope:** Base schemas/parser: format headers, IDs, coordinates, assets/dependencies, map bounds; bounded duplicate-key/path parsing.
@@ -41,6 +23,7 @@
 - **Acceptance:** Valid/invalid golden inputs; closed objects reject extras; quantum/range/path cases; no network schema fetch.
 - **Depends on:** ML-002 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
 - **Specification:** [D1](docs/specifications/2026-10-16-maplab.md#d1-coordinate-and-precision-contract), [F1](docs/specifications/2026-10-16-maplab.md#f1-versioned-documents-and-contract-rules), [F2](docs/specifications/2026-10-16-maplab.md#f2-normative-typescript-contract-sketch), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **R1 adoption (owner-approved option A, 17 October 2026):** commit the [R1 revision](docs/specifications/2026-10-17-maplab-r1/README.md), edit the adopted section bodies in its delta table and the ML-009 J2 row under unchanged headings, then implement this task on R1 rules: 1/16 WU quantum, ±131,072 WU range, 60 Hz integer ticks and the ID/catalog-key grammar ([R1 J4](docs/specifications/2026-10-17-maplab-r1/J-implementation-queue.md)).
 - **Subtasks:**
   1. Implement strict versioned format headers, stable ID, coordinate quantum, bounds, assets and dependency schemas with local references.
   2. Build bounded JSON scanner/parser that rejects duplicate keys, depth/size breaches, unsafe paths, aliasing and extra fields before semantic loading.
@@ -48,6 +31,11 @@
   4. Add executable checks: Golden parser/schema tests; no network resolution or partial state mutation.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-004 / P0
 
 - **Source scope:** Complete geometry, layer/visual, tileset and prefab schemas plus ownership/reference validators.
@@ -120,16 +108,16 @@
 
 ### ML-009 / P0
 
-- **Source scope:** Browser project library, New/Open/Save/Save As/Duplicate and IndexedDB revision recovery with file fallback.
-- **Non-goals:** No directory picker/OPFS optimization or external-library writes.
-- **Acceptance:** Two maps reopen with IDs intact; quota/interrupt/conflict simulations preserve prior good revision; browser versus disk status clear.
+- **Source scope:** Library folder through the loopback plugin (RigLab pattern) and the `npm start` launcher; New/Open/Save/Save As/Duplicate/Revert; torn-save detection from project digests; IndexedDB drafts only.
+- **Non-goals:** No hosted write API, directory picker/OPFS or writes to external libraries.
+- **Acceptance:** Two maps reopen with IDs intact; stale-base conflict refuses; backups precede replacement; torn save detected; wrong Host/Origin refused; placeholder library read-only; WebKit and Chromium tests.
 - **Depends on:** ML-008 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C1](docs/specifications/2026-10-16-maplab.md#c1-document-workflow-and-layout), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **Specification:** [C1](docs/specifications/2026-10-16-maplab.md#c1-document-workflow-and-layout), [H1](docs/specifications/2026-10-16-maplab.md#h1-source-modules-and-dependency-direction), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
 - **Subtasks:**
-  1. Implement browser document library and New/Open/Save/Save As/Duplicate with explicit browser-recovery versus exported-disk state.
-  2. Commit validated IndexedDB revisions transactionally; retain last-good data through quota/interruption/conflict and provide file import/download fallback.
-  3. Create owned fixture(s): Two-map reopen, version conflict, interrupted IndexedDB write, quota exceeded and tab reload.
-  4. Add executable checks: Browser integration tests; no directory/OPFS write authority yet.
+  1. Implement the `src/library` loopback Vite plugin and client with `MAPLAB_LIBRARY` resolution, a read-only placeholder library and the `npm start` launcher.
+  2. Save by refusing stale base digests, validating across documents, writing backups, then temp-write/fsync/rename with `maplab.project.json` last; IndexedDB keeps unsaved drafts only.
+  3. Create owned fixture(s): Two-map library reopen, stale baseDigest conflict, torn save, backup before replacement, wrong Host/Origin request and placeholder write refusal.
+  4. Add executable checks: Plugin endpoint integration tests plus WebKit and Chromium browser tests; no hosted write API, picker or OPFS authority.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
 ### ML-010 / P0

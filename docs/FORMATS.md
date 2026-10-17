@@ -1,9 +1,11 @@
 # Planned format authority
 
-No MapLab schema, parser, importer, exporter, or migration is implemented in ML-001.
-[Specification D, F, and G](specifications/2026-10-16-maplab.md) are adopted design
-material. Their TypeScript/JSON examples remain documentation, not a consumer API.
-ML-003–006 implement contracts; ML-007 adds the independent byte reader.
+[Specification D, F, and G](specifications/2026-10-16-maplab.md), amended by
+[R1](specifications/2026-10-17-maplab-r1/F-formats.md), are adopted design material.
+ML-003 implements the bounded parser in `src/contracts/` and the `maplab.map` v1 header
+subset in `schemas/maplab.map.v1.schema.json`: IDs, 1/16 WU coordinates within
+±131,072 WU, 60 Hz tick fields, safe paths, dependencies, assets and bounds.
+ML-004–006 complete the contracts; ML-007 adds the independent byte reader.
 
 Future formats use closed versioned headers, stable IDs, bounded X-right/Y-down
 world coordinates, explicit asset/dependency references, and independent authored

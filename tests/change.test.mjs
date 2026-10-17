@@ -60,10 +60,10 @@ test.each([
   ['root task reuse', (p) => json(p, 'config/change.json', (v) => { v.id = 'ML-001'; }), 'post-bootstrap'],
   ['unreserved ID', (p) => json(p, 'config/change.json', (v) => { v.id = 'ML-999'; }), 'post-bootstrap'],
   ['wrong branch', (p) => json(p, 'config/change.json', (v) => { v.branch = 'main'; }), 'branch identity'],
-  ['record path escape', (p) => json(p, 'config/change.json', (v) => { v.record = '../ML-002.md'; }), 'record identity'],
+  ['record path escape', (p) => json(p, 'config/change.json', (v) => { v.record = `../${change.id}.md`; }), 'record identity'],
   ['record title mismatch', (p) => edit(p, change.record, (s) => s.replace(`# ${change.title}`, '# Mismatched record title')), 'record title'],
   ['missing record section', (p) => edit(p, change.record, (s) => s.replace('## Controls', '## Control')), 'sections disagree'],
-  ['duplicate future ID', (p) => edit(p, 'implementation_plan.md', (s) => s.replace('### ML-003 /', '### ML-002 /')), 'Reserved future tasks'],
+  ['duplicate future ID', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${otherId} /`, `### ${change.id} /`)), 'Reserved future tasks'],
   ['queue mismatch', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${change.id} /`, `### ${otherId} /`)), 'Active queue'],
   ['missing predecessor', (p) => writeFileSync(join(p, 'docs/deliveries.json'), '[]\n'), 'Predecessor delivery chain'],
   ['failed predecessor CI', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.conclusion = 'failure'; }), 'main CI evidence'],
@@ -86,7 +86,7 @@ function eventFixture() {
 test('event validation accepts a current PR', () => expect(() => checkEvent(change, eventFixture())).not.toThrow());
 test.each([
   ['checkout merge revision', (v) => { v.actualHead = 'c'.repeat(40); }],
-  ['wrong PR title', (v) => { v.event.pull_request.title = '[ML-003] [FEATURE] Wrong task'; }],
+  ['wrong PR title', (v) => { v.event.pull_request.title = `[${change.id}] [${change.type}] Wrong task`; }],
   ['wrong PR base', (v) => { v.event.pull_request.base.ref = 'dev'; }],
   ['wrong PR branch', (v) => { v.event.pull_request.head.ref = 'main'; }],
   ['unscoped commit', (v) => { v.commitTitles.push('Unrelated cleanup'); }],

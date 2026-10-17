@@ -4,7 +4,24 @@ import { fileURLToPath } from 'node:url';
 import { checkChange } from './check-change.mjs';
 import { checkPolicyConfig } from './repository-policy.mjs';
 
+// R1, adopted at ML-003, is a frozen revision record: every file stays present and link-checked.
+const revisionR1 = [
+  'README.md', 'NEXT-SESSION-PROMPT.md', 'A-research.md', 'B-riglab-hexframe-review.md', 'C-product.md',
+  'D-world-physics.md', 'D-reference-controller.md', 'E-navigation.md', 'F-formats.md',
+  'G-engine-integration.md', 'H-editor-architecture.md', 'I-validation-acceptance.md',
+  'J-implementation-queue.md', 'K-decisions-risks.md',
+  ...['common', 'map', 'gameplay', 'documents'].map((name) => `contract/${name}.ts`),
+  'examples/forest/maplab.project.json', 'examples/forest-export/manifest.json',
+  ...['forest', 'forest-export'].flatMap((dir) => [
+    'maps/forest.map.json', 'maps/clearing.map.json', 'movement/player.movement.json',
+    'movement/ground.movement.json', 'movement/flyer.movement.json', 'catalogs/core.catalog.json',
+    'tilesets/forest.tileset.json',
+  ].map((file) => `examples/${dir}/${file}`)),
+  'examples/forest/prefabs/tree.prefab.json',
+].map((file) => `docs/specifications/2026-10-17-maplab-r1/${file}`);
+
 export const requiredFiles = [
+  ...revisionR1,
   'AGENTS.md', 'implementation_plan.md', 'README.md', 'CONTRIBUTING.md',
   'SECURITY.md', 'LICENSE', 'docs/ARCHITECTURE.md', 'docs/FORMATS.md',
   'docs/PHYSICS-CONFORMANCE.md', 'docs/CHANGE-MANAGEMENT.md',

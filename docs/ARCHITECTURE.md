@@ -30,12 +30,14 @@ swim use free-space representations. Finite sampling may miss legal routes; budg
 unsupported, stale, conditional, and no-result states must remain honest. A future
 engine rebuilds under its solver or reports fixture-qualified compatibility.
 
-Browser import/download plus transactional IndexedDB recovery is the baseline.
-Picker/OPFS adapters are optional later work. Save writes authored data; export
+Since R1 (adopted at ML-003), storage is a library folder written through a
+loopback-only dev-server plugin, the RigLab pattern; IndexedDB keeps unsaved drafts
+only, and picker/OPFS adapters are optional later work. Save writes authored data; export
 creates dependency-closed deterministic consumer bytes. Closed data-only catalogs,
 bounded inert assets, canonical domain ordering and hashes are required. No hosted
 write authority or implicit gameplay server is part of the architecture.
 
-Specification C–I and K remain the detailed product/data/controller/validation
-authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order; the former roadmap file is only a pointer.
+Specification C–I and K, as amended in place by the
+[R1 revision](specifications/2026-10-17-maplab-r1/README.md), remain the detailed
+product/data/controller/validation authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order; the former roadmap file is only a pointer.
 No performance target or conformance fixture is claimed to pass before its task.
