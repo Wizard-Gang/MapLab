@@ -15,6 +15,7 @@ const CODES: Readonly<Record<string, string>> = {
   items: 'items', minItems: 'min-items', maxItems: 'max-items', uniqueItems: 'unique-items', minimum: 'minimum',
   maximum: 'maximum', exclusiveMinimum: 'exclusive-minimum', exclusiveMaximum: 'exclusive-maximum',
   multipleOf: 'multiple-of', pattern: 'pattern', minLength: 'min-length', maxLength: 'max-length',
+  oneOf: 'one-of',
 };
 const ANNOTATIONS = new Set(['$schema', '$id', '$comment', 'title', 'description', '$defs', '$ref', 'properties', 'prefixItems']);
 const TYPES = new Set(['null', 'boolean', 'object', 'array', 'number', 'integer', 'string']);
@@ -25,6 +26,7 @@ const SHAPES: Readonly<Record<string, (v: JsonValue) => boolean>> = {
   exclusiveMinimum: (v) => typeof v === 'number', exclusiveMaximum: (v) => typeof v === 'number',
   minItems: count, maxItems: count, minLength: count, maxLength: count,
   uniqueItems: (v) => typeof v === 'boolean', enum: Array.isArray, prefixItems: Array.isArray,
+  oneOf: (v) => Array.isArray(v) && v.length > 0,
   required: (v) => Array.isArray(v) && v.every((name) => typeof name === 'string'),
   properties: (v) => typeof v === 'object' && v !== null && !Array.isArray(v),
 };
@@ -79,6 +81,7 @@ export function compileSchema(schema: JsonValue, rootName: string): CompiledSche
     for (const [name, sub] of Object.entries(isObject(n.properties) ? n.properties : {})) check(node(sub, `${at}/properties/${name}`), `${at}/properties/${name}`);
     if (Array.isArray(n.prefixItems)) n.prefixItems.forEach((sub, i) => check(node(sub, `${at}/prefixItems/${i}`), `${at}/prefixItems/${i}`));
     if (n.items !== undefined) check(node(n.items, `${at}/items`), `${at}/items`);
+    if (Array.isArray(n.oneOf)) n.oneOf.forEach((sub, i) => check(node(sub, `${at}/oneOf/${i}`), `${at}/oneOf/${i}`));
   };
   const root = node(schema, '#');
   check(root, '#');
@@ -109,7 +112,7 @@ function typeMatches(type: string, v: JsonValue): boolean {
 }
 
 export function evaluate(schema: CompiledSchema, value: JsonValue, limit = 100): Diagnostic[] {
-  const out: Diagnostic[] = [];
+  let out: Diagnostic[] = [];
   const report = (prefix: string, keyword: string, path: readonly PathSegment[], message: string): void => {
     if (out.length < limit) out.push(error(`${prefix}.${CODES[keyword] ?? keyword}`, path, message));
   };
@@ -119,6 +122,34 @@ export function evaluate(schema: CompiledSchema, value: JsonValue, limit = 100):
     if (typeof n.$ref === 'string') {
       const name = (LOCAL_REF.exec(n.$ref) as RegExpExecArray)[1] as string;
       visit(schema.defs.get(name) as SchemaNode, v, path, name);
+    }
+    if (Array.isArray(n.oneOf)) {
+      const outer = out;
+      const branches = n.oneOf as SchemaNode[];
+      const results = branches.map((branch) => {
+        out = [];
+        visit(branch, v, path, prefix);
+        return out;
+      });
+      out = outer;
+      const matches = results.filter((result) => result.length === 0).length;
+      if (matches !== 1) {
+        // For a recognized kind (or a nullable typed value), retain the branch's precise
+        // field diagnostic. Unknown/ambiguous kinds retain the union's one-of code.
+        const candidates = branches.map((branch, i) => {
+          const resolved = typeof branch === 'object' && typeof branch.$ref === 'string'
+            ? schema.defs.get((LOCAL_REF.exec(branch.$ref) as RegExpExecArray)[1] as string) : branch;
+          if (typeof resolved !== 'object' || resolved === null) return -1;
+          if (typeof resolved.type === 'string' && !typeMatches(resolved.type, v)) return -1;
+          const kind = isObject(resolved.properties) ? resolved.properties.kind : undefined;
+          if (isObject(kind) && isObject(v) &&
+            (kind.const !== undefined ? canonical(kind.const) !== canonical(v.kind ?? null)
+              : Array.isArray(kind.enum) && !kind.enum.some((k) => canonical(k) === canonical(v.kind ?? null)))) return -1;
+          return i;
+        }).filter((i) => i >= 0);
+        if (matches === 0 && candidates.length === 1) out.push(...(results[candidates[0] as number] ?? []).slice(0, Math.max(0, limit - out.length)));
+        else report(prefix, 'oneOf', path, 'Expected exactly one matching union branch');
+      }
     }
     if (typeof n.type === 'string' && !typeMatches(n.type, v)) return report(prefix, 'type', path, `Expected ${n.type}`);
     const text = n.const !== undefined || Array.isArray(n.enum) ? canonical(v) : '';

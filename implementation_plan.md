@@ -4,38 +4,19 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** ML-001 and ML-002 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-003 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-004–044 are reserved, not active.
+**Completion status:** ML-001–003 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-004 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-005–044 are reserved, not active.
 
 ## Completed history
 
 <!-- completed-history:start -->
 - **ML-001** — completed at `b0b1ff57859371be5aef7071394cb50c405d4794` (successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/38990031757)); original [change record](docs/changes/ML-001.md) and [delivery chain](docs/deliveries.json) remain authoritative historical evidence. ML-001's empty-repository root exception is permanently closed.
 - **ML-002** — completed at `3e2709307c31ad15075d62d3a76e2557b860b943` by protected squash of PR #1 (tested head `f122e730a8c9ce1e719566119549843499130367`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39062228164)); exact-head `verify`/`change-id`/`security` gates and both live rulesets were read back before merge. Its [change record](docs/changes/ML-002.md) and the [delivery chain](docs/deliveries.json) are the historical evidence.
+- **ML-003** — completed at `cb3ba448881651457489bd4aa9c126d44d15e3ee` by protected squash of PR #2 (tested head `4b80851be3f8fd9d2c09fdfb33c84307736f5aac`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39065336427)); its [change record](docs/changes/ML-003.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-003 / P0
-
-- **Source scope:** Base schemas/parser: format headers, IDs, coordinates, assets/dependencies, map bounds; bounded duplicate-key/path parsing.
-- **Non-goals:** No geometry tools or runtime.
-- **Acceptance:** Valid/invalid golden inputs; closed objects reject extras; quantum/range/path cases; no network schema fetch.
-- **Depends on:** ML-002 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D1](docs/specifications/2026-10-16-maplab.md#d1-coordinate-and-precision-contract), [F1](docs/specifications/2026-10-16-maplab.md#f1-versioned-documents-and-contract-rules), [F2](docs/specifications/2026-10-16-maplab.md#f2-normative-typescript-contract-sketch), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **R1 adoption (owner-approved option A, 17 October 2026):** commit the [R1 revision](docs/specifications/2026-10-17-maplab-r1/README.md), edit the adopted section bodies in its delta table and the ML-009 J2 row under unchanged headings, then implement this task on R1 rules: 1/16 WU quantum, ±131,072 WU range, 60 Hz integer ticks and the ID/catalog-key grammar ([R1 J4](docs/specifications/2026-10-17-maplab-r1/J-implementation-queue.md)).
-- **Subtasks:**
-  1. Implement strict versioned format headers, stable ID, coordinate quantum, bounds, assets and dependency schemas with local references.
-  2. Build bounded JSON scanner/parser that rejects duplicate keys, depth/size breaches, unsafe paths, aliasing and extra fields before semantic loading.
-  3. Create owned fixture(s): Valid and malformed map headers, quantization/bounds extremes, duplicate keys, traversal paths and unknown required versions.
-  4. Add executable checks: Golden parser/schema tests; no network resolution or partial state mutation.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-004 / P0
 
 - **Source scope:** Complete geometry, layer/visual, tileset and prefab schemas plus ownership/reference validators.
@@ -50,6 +31,11 @@
   4. Add executable checks: Closed-schema and semantic validation fixtures; renderer/collision data never inferred from tile art.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-005 / P0
 
 - **Source scope:** Full movement schema including every advanced ability family; controller/collision contract document and capability registry.

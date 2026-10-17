@@ -30,8 +30,8 @@
   "footholds": [
     {"id": "fh.floor", "name": "Clearing floor", "ownerBodyId": "body.floor", "a": [0, 576], "b": [640, 576], "normal": "up", "mode": "solid", "solidEdge": {"bodyId": "body.floor", "shapeId": "shape.floor", "edgeIndex": 0}, "dropAllowed": false, "dropGroupId": null, "materialId": "material.earth", "direction": "both", "category": "world", "mask": ["actor"], "enabled": true, "connections": {"a": [], "b": []}, "planeId": null}
   ],
-  "traversals": {},
-  "regions": [{"id": "region.back", "name": "Return portal", "shape": {"kind": "rect", "rect": [32, 512, 32, 64]}, "role": "trigger"}],
+  "traversals": [],
+  "regions": {},
   "entities": [
     {"id": "start.arrival", "name": "Forest arrival", "anchor": {"kind": "surface", "footholdId": "fh.floor", "u": 0.25, "normalOffset": 0}, "enabled": true, "facing": "right", "visualId": null, "presentationId": null, "kind": "playerStart", "movementId": "movement.player", "default": true},
     {"id": "portal.forest", "name": "Back to the forest", "anchor": {"kind": "surface", "footholdId": "fh.floor", "u": 0.0625, "normalOffset": 0}, "enabled": true, "facing": "left", "visualId": null, "presentationId": null, "kind": "portal", "regionId": "region.back", "activation": "interact", "destination": {"mapId": "map.forest", "entityId": "checkpoint.east"}, "delayTicks": 30, "conditions": []}

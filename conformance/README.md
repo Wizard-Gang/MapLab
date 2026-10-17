@@ -22,6 +22,23 @@ Golden inputs for the `maplab.map` v1 header and base subset, read by
   paths, unsupported contracts and inconsistent assets.
 - R1's two example maps are listed in place as valid golden inputs.
 
-Geometry, layers, gameplay, camera, environment and navigation members are only
-type-checked until ML-004–006, so these fixtures make no claim about them beyond
-inheriting R1's checked example content.
+The header API now checks the expanded structural schema; semantic geometry
+validation belongs to the geometry API below. Gameplay, camera, environment and
+navigation remain deferred. The deferred-member-type case uses `regions`, which
+is still outside ML-004's scope.
+
+## `geometry/` (ML-004)
+
+`cases.json` pins every owned valid/invalid geometry fixture and the unchanged R1
+forest, clearing, tileset and prefab examples, including exported map bytes.
+Every invalid golden file expects exactly one diagnostic code and JSON path.
+The suite covers stable shape IDs, source-edge ownership/equality, clockwise and
+self-intersecting polygons, reciprocal welds, parent cycles, dangling/wrong-kind
+anchors, actor planes, terrain cells and prefab slot/provenance failures.
+
+Additional executable regressions check entity-anchor chains/cycles, visual
+content layers, expanded prefab object kinds and actor-plane bindings, motion
+phase bounds and tile permissions. A separate Node process reads final forest
+JSON and independently resolves solid-edge endpoints using only the published
+contracts/schema modules. Node's built-in TypeScript stripping prepares that
+consumer; the TypeScript compiler API and editor runtime are not imported.

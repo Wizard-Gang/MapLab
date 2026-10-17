@@ -7,3 +7,6 @@ export {
   type Asset, type AssetMediaType, type ContractRef, type Dependency, type DependencyKind, type MapHeader, type MapHeaderResult,
 } from './map-header';
 export { SCHEMA_DIALECT, SchemaError, canonical, compileSchema, evaluate, type CompiledSchema } from './schema';
+export * from './geometry';
+export type { Anchor, BodyShape, RegionShape, Vec2, Transform } from './common-types';
+export type { Layer, VisualSource, Visual, Material, Motion, CollisionBody, EdgeRef, EndpointLink, Foothold, AccessPoint, Traversal, Cell, TerrainChunk, TerrainLayer } from './geometry-types';

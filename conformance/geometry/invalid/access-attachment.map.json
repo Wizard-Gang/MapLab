@@ -1,0 +1,2126 @@
+{
+  "format": "maplab.map",
+  "version": 1,
+  "id": "map.forest",
+  "metadata": {
+    "name": "Forest acceptance world",
+    "description": "Ground, one-way platforms, slope, ladder, rope, jump gap, pit, parallax, foreground, patrols, flyer, boss arena and a portal.",
+    "authors": [
+      "MapLab R1 specification"
+    ],
+    "license": "CC0-1.0",
+    "tags": [
+      "acceptance",
+      "side-view",
+      "r1"
+    ]
+  },
+  "requiredFeatures": [
+    {
+      "key": "maplab.collision",
+      "version": 1
+    },
+    {
+      "key": "maplab.climb",
+      "version": 1
+    },
+    {
+      "key": "maplab.camera",
+      "version": 1
+    }
+  ],
+  "coordinates": {
+    "units": "WU",
+    "x": "right",
+    "y": "down",
+    "rotation": "clockwiseDegrees",
+    "quantum": 0.0625,
+    "ticksPerSecond": 60
+  },
+  "bounds": [
+    0,
+    0,
+    1280,
+    800
+  ],
+  "collisionContract": {
+    "key": "maplab.collision",
+    "version": 1
+  },
+  "dependencies": [
+    {
+      "id": "map.clearing",
+      "kind": "map",
+      "path": "maps/clearing.map.json",
+      "required": true
+    },
+    {
+      "id": "movement.player",
+      "kind": "movement",
+      "path": "movement/player.movement.json",
+      "required": true
+    },
+    {
+      "id": "movement.ground",
+      "kind": "movement",
+      "path": "movement/ground.movement.json",
+      "required": true
+    },
+    {
+      "id": "movement.flyer",
+      "kind": "movement",
+      "path": "movement/flyer.movement.json",
+      "required": true
+    },
+    {
+      "id": "catalog.core",
+      "kind": "catalog",
+      "path": "catalogs/core.catalog.json",
+      "required": true
+    },
+    {
+      "id": "tileset.forest",
+      "kind": "tileset",
+      "path": "tilesets/forest.tileset.json",
+      "required": true
+    },
+    {
+      "id": "prefab.tree",
+      "kind": "prefab",
+      "path": "prefabs/tree.prefab.json",
+      "required": false
+    }
+  ],
+  "assets": [],
+  "presentations": [],
+  "layers": [
+    {
+      "id": "layer.sky",
+      "name": "Sky",
+      "parentId": null,
+      "order": 0,
+      "visible": true,
+      "opacity": 1,
+      "kind": "background",
+      "space": "camera",
+      "parallax": [
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "repeat": "none",
+      "repeatSize": [
+        0,
+        0
+      ],
+      "scrollWUPerTick": [
+        0,
+        0
+      ],
+      "phase": [
+        0,
+        0
+      ],
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.far",
+      "name": "Distant forest",
+      "parentId": null,
+      "order": 1,
+      "visible": true,
+      "opacity": 1,
+      "kind": "background",
+      "space": "world",
+      "parallax": [
+        0.25,
+        0.125
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "repeat": "x",
+      "repeatSize": [
+        512,
+        0
+      ],
+      "scrollWUPerTick": [
+        0,
+        0
+      ],
+      "phase": [
+        0,
+        0
+      ],
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.near",
+      "name": "Near forest",
+      "parentId": null,
+      "order": 2,
+      "visible": true,
+      "opacity": 1,
+      "kind": "background",
+      "space": "world",
+      "parallax": [
+        0.5,
+        0.25
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "repeat": "x",
+      "repeatSize": [
+        640,
+        0
+      ],
+      "scrollWUPerTick": [
+        0,
+        0
+      ],
+      "phase": [
+        0,
+        0
+      ],
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.tiles",
+      "name": "Ground tiles",
+      "parentId": null,
+      "order": 3,
+      "visible": true,
+      "opacity": 1,
+      "kind": "tile",
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.world",
+      "name": "Terrain art",
+      "parentId": null,
+      "order": 4,
+      "visible": true,
+      "opacity": 1,
+      "kind": "sprite",
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.actors",
+      "name": "Actors",
+      "parentId": null,
+      "order": 5,
+      "visible": true,
+      "opacity": 1,
+      "kind": "actors"
+    },
+    {
+      "id": "layer.front",
+      "name": "Foreground",
+      "parentId": null,
+      "order": 6,
+      "visible": true,
+      "opacity": 1,
+      "kind": "sprite",
+      "occlusionFade": 0.5
+    }
+  ],
+  "terrain": [
+    {
+      "layerId": "layer.tiles",
+      "tilesetId": "tileset.forest",
+      "origin": [
+        0,
+        0
+      ],
+      "cellSize": [
+        32,
+        32
+      ],
+      "chunkSize": 32,
+      "chunks": [],
+      "terrainIntent": [],
+      "rulesVersion": 1,
+      "variationSeed": 7
+    }
+  ],
+  "visuals": [
+    {
+      "id": "visual.sky",
+      "name": "Sky",
+      "layerId": "layer.sky",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            640,
+            360
+          ]
+        },
+        "fill": "#b4d8cb"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.far",
+      "name": "Distant canopy",
+      "layerId": "layer.far",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          128
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "polygon",
+          "points": [
+            [
+              0,
+              320
+            ],
+            [
+              64,
+              160
+            ],
+            [
+              128,
+              320
+            ],
+            [
+              256,
+              96
+            ],
+            [
+              384,
+              320
+            ],
+            [
+              448,
+              192
+            ],
+            [
+              512,
+              320
+            ],
+            [
+              512,
+              672
+            ],
+            [
+              0,
+              672
+            ]
+          ]
+        },
+        "fill": "#6b9985"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.near",
+      "name": "Near canopy",
+      "layerId": "layer.near",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          192
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "polygon",
+          "points": [
+            [
+              0,
+              384
+            ],
+            [
+              96,
+              128
+            ],
+            [
+              192,
+              384
+            ],
+            [
+              320,
+              64
+            ],
+            [
+              448,
+              384
+            ],
+            [
+              544,
+              160
+            ],
+            [
+              640,
+              384
+            ],
+            [
+              640,
+              608
+            ],
+            [
+              0,
+              608
+            ]
+          ]
+        },
+        "fill": "#416f57"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.west",
+      "name": "West ground art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          640
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            480,
+            160
+          ]
+        },
+        "fill": "#476333"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.east",
+      "name": "East ground and slope art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 1,
+      "transform": {
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "polygon",
+          "points": [
+            [
+              608,
+              640
+            ],
+            [
+              800,
+              640
+            ],
+            [
+              928,
+              576
+            ],
+            [
+              1280,
+              576
+            ],
+            [
+              1280,
+              800
+            ],
+            [
+              608,
+              800
+            ]
+          ]
+        },
+        "fill": "#476333"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.platforms",
+      "name": "Elevated platform art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 2,
+      "transform": {
+        "position": [
+          224,
+          496
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            160,
+            12
+          ]
+        },
+        "fill": "#8a6a45"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.upper",
+      "name": "Upper platform art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 3,
+      "transform": {
+        "position": [
+          448,
+          384
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            160,
+            12
+          ]
+        },
+        "fill": "#8a6a45"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.right",
+      "name": "High right platform art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 4,
+      "transform": {
+        "position": [
+          736,
+          352
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            160,
+            12
+          ]
+        },
+        "fill": "#8a6a45"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.ladder",
+      "name": "Ladder art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 5,
+      "transform": {
+        "position": [
+          296,
+          496
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            16,
+            144
+          ]
+        },
+        "fill": "#9c7a4f"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.rope",
+      "name": "Rope art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 6,
+      "transform": {
+        "position": [
+          526,
+          384
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            4,
+            208
+          ]
+        },
+        "fill": "#c9b27c"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.gate",
+      "name": "Arena gate art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 7,
+      "transform": {
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            944,
+            448,
+            16,
+            128
+          ]
+        },
+        "fill": "#5a4a3a"
+      },
+      "bodyId": "body.gate"
+    },
+    {
+      "id": "pp.tree1:trunk",
+      "name": "Tree trunk",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 8,
+      "transform": {
+        "position": [
+          160,
+          576
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            -8,
+            0,
+            16,
+            64
+          ]
+        },
+        "fill": "#3b2c1e"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "pp.tree1:canopy",
+      "name": "Tree canopy",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 9,
+      "transform": {
+        "position": [
+          160,
+          576
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "circle",
+          "center": [
+            0,
+            -8
+          ],
+          "radius": 40
+        },
+        "fill": "#2f6b3f"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.front",
+      "name": "Foreground trunk",
+      "layerId": "layer.front",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          96,
+          224
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            40,
+            416
+          ]
+        },
+        "fill": "#263f32"
+      },
+      "bodyId": null
+    }
+  ],
+  "materials": [
+    {
+      "id": "material.earth",
+      "name": "Earth",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "ground"
+      ]
+    },
+    {
+      "id": "material.wood",
+      "name": "Wood",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "wood"
+      ]
+    }
+  ],
+  "bodies": [
+    {
+      "id": "body.west",
+      "name": "West solid ground",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.west",
+          "kind": "rect",
+          "rect": [
+            0,
+            640,
+            480,
+            160
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.east",
+      "name": "East solid ground and slope",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.east",
+          "kind": "polygon",
+          "points": [
+            [
+              608,
+              640
+            ],
+            [
+              800,
+              640
+            ],
+            [
+              928,
+              576
+            ],
+            [
+              1280,
+              576
+            ],
+            [
+              1280,
+              800
+            ],
+            [
+              608,
+              800
+            ]
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.edge.left",
+      "name": "Left world edge",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.edge.left",
+          "kind": "segment",
+          "a": [
+            0,
+            0
+          ],
+          "b": [
+            0,
+            640
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.edge.right",
+      "name": "Right world edge",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.edge.right",
+          "kind": "segment",
+          "a": [
+            1280,
+            0
+          ],
+          "b": [
+            1280,
+            576
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.gate",
+      "name": "Arena gate (initially open)",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": false,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.wood",
+      "shapes": [
+        {
+          "id": "shape.gate",
+          "kind": "rect",
+          "rect": [
+            944,
+            448,
+            16,
+            128
+          ]
+        }
+      ],
+      "motion": null
+    }
+  ],
+  "footholds": [
+    {
+      "id": "fh.west",
+      "name": "West floor",
+      "ownerBodyId": "body.west",
+      "a": [
+        0,
+        640
+      ],
+      "b": [
+        480,
+        640
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.west",
+        "shapeId": "shape.west",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.east",
+      "name": "East floor",
+      "ownerBodyId": "body.east",
+      "a": [
+        608,
+        640
+      ],
+      "b": [
+        800,
+        640
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.east",
+        "shapeId": "shape.east",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": [
+          {
+            "footholdId": "fh.slope",
+            "endpoint": "a"
+          }
+        ]
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.slope",
+      "name": "Forest slope",
+      "ownerBodyId": "body.east",
+      "a": [
+        800,
+        640
+      ],
+      "b": [
+        928,
+        576
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.east",
+        "shapeId": "shape.east",
+        "edgeIndex": 1
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [
+          {
+            "footholdId": "fh.east",
+            "endpoint": "b"
+          }
+        ],
+        "b": [
+          {
+            "footholdId": "fh.boss",
+            "endpoint": "a"
+          }
+        ]
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.boss",
+      "name": "Boss floor",
+      "ownerBodyId": "body.east",
+      "a": [
+        928,
+        576
+      ],
+      "b": [
+        1280,
+        576
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.east",
+        "shapeId": "shape.east",
+        "edgeIndex": 2
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [
+          {
+            "footholdId": "fh.slope",
+            "endpoint": "b"
+          }
+        ],
+        "b": []
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.elevated",
+      "name": "Ladder platform",
+      "ownerBodyId": null,
+      "a": [
+        224,
+        496
+      ],
+      "b": [
+        384,
+        496
+      ],
+      "normal": "up",
+      "mode": "oneWay",
+      "solidEdge": null,
+      "dropAllowed": true,
+      "dropGroupId": "drop.elevated",
+      "materialId": "material.wood",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.upper",
+      "name": "Rope platform",
+      "ownerBodyId": null,
+      "a": [
+        448,
+        384
+      ],
+      "b": [
+        608,
+        384
+      ],
+      "normal": "up",
+      "mode": "oneWay",
+      "solidEdge": null,
+      "dropAllowed": true,
+      "dropGroupId": "drop.upper",
+      "materialId": "material.wood",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": null
+    },
+    {
+      "id": "fh.right",
+      "name": "High right platform",
+      "ownerBodyId": null,
+      "a": [
+        736,
+        352
+      ],
+      "b": [
+        896,
+        352
+      ],
+      "normal": "up",
+      "mode": "oneWay",
+      "solidEdge": null,
+      "dropAllowed": true,
+      "dropGroupId": "drop.right",
+      "materialId": "material.wood",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": null
+    }
+  ],
+  "traversals": [
+    {
+      "id": "traversal.ladder",
+      "kind": "ladder",
+      "points": [
+        [
+          304,
+          496
+        ],
+        [
+          304,
+          640
+        ]
+      ],
+      "grabRadius": 12,
+      "direction": "both",
+      "access": [
+        {
+          "id": "access.ladder.top",
+          "pathU": 0.5,
+          "anchor": {
+            "kind": "surface",
+            "footholdId": "fh.elevated",
+            "u": 0.5,
+            "normalOffset": 0
+          },
+          "entry": "grounded",
+          "exit": "grounded",
+          "conditions": []
+        },
+        {
+          "id": "access.ladder.bottom",
+          "pathU": 1,
+          "anchor": {
+            "kind": "world",
+            "point": [
+              304,
+              640
+            ]
+          },
+          "entry": "grounded",
+          "exit": "grounded",
+          "conditions": []
+        }
+      ],
+      "requiredAbilities": [
+        "climb.ladder"
+      ],
+      "visualId": "visual.ladder",
+      "planeId": null
+    },
+    {
+      "id": "traversal.rope",
+      "kind": "rope",
+      "points": [
+        [
+          528,
+          384
+        ],
+        [
+          528,
+          592
+        ]
+      ],
+      "grabRadius": 12,
+      "direction": "both",
+      "access": [
+        {
+          "id": "access.rope.top",
+          "pathU": 0,
+          "anchor": {
+            "kind": "surface",
+            "footholdId": "fh.upper",
+            "u": 0.5,
+            "normalOffset": 0
+          },
+          "entry": "grounded",
+          "exit": "grounded",
+          "conditions": []
+        },
+        {
+          "id": "access.rope.bottom",
+          "pathU": 1,
+          "anchor": {
+            "kind": "world",
+            "point": [
+              528,
+              592
+            ]
+          },
+          "entry": "airborne",
+          "exit": "airborne",
+          "conditions": []
+        }
+      ],
+      "requiredAbilities": [
+        "climb.rope"
+      ],
+      "visualId": "visual.rope",
+      "planeId": null
+    }
+  ],
+  "regions": [
+    {
+      "id": "region.patrol",
+      "name": "West patrol",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          32,
+          560,
+          400,
+          96
+        ]
+      },
+      "role": "patrol"
+    },
+    {
+      "id": "region.leash",
+      "name": "West leash",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          0,
+          480,
+          480,
+          208
+        ]
+      },
+      "role": "leash"
+    },
+    {
+      "id": "region.flight",
+      "name": "Flight volume",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          640,
+          96,
+          240,
+          176
+        ]
+      },
+      "role": "flight"
+    },
+    {
+      "id": "region.pit",
+      "name": "Gap pit",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          480,
+          704,
+          128,
+          96
+        ]
+      },
+      "role": "hazard"
+    },
+    {
+      "id": "region.checkpoint",
+      "name": "East checkpoint",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          608,
+          560,
+          64,
+          80
+        ]
+      },
+      "role": "checkpoint"
+    },
+    {
+      "id": "region.boss",
+      "name": "Boss arena",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          960,
+          320,
+          320,
+          256
+        ]
+      },
+      "role": "encounter"
+    },
+    {
+      "id": "region.boss-enter",
+      "name": "Arena entry",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          976,
+          480,
+          32,
+          96
+        ]
+      },
+      "role": "trigger"
+    },
+    {
+      "id": "region.boss-camera",
+      "name": "Arena camera",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          944,
+          256,
+          336,
+          320
+        ]
+      },
+      "role": "camera"
+    },
+    {
+      "id": "region.portal",
+      "name": "Exit portal",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          1224,
+          512,
+          32,
+          64
+        ]
+      },
+      "role": "trigger"
+    }
+  ],
+  "entities": [
+    {
+      "id": "start.player",
+      "name": "Forest start",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.west",
+        "u": 0.125,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "playerStart",
+      "movementId": "movement.player",
+      "default": true
+    },
+    {
+      "id": "checkpoint.east",
+      "name": "East checkpoint",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.east",
+        "u": 0.125,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "checkpoint",
+      "regionId": "region.checkpoint",
+      "activate": {
+        "key": "core.checkpoint.activate",
+        "version": 1,
+        "params": {}
+      }
+    },
+    {
+      "id": "spawn.ground",
+      "name": "Slime patroller",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.west",
+        "u": 0.25,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "enemySpawn",
+      "archetype": {
+        "key": "enemy.slime",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.ground",
+      "ai": {
+        "behavior": {
+          "key": "core.patrol",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": "route.ground",
+        "guard": null,
+        "patrolRegionId": "region.patrol",
+        "pursuitRegionId": null,
+        "home": {
+          "kind": "surface",
+          "footholdId": "fh.west",
+          "u": 0.25,
+          "normalOffset": 0
+        },
+        "leashRegionId": "region.leash",
+        "aggroRegionId": null,
+        "invalidRoute": "returnHome",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "timer",
+        "delayTicks": 1200,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": null
+    },
+    {
+      "id": "spawn.flyer",
+      "name": "Bat patroller",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          688,
+          176
+        ]
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "enemySpawn",
+      "archetype": {
+        "key": "enemy.bat",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.flyer",
+      "ai": {
+        "behavior": {
+          "key": "core.patrol",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": "route.flyer",
+        "guard": null,
+        "patrolRegionId": null,
+        "pursuitRegionId": "region.flight",
+        "home": {
+          "kind": "world",
+          "point": [
+            688,
+            176
+          ]
+        },
+        "leashRegionId": "region.flight",
+        "aggroRegionId": null,
+        "invalidRoute": "wait",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "never",
+        "delayTicks": 0,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": null
+    },
+    {
+      "id": "spawn.boss",
+      "name": "Forest guardian",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.boss",
+        "u": 0.5,
+        "normalOffset": 0
+      },
+      "enabled": false,
+      "facing": "left",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "enemySpawn",
+      "archetype": {
+        "key": "enemy.forest-guardian",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.ground",
+      "ai": {
+        "behavior": {
+          "key": "core.guard",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": null,
+        "guard": {
+          "kind": "surface",
+          "footholdId": "fh.boss",
+          "u": 0.5,
+          "normalOffset": 0
+        },
+        "patrolRegionId": null,
+        "pursuitRegionId": "region.boss",
+        "home": {
+          "kind": "surface",
+          "footholdId": "fh.boss",
+          "u": 0.5,
+          "normalOffset": 0
+        },
+        "leashRegionId": "region.boss",
+        "aggroRegionId": "region.boss",
+        "invalidRoute": "safeStop",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "never",
+        "delayTicks": 0,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": "group.boss"
+    },
+    {
+      "id": "npc.ranger",
+      "name": "Ranger",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.east",
+        "u": 0.5,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "left",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "npc",
+      "archetype": {
+        "key": "npc.ranger",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.ground",
+      "ai": {
+        "behavior": {
+          "key": "core.idle",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": null,
+        "guard": null,
+        "patrolRegionId": null,
+        "pursuitRegionId": null,
+        "home": {
+          "kind": "surface",
+          "footholdId": "fh.east",
+          "u": 0.5,
+          "normalOffset": 0
+        },
+        "leashRegionId": null,
+        "aggroRegionId": null,
+        "invalidRoute": "wait",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "never",
+        "delayTicks": 0,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": null
+    },
+    {
+      "id": "chest.right",
+      "name": "High chest",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.right",
+        "u": 0.5,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "left",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "chest",
+      "archetype": {
+        "key": "chest.wooden",
+        "version": 1,
+        "params": {
+          "lootTable": "forest.basic"
+        }
+      },
+      "bodyIds": [],
+      "interaction": {
+        "key": "core.chest.open",
+        "version": 1,
+        "params": {}
+      }
+    },
+    {
+      "id": "hazard.pit",
+      "name": "Pit",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          544,
+          752
+        ]
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "hazard",
+      "regionId": "region.pit",
+      "effect": {
+        "key": "core.respawn-at-checkpoint",
+        "version": 1,
+        "params": {}
+      }
+    },
+    {
+      "id": "portal.clearing",
+      "name": "Clearing exit",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.boss",
+        "u": 0.875,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "portal",
+      "regionId": "region.portal",
+      "activation": "interact",
+      "destination": {
+        "mapId": "map.clearing",
+        "entityId": "start.arrival"
+      },
+      "delayTicks": 30,
+      "conditions": [
+        {
+          "kind": "flag",
+          "id": "flag.boss-defeated",
+          "equals": true
+        }
+      ]
+    }
+  ],
+  "waypoints": [
+    {
+      "id": "waypoint.west.a",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.west",
+        "u": 0.125,
+        "normalOffset": 0
+      },
+      "waitTicks": 60
+    },
+    {
+      "id": "waypoint.west.b",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.west",
+        "u": 0.875,
+        "normalOffset": 0
+      },
+      "waitTicks": 60
+    },
+    {
+      "id": "waypoint.fly.a",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          688,
+          176
+        ]
+      },
+      "waitTicks": 30
+    },
+    {
+      "id": "waypoint.fly.b",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          832,
+          176
+        ]
+      },
+      "waitTicks": 30
+    }
+  ],
+  "routes": [
+    {
+      "id": "route.ground",
+      "waypointIds": [
+        "waypoint.west.a",
+        "waypoint.west.b"
+      ],
+      "mode": "pingPong",
+      "requiredAbilities": [],
+      "conditions": []
+    },
+    {
+      "id": "route.flyer",
+      "waypointIds": [
+        "waypoint.fly.a",
+        "waypoint.fly.b"
+      ],
+      "mode": "pingPong",
+      "requiredAbilities": [
+        "locomotion.fly"
+      ],
+      "conditions": []
+    }
+  ],
+  "triggers": [
+    {
+      "id": "trigger.boss-enter",
+      "regionId": "region.boss-enter",
+      "event": "enter",
+      "actorCategories": [
+        "player"
+      ],
+      "once": true,
+      "conditions": [
+        {
+          "kind": "flag",
+          "id": "flag.boss-defeated",
+          "equals": false
+        }
+      ],
+      "actions": [
+        {
+          "key": "core.encounter.activate",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "encounter",
+                "id": "encounter.boss"
+              }
+            }
+          }
+        },
+        {
+          "key": "core.body.set-enabled",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "body",
+                "id": "body.gate"
+              }
+            },
+            "enabled": true
+          }
+        }
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "id": "encounter.boss",
+      "regionId": "region.boss",
+      "groupId": "group.boss",
+      "spawnIds": [
+        "spawn.boss"
+      ],
+      "waves": [],
+      "completionEvent": {
+        "key": "core.encounter.cleared",
+        "version": 1
+      },
+      "onComplete": [
+        {
+          "key": "core.flag.set",
+          "version": 1,
+          "params": {
+            "flag": {
+              "ref": {
+                "kind": "flag",
+                "id": "flag.boss-defeated"
+              }
+            },
+            "value": true
+          }
+        },
+        {
+          "key": "core.body.set-enabled",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "body",
+                "id": "body.gate"
+              }
+            },
+            "enabled": false
+          }
+        }
+      ]
+    }
+  ],
+  "camera": {
+    "model": {
+      "key": "maplab.camera",
+      "version": 1
+    },
+    "defaults": {
+      "viewWU": [
+        640,
+        360
+      ],
+      "zoom": 1,
+      "bounds": [
+        0,
+        0,
+        1280,
+        800
+      ],
+      "followX": true,
+      "followY": true,
+      "deadZone": [
+        0.375,
+        0.25,
+        0.25,
+        0.5
+      ],
+      "dampingTicks": [
+        8,
+        12
+      ],
+      "lookaheadWU": [
+        80,
+        64
+      ],
+      "verticalPolicy": "platformSnap",
+      "climbFollow": true,
+      "transitionTicks": 15,
+      "transition": "smoothstep"
+    },
+    "zones": [
+      {
+        "id": "camera.boss",
+        "regionId": "region.boss-camera",
+        "priority": 10,
+        "settings": {
+          "viewWU": [
+            640,
+            360
+          ],
+          "zoom": 2,
+          "bounds": [
+            944,
+            256,
+            336,
+            320
+          ],
+          "followX": false,
+          "followY": false,
+          "deadZone": [
+            0.375,
+            0.25,
+            0.25,
+            0.5
+          ],
+          "dampingTicks": [
+            0,
+            0
+          ],
+          "lookaheadWU": [
+            0,
+            0
+          ],
+          "verticalPolicy": "locked",
+          "climbFollow": false,
+          "transitionTicks": 24,
+          "transition": "smoothstep"
+        }
+      }
+    ],
+    "shakeEffects": [
+      {
+        "key": "core.camera.shake.small",
+        "version": 1
+      }
+    ]
+  },
+  "environment": {
+    "ambientColor": "#f4f1e6",
+    "effects": [
+      {
+        "key": "core.env.fireflies",
+        "version": 1,
+        "params": {
+          "density": 12
+        }
+      }
+    ],
+    "zones": [
+      {
+        "id": "env.arena",
+        "kind": "transition",
+        "regionId": "region.boss",
+        "priority": 5,
+        "effect": {
+          "key": "core.env.tint",
+          "version": 1,
+          "params": {
+            "color": "#20302a"
+          }
+        }
+      }
+    ]
+  },
+  "navigation": {
+    "modeVolumes": [
+      {
+        "id": "nav.flight",
+        "regionId": "region.flight",
+        "mode": "fly",
+        "profileIds": [
+          "movement.flyer"
+        ]
+      }
+    ],
+    "links": [],
+    "overrides": [
+      {
+        "id": "nav.avoid-pit",
+        "regionId": "region.pit",
+        "profileIds": [
+          "movement.player",
+          "movement.ground"
+        ],
+        "actions": [
+          "fall",
+          "drop",
+          "jump"
+        ],
+        "policy": "forbid",
+        "penaltyTicks": 0
+      }
+    ]
+  },
+  "flags": [
+    {
+      "id": "flag.boss-defeated",
+      "initial": false
+    }
+  ],
+  "prefabPlacements": [
+    {
+      "id": "pp.tree1",
+      "prefabId": "prefab.tree",
+      "position": [
+        160,
+        576
+      ],
+      "mirrorX": false,
+      "layerBindings": [
+        {
+          "slot": "scenery",
+          "layerId": "layer.world"
+        }
+      ],
+      "expandedIds": [
+        "pp.tree1:trunk",
+        "pp.tree1:canopy"
+      ]
+    }
+  ]
+}
