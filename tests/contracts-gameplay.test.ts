@@ -196,3 +196,25 @@ test('dependency identity has one unaliased file path throughout the closure', (
   const docs = world(); docs[1].dependencies.find((d: { id: string }) => d.id === 'movement.player').path = 'movement/other.movement.json';
   expect(errors(validateSourceGraph(docs)).map((d) => d.code)).toContain('dependency.path-identity');
 });
+
+const documentOrders = Array.from({ length: files.length }, (_, start) => [
+  ...Array.from({ length: files.length }, (_, offset) => (start + offset) % files.length),
+]);
+test.each(documentOrders.flatMap((order) => [order, [...order].reverse()]).map((order, i) => [i, order] as const))(
+  'mixed cycle rejection is independent of document/dependency visitation order %s', (_i, order) => {
+    for (const reverseDependencies of [false, true]) {
+      const docs = world();
+      docs[7].dependencies = [{ id: 'map.clearing', kind: 'map', path: 'maps/clearing.map.json', required: true }];
+      if (reverseDependencies) docs.forEach((d) => d.dependencies?.reverse());
+      const result = validateSourceGraph(order.map((i) => docs[i]));
+      expect(result.ok).toBe(false);
+      expect(errors(result)).toEqual([expect.objectContaining({ code: 'dependency.cycle', documentId: 'prefab.tree', jsonPath: '$.dependencies[0]' })]);
+      // Without the forest→template edge the same prefab→map edge is acyclic.
+      docs[0].dependencies = docs[0].dependencies.filter((d: { id: string }) => d.id !== 'prefab.tree');
+      expect(errors(validateSourceGraph(order.map((i) => docs[i])))).toEqual([]);
+      // Preserve the original, legal forest↔clearing map-only cycle.
+      const legal = world(); if (reverseDependencies) legal.forEach((d) => d.dependencies?.reverse());
+      expect(errors(validateSourceGraph(order.map((i) => legal[i])))).toEqual([]);
+    }
+  },
+);

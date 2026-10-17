@@ -77,22 +77,13 @@ export function validateSourceGraph(values: readonly JsonValue[]): SourceGraphRe
     }
     return found;
   };
-  // Only map cycles are legal. Templates must never form an expansion cycle.
-  const colors = new Map<string, 'active' | 'done'>();
-  for (const start of docs) {
-    if (colors.has(start.id)) continue;
-    const stack = [{ doc: start, next: 0 }]; colors.set(start.id, 'active');
-    while (stack.length) {
-      const frame = stack.at(-1)!; const dep = dependencies(frame.doc)[frame.next++];
-      if (!dep) { colors.set(frame.doc.id, 'done'); stack.pop(); continue; }
-      const target = byId.get(dep.id); if (!target) continue;
-      if (colors.get(target.id) === 'active') {
-        const cycle = stack.slice(stack.findIndex((f) => f.doc.id === target.id));
-        if (cycle.some((f) => f.doc.format !== 'maplab.map')) report(frame.doc, 'dependency.cycle', ['dependencies', frame.next - 1], 'Only map dependency cycles are legal');
-      } else if (!colors.has(target.id)) { colors.set(target.id, 'active'); stack.push({ doc: target, next: 0 }); }
-    }
-  }
   const scopes = new Map(docs.map((d) => [d.id, closure(d)]));
+  // A non-map document is cyclic exactly when one of its outgoing targets can
+  // reach it. Reuse complete closures so previously visited map subcycles cannot
+  // hide a larger mixed cycle. Ordinary map-only portal cycles remain legal.
+  for (const doc of docs) if (doc.format !== 'maplab.map') dependencies(doc).forEach((dep, i) => {
+    if (scopes.get(dep.id)?.has(doc.id)) report(doc, 'dependency.cycle', ['dependencies', i], 'Only map dependency cycles are legal');
+  });
   const geometryContext: GeometryContext = {
     tilesets: docs.filter((d): d is TilesetDocument => d.format === 'maplab.tileset'),
     prefabs: docs.filter((d): d is PrefabDocument => d.format === 'maplab.prefab') as unknown as GeometryContext['prefabs'] & {},
