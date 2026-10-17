@@ -1,0 +1,12 @@
+[
+  {
+    "id": "ML-001",
+    "commit": "b0b1ff57859371be5aef7071394cb50c405d4794",
+    "pr": null,
+    "mainCi": {
+      "head": "b0b1ff57859371be5aef7071394cb50c405d4794",
+      "conclusion": "success",
+      "url": "https://github.com/Wizard-Gang/MapLab/actions/runs/38990031757"
+    }
+  }
+]

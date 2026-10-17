@@ -1,7 +1,8 @@
 # Reserved implementation roadmap
 
-ML-001 is the sole active bootstrap delivery. ML-002–044 are reserved and
-unimplemented. Follow every predecessor in sequence. Research/review may run
+ML-001 is delivered with successful exact-root push CI recorded in
+[the delivery chain](deliveries.json). ML-002 is active; ML-003–044 are reserved and
+unimplemented. ML-002 is complete only after protected delivery and main CI. Follow every predecessor in sequence. Research/review may run
 concurrently; no parallel product implementation. The table below is preserved
 from the adopted planning specification J2; acceptance text is a requirement,
 not a claim of delivery.

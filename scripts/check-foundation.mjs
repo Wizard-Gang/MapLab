@@ -1,6 +1,8 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkChange } from './check-change.mjs';
+import { checkPolicyConfig } from './repository-policy.mjs';
 
 export const requiredFiles = [
   'AGENTS.md', 'implementation_plan.md', 'README.md', 'CONTRIBUTING.md',
@@ -14,7 +16,9 @@ export const requiredFiles = [
   'vitest.config.ts', 'src/app/App.tsx', 'src/app/main.tsx', 'src/app/styles.css',
   'tests/app.test.tsx', 'tests/foundation.test.mjs', 'scripts/check-foundation.mjs',
   'scripts/check-build.mjs', '.github/workflows/verify.yml',
-  '.github/pull_request_template.md',
+  '.github/pull_request_template.md', 'docs/deliveries.json',
+  'scripts/check-change.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
+  'tests/change.test.mjs', 'tests/policy.test.mjs', 'docs/DELIVERY-GATES.md',
 ];
 
 function demand(condition, message) {
@@ -46,6 +50,22 @@ export function checkFoundation(root) {
   demand(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(pins).sort()),
     'Foundation dependency pins changed or are not exact');
   demand(!pkg.optionalDependencies && !pkg.peerDependencies, 'Unreviewed dependency category');
+  const commands = {
+    'check:foundation': 'node scripts/check-foundation.mjs',
+    'check:change': 'node scripts/check-change.mjs',
+    typecheck: 'tsc --noEmit', test: 'vitest run', build: 'vite build',
+    smoke: 'node scripts/check-build.mjs',
+    check: 'npm run check:foundation && npm run typecheck && npm test && npm run build && npm run smoke',
+    security: 'npm audit --audit-level=low && npm audit signatures',
+    'policy:check': 'node scripts/repository-policy.mjs',
+    'policy:apply': 'node scripts/repository-policy.mjs --apply',
+    'delivery:verify': 'node scripts/verify-pr.mjs',
+  };
+  for (const [name, command] of Object.entries(commands)) {
+    demand(pkg.scripts?.[name] === command, `Required executable command changed: ${name}`);
+    demand(!pkg.scripts?.[`pre${name}`] && !pkg.scripts?.[`post${name}`], `Unapproved check hook: ${name}`);
+  }
+
   for (const hook of ['preinstall', 'install', 'postinstall', 'prepare']) {
     demand(!pkg.scripts?.[hook], `Unapproved root lifecycle hook: ${hook}`);
   }
@@ -75,37 +95,26 @@ export function checkFoundation(root) {
       && /^sha512-[A-Za-z0-9+/]+=*$/.test(entry.integrity ?? ''),
     `Unpinned registry bytes or local dependency: ${path}`);
   }
-  const change = json('config/change.json');
-  demand(/^ML-\d{3}$/.test(change.id) &&
-    /^(FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)$/.test(change.type), 'Malformed controlled change ID/type');
-  demand(new RegExp(`^\\[${change.id}\\] \\[${change.type}\\] [A-Z].+`).test(change.title),
-    'Malformed controlled change title');
-  demand(change.id === 'ML-001' && change.bootstrap === 'empty-repository-root-commit',
-    'ML-001 bootstrap identity changed; activate future tasks through controlled governance');
-  demand(change.record === `docs/changes/${change.id}.md` && existsSync(resolve(root, change.record)),
-    'Change record identity disagrees');
-  demand(read(change.record).startsWith(`# ${change.title}\n`), 'Change record title disagrees');
-  const plan = read('implementation_plan.md');
-  const queue = plan.match(/<!-- active-queue:start -->([\s\S]*?)<!-- active-queue:end -->/);
-  demand(queue, 'Active queue markers are missing');
-  const ids = queue[1].match(/\bML-\d{3}\b/g) ?? [];
-  demand(ids.length === 1 && ids[0] === change.id, 'Active queue must contain only the controlled task');
-  const roadmap = read('docs/IMPLEMENTATION-ROADMAP.md');
-  const rows = [...roadmap.matchAll(/^\| \*\*(ML-\d{3}) \/[^\n]+/gm)].map((match) => match[1]);
-  demand(rows.length === 44 && rows.every((id, i) => id === `ML-${String(i + 1).padStart(3, '0')}`),
-    'Reserved roadmap must contain ML-001–044 exactly once in order');
-  const settings = json('config/github-repository-settings.json');
-  demand(settings.repository === 'Wizard-Gang/MapLab' && settings.visibility === 'private'
-    && settings.status === 'desired-only; apply and verify in ML-002', 'Desired settings identity/status disagrees');
-  demand(JSON.stringify(settings.main?.requiredChecks) === '["verify","change-id","security"]'
-    && settings.main?.bypassActors?.length === 0, 'Desired checks/bypass policy disagrees');
+  const change = checkChange(root);
+  checkPolicyConfig(json('config/github-repository-settings.json'));
   const workflow = read('.github/workflows/verify.yml');
   const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
-  demand(uses.length === 2 && uses.every((action) => /^[\w-]+\/[\w-]+@[a-f0-9]{40}$/.test(action)),
+  demand(uses.length === 6 && uses.every((action) => [
+    'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803',
+    'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38',
+  ].includes(action)),
     'CI Actions must use immutable commit SHAs');
-  demand(workflow.includes('contents: read') && workflow.includes('persist-credentials: false')
-    && workflow.includes('run: npm ci') && workflow.includes('run: npm run check'),
-  'Initial CI must run credential-free canonical checks with least privilege');
+  demand(workflow.includes('contents: read') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(workflow)
+    && workflow.includes('persist-credentials: false')
+    && workflow.includes('run: npm ci') && workflow.includes('run: npm run check')
+    && workflow.includes('run: npm run check:change') && workflow.includes('run: npm run security')
+    && workflow.includes('github.event.pull_request.head.sha || github.sha'),
+    'CI must run exact-head credential-free canonical and separate online gates with least privilege');
+  demand(/  push:\n    branches: \[main\]/.test(workflow), 'CI pushes must be restricted to main; tag/branch cleanup is not delivery CI');
+  const jobs = Object.fromEntries([...workflow.matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:|$(?![\s\S]))/gm)].map((m) => [m[1], m[2]]));
+  for (const [job, command] of Object.entries({ verify: 'npm run check', 'change-id': 'npm run check:change', security: 'npm run security' })) {
+    demand(jobs[job]?.includes(`    name: ${job}\n`) && jobs[job].split('\n').some((line) => line.trim() === `run: ${command}`), `Required CI job/command missing: ${job}`);
+  }
   for (const file of [...requiredFiles.filter((p) => p.endsWith('.md')), change.record]) {
     for (const [, target] of read(file).matchAll(/\]\(([^\s)]+)\)/g)) {
       if (/^(?:https?:|#|mailto:)/.test(target)) continue;
@@ -113,7 +122,7 @@ export function checkFoundation(root) {
         `Broken local authority link in ${file}: ${target}`);
     }
   }
-  return 'Foundation verified: pins, lockfile, policies, authorities, ML-001 identity and reserved roadmap';
+  return 'Foundation verified: pins, lockfile, policies, authorities, current task identity, closed bootstrap and reserved roadmap';
 }
 
 const self = fileURLToPath(import.meta.url);

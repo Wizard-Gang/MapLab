@@ -1,0 +1,72 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { demand, sha, readJson, checkChange, checkSections } from './check-change.mjs';
+import { ghApi, readPolicy } from './repository-policy.mjs';
+
+export function requiredContexts(policy) {
+  const requirements = policy.effectiveMain.filter((r) => r.type === 'required_status_checks')
+    .flatMap((r) => r.parameters.required_status_checks.map((c) => ({ name: c.context, appId: c.integration_id ?? null })));
+  const legacy = policy.branchProtection?.required_status_checks;
+  for (const c of legacy?.checks ?? []) requirements.push({ name: c.context, appId: c.app_id ?? null });
+  for (const name of legacy?.contexts ?? []) {
+    if (!requirements.some((r) => r.name === name)) requirements.push({ name, appId: null });
+  }
+  demand(requirements.length > 0 && requirements.every((r) => typeof r.name === 'string' && r.name.length > 0), 'Effective required checks are missing/malformed');
+  return [...new Map(requirements.map((r) => [`${r.name}:${r.appId}`, r])).values()];
+}
+
+export function checkHeadChecks(checks, head, appId, requirements = ['verify', 'change-id', 'security'].map((name) => ({ name, appId })), statuses = []) {
+  const evidence = [];
+  for (const { name, appId: requiredApp } of requirements) {
+    const matchingStatuses = statuses.filter((s) => s.context === name);
+    for (const status of matchingStatuses) {
+      demand(status.state === 'success', `Required commit status is unsuccessful: ${name}`);
+      evidence.push({ name, head, url: status.target_url, id: status.id });
+    }
+    const matching = checks.filter((c) => c.name === name && (requiredApp === null || c.app?.id === requiredApp));
+    if (matching.length === 0 && requiredApp === null) {
+      demand(matchingStatuses.length > 0, `Required commit status is missing: ${name}`);
+      continue;
+    }
+    demand(matching.length > 0, `Missing current check: ${name}`);
+    for (const c of matching) {
+      demand(c.head_sha === head && c.status === 'completed' && c.conclusion === 'success', `Check is not successful on exact current head: ${name}`);
+      evidence.push({ name, head: c.head_sha, url: c.html_url, id: c.id });
+    }
+  }
+  return evidence;
+}
+
+export function verifyPr(root, number, head) {
+  demand(Number.isSafeInteger(number) && number > 0 && sha.test(head), 'PR number/head required');
+  const change = checkChange(root);
+  const p = readJson(root, 'config/github-repository-settings.json');
+  const policy = readPolicy(p); // A plan/access failure blocks delivery, never bypasses policy.
+  const prefix = `repos/${p.repository}`;
+  const pr = ghApi(`${prefix}/pulls/${number}`);
+  demand(pr.state === 'open' && pr.draft === false && pr.head.sha === head && pr.head.ref === change.branch
+    && pr.base.ref === 'main' && pr.title === change.title, 'PR identity/state/head differs');
+  checkSections(pr.body ?? '');
+  demand(pr.body.includes(head), 'PR must record exact tested head');
+  const main = ghApi(`${prefix}/git/ref/heads/main`).object.sha;
+  const compare = ghApi(`${prefix}/compare/${main}...${head}`);
+  demand(compare.behind_by === 0 && compare.ahead_by > 0 && compare.status === 'ahead', 'PR is not current with main');
+  demand(pr.mergeable === true && pr.mergeable_state === 'clean', 'Provider has not confirmed all merge/review requirements');
+  const response = ghApi(`${prefix}/commits/${head}/check-runs?filter=latest&per_page=100`);
+  demand(response.total_count <= 100, 'Check pagination requires explicit inspection');
+  const status = ghApi(`${prefix}/commits/${head}/status?per_page=100`);
+  demand(status.sha === head && status.total_count <= 100, 'Status SHA/pagination requires explicit inspection');
+  const checks = checkHeadChecks(response.check_runs, head, p.main.checksAppId, requiredContexts(policy), status.statuses);
+  // Recheck identity after all read operations. Merge must still submit head as its SHA guard.
+  demand(ghApi(`${prefix}/pulls/${number}`).head.sha === head && ghApi(`${prefix}/git/ref/heads/main`).object.sha === main, 'Head/main changed during evidence collection');
+  return { task: change.id, pr: pr.html_url, head, main, checks, policy, mergeMethod: 'squash', bypass: false };
+}
+
+const self = fileURLToPath(import.meta.url);
+if (process.argv[1] && resolve(process.argv[1]) === self) {
+  try {
+    const args = process.argv.slice(2);
+    demand(args.length === 4 && args[0] === '--pr' && args[2] === '--head', 'Usage: verify-pr.mjs --pr NUMBER --head SHA');
+    console.log(JSON.stringify(verifyPr(resolve(dirname(self), '..'), Number(args[1]), args[3]), null, 2));
+  } catch (error) { console.error(`Delivery rejected: ${error.message}`); process.exitCode = 1; }
+}

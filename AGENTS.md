@@ -18,8 +18,10 @@ task scope. This repository is independent of RigLab and Hexframe.
 - Do not copy third-party code or assets. Record provenance and license terms.
 - Ordinary tasks do not release, deploy, change visibility, or apply live settings.
   Those actions need their own authorized scope. ML-002 owns protection read-back.
-- Only ML-001 in a truly empty repository may create an initial root commit on
-  main after clean checks. Verify push CI and record its exact SHA externally;
-  all later changes follow PR/squash flow. Never use this exception again.
+- The ML-001 root exception is closed. Historical evidence remains in its change
+  record and delivery chain. Every current change requires a scoped PR and squash.
+- Run `npm run check:change` for controlled metadata and `npm run security` for the
+  separate online audit/signature gates. Before merging run `npm run policy:check`
+  and `npm run delivery:verify -- --pr NUMBER --head SHA`; never bypass a failure.
 
-ML-001 implements only governance, tooling, and the static planning shell.
+Product scope remains the active queue; no world feature exists before ML-003.

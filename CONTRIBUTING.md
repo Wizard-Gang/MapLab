@@ -19,7 +19,9 @@ consumer-impact and numerical fixture evidence. Browser interaction claims need
 browser interaction tests. Do not describe proposed schemas, conformance or
 performance targets as implemented or measured.
 
-Online dependency/security checks and live protections are ML-002 work. Record
+Run the separate online `npm run security` gate and authenticated
+`npm run policy:check`/`npm run delivery:verify` before merging. See
+[delivery gates](docs/DELIVERY-GATES.md). Record
 exact PR-head check evidence and recheck after any edit or rebase; verify main
 after squash before treating delivery as complete. Do not release or deploy as a
 side effect. Public visibility and final license approval precede public release.
