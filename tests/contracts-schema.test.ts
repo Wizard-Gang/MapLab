@@ -85,7 +85,7 @@ test('src/contracts stays pure: relative imports and the local schema only, no I
     const source = readFileSync(join(dir, file), 'utf8');
     for (const [, specifier] of source.matchAll(/^(?:import|export)\b[^;]*?\bfrom\s+'([^']+)'/gm)) {
       specifiers++;
-      expect(/^\.\.\/\.\.\/schemas\/maplab\.(?:map|tileset|prefab|movement)\.v1\.schema\.json$/.test(specifier ?? '') || specifier === '../../contracts/maplab.reference-controller.v1.capabilities.json' || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
+      expect(/^\.\.\/\.\.\/schemas\/maplab\.(?:map|tileset|prefab|movement|catalog|project|export|navigation)\.v1\.schema\.json$/.test(specifier ?? '') || specifier === '../../contracts/maplab.reference-controller.v1.capabilities.json' || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
     }
     expect(source, file).not.toMatch(/\bfetch\(|XMLHttpRequest|WebSocket|\bimport\(|\brequire\(|process\.|document\.|window\.|localStorage|indexedDB/);
     expect(source.replaceAll(SCHEMA_DIALECT, ''), file).not.toMatch(/https?:\/\//);

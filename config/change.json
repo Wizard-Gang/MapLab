@@ -1,7 +1,7 @@
 {
-  "id": "ML-005",
+  "id": "ML-006",
   "type": "FEATURE",
-  "title": "[ML-005] [FEATURE] Publish movement and controller contracts",
-  "record": "docs/changes/ML-005.md",
-  "branch": "ml-005-movement-contracts"
+  "title": "[ML-006] [FEATURE] Finalize gameplay and catalog schemas",
+  "record": "docs/changes/ML-006.md",
+  "branch": "ml-006-gameplay-contracts"
 }

@@ -56,3 +56,18 @@ Tests compare Web Crypto and Node crypto, same-version coefficient/effective
 profile edits, Unicode/JCS boundaries and semantic reorderings. A separate Node
 process reads final profile bytes and computes the digest without editor imports.
 Numerical controller traces remain their reserved tasks.
+
+## `gameplay/` (ML-006)
+
+Owned CC0 `all-kinds` map/catalog bytes extend the unchanged R1 forest closure
+with every entity kind, every catalog field type, every environment zone kind,
+nav links and compound conditions. `cases.json` pins those bytes and supplies 32
+inert mutation records with expected rejection codes. Tests apply them only to
+clones: wrong handler/ref kinds, unknown params/flags, portal destinations,
+capability mismatch, camera ticks/dead zones and arbitrary script payloads reject.
+
+Additional executable regressions cover every ObjectRef kind, cross-map scopes,
+non-map cycles, decimal quanta, unused-profile extensions, resolved nav-anchor
+ranges, compatibility reports, warning saturation and immutable outputs. A separate
+process checks final catalog bytes and closed schema rejection without importing
+the editor. Full independent bundle/fixture loading remains ML-007.

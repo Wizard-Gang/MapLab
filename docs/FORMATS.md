@@ -1,58 +1,74 @@
 # Format contracts
 
-[Specification D, F, and G](specifications/2026-10-16-maplab.md), amended by
-[R1](specifications/2026-10-17-maplab-r1/F-formats.md), are adopted design material.
-ML-003 implements the bounded parser in `src/contracts/` and the `maplab.map` v1 header
-subset: IDs, 1/16 WU coordinates within ±131,072 WU, 60 Hz tick fields, safe paths,
-dependencies, assets and bounds. ML-004 extends `schemas/maplab.map.v1.schema.json`
-with geometry, layers, visuals, terrain and prefab provenance, and publishes
-`schemas/maplab.tileset.v1.schema.json` and `schemas/maplab.prefab.v1.schema.json`.
-ML-005 publishes the full movement schema, all ability families and profile
-digests described in the [controller contract](CONTROLLER-CONTRACT.md). ML-006
-completes gameplay contracts; ML-007 adds the complete independent bundle reader.
+[Specification D, F and G](specifications/2026-10-16-maplab.md), amended by
+[R1](specifications/2026-10-17-maplab-r1/F-formats.md), govern the contracts.
+ML-006 completes the eight typed F sketches with local, closed JSON Schema
+2020-12 files: map, tileset, prefab, movement, catalog, project, export and
+navigation. `maplab.palette` has no adopted field sketch yet; it and the reserved
+`maplab.world` name fail closed until their separately governed tasks.
 
-Use `loadMapGeometry`, `loadTileset` and `loadPrefab` from `src/contracts/` for
-bounded parsing, structural validation and semantic validation of these scopes.
-Their `validate…` counterparts accept already parsed JSON. Successful results
-contain a detached, deeply frozen document, an explicit `deferred` list and
-`unresolved` external tileset/prefab IDs; failures contain diagnostics only.
-`loadMapHeader` remains a base-header API: its use of the expanded published
-schema does not establish semantic geometry validity.
+`loadSourceGraph` accepts an explicit array of bounded JSON byte/string inputs;
+`validateSourceGraph` accepts parsed JSON values. Both validate authored maps,
+tilesets, prefabs, movement and catalogs as one source dependency graph. No I/O,
+network lookup, runtime handlers or editor imports occur in these APIs. A failure
+returns diagnostics only; success returns detached frozen typed documents,
+warnings, per-profile movement compatibility, and explicit deferred runtime work.
+`contractSupported`, `runtimeImplemented` and `canCertify` remain distinct.
+Unsupported movement configuration retains ML-005's capability report; a valid
+source graph never claims engine parity, a runnable controller or a route proof.
 
-Geometry checks include clockwise simple polygons, stable shape-edge ownership,
-exact source-edge equality, reciprocal endpoint welds, layer/visual parent cycles,
-actor-plane references, anchor reference cycles and access-point attachment.
-Visuals paint only in sprite/background layers. Tileset trace shapes remain
-tile-local suggestions. Prefab provenance preserves expanded object kinds and
-visual/actor-plane slot bindings. Motion paths validate durations, loops and
-initial phase, without running a moving-platform solver.
+Required dependencies and all used reference targets must exist with the declared
+format/kind. Optional unused prefab provenance may be absent from exported maps.
+Portal cycles between maps are legal; dependency cycles involving templates are
+errors. Cross-map `ObjectRef.mapId` identifies a declared map, never a prefab's
+local namespace. IDs are unique within each map and documents within the supplied
+graph. Encounters own distinct groups; route abilities must match their actors.
+Catalog `(key, version)` identities are unique across the graph. Calls resolve
+only through the owning document's declared transitive catalog dependencies.
+Movement documents have no dependency list: catalog extensions bind in each map/
+prefab dependency scope that uses them, or the explicit supplied catalog set for
+unowned profiles. Unowned profiles cannot resolve map-local parameter references.
 
-Pass only validated tileset/prefab documents as `GeometryContext`. With those
-documents present, map validation checks terrain cell permissions and prefab
-namespaces/bindings. Missing context is named as unresolved, and is never fetched.
-Gameplay collections, catalog-bound calls/conditions and profile-specific stance,
-support and clearance remain explicitly deferred. A successful geometry result is
-not a claim of gameplay validity, dependency closure or controller compatibility.
+Every parameter binds to one of six field types: integer, number with positive
+quantum, bounded string, boolean, enum or typed reference. Unknown/missing fields,
+wrong handler kinds and dangling/wrong-kind references reject. Decimal field
+quanta use exact decimal divisibility, without floating tolerance. Params cannot
+contain arrays, nested arbitrary objects, code or executable extension payloads.
+Field names are bounded strings (R1 uses camelCase names such as `lootTable`);
+catalog keys and object IDs retain the adopted lowercase grammar.
 
-Future formats use closed versioned headers, stable IDs, bounded X-right/Y-down
-world coordinates, explicit asset/dependency references, and independent authored
-documents. Geometry, visual layers, prefabs, every movement ability family,
-gameplay catalogs, camera/environment intent and navigation intent have explicit
-source boundaries. Generated graphs are optional caches; mutable simulation state
-is never canonical authored content. Unknown required versions/features fail.
+Handler-kind bindings are explicit:
 
-Parsing must bound bytes and depth, reject duplicate keys and unsafe/aliased paths,
-validate cross-document references and exact geometry, and stage before opening.
-Schemas are local, closed JSON Schema 2020-12 plus independent semantic validators;
-network schema fetching and executable extension strings are forbidden.
+| Use | Catalog kind |
+|---|---|
+| Entity archetype; quest/objective definition | archetype |
+| AI behavior and registered fallback | behavior |
+| Checkpoint activation, interaction, trigger/onComplete, crush action | action |
+| Material/hazard/environment/transition, cutscene marker, camera shake | effect |
+| Respawn event, encounter wave/completion identity | event |
+| Scripted traversal, explicit nav link, registered ability/ledge action | traversal |
+| Movement-modifier zone and allowed movement modifiers | modifier |
 
-Exports require complete transitive closure, SHA-256 byte inventories, JCS property
-and number serialization, specified semantic array ordering, deterministic STORE
-ZIP metadata, and independent final-byte verification. Do not infer ZIP determinism
-from canonical JSON or publisher authenticity from an unsigned manifest. Current
-and previous schema migrations need deterministic proof fixtures. Asset/archive
-limits and path rules remain specification H4 authority until implemented.
+Conditions are data trees, at most depth 8 and 256 leaves per condition list;
+flag references and entity state names resolve. Camera settings use 60 Hz integer
+ticks, normalized 1/256 dead zones contained within the view, `platformSnap` and
+`climbFollow`. Bounds constrain the visible rectangle. Smaller bounds produce a
+letterbox warning; equal-priority overlapping zone bounds warn with stable ID
+precedence. Region shapes and resolved navigation anchors obey world limits.
+Environment audio references audio assets; all four zone kinds remain data only.
+RigLab presentation bindings validate local assets/semantic fallback graphs and
+name foreign dependencies; foreign manifests/animations need their later validator.
 
-Optional RigLab manifests/baked data must be independently validated and bound to
-explicit art, scale, ground anchors and actions. They never supply collider, root
-motion, or gameplay authority. Unbaked/missing-art input uses a placeholder.
+`validateDocumentSchema` validates syntax for every published format. For project,
+export and derived-navigation documents it does **not** establish library-save
+integrity, inventory/digest closure, witness replay or cache identity correctness.
+Those implementations remain in their reserved tasks. No exporter, library saver,
+AI, camera runtime, script interpreter, navigation solver or authoring UI is added.
+
+`loadMapHeader`, `loadMapGeometry`, `loadTileset` and `loadPrefab` remain explicit
+partial readers with `deferred` scopes. Their schema views preserve the earlier
+scope boundaries; only the full graph reader establishes gameplay/catalog closure.
+Geometry checks retain stable shape/edge ownership, exact welds, polygons,
+actor planes, anchor cycles, motion legs, terrain permissions and prefab provenance.
+Profile-dependent resting stance/full-body clearance and controller replay remain
+explicitly deferred. ML-007 owns the complete independent final-byte fixture reader.

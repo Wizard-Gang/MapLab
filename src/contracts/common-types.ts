@@ -1,4 +1,4 @@
-// Shared R1 vocabulary. Call/Condition catalog validation remains ML-006.
+// Shared R1 vocabulary. ML-006 binds calls and conditions in a closed source graph.
 // TypeScript cannot express ranges, quanta, closure or reference integrity; the published JSON Schemas
 // (closed, 2020-12) and the semantic validators in F-formats.md §F3 enforce those.
 
