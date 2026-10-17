@@ -1,0 +1,554 @@
+{
+  "description": "ML-003 golden inputs for the maplab.map v1 header and base subset. Each invalid file is valid/base.map.json with exactly one defect and must yield exactly the one listed diagnostic.",
+  "license": "CC0-1.0",
+  "cases": [
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/forest.map.json",
+      "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/map-header/valid/base.map.json",
+      "sha256": "316ef4ecce4b4a0fdffda34807fe2a49d31f7ce79163e239cc0ede824fce2f4f",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/map-header/valid/extremes.map.json",
+      "sha256": "6ec18659a1d831a868ecf1df5218be83a3db133bc64b80e629694c78cc0d5f7d",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-duplicate-key.map.json",
+      "sha256": "280633a1505eae639149fc348be927df48115f4a85f14239e7b471f676c18d22",
+      "expect": {
+        "code": "json.duplicate-key",
+        "jsonPath": "$.coordinates.quantum"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-duplicate-escaped-key.map.json",
+      "sha256": "6fcb601dfd703f3cfec76e8974c082319c314d553986bca0b11c6dddfd50f0de",
+      "expect": {
+        "code": "json.duplicate-key",
+        "jsonPath": "$.id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-bom.map.json",
+      "sha256": "64d773c9434315a0b720ff33dc2ffa574181f5f8976d546069d4ef03a72e70da",
+      "expect": {
+        "code": "json.bom",
+        "jsonPath": "$"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-trailing-comma.map.json",
+      "sha256": "104b9f374cd85f2c64b1fceada571ae2e226ff4e506b024c6e9542f04622f2ac",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$.bounds[4]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-comment.map.json",
+      "sha256": "25145038f13a0912800a43b714ac697053556d549dff31feb1fc4f164413aba8",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-nan.map.json",
+      "sha256": "e9242f98f0fd5e5bf53d851d133e2b7b7c42d2c4ea6164280224e575d7bc2b70",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-leading-zero.map.json",
+      "sha256": "3baabf72c07031c4ebc80028fec14eccb7513be8ed0dcb235a56e08abe1c12be",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-number-overflow.map.json",
+      "sha256": "a24fa37ab486b597dd2a189272358e718bc79a44fe84a7d3dbea8f86467f13c6",
+      "expect": {
+        "code": "json.number-range",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-lone-surrogate.map.json",
+      "sha256": "ff74b9c40c269c4f7925c3aec3d961202952fdd27a5bd33521b10449dbfbd152",
+      "expect": {
+        "code": "json.lone-surrogate",
+        "jsonPath": "$.metadata.description"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-control-character.map.json",
+      "sha256": "d92bb76729152ccce3eceed8ceb292d8a051cce3438b8499d4c9455dba15c15a",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$.metadata.name"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-too-deep.map.json",
+      "sha256": "4b952971b230eed2a3e7853d198ae081d2524995a5df7a3599c5fdd0fde6a451",
+      "expect": {
+        "code": "json.depth",
+        "jsonPath": "$.presentations[0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-trailing-content.map.json",
+      "sha256": "309fd7882d287a901f583d238d142f364335689739238f6a7a0ef318dbe5c743",
+      "expect": {
+        "code": "json.syntax",
+        "jsonPath": "$"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/format-not-object.map.json",
+      "sha256": "92ee50acbac610fa0dfdc94ac78dba54b50fdb8d680267bd231fcbe571d9d8d9",
+      "expect": {
+        "code": "format.not-object",
+        "jsonPath": "$"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/format-missing.map.json",
+      "sha256": "4766afecc5fb9ba4389b972bd62ec538d2e4307c79286a6335b9a9119112aa9d",
+      "expect": {
+        "code": "format.missing",
+        "jsonPath": "$.format"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/format-mismatch.map.json",
+      "sha256": "7cf37df490327970e86648a610b199b3641a4d16705c102a97550cbfda0904ac",
+      "expect": {
+        "code": "format.mismatch",
+        "jsonPath": "$.format"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/version-unknown.map.json",
+      "sha256": "841e50faf1add56146081693754a6afbcc9669427f1f23b23e62fa507414ab11",
+      "expect": {
+        "code": "format.unsupported-version",
+        "jsonPath": "$.version"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/version-string.map.json",
+      "sha256": "e756f4ded64af4f86bd9d5bd844fbfc41165b0541c81ca1082ceb7c9ab5b09dd",
+      "expect": {
+        "code": "format.unsupported-version",
+        "jsonPath": "$.version"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/extra-member.map.json",
+      "sha256": "cb8e6dda73f394e0715aa518a5dbf7263fe86ed4369d7630bd9cf2f079f1dd30",
+      "expect": {
+        "code": "map.additional-property",
+        "jsonPath": "$.editorState"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/extra-metadata-member.map.json",
+      "sha256": "040d96e9b84fb0be6f040f8ac5e42b0a8e5c48b4d2cc2ff650d827e3f15972a1",
+      "expect": {
+        "code": "metadata.additional-property",
+        "jsonPath": "$.metadata.thumbnail"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/extra-dependency-member.map.json",
+      "sha256": "961c7b141fc10352dd3a68977a6bc0e650cdbbeaf38cf1ca488daabe8c2b6fab",
+      "expect": {
+        "code": "dependency.additional-property",
+        "jsonPath": "$.dependencies[0].sha256"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/extra-coordinates-member.map.json",
+      "sha256": "8f6692d41b128f13844678ac1e9a7585ffff10f289d8177d8ba786eae1e6caeb",
+      "expect": {
+        "code": "coordinates.additional-property",
+        "jsonPath": "$.coordinates.zUp"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/missing-member.map.json",
+      "sha256": "2ff5a04bc275776e3c1cfde18cc91583cddc568d2456b9800db683840cd54221",
+      "expect": {
+        "code": "map.required",
+        "jsonPath": "$.collisionContract"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/missing-dependency-member.map.json",
+      "sha256": "90a69a0df6ebe74e958334da59417f6ab5369447aa097e324d6df71d72d9904e",
+      "expect": {
+        "code": "dependency.required",
+        "jsonPath": "$.dependencies[0].required"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/deferred-member-type.map.json",
+      "sha256": "35902a78786ddcde19ca543c8fdaa96860263c41d8a161e72b7a3bfbe583248e",
+      "expect": {
+        "code": "deferred-array.type",
+        "jsonPath": "$.traversals"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/adopted-quantum.map.json",
+      "sha256": "4e5498d7836af01e85b1ca3289ce24952001ff8d5b0e75e5a847fc3c289fc3de",
+      "expect": {
+        "code": "coordinates.const",
+        "jsonPath": "$.coordinates.quantum"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/adopted-tick-rate.map.json",
+      "sha256": "db2353743b108b2962cc5bcaa84f33eb4b38dd5fabd8151c2320183f18f508a4",
+      "expect": {
+        "code": "coordinates.const",
+        "jsonPath": "$.coordinates.ticksPerSecond"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/id-camelcase.map.json",
+      "sha256": "fd09bad0b52987a07d9d12501b291412a2a115a15793c36e5f9e4cdfc31e030e",
+      "expect": {
+        "code": "id.pattern",
+        "jsonPath": "$.id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/id-too-long.map.json",
+      "sha256": "0eadebc35b0611863d4c869a2f9ec0e146c5caa4ff075af7b8b8a9f2b7cd0058",
+      "expect": {
+        "code": "id.pattern",
+        "jsonPath": "$.dependencies[0].id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/key-uppercase.map.json",
+      "sha256": "3c5a1410d94549328d79383fe156f637e2f24e2b8b37b68fe1ac4b3e7365e77b",
+      "expect": {
+        "code": "key.pattern",
+        "jsonPath": "$.requiredFeatures[0].key"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/coordinate-off-quantum.map.json",
+      "sha256": "c571fd4ff301b2f72f711ebbdc163cfe79da0785cc108d4078f9e77344b219b0",
+      "expect": {
+        "code": "coordinate.multiple-of",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/coordinate-above-range.map.json",
+      "sha256": "3173669dcc1b1601fa4f6d72cd2b6689c840592d58fae25131bb0f50ed43561a",
+      "expect": {
+        "code": "coordinate.maximum",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/coordinate-below-range.map.json",
+      "sha256": "f535ca31f22357511d47b221bd8cd503c9e7a4edfb0064ed8a9bb12aa828aa8b",
+      "expect": {
+        "code": "coordinate.minimum",
+        "jsonPath": "$.bounds[1]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/bounds-far-edge.map.json",
+      "sha256": "bb8d8217313d1cb6d3942c9c1c9d51a35ee4a0d716a31acda272868fd40b0527",
+      "expect": {
+        "code": "bounds.range",
+        "jsonPath": "$.bounds[2]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/bounds-zero-size.map.json",
+      "sha256": "e2f1955aa65a95d5ce817f4da9a6ed3b098aa552c3875d4c8dace3404f4e04dd",
+      "expect": {
+        "code": "length.exclusive-minimum",
+        "jsonPath": "$.bounds[3]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/bounds-negative-zero.map.json",
+      "sha256": "283138acbb68c24ed33026f500c84daaeb76ea50f3d938231ddcdff68df2c0f5",
+      "expect": {
+        "code": "number.negative-zero",
+        "jsonPath": "$.bounds[0]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/bounds-short.map.json",
+      "sha256": "06cb15d8a4776c03c353db6ec5177b0854b96b5b24259506e5a2140800a1c38b",
+      "expect": {
+        "code": "rect.min-items",
+        "jsonPath": "$.bounds"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-traversal.map.json",
+      "sha256": "14fb23392d61d0f5e53072c53ddfbd04aa86dd9a59e3e6f988464a4cde854d52",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-backslash.map.json",
+      "sha256": "070a3d05cbc65515223dcd7f1d143e55e5516e0668e2b2a1847f74ec4a78a583",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-absolute.map.json",
+      "sha256": "095cf3983e01dc1c9f79922fcd26da3b83550c0ecf57dfefdd04a2685dffe29c",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-scheme.map.json",
+      "sha256": "70f549865e0a804e3903933d8716b751da100a2e4c1702380b2aadf62a906676",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-percent-alias.map.json",
+      "sha256": "0c998735946ec1a22e95fda95c680a5a01ec295288071ebc5ad2ea33411adaec",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-empty-component.map.json",
+      "sha256": "f91b7aaed63dd902a15b44ded396c7ff395c6763f57c4cfc627bd3b6583434b0",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-hidden-component.map.json",
+      "sha256": "5f8dd6b04f92f5d014c0f837ee5c44b8dd6c6802c452a9a307eb9cfc8c08bfc3",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-trailing-dot.map.json",
+      "sha256": "7755f8dc2f3807d15d6da55c90c3d04fff61d55df52fadd4129a9d9ef0b05770",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-non-ascii.map.json",
+      "sha256": "ce36dd95d04cf432ffa0c72f924042de6250e27bee2819a7a2c0f1ecf0be1195",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-too-long.map.json",
+      "sha256": "5bf6ff538eea102236458c272d67a824558545a83a19c97463722ecfdfdd202e",
+      "expect": {
+        "code": "path.max-length",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-reserved-name.map.json",
+      "sha256": "81fbf9a13d17c491f5c38b58796aefb0aff3c7b88a4e356a3fb77a06916fe4e8",
+      "expect": {
+        "code": "path.reserved-name",
+        "jsonPath": "$.dependencies[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-case-alias.map.json",
+      "sha256": "dc7b801724780f415d27d0e072640420ce732a94a41c3ec04a5440c0c0844f1d",
+      "expect": {
+        "code": "path.alias",
+        "jsonPath": "$.dependencies[2].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/path-file-directory.map.json",
+      "sha256": "23f760769f4cc6d13605d46818fa904fb8471d5669c99428b8a6197f81f0e911",
+      "expect": {
+        "code": "path.alias",
+        "jsonPath": "$.assets[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/dependency-self.map.json",
+      "sha256": "60f03db82c407db6fc0b9c6249f117125f23c1b4b416e2185ccc7f6ccb61d1cf",
+      "expect": {
+        "code": "dependency.self",
+        "jsonPath": "$.dependencies[0].id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/dependency-duplicate.map.json",
+      "sha256": "17377625364acd6c3bbc1a2c7a1959ac148fdb22379ea791bcb97968b2987eb5",
+      "expect": {
+        "code": "dependency.duplicate",
+        "jsonPath": "$.dependencies[2].id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/dependency-extension.map.json",
+      "sha256": "3efc3e8c22512d162e974e5a40c5337a8765c243b7e7c513c8aed5fe1befc58a",
+      "expect": {
+        "code": "dependency.extension",
+        "jsonPath": "$.dependencies[1].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/dependency-kind.map.json",
+      "sha256": "acf58e551a339e03d12588300de2c1a0ee9f1b5e9e4239ac92b226283eecc2af",
+      "expect": {
+        "code": "dependency.enum",
+        "jsonPath": "$.dependencies[0].kind"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/feature-unknown.map.json",
+      "sha256": "141d1332b2705b46ca7232ae9018de1f4f4171d8944628465c1c0f731a652e78",
+      "expect": {
+        "code": "feature.unsupported",
+        "jsonPath": "$.requiredFeatures[2]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/feature-version-unknown.map.json",
+      "sha256": "ff7f4fbda97ebf9964df25be9d405b5f065f0deed2bfac7543cd729cb6b4d96f",
+      "expect": {
+        "code": "feature.unsupported",
+        "jsonPath": "$.requiredFeatures[1]"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/feature-duplicate.map.json",
+      "sha256": "47e0060de2ea86ff761c96241469c0c296e6748ba3831de3f23614bbad457f2d",
+      "expect": {
+        "code": "feature.duplicate",
+        "jsonPath": "$.requiredFeatures[2].key"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/collision-contract.map.json",
+      "sha256": "a54f58baaa4733bde330bc339ad0170d50383e5b1f61f15597cc1aaba605d304",
+      "expect": {
+        "code": "collision.unsupported",
+        "jsonPath": "$.collisionContract"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-extension.map.json",
+      "sha256": "526cc4620526fb685ac666611b24c106d47558740277d0c37325131c21448df8",
+      "expect": {
+        "code": "asset.extension",
+        "jsonPath": "$.assets[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-media-type.map.json",
+      "sha256": "abf422d6eb1b64583bf99742442c25aceb520fc67a9ea71919a5a2c5492b6238",
+      "expect": {
+        "code": "asset.enum",
+        "jsonPath": "$.assets[0].mediaType"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-raster-size.map.json",
+      "sha256": "bf15b5c3df4da021f44ea67ebecda2be208e795c81de2eb60e222e094bbedac2",
+      "expect": {
+        "code": "asset.size",
+        "jsonPath": "$.assets[0].size"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-audio-size.map.json",
+      "sha256": "b57855c1a36145985c44cccd4aff7593bc55d3256aefef90c747774a5195b7fc",
+      "expect": {
+        "code": "asset.size",
+        "jsonPath": "$.assets[0].size"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-scale-quantum.map.json",
+      "sha256": "f24054848533c178cdbc1c38de87d70c78a71e68c70c117243e5a15998aad83f",
+      "expect": {
+        "code": "asset-scale.multiple-of",
+        "jsonPath": "$.assets[0].wuPerAssetUnit"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-duplicate-id.map.json",
+      "sha256": "734e55ffbc90feb1466cd99bcb023d98289879a2bd863d2db10144c6a97ee05b",
+      "expect": {
+        "code": "id.duplicate",
+        "jsonPath": "$.assets[1].id"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/asset-script-path.map.json",
+      "sha256": "8e1e7cd6b241b116639b1249f9ee8e8ad0569014fbd400f292fd0893367cb9d7",
+      "expect": {
+        "code": "path.pattern",
+        "jsonPath": "$.assets[0].path"
+      }
+    },
+    {
+      "file": "conformance/map-header/invalid/json-invalid-utf8.map.json",
+      "sha256": "3832cafa703b591a26bc74d424671a9c76462e354795668f13bef13c1509fae8",
+      "expect": {
+        "code": "json.invalid-utf8",
+        "jsonPath": "$"
+      }
+    }
+  ]
+}

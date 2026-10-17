@@ -1,0 +1,399 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:maplab:schema:maplab.map:1",
+  "title": "maplab.map v1: header and base subset",
+  "description": "Published by ML-003 from the R1 contract. Closed header, identity, coordinate, bounds, dependency and asset rules. Geometry, layer, gameplay, camera, environment and navigation members are typed only and are validated from ML-004 to ML-006. Every reference is local; validators must never fetch a schema.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "maplab.map"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "requiredFeatures": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/contract-ref"
+      }
+    },
+    "coordinates": {
+      "$ref": "#/$defs/coordinates"
+    },
+    "bounds": {
+      "$ref": "#/$defs/rect"
+    },
+    "collisionContract": {
+      "$ref": "#/$defs/contract-ref"
+    },
+    "dependencies": {
+      "type": "array",
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/dependency"
+      }
+    },
+    "assets": {
+      "type": "array",
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/asset"
+      }
+    },
+    "presentations": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "layers": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "terrain": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "visuals": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "materials": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "bodies": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "footholds": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "traversals": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "regions": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "entities": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "waypoints": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "routes": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "triggers": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "encounters": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "camera": {
+      "$ref": "#/$defs/deferred-object"
+    },
+    "environment": {
+      "$ref": "#/$defs/deferred-object"
+    },
+    "navigation": {
+      "$ref": "#/$defs/deferred-object"
+    },
+    "flags": {
+      "$ref": "#/$defs/deferred-array"
+    },
+    "prefabPlacements": {
+      "$ref": "#/$defs/deferred-array"
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "id",
+    "metadata",
+    "requiredFeatures",
+    "coordinates",
+    "bounds",
+    "collisionContract",
+    "dependencies",
+    "assets",
+    "presentations",
+    "layers",
+    "terrain",
+    "visuals",
+    "materials",
+    "bodies",
+    "footholds",
+    "traversals",
+    "regions",
+    "entities",
+    "waypoints",
+    "routes",
+    "triggers",
+    "encounters",
+    "camera",
+    "environment",
+    "navigation",
+    "flags",
+    "prefabPlacements"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "description": "Persistent ID: unique across a map's object collections; document IDs unique across a bundle.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{0,95}$"
+    },
+    "key": {
+      "description": "Catalog and contract key; same grammar as IDs.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{0,95}$"
+    },
+    "coordinate": {
+      "description": "World units on the 1/16 WU quantum within ±131,072 WU (2^17).",
+      "type": "number",
+      "multipleOf": 0.0625,
+      "minimum": -131072,
+      "maximum": 131072
+    },
+    "length": {
+      "description": "Positive length on the 1/16 WU quantum, at most 262,144 WU (2^18).",
+      "type": "number",
+      "multipleOf": 0.0625,
+      "exclusiveMinimum": 0,
+      "maximum": 262144
+    },
+    "rect": {
+      "description": "x, y, width, height in WU; the far edges must also stay within range.",
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/coordinate"
+        },
+        {
+          "$ref": "#/$defs/coordinate"
+        },
+        {
+          "$ref": "#/$defs/length"
+        },
+        {
+          "$ref": "#/$defs/length"
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "ticks": {
+      "description": "Duration in integer ticks at the declared 60 Hz.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "path": {
+      "description": "Bundle-root-relative POSIX path of portable filename characters; reserved device names and case aliases are semantic errors.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[A-Za-z0-9_](?:[A-Za-z0-9._-]*[A-Za-z0-9_-])?(?:/[A-Za-z0-9_](?:[A-Za-z0-9._-]*[A-Za-z0-9_-])?)*$"
+    },
+    "contract-ref": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/key"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "key",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 4096
+        },
+        "authors": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "authors",
+        "license",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "coordinates": {
+      "type": "object",
+      "properties": {
+        "units": {
+          "const": "WU"
+        },
+        "x": {
+          "const": "right"
+        },
+        "y": {
+          "const": "down"
+        },
+        "rotation": {
+          "const": "clockwiseDegrees"
+        },
+        "quantum": {
+          "const": 0.0625
+        },
+        "ticksPerSecond": {
+          "const": 60
+        }
+      },
+      "required": [
+        "units",
+        "x",
+        "y",
+        "rotation",
+        "quantum",
+        "ticksPerSecond"
+      ],
+      "additionalProperties": false
+    },
+    "dependency": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "map",
+            "tileset",
+            "prefab",
+            "movement",
+            "catalog",
+            "riglab"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "path",
+        "required"
+      ],
+      "additionalProperties": false
+    },
+    "asset": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "mediaType": {
+          "enum": [
+            "image/png",
+            "image/webp",
+            "image/svg+xml",
+            "audio/ogg",
+            "audio/wav"
+          ]
+        },
+        "wuPerAssetUnit": {
+          "$ref": "#/$defs/asset-scale"
+        },
+        "size": {
+          "$ref": "#/$defs/asset-size"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "mediaType",
+        "wuPerAssetUnit",
+        "size"
+      ],
+      "additionalProperties": false
+    },
+    "asset-scale": {
+      "description": "WU per asset pixel or SVG viewBox unit; positive scale on the 1/65536 quantum.",
+      "type": "number",
+      "multipleOf": 0.0000152587890625,
+      "exclusiveMinimum": 0,
+      "maximum": 131072
+    },
+    "asset-size": {
+      "description": "Decoded pixel size, SVG viewBox size, or [0, 0] for audio.",
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/asset-extent"
+        },
+        {
+          "$ref": "#/$defs/asset-extent"
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "asset-extent": {
+      "type": "number",
+      "multipleOf": 0.0625,
+      "minimum": 0,
+      "maximum": 131072
+    },
+    "deferred-array": {
+      "$comment": "Contents validated from ML-004 to ML-006; ML-003 checks only the JSON type.",
+      "type": "array"
+    },
+    "deferred-object": {
+      "$comment": "Contents validated from ML-004 to ML-006; ML-003 checks only the JSON type.",
+      "type": "object"
+    }
+  }
+}

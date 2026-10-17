@@ -68,8 +68,9 @@ HTTP 403 ("Resource not accessible by integration"). The independent admin must 
 `npm run policy:apply` and `npm run policy:check` using authorized `gh` access,
 keeping public visibility. Existing squash-only, automatic branch deletion and
 immutable releases were applied and read back earlier, but do not protect main/tags.
-ML-002 cannot merge until both rulesets and all effective enforcement are
-independently applied/read back and all delivery/review gates pass.
+On 17 October 2026 the owner's admin `gh` applied both rulesets, `MapLab main`
+(25315600) and `MapLab immutable versions` (25315601), and `npm run policy:check`
+read them back active with no bypass before ML-002's protected squash delivery.
 
 ## Merge and records
 
@@ -101,4 +102,4 @@ failed predecessor, main CI, access or protection gate; preserve work and eviden
 
 `implementation_plan.md` is the sole current/future task queue. Each reserved J2 ID retains exact scope, exclusions and acceptance and now has executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `docs/IMPLEMENTATION-ROADMAP.md` is a historical pointer only. `scripts/check-queue.mjs` enforces sequential first-open selection, uninterrupted delivered predecessor chain, retirement of completed IDs, future preservation, exact J2 fields, section link validity and no duplicate legacy roadmap definitions. `check:change` and canonical `check` invoke it. Synthetic next-task and malformed-queue tests demonstrate generic selection rather than ML-002-only parsing.
 
-This is governance-only ML-002 scope; the adopted full specification, world shell, lockfile, ML-001 evidence and all later task implementations remain untouched.
+ML-002 delivered this governance scope. Later tasks change it only through their own controlled records; ML-003 generalized the queue tests to follow the delivery chain.

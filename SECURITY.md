@@ -14,7 +14,9 @@ checks through `npm run security`. Any low-or-higher vulnerability or failed
 verification blocks delivery. See [delivery gates](docs/DELIVERY-GATES.md).
 Required-check enforcement additionally needs successful live policy read-back.
 
-Future imports must be bounded, data-only, and closed. Validate duplicate keys,
+ML-003 adds the first input surface, a bounded parser that rejects duplicate keys,
+unsafe paths and unknown fields before semantic loading. Future imports must be
+bounded, data-only, and closed. Validate duplicate keys,
 versions, references, path aliases/traversal, archive inventories, hashes, image
 budgets, and inert structural SVG allowlists before replacing active documents.
 Never evaluate imported strings, execute scripts, fetch arbitrary asset URLs, or

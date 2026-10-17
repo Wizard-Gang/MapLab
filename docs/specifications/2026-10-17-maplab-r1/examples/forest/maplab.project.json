@@ -1,0 +1,67 @@
+{
+  "format": "maplab.project",
+  "version": 1,
+  "id": "project.forest-example",
+  "name": "Forest example library",
+  "documents": [
+    {
+      "id": "catalog.core",
+      "kind": "catalog",
+      "path": "catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "id": "map.clearing",
+      "kind": "map",
+      "path": "maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a"
+    },
+    {
+      "id": "map.forest",
+      "kind": "map",
+      "path": "maps/forest.map.json",
+      "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b"
+    },
+    {
+      "id": "movement.flyer",
+      "kind": "movement",
+      "path": "movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "id": "movement.ground",
+      "kind": "movement",
+      "path": "movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "id": "movement.player",
+      "kind": "movement",
+      "path": "movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "id": "prefab.tree",
+      "kind": "prefab",
+      "path": "prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "id": "tileset.forest",
+      "kind": "tileset",
+      "path": "tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    }
+  ],
+  "defaults": {
+    "tileSize": [
+      32,
+      32
+    ],
+    "snap": [
+      16,
+      16
+    ],
+    "movementId": "movement.player"
+  }
+}

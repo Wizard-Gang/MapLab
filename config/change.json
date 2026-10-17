@@ -1,7 +1,7 @@
 {
-  "id": "ML-002",
-  "type": "SECURITY",
-  "title": "[ML-002] [SECURITY] Enforce delivery and repository gates",
-  "record": "docs/changes/ML-002.md",
-  "branch": "ml-002-ci-security-protections"
+  "id": "ML-003",
+  "type": "FEATURE",
+  "title": "[ML-003] [FEATURE] Adopt R1 and add base schemas and bounded parser",
+  "record": "docs/changes/ML-003.md",
+  "branch": "ml-003-base-schemas-parser"
 }
