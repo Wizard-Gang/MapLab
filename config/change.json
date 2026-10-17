@@ -1,7 +1,7 @@
 {
-  "id": "ML-001",
-  "type": "CHORE",
-  "title": "[ML-001] [CHORE] Establish governed planning foundation",
-  "record": "docs/changes/ML-001.md",
-  "bootstrap": "empty-repository-root-commit"
+  "id": "ML-002",
+  "type": "SECURITY",
+  "title": "[ML-002] [SECURITY] Enforce delivery and repository gates",
+  "record": "docs/changes/ML-002.md",
+  "branch": "ml-002-ci-security-protections"
 }

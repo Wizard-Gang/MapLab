@@ -1,7 +1,7 @@
 # MapLab
 
 MapLab is a planned standalone world authoring application. Version `0.1.0` is
-unreleased. The current implementation is **ML-001 only**: a static React page
+unreleased. The product implementation is a static React page
 showing the name and planning-stage status, plus governed tooling and documentation.
 
 Use **Node 26.10.0** and **npm 12.1.0**:
@@ -25,12 +25,14 @@ The [architecture](docs/ARCHITECTURE.md), [formats](docs/FORMATS.md), and
 contracts describe future work; no map schema, editor, importer, physics,
 navigation, persistence, or engine integration is implemented.
 
-See [the active task](implementation_plan.md), [reserved roadmap](docs/IMPLEMENTATION-ROADMAP.md),
+See [the permanent current/future queue](implementation_plan.md),
 [contribution rules](CONTRIBUTING.md), and [ML-001 evidence](docs/changes/ML-001.md).
 Desired repository protections are committed in
 [`config/github-repository-settings.json`](config/github-repository-settings.json).
-They are **not evidence of live enforcement**; applying and reading them back is
-reserved for ML-002.
+They are **not evidence of live enforcement**. ML-002 adds the
+[delivery gates](docs/DELIVERY-GATES.md), online `npm run security` and
+authenticated `npm run policy:check`. MapLab is now public, but its required main/tag rulesets are not yet installed;
+ML-002 cannot complete until authenticated administrative application and read-back.
 
 Original code is MIT licensed. See [provenance](docs/PROVENANCE.md) for the separate
 CC0 policy for owned numeric fixtures and the status of third-party dependencies.

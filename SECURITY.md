@@ -9,8 +9,10 @@ Dependency versions and registry integrity are locked. `.npmrc` denies dependenc
 lifecycle scripts; `config/lifecycle-scripts.json` records the empty allowlist.
 Canonical checks are credential-free and offline after installation. CI uses
 SHA-pinned Actions, read-only contents permission, and no deployment credentials.
-Dedicated online security checks and required-check enforcement are reserved for
-ML-002; initial foundation CI is not a claim of completed security hardening.
+ML-002 adds dedicated online vulnerability and registry signature/provenance
+checks through `npm run security`. Any low-or-higher vulnerability or failed
+verification blocks delivery. See [delivery gates](docs/DELIVERY-GATES.md).
+Required-check enforcement additionally needs successful live policy read-back.
 
 Future imports must be bounded, data-only, and closed. Validate duplicate keys,
 versions, references, path aliases/traversal, archive inventories, hashes, image

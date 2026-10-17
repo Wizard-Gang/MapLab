@@ -1,25 +1,12 @@
 # MapLab repository instructions
 
-Read this file, `implementation_plan.md`, `docs/CHANGE-MANAGEMENT.md`, and the
-relevant architecture authorities before changing code. User instructions govern
-task scope. This repository is independent of RigLab and Hexframe.
+Read `AGENTS.md`, [implementation_plan.md](implementation_plan.md), [change management](docs/CHANGE-MANAGEMENT.md), [delivery gates](docs/DELIVERY-GATES.md), and relevant design specification sections before editing. MapLab is standalone; RigLab is optional presentation, Hexframe is not a dependency.
 
-- Execute only the controlled task in the active queue. Reserve future work in
-  `docs/IMPLEMENTATION-ROADMAP.md`; do not implement ahead of that queue. Research
-  and review may run concurrently; product implementation follows the roadmap.
-- Keep one `ML-###` task per branch, scoped PR, and squash commit after bootstrap.
-  Use `[ML-###] [TYPE] Imperative summary` and the PR template. IDs are permanent.
-- Use Node 26.10.0, npm 12.1.0, exact dependencies, and the committed lockfile.
-  Dependency lifecycle scripts are denied; the explicit allowlist is empty.
-- Run clean `npm ci` and `npm run check` before delivery. Record failures honestly.
-  Canonical checks require no credentials, external libraries, or user assets.
-- Preserve source/derived/runtime boundaries, closed data contracts, and qualified
-  navigation claims. Follow the adopted specification for future implementation.
-- Do not copy third-party code or assets. Record provenance and license terms.
-- Ordinary tasks do not release, deploy, change visibility, or apply live settings.
-  Those actions need their own authorized scope. ML-002 owns protection read-back.
-- Only ML-001 in a truly empty repository may create an initial root commit on
-  main after clean checks. Verify push CI and record its exact SHA externally;
-  all later changes follow PR/squash flow. Never use this exception again.
-
-ML-001 implements only governance, tooling, and the static planning shell.
+- **Authority split:** [full specification](docs/specifications/2026-10-16-maplab.md) alone governs design/contracts/fixtures/limits. `implementation_plan.md` alone governs **current and future delivery**. `docs/IMPLEMENTATION-ROADMAP.md` is a compatibility pointer, never an executable second queue.
+- **First-open workflow:** compare contiguous completed `docs/deliveries.json` with reserved J2 IDs; select the first undelivered task (currently ML-002) from the active block only. Keep all later reserved IDs ordered and fully scoped in the future block. One controlled task, branch, PR and squash delivery at a time; no early ML-003 or parallel implementation.
+- **Retire after evidence:** once protected squash and resulting-main CI are confirmed, at the next activation append verified delivery evidence and move only the completed task to historical records, promote the first future ID, and leave every subsequent task untouched. Never reuse, renumber, drop or modify IDs/acceptance to evade failure. Tests and `npm run check:change` enforce J2 traceability, queue ordering, predecessor completeness and future preservation.
+- Title `[ML-###] [FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY] Imperative summary`; PR sections follow `docs/CHANGE-MANAGEMENT.md`. The ML-001 root exception is historical and closed.
+- Use exact Node **26.10.0** / npm **12.1.0**, lockfile and lifecycle-script denial. Clean `npm ci` then `npm run check`; `npm run security` is separately online. No borrowed assets or executable schema extensions.
+- Preserve source/derived/runtime separation, finite-body witness and qualified nav claims, semantic reference/ID stability, and owned CC0 fixture provenance. Add negative tests and independent-consumer proofs per task.
+- Before merging verify fresh exact-head `verify`, `change-id`, `security`, independent review, `npm run policy:check`, `npm run delivery:verify -- --pr NUMBER --head SHA`, and post-squash main CI. Stop rather than bypass unavailable protections.
+- ML-002 owns governance/settings read-back only. The repository is now public but both required main/tag rulesets are absent; **do not merge, deploy or release** until authenticated policy application/read-back and delivery gates pass. ML-044 alone owns first source release.

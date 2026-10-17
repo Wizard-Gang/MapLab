@@ -37,5 +37,5 @@ bounded inert assets, canonical domain ordering and hashes are required. No host
 write authority or implicit gameplay server is part of the architecture.
 
 Specification C–I and K remain the detailed product/data/controller/validation
-authority. The [roadmap](IMPLEMENTATION-ROADMAP.md) preserves their delivery order.
+authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order; the former roadmap file is only a pointer.
 No performance target or conformance fixture is claimed to pass before its task.
