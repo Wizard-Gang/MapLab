@@ -42,3 +42,17 @@ phase bounds and tile permissions. A separate Node process reads final forest
 JSON and independently resolves solid-edge endpoints using only the published
 contracts/schema modules. Node's built-in TypeScript stripping prepares that
 consumer; the TypeScript compiler API and editor runtime are not imported.
+
+## `movement/` (ML-005)
+
+The index pins unchanged R1 player/ground/flyer source/export bytes plus owned
+valid/invalid examples for every family and version. Valid cases record expected
+unsupported diagnostics separately from parsing errors. Capsules, center-foot,
+extra jumps and advanced solvers never certify movement.
+
+Valid cases also pin canonical-profile SHA-256 vectors independently generated
+from ASCII-key JSON, normalized domain sets and separately hashed UTF-8 bytes.
+Tests compare Web Crypto and Node crypto, same-version coefficient/effective
+profile edits, Unicode/JCS boundaries and semantic reorderings. A separate Node
+process reads final profile bytes and computes the digest without editor imports.
+Numerical controller traces remain their reserved tasks.

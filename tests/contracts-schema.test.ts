@@ -85,7 +85,7 @@ test('src/contracts stays pure: relative imports and the local schema only, no I
     const source = readFileSync(join(dir, file), 'utf8');
     for (const [, specifier] of source.matchAll(/^(?:import|export)\b[^;]*?\bfrom\s+'([^']+)'/gm)) {
       specifiers++;
-      expect(/^\.\.\/\.\.\/schemas\/maplab\.(?:map|tileset|prefab)\.v1\.schema\.json$/.test(specifier ?? '') || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
+      expect(/^\.\.\/\.\.\/schemas\/maplab\.(?:map|tileset|prefab|movement)\.v1\.schema\.json$/.test(specifier ?? '') || specifier === '../../contracts/maplab.reference-controller.v1.capabilities.json' || /^\.\/[a-z-]+$/.test(specifier ?? ''), `${file}: ${specifier}`).toBe(true);
     }
     expect(source, file).not.toMatch(/\bfetch\(|XMLHttpRequest|WebSocket|\bimport\(|\brequire\(|process\.|document\.|window\.|localStorage|indexedDB/);
     expect(source.replaceAll(SCHEMA_DIALECT, ''), file).not.toMatch(/https?:\/\//);
@@ -110,4 +110,18 @@ test('oneOf validates every branch, rejects ambiguity and preserves discriminate
   expect(refusal(tiny({ oneOf: [{ unknown: true }] }))).toBe('schema.unsupported-keyword');
   expect(refusal(tiny({ oneOf: [{ $ref: 'https://example.com/schema' }] }))).toBe('schema.remote-ref');
   expect(evaluate(schema, { shape: { kind: 'rect' } }, 1)).toHaveLength(1);
+});
+
+test('bounded typed dictionaries validate names and values without permitting unrestricted payloads', () => {
+  const schema = compileSchema(tiny({ maxProperties: 2, propertyNames: { minLength: 1, maxLength: 8 },
+    additionalProperties: { type: 'number', minimum: 0 } }), 'params');
+  expect(evaluate(schema, { x: 1 })).toEqual([]);
+  expect(evaluate(schema, { x: { code: 'run' } }).map((d) => d.code)).toEqual(['params.type']);
+  expect(evaluate(schema, { x: NaN }).map((d) => d.code)).toEqual(['params.type']);
+  expect(evaluate(schema, { x: Infinity }).map((d) => d.code)).toEqual(['params.type']);
+  expect(evaluate(schema, { '': 1 }).map((d) => d.code)).toEqual(['params.min-length']);
+  expect(evaluate(schema, { a: 1, b: 2, c: 3 }).map((d) => d.code)).toEqual(['params.max-properties']);
+  expect(refusal(tiny({ additionalProperties: { $ref: 'https://example.com/schema' } }))).toBe('schema.remote-ref');
+  expect(refusal(tiny({ propertyNames: 3 }))).toBe('schema.invalid');
+  expect(refusal(tiny({ maxProperties: -1 }))).toBe('schema.invalid');
 });

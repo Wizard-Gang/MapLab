@@ -25,6 +25,8 @@ export const requiredFiles = [
   'AGENTS.md', 'implementation_plan.md', 'README.md', 'CONTRIBUTING.md',
   'SECURITY.md', 'LICENSE', 'docs/ARCHITECTURE.md', 'docs/FORMATS.md',
   'docs/PHYSICS-CONFORMANCE.md', 'docs/CHANGE-MANAGEMENT.md',
+  'docs/CONTROLLER-CONTRACT.md', 'schemas/maplab.movement.v1.schema.json',
+  'contracts/maplab.reference-controller.v1.capabilities.json',
   'docs/RELEASE-MANAGEMENT.md', 'docs/IMPLEMENTATION-ROADMAP.md',
   'docs/PROVENANCE.md', 'docs/specifications/2026-10-16-maplab.md',
   'config/github-repository-settings.json', 'config/lifecycle-scripts.json',

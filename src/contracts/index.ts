@@ -8,5 +8,8 @@ export {
 } from './map-header';
 export { SCHEMA_DIALECT, SchemaError, canonical, compileSchema, evaluate, type CompiledSchema } from './schema';
 export * from './geometry';
+export * from './movement';
+export * from './capabilities';
+export type { Ability, MovementDocument } from './movement-types';
 export type { Anchor, BodyShape, RegionShape, Vec2, Transform } from './common-types';
 export type { Layer, VisualSource, Visual, Material, Motion, CollisionBody, EdgeRef, EndpointLink, Foothold, AccessPoint, Traversal, Cell, TerrainChunk, TerrainLayer } from './geometry-types';

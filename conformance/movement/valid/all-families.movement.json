@@ -1,0 +1,231 @@
+{
+  "format": "maplab.movement",
+  "version": 1,
+  "id": "movement.ground",
+  "name": "Ground-only enemy",
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1
+  },
+  "units": {
+    "subunitsPerWU": 256,
+    "ticksPerSecond": 60
+  },
+  "collider": {
+    "kind": "rect",
+    "width": 24,
+    "height": 40
+  },
+  "support": "fullFootprint",
+  "grabHeight": 32,
+  "category": "actor",
+  "mask": [
+    "world"
+  ],
+  "ground": {
+    "walkSpeed": 256,
+    "runSpeed": 256,
+    "acceleration": 64,
+    "braking": 64,
+    "maxSlope": {
+      "rise": 7,
+      "run": 10
+    },
+    "uphill": {
+      "num": 1,
+      "den": 1
+    },
+    "downhill": {
+      "num": 1,
+      "den": 1
+    },
+    "snapDistance": 1024
+  },
+  "air": {
+    "gravity": 96,
+    "maxFall": 3072,
+    "acceleration": 0,
+    "maxSpeed": 0
+  },
+  "drop": {
+    "canDrop": false,
+    "timeoutTicks": 0
+  },
+  "abilities": [
+    {
+      "kind": "jump",
+      "version": 1,
+      "impulse": 2112,
+      "holdTicks": 0,
+      "holdGravity": 96,
+      "release": {
+        "num": 1,
+        "den": 1
+      },
+      "airJumps": 0,
+      "airborneImpulse": 2112
+    },
+    {
+      "kind": "climb",
+      "version": 1,
+      "speed": 512,
+      "ladder": true,
+      "rope": true,
+      "jumpOff": [
+        512,
+        -1024
+      ]
+    },
+    {
+      "kind": "dash",
+      "version": 1,
+      "mode": "ground",
+      "speed": 2048,
+      "durationTicks": 8,
+      "cooldownTicks": 30,
+      "charges": 2,
+      "reset": "ground",
+      "gravity": {
+        "num": 0,
+        "den": 1
+      },
+      "collision": "stop"
+    },
+    {
+      "kind": "wall",
+      "version": 1,
+      "permissions": [
+        "slide",
+        "jump",
+        "climb"
+      ],
+      "slideMaxSpeed": 512,
+      "jumpImpulse": [
+        768,
+        -1536
+      ],
+      "climbSpeed": 256,
+      "staminaTicks": 90
+    },
+    {
+      "kind": "ledge",
+      "version": 1,
+      "grabReach": 16,
+      "climbTicks": 24,
+      "action": {
+        "key": "core.ledge.climb",
+        "version": 1
+      }
+    },
+    {
+      "kind": "swim",
+      "version": 1,
+      "speed": 512,
+      "acceleration": 32,
+      "buoyancy": 64,
+      "breachImpulse": 1024
+    },
+    {
+      "kind": "fly",
+      "version": 1,
+      "speed": 512,
+      "acceleration": 32,
+      "turnAcceleration": 32,
+      "hover": true
+    },
+    {
+      "kind": "grapple",
+      "version": 1,
+      "range": 256,
+      "reelSpeed": 256,
+      "lengthRange": [
+        16,
+        256
+      ],
+      "swingGravity": {
+        "num": 1,
+        "den": 1
+      },
+      "solver": {
+        "key": "game.grapple",
+        "version": 1
+      }
+    },
+    {
+      "kind": "teleport",
+      "version": 1,
+      "range": 256,
+      "cooldownTicks": 60,
+      "target": "lineOfSight",
+      "clearance": "fullBody"
+    },
+    {
+      "kind": "launch",
+      "version": 1,
+      "maxImpulse": 4096,
+      "airControl": {
+        "num": 1,
+        "den": 2
+      },
+      "canRecover": true
+    },
+    {
+      "kind": "modifier",
+      "version": 1,
+      "allowed": [
+        {
+          "key": "core.slow",
+          "version": 1
+        },
+        {
+          "key": "core.fast",
+          "version": 1
+        }
+      ],
+      "stacking": "multiplyThenClamp"
+    },
+    {
+      "kind": "registered",
+      "version": 1,
+      "definition": {
+        "key": "game.special",
+        "version": 1,
+        "params": {
+          "strength": 2,
+          "enabled": true,
+          "label": "Special",
+          "target": {
+            "ref": {
+              "kind": "entity",
+              "id": "entity.target",
+              "mapId": "map.forest"
+            }
+          }
+        }
+      },
+      "solver": {
+        "key": "game.special-solver",
+        "version": 1
+      }
+    },
+    {
+      "kind": "dash",
+      "version": 1,
+      "mode": "air",
+      "speed": 2048,
+      "durationTicks": 8,
+      "cooldownTicks": 30,
+      "charges": 2,
+      "reset": "timer",
+      "gravity": {
+        "num": 0,
+        "den": 1
+      },
+      "collision": "stop"
+    }
+  ],
+  "abilityTags": [],
+  "forbiddenMaterialTags": [
+    "hazard"
+  ]
+}

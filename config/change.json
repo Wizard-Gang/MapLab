@@ -1,7 +1,7 @@
 {
-  "id": "ML-004",
+  "id": "ML-005",
   "type": "FEATURE",
-  "title": "[ML-004] [FEATURE] Add geometry and reusable content contracts",
-  "record": "docs/changes/ML-004.md",
-  "branch": "ml-004-geometry-contracts"
+  "title": "[ML-005] [FEATURE] Publish movement and controller contracts",
+  "record": "docs/changes/ML-005.md",
+  "branch": "ml-005-movement-contracts"
 }

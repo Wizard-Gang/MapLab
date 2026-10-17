@@ -1,0 +1,86 @@
+{
+  "format": "maplab.movement",
+  "version": 1,
+  "id": "movement.player",
+  "name": "Reference player",
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1
+  },
+  "units": {
+    "subunitsPerWU": 256,
+    "ticksPerSecond": 60
+  },
+  "collider": {
+    "kind": "rect",
+    "width": 24,
+    "height": 48
+  },
+  "support": "fullFootprint",
+  "grabHeight": 40,
+  "category": "actor",
+  "mask": [
+    "world"
+  ],
+  "ground": {
+    "walkSpeed": 512,
+    "runSpeed": 1024,
+    "acceleration": 64,
+    "braking": 96,
+    "maxSlope": {
+      "rise": 1,
+      "run": 1
+    },
+    "uphill": {
+      "num": 1,
+      "den": 1
+    },
+    "downhill": {
+      "num": 1,
+      "den": 1
+    },
+    "snapDistance": 1024
+  },
+  "air": {
+    "gravity": 96,
+    "maxFall": 3072,
+    "acceleration": 48,
+    "maxSpeed": 1024
+  },
+  "drop": {
+    "canDrop": true,
+    "timeoutTicks": 30
+  },
+  "abilities": [
+    {
+      "kind": "jump",
+      "version": 1,
+      "impulse": 2112,
+      "holdTicks": 0,
+      "holdGravity": 96,
+      "release": {
+        "num": 2,
+        "den": 1
+      },
+      "airJumps": 0,
+      "airborneImpulse": 2112
+    },
+    {
+      "kind": "climb",
+      "version": 1,
+      "speed": 512,
+      "ladder": true,
+      "rope": true,
+      "jumpOff": [
+        512,
+        -1024
+      ]
+    }
+  ],
+  "abilityTags": [
+    "locomotion.jump",
+    "climb.ladder",
+    "climb.rope"
+  ],
+  "forbiddenMaterialTags": []
+}

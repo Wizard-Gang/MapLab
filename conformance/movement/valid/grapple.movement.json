@@ -1,0 +1,78 @@
+{
+  "format": "maplab.movement",
+  "version": 1,
+  "id": "movement.grapple",
+  "name": "Ground-only enemy",
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1
+  },
+  "units": {
+    "subunitsPerWU": 256,
+    "ticksPerSecond": 60
+  },
+  "collider": {
+    "kind": "rect",
+    "width": 24,
+    "height": 40
+  },
+  "support": "fullFootprint",
+  "grabHeight": 32,
+  "category": "actor",
+  "mask": [
+    "world"
+  ],
+  "ground": {
+    "walkSpeed": 256,
+    "runSpeed": 256,
+    "acceleration": 64,
+    "braking": 64,
+    "maxSlope": {
+      "rise": 7,
+      "run": 10
+    },
+    "uphill": {
+      "num": 1,
+      "den": 1
+    },
+    "downhill": {
+      "num": 1,
+      "den": 1
+    },
+    "snapDistance": 1024
+  },
+  "air": {
+    "gravity": 96,
+    "maxFall": 3072,
+    "acceleration": 0,
+    "maxSpeed": 0
+  },
+  "drop": {
+    "canDrop": false,
+    "timeoutTicks": 0
+  },
+  "abilities": [
+    {
+      "kind": "grapple",
+      "version": 1,
+      "range": 256,
+      "reelSpeed": 256,
+      "lengthRange": [
+        16,
+        256
+      ],
+      "swingGravity": {
+        "num": 1,
+        "den": 1
+      },
+      "solver": {
+        "key": "game.grapple",
+        "version": 1
+      }
+    }
+  ],
+  "abilityTags": [],
+  "forbiddenMaterialTags": [
+    "hazard"
+  ]
+}
