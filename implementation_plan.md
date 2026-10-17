@@ -4,7 +4,7 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** only ML-001 has delivered. ML-002 is in draft PR #1 and **blocked** by provider private-repository main/tag protection (HTTP 403); passing CI is not delivery. There is no release or deployment. ML-003–044 are reserved, not active.
+**Completion status:** only ML-001 has delivered. ML-002 is in draft PR #1 and **blocked** by absent main/tag rulesets after the repository changed to public; the GitHub App cannot apply administrator settings. Passing CI is not delivery. There is no release or deployment. ML-003–044 are reserved, not active.
 
 ## Completed history
 

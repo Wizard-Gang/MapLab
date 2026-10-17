@@ -43,7 +43,7 @@ are read as data from the event JSON rather than interpolated into shell command
 ## Live policy
 
 `npm run policy:apply` is restricted to ML-002 and requires authenticated `gh`
-administration access. It preserves private visibility, applies squash-only and
+administration access. It preserves the configured public visibility (without changing visibility), applies squash-only and
 automatic branch deletion, enables release immutability, and manages two active
 no-bypass rulesets. Main requires PRs, linear history, resolved review threads and
 strict `verify`/`change-id`/`security` checks from the observed GitHub Actions app
@@ -58,13 +58,18 @@ policy, insufficient plan or access. It prints provider evidence for archival.
 The settings JSON always represents desired policy; it is never enforcement proof.
 Inherited or additional policies remain intact and may impose stronger controls.
 
-On 16 October 2026, read-back found Wizard-Gang on the Free organization plan.
-Both ruleset and branch-protection endpoints returned HTTP 403 for this private
-repository. GitHub Team or Enterprise capability is needed. The repository must
-remain private. Available squash-only, automatic branch deletion and immutable
-release settings were applied and read back successfully; this partial result
-does not protect main/tags. ML-002 cannot be merged or called delivered until the capability
-is available, policy is applied and complete read-back passes.
+On 16 October 2026, read-back found Wizard-Gang on the Free organization plan
+and private-repository rulesets returned HTTP 403. On 17 October, live repository
+read-back confirmed the owner changed MapLab to **public**, enabling access to the
+ruleset read endpoint. Its returned list is **empty**: neither required managed
+ruleset is installed. The connected GitHub App can read rulesets but cannot write
+repository administration settings; legacy branch-protection read-back returns
+HTTP 403 ("Resource not accessible by integration"). The independent admin must run
+`npm run policy:apply` and `npm run policy:check` using authorized `gh` access,
+keeping public visibility. Existing squash-only, automatic branch deletion and
+immutable releases were applied and read back earlier, but do not protect main/tags.
+ML-002 cannot merge until both rulesets and all effective enforcement are
+independently applied/read back and all delivery/review gates pass.
 
 ## Merge and records
 

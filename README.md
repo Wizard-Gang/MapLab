@@ -31,8 +31,8 @@ Desired repository protections are committed in
 [`config/github-repository-settings.json`](config/github-repository-settings.json).
 They are **not evidence of live enforcement**. ML-002 adds the
 [delivery gates](docs/DELIVERY-GATES.md), online `npm run security` and
-authenticated `npm run policy:check`. Private rulesets currently require a provider
-plan upgrade before ML-002 can complete.
+authenticated `npm run policy:check`. MapLab is now public, but its required main/tag rulesets are not yet installed;
+ML-002 cannot complete until authenticated administrative application and read-back.
 
 Original code is MIT licensed. See [provenance](docs/PROVENANCE.md) for the separate
 CC0 policy for owned numeric fixtures and the status of third-party dependencies.

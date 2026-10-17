@@ -2,7 +2,7 @@
   "repository": "Wizard-Gang/MapLab",
   "status": "desired-policy; enforcement requires successful provider read-back",
   "defaultBranch": "main",
-  "visibility": "private",
+  "visibility": "public",
   "merge": {
     "allowSquashMerge": true,
     "allowMergeCommit": false,

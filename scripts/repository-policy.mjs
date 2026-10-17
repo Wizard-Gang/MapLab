@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { demand, readJson } from './check-change.mjs';
 
 export function checkPolicyConfig(p) {
-  demand(p.repository === 'Wizard-Gang/MapLab' && p.visibility === 'private' && p.defaultBranch === 'main', 'Repository policy identity disagrees');
+  demand(p.repository === 'Wizard-Gang/MapLab' && p.visibility === 'public' && p.defaultBranch === 'main', 'Repository policy identity disagrees');
   demand(p.merge?.allowSquashMerge === true && p.merge.allowMergeCommit === false
     && p.merge.allowRebaseMerge === false && p.merge.deleteBranchOnMerge === true, 'Squash-only merge policy disagrees');
   demand(p.main?.requirePullRequest === true && p.main.requireCurrentWithMain === true
@@ -82,7 +82,7 @@ export function readPolicy(p) {
   checkPolicyConfig(p);
   const prefix = `repos/${p.repository}`;
   const repo = ghApi(prefix);
-  demand(repo.private === true && repo.visibility === 'private' && repo.default_branch === 'main', 'Live repository must remain private on main');
+  demand(repo.private === false && repo.visibility === p.visibility && repo.default_branch === 'main', 'Live repository must remain public on main');
   requireMatch(repo, { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: false, delete_branch_on_merge: true }, 'repository');
   const summaries = ghApi(`${prefix}/rulesets?includes_parents=true&per_page=100`);
   demand(summaries.length < 100, 'Ruleset pagination requires explicit inspection');
@@ -104,7 +104,7 @@ export function applyPolicy(p) {
   checkPolicyConfig(p);
   const prefix = `repos/${p.repository}`;
   const repo = ghApi(prefix);
-  demand(repo.private === true && repo.visibility === 'private' && repo.default_branch === 'main', 'Refuse to apply to unexpected repository state');
+  demand(repo.private === false && repo.visibility === p.visibility && repo.default_branch === 'main', 'Refuse to apply to unexpected repository state');
   ghApi(prefix, 'PATCH', { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: false, delete_branch_on_merge: true });
   ghApi(`${prefix}/immutable-releases`, 'PUT');
   const summaries = ghApi(`${prefix}/rulesets?includes_parents=false&per_page=100`);

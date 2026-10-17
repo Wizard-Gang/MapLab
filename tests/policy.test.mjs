@@ -15,7 +15,7 @@ test.each([
   ['bypass', (p) => { p.main.bypassActors.push(1); }],
   ['missing check', (p) => { p.main.requiredChecks.pop(); }],
   ['wrong app', (p) => { p.main.checksAppId = 1; }],
-  ['public', (p) => { p.visibility = 'public'; }],
+  ['private', (p) => { p.visibility = 'private'; }],
   ['mutable releases', (p) => { p.releases.immutable = false; }],
 ])('weakened desired policy rejects %s', (_name, corrupt) => {
   const p = structuredClone(policy); corrupt(p); expect(() => checkPolicyConfig(p)).toThrow();
