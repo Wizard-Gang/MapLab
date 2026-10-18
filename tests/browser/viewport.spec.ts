@@ -1,6 +1,6 @@
 // ML-010: actual WebKit/Chromium wheel, pointer capture/cancel, focus, DPR, resize and canvas pixels.
 import { expect, test, type Page } from '@playwright/test';
-import hierarchies from '../../conformance/viewport/hierarchies.json';
+import hierarchies from '../../conformance/viewport/hierarchies.json' with { type: 'json' };
 import { command, libraryFile, nameField, openEditor, openMap, resetLibrary, saveElsewhere } from './support';
 
 const canvas = (page: Page) => page.getByRole('group', { name: 'World canvas', exact: true });
