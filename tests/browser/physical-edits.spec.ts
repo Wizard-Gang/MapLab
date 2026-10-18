@@ -62,3 +62,15 @@ test('mismatched solid/one-way connect and owner edges refuse explicitly without
   await page.getByLabel('Target foothold',{exact:true}).selectOption('fh.slope');await page.getByRole('button',{name:'Snap and connect',exact:true}).click();await expect(notice(page)).toHaveText('Snap and connect footholds');
   await command(page,'Undo').click();await command(page,'Undo').click();await expect(command(page,'Undo')).toBeDisabled();
 });
+
+
+test('named handle coordinates provide atomic keyboard edits; Escape and return drags are no-ops',async({page})=>{
+  await ready(page);await choose(page,'fh.west');const original=libraryFile('maps/forest.map.json');
+  const x=page.getByRole('spinbutton',{name:'Handle fh.west endpoint b X',exact:true});
+  await x.fill('496');await x.press('Escape');await expect(x).toHaveValue('480');await expect(command(page,'Undo')).toBeDisabled();
+  const start=await at(page,480,640);await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(start.x+32*start.z,start.y);await page.mouse.move(start.x,start.y);await page.mouse.up();await expect(command(page,'Undo')).toBeDisabled();
+  await x.fill('496');await x.press('Enter');await expect(prop(page,'b.0')).toHaveValue('496');await expect(notice(page)).toHaveText('Move physical handle');
+  await choose(page,'body.west');await expect(prop(page,'shapes.0.points.1.0')).toHaveValue('496');await command(page,'Undo').click();await expect(prop(page,'shapes.0.rect.2')).toHaveValue('480');await expect(command(page,'Undo')).toBeDisabled();
+  await page.getByRole('spinbutton',{name:'Handle shape.west vertex 1 X',exact:true}).fill('496');await page.getByRole('spinbutton',{name:'Handle shape.west vertex 1 X',exact:true}).press('Enter');await expect(notice(page)).toHaveText('Edit collider shape');
+  await choose(page,'fh.west');await expect(prop(page,'b.0')).toHaveValue('496');await command(page,'Undo').click();await expect(command(page,'Undo')).toBeDisabled();expect(libraryFile('maps/forest.map.json')).toEqual(original);
+});

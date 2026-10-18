@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import type { JsonValue, CollisionBody } from '../src/contracts';
 import { validateSourceGraph } from '../src/contracts';
 import { candidate, editProblems, recordOf } from '../src/editor/editing';
-import { assignSolidEdge, connectFootholds, disconnectFootholds, editShape, foothold, joinFootholds, moveEndpoint, physicalHandles, splitFoothold } from '../src/editor/geometry';
+import { assignSolidEdge, connectFootholds, disconnectFootholds, editShape, foothold, joinFootholds, moveHandle, moveEndpoint, physicalHandles, splitFoothold } from '../src/editor/geometry';
 import { commit, openDocument, undo, redo } from '../src/editor/history';
 import { denormalize, encode, normalize } from '../src/domain/model';
 import { setOp, transaction } from '../src/domain/commands';
@@ -113,4 +113,16 @@ test('explicit snap connects quantized free supports and rejects dangling or edg
   const doc=denormalize(m),source={...doc,traversals:[...(doc.traversals as JsonValue[]),traversal]};
   const normalized=normalize(source);if(!normalized.ok)throw new Error('fixture');expect(editProblems(normalized.model)).toEqual([]);
   expect(()=>splitFoothold(normalized.model,'fh.west',240)).toThrow('Repair edge-dependent traversal');
+});
+
+
+test('no-op endpoints and collider handles retain rect bytes and record no undo',()=>{
+  expect(moveEndpoint(m,'fh.west','b',[480,640]).ops).toHaveLength(0);
+  for(const h of physicalHandles(m,[{collection:'bodies',id:'body.west'},key('fh.west')])) {
+    const tx=moveHandle(m,h,h.point),result=commit(openDocument(m),tx);
+    expect(tx.ops,h.label).toHaveLength(0);expect(result.outcome).toBe('noop');expect(result.state.model).toBe(m);expect(result.state.past).toHaveLength(0);
+  }
+  let state=openDocument(m);const session=new SelectionSession(()=>state.model,tx=>{state=commit(state,tx).state;return true;},()=>true),vp=new ViewportSession();vp.resize([900,600],[0,0,1280,800]);
+  session.select([key('fh.west')]);session.mode('Platforms');const index=new PickIndex(m,buildScene(m)),css=worldToCss(vp.getSnapshot().view,[480,640]);
+  session.down(css,index,vp.getSnapshot(),false,false);session.move([css[0]+32,css[1]]);session.move(css);session.end();expect(state.model).toBe(m);expect(state.past).toHaveLength(0);expect(encode(state.model)).toBe(encode(m));
 });

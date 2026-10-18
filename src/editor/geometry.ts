@@ -83,7 +83,9 @@ function shapeOverrides(m:MapModel, changes:ReadonlyMap<string,CollisionBody>): 
   return overrides;
 }
 export function moveEndpoint(m:MapModel,id:string,end:Endpoint,position:Vec2):Transaction {
-  const p=point(position), seen=new Set<string>(), pending:[string,Endpoint][]=[[id,end]], overrides=new Map<string,JsonObject>(), changes=new Map<string,CollisionBody>();
+  const p=point(position);
+  if(eq(foothold(m,id)[end],p)) return checked(m,'Move physical handle',[]);
+  const seen=new Set<string>(), pending:[string,Endpoint][]=[[id,end]], overrides=new Map<string,JsonObject>(), changes=new Map<string,CollisionBody>();
   while(pending.length) {
     const [fid,e]=pending.pop()!,tag=`${fid}/${e}`; if(seen.has(tag)) continue; seen.add(tag);
     const original=foothold(m,fid), f=(overrides.get(fid) as unknown as Foothold)??original;
@@ -202,6 +204,7 @@ export function physicalHandles(m:MapModel,keys:readonly ObjectKey[]):PhysicalHa
   }return out;
 }
 export function moveHandle(m:MapModel,h:PhysicalHandle,p:Vec2):Transaction {
+  if(eq(point(p),h.point)) return checked(m,'Move physical handle',[]);
   if(h.kind==='body')return moveSelection(m,[h.key],[quantize(p[0]-h.point[0]),quantize(p[1]-h.point[1])]);
   const f=h.kind==='endpoint'?foothold(m,h.key.id):null,b=f?.ownerBodyId?body(m,f.ownerBodyId):h.kind==='vertex'?body(m,h.key.id):null;
   const local=point([p[0]-(b?.position[0]??0),p[1]-(b?.position[1]??0)]);
