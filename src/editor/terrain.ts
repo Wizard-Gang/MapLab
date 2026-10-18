@@ -8,10 +8,10 @@ import { chunkKey, locate, type CellStore } from '../domain/paint';
 import type { Transaction } from '../domain/transaction';
 import { floorDiv } from '../render/transform';
 
-export const TERRAIN_TOOLS = ['brush', 'rect', 'line', 'fill', 'erase'] as const;
+export const TERRAIN_TOOLS = ['brush', 'rect', 'line', 'fill', 'erase', 'transform'] as const;
 export type TerrainTool = (typeof TERRAIN_TOOLS)[number];
 export const TOOL_LABELS: Readonly<Record<TerrainTool, string>> = {
-  brush: 'Paint terrain', rect: 'Paint terrain rectangle', line: 'Paint terrain line', fill: 'Fill terrain', erase: 'Erase terrain',
+  brush: 'Paint terrain', rect: 'Paint terrain rectangle', line: 'Paint terrain line', fill: 'Fill terrain', erase: 'Erase terrain', transform: 'Turn terrain cells',
 };
 /**
  * Most cells one gesture may write: 64 full chunks. Its delta stays below ~1 MiB of the 64 MiB history budget

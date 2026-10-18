@@ -57,7 +57,7 @@ export function drawTerrain(ctx: CanvasRenderingContext2D, t: TerrainArt, view: 
 }
 
 /** A gesture's affected cells over everything: translucent tile art, or a red cross to erase. Returns the cells drawn. */
-export function drawPreview(ctx: CanvasRenderingContext2D, p: { readonly grid: Grid; readonly value: Cell | null; readonly xs: readonly number[]; readonly ys: readonly number[]; readonly count: number },
+export function drawPreview(ctx: CanvasRenderingContext2D, p: { readonly grid: Grid; readonly value: Cell | null; readonly xs: readonly number[]; readonly ys: readonly number[]; readonly count: number; readonly outline?: boolean },
   art: TileArt | undefined, view: ViewTransform, size: Vec2): number {
   const [c0, r0, c1, r1] = visibleRange(p.grid, visibleWorld(view, size)), [w, h] = p.grid.cellSize;
   let drawn = 0;
@@ -66,7 +66,8 @@ export function drawPreview(ctx: CanvasRenderingContext2D, p: { readonly grid: G
     const c = p.xs[i]!, r = p.ys[i]!;
     if (c < c0 || c > c1 || r < r0 || r > r1) continue;
     const x = p.grid.origin[0] + c * w, y = p.grid.origin[1] + r * h;
-    if (p.value) drawCell(ctx, x, y, w, h, p.value, art);
+    if (p.outline) { /* A transform previews its region only: the turned art appears on commit. */ }
+    else if (p.value) drawCell(ctx, x, y, w, h, p.value, art);
     else { ctx.strokeStyle = '#ff8c88'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); ctx.moveTo(x + w, y); ctx.lineTo(x, y + h); ctx.stroke(); }
     ctx.strokeStyle = '#ffffff'; ctx.strokeRect(x, y, w, h);
     drawn++;

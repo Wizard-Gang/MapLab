@@ -70,6 +70,7 @@ class TileBuilder {
 }
 
 export const EMPTY_TILES: TileTable = Object.freeze({ ids: Object.freeze([]), index: new Map() });
+export const EMPTY_STORE: CellStore = Object.freeze({ order: Object.freeze([]), chunks: new Map(), tiles: EMPTY_TILES });
 
 /** Packs authored chunks; the caller has already refused duplicate chunk coordinates. */
 export function storeFromChunks(chunks: readonly TerrainChunk[]): CellStore {
@@ -215,3 +216,26 @@ export function applyDelta(store: CellStore, d: PaintDelta): CellStore {
   }
   return { order: Object.freeze(order), chunks, tiles: tiles.table() };
 }
+
+/** One terrain-intent entry of a layer (adopted F4): the terrain a cell should resolve from. */
+export interface IntentEntry { readonly column: number; readonly row: number; readonly terrainId: string }
+/** Intent shares the packed store: a terrain ID in place of a tile ID, with no transform bits. */
+export const intentCell = (terrainId: string): Cell => ({ tileId: terrainId, quarterTurns: 0, mirrorX: false, mirrorY: false });
+
+/** Packs authored intent entries; the caller has already refused repeated cells. */
+export function storeFromIntents(entries: readonly IntentEntry[]): CellStore {
+  const buffer = new PaintBuffer(EMPTY_STORE);
+  for (const e of entries) if (!buffer.write({ column: e.column, row: e.row, cell: intentCell(e.terrainId) })) throw new RangeError(`Unsafe intent cell ${e.column},${e.row}`);
+  return buffer.view();
+}
+
+/** Authored intent entries in domain order: row, then column (ML-014). */
+export function intentEntries(store: CellStore): IntentEntry[] {
+  const out: IntentEntry[] = [];
+  for (const [key, cells] of store.chunks) {
+    const [cc, cr] = keyOf(key);
+    cells.forEach((v, i) => { if (v !== 0) out.push({ column: cc * CHUNK_SIZE + (i % CHUNK_SIZE), row: cr * CHUNK_SIZE + Math.floor(i / CHUNK_SIZE), terrainId: store.tiles.ids[tileOf(v)] as string }); });
+  }
+  return out.sort((a, b) => a.row - b.row || a.column - b.column);
+}
+
