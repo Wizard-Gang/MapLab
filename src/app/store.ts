@@ -1,7 +1,7 @@
 // The editor's library session (R1 C2, H2): open documents, their histories and the library mirror. React reads it
 // through useSyncExternalStore; large models never live in component state. Disk is the authority, so every
 // library operation re-reads the server's snapshot afterwards.
-import { parseJson, validateSourceGraph, validateTileset, type JsonValue, type TilesetDocument } from '../contracts';
+import { canonical, parseJson, validateSourceGraph, validateTileset, type JsonValue, type TilesetDocument } from '../contracts';
 import { denormalize } from '../domain/model';
 import { SelectionSession } from '../editor/selection';
 import { TerrainSession } from '../editor/terrain-session';
@@ -161,7 +161,10 @@ export class LibraryStore {
     this.sources = sources;
     const tilesets = new Map<string, TilesetDocument>();
     for (const [id, value] of sources) if (validateTileset(value).ok) tilesets.set(id, value as unknown as TilesetDocument);
-    this.set({ tilesets });
+    // Unchanged tilesets keep their identity, so a save or refresh does not rebuild every scene.
+    const previous = this.view.tilesets;
+    const same = previous.size === tilesets.size && [...tilesets].every(([id, t]) => previous.has(id) && canonical(previous.get(id) as never) === canonical(t as never));
+    if (!same) this.set({ tilesets });
     await this.listOrphanDrafts();
   }
 
