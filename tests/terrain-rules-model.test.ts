@@ -79,3 +79,27 @@ describe('every intent cell always stores its resolved tile', () => {
     expect(graphErrors(h.state.model)).toEqual([]);
   }, 30_000);
 });
+
+describe('terrain-mode fill and erase', () => {
+  test('fill floods equal intent inside the map bounds and resolves every filled cell; erase clears intent and tile', () => {
+    const h = new Harness(rulesForest()), t = h.session;
+    t.mode('terrain'); t.tool('line'); t.chooseTerrain('terrain.sand');
+    h.gesture('line', null, [[0, 10], [39, 10]]);
+    t.tool('fill'); t.chooseTerrain('terrain.forest');
+    h.gesture('fill', null, [[5, 5]]);
+    expect(h.state.past.at(-1)!.tx.ops.map((op) => op.op)).toEqual(['intent', 'paint']);
+    const layer = () => h.state.model.terrain!.byLayer.get(LAYER)!;
+    let forest = 0;
+    for (const c of layer().intent.chunks.values()) for (const v of c) if (v && unpack(layer().intent.tiles.ids, v)!.tileId === 'terrain.forest') forest++;
+    expect(forest).toBe(400);
+    // The sand line bounds the fill and keeps its own resolution; the row above it is forest with no south neighbor.
+    expect(resolveCell(ruleBook(rulesTileset), layer().intent, 7, LAYER, 5, 10)?.tileId).toBe('tile.sand');
+    expect(resolveCell(ruleBook(rulesTileset), layer().intent, 7, LAYER, 5, 9)?.tileId).toBe('tile.dirt');
+    const before = h.state;
+    t.tool('erase'); h.gesture('erase', null, [[5, 5], [5, 5]]);
+    expect(h.state.past.length).toBe(before.past.length + 1);
+    expect(unpack(layer().cells.tiles.ids, layer().cells.chunks.get('0,0')![5 * 32 + 5]!)).toBeNull();
+    expect(unpack(layer().intent.tiles.ids, layer().intent.chunks.get('0,0')![5 * 32 + 5]!)).toBeNull();
+    expect(encode(undo(h.state).model)).toBe(encode(before.model));
+  });
+});
