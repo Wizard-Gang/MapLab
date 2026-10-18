@@ -15,6 +15,16 @@ export const fixture = JSON.parse(readFileSync(join(root, 'conformance/terrain/c
 export const LAYER: string = fixture.base.layerId;
 export const tileset = JSON.parse(readFileSync(join(root, 'placeholder-library/tilesets/forest.tileset.json'), 'utf8')) as TilesetDocument;
 export const plain = (tileId: string): Cell => ({ tileId, quarterTurns: 0, mirrorX: false, mirrorY: false });
+/** ML-014's owned rule fixture tileset. */
+export const rulesTileset = JSON.parse(readFileSync(join(root, 'conformance/terrain-rules/rules.tileset.json'), 'utf8')) as TilesetDocument;
+const TILESETS = new Map([[tileset.id, tileset], [rulesTileset.id, rulesTileset]]);
+
+/** The R1 forest map with its terrain layer drawn from the rules fixture tileset, declared as a dependency. */
+export function rulesForest(): MapModel {
+  const doc = forestDocument() as Record<string, JsonValue> & { terrain: Record<string, JsonValue>[]; dependencies: Record<string, JsonValue>[] };
+  return modelOf({ ...doc, terrain: doc.terrain.map((t) => ({ ...t, tilesetId: rulesTileset.id })),
+    dependencies: [...doc.dependencies.filter((d) => d.id !== tileset.id), { id: rulesTileset.id, kind: 'tileset', path: 'tilesets/rules.tileset.json', required: true }] });
+}
 
 /** The R1 forest map, optionally with other bounds (fills are bounded by them). */
 export function forest(bounds?: readonly number[]): MapModel {
@@ -33,7 +43,7 @@ export class Harness {
   readonly queued: (() => void)[] = [];
   constructor(m: MapModel, options: { readonly budget?: number; readonly deferred?: boolean } = {}) {
     this.state = openDocument(m, { savedDigest: 'disk-0', ...(options.budget ? { budget: options.budget } : {}) });
-    this.session = new TerrainSession(() => this.state.model, (id) => (id === tileset.id ? tileset : undefined),
+    this.session = new TerrainSession(() => this.state.model, (id) => TILESETS.get(id),
       (tx) => { const r = commit(this.state, tx); if (r.outcome === 'refused') return false; this.state = r.state; return true; },
       () => true, options.deferred ? (run) => { this.queued.push(run); } : (run) => run());
   }
@@ -60,6 +70,6 @@ export function graphErrors(model: MapModel): string[] {
   const dirs = ['maps', 'movement', 'catalogs', 'tilesets', 'prefabs'];
   const inputs = dirs.flatMap((dir) => readdirSync(join(root, 'placeholder-library', dir)).filter((f) => f.endsWith('.json'))
     .map((f) => JSON.parse(readFileSync(join(root, 'placeholder-library', dir, f), 'utf8')) as Record<string, JsonValue>));
-  return validateSourceGraph(inputs.map((d) => (d.id === model.id ? denormalize(model) : d)) as JsonValue[]).diagnostics
+  return validateSourceGraph([...inputs.map((d) => (d.id === model.id ? denormalize(model) : d)), rulesTileset] as unknown as JsonValue[]).diagnostics
     .filter((d) => d.severity === 'error').map((d) => `${d.jsonPath}: ${d.message}`);
 }
