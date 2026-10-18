@@ -19,9 +19,10 @@ const baseDocument = JSON.parse(baseBytes.toString('utf8')) as JsonValue;
 const tileOf = (id: string | null) => (id === null ? null : cell(id));
 
 type Step = Record<string, any>;
+interface Case { readonly id: string; readonly steps: Step[]; readonly budget?: number }
 interface Outcome { outcome?: string; code?: string; mapping?: Record<string, string>; problems?: { code: string; path: string }[] }
 
-function run(record: { steps: Step[]; budget?: number }): void {
+function run(record: Case): void {
   let s: DocumentState = openDocument(modelOf(baseDocument), { savedDigest: index.base.savedDigest, ...(record.budget ? { budget: record.budget } : {}) });
   const tickets = new Map<string, SaveTicket>();
   const fromCommit = (r: ReturnType<typeof commit>): Outcome => { s = r.state; return r.outcome === 'refused' ? { outcome: r.outcome, code: r.problem.code } : { outcome: r.outcome }; };
@@ -121,7 +122,8 @@ describe('conformance/history', () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toEqual(expect.arrayContaining(['paint-10000-cell-delta', 'undo-redo-no-op', 'duplicate-ids', 'saved-revision-conflict', 'memory-bound']));
   });
-  test.each(index.cases.map((c: { id: string }) => [c.id, c]))('%s', (_, record) => run(record));
+  const cases = index.cases as Case[];
+  test.each(cases.map((c): [string, Case] => [c.id, c]))('%s', (_, record) => run(record));
 });
 
 test('src/domain and the editor history modules stay pure: no React, DOM, storage, network or app imports', () => {
