@@ -22,6 +22,7 @@ form { display: grid; gap: 0.4rem; margin-top: 0.4rem; }
 .toolbar { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .library-name { color: #8fd3b8; }
 .status { flex: 1; text-align: right; margin: 0; }
+.editor { min-width: 0; }
 .workspace { display: grid; grid-template-columns: minmax(14rem, 20rem) 1fr; gap: 1rem; align-items: start; }
 .library, .document { background: #14231f; border: 1px solid #23372f; border-radius: 0.5rem; padding: 0.75rem; }
 .library li { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: 0.15rem 0; }
@@ -40,3 +41,15 @@ form { display: grid; gap: 0.4rem; margin-top: 0.4rem; }
 .problems { color: #f2a2a2; }
 .name { max-width: 24rem; }
 @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } }
+
+.viewport-panel { margin-top: 0.75rem; }
+.viewport-controls, .overlay-toggles, .snap-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.overlay-controls { margin: 0.5rem 0; }
+.overlay-toggles { margin: 0.5rem 0; }
+.overlay-toggles label, .snap-controls label:first-child { flex-direction: row; align-items: center; }
+.snap-controls input[type="number"] { width: 7rem; }
+.viewport { position: relative; height: clamp(20rem, 55vh, 42rem); overflow: hidden; background: #101915; outline-offset: 2px; touch-action: none; }
+.viewport:focus-visible { outline: 2px solid #8fd3b8; }
+.viewport.panning { cursor: grabbing; }
+.viewport canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cursor { display: block; min-height: 1.5em; font-variant-numeric: tabular-nums; }

@@ -4,7 +4,7 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** ML-001–008 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-009 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-010–044 are reserved, not active.
+**Completion status:** ML-001–009 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-010 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-011–044 are reserved, not active.
 
 ## Completed history
 
@@ -17,30 +17,12 @@
 - **ML-006** — completed at `9d23326745c9fdbf80ad15a80619a83671f54c87` by protected squash of PR #5 (tested head `7d38f02116dd3fe4c49a78089a523a0841a07064`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39072741573)); a blocking exact-head review at `7a23a92` was repaired and re-reviewed, then archived head-guarded merge/policy evidence and authenticated read-back confirmed all three required checks, no bypass and deleted branches. Its [change record](docs/changes/ML-006.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-007** — completed at `a6f3d61c50df6c2d0a76a7a3258dac9b3ec8e4fd` by protected squash of PR #6 (tested head `b80aa45168b7ecf084f77200e4aba9503e6a1acd`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39082379696)); blocking exact-head reviews at `176d764` and `bda7f55` were repaired and re-reviewed, then archived head-guarded merge/policy evidence and authenticated read-back confirmed all three required checks, no bypass and deleted branches. Its [change record](docs/changes/ML-007.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-008** — completed at `b7016dcedb201649fac124e3883b347f2cba69ac` by protected squash of PR #7 (tested head `a9a658b583b4b816a0ad46e4f8e23bc2e65c6785`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39096778933)); a blocking exact-head review at `61856eb` was repaired and re-reviewed, then archived head-guarded merge/policy evidence and authenticated read-back confirmed all three required checks, no bypass and deleted branches. Its [change record](docs/changes/ML-008.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
+- **ML-009** — completed at `211a18acf02595525dd4ffbeb0c19c2ad844c615` by protected squash of PR #8 (tested head `d73001f8a8ae162b7ab81375f2756b6dd89b7fee`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39148593281)); the independent exact-head review, authenticated delivery verification and all three main jobs passed without bypass; both completed branches were deleted. Its [change record](docs/changes/ML-009.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-009 / P0
-
-- **Source scope:** Library folder through the loopback plugin (RigLab pattern) and the `npm start` launcher; New/Open/Save/Save As/Duplicate/Revert; torn-save detection from project digests; IndexedDB drafts only.
-- **Non-goals:** No hosted write API, directory picker/OPFS or writes to external libraries.
-- **Acceptance:** Two maps reopen with IDs intact; stale-base conflict refuses; backups precede replacement; torn save detected; wrong Host/Origin refused; placeholder library read-only; WebKit and Chromium tests.
-- **Depends on:** ML-008 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C1](docs/specifications/2026-10-16-maplab.md#c1-document-workflow-and-layout), [H1](docs/specifications/2026-10-16-maplab.md#h1-source-modules-and-dependency-direction), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement the `src/library` loopback Vite plugin and client with `MAPLAB_LIBRARY` resolution, a read-only placeholder library and the `npm start` launcher.
-  2. Save by refusing stale base digests, validating across documents, writing backups, then temp-write/fsync/rename with `maplab.project.json` last; IndexedDB keeps unsaved drafts only.
-  3. Create owned fixture(s): Two-map library reopen, stale baseDigest conflict, torn save, backup before replacement, wrong Host/Origin request and placeholder write refusal.
-  4. Add executable checks: Plugin endpoint integration tests plus WebKit and Chromium browser tests; no hosted write API, picker or OPFS authority.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-010 / P0
 
 - **Source scope:** World↔screen transform, viewport Canvas, grid, pan/cursor zoom, independently toggled overlay passes.
@@ -55,6 +37,11 @@
   4. Add executable checks: Round-trip numerical tests plus real browser wheel/pointer/focus tests.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-011 / P0
 
 - **Source scope:** Selection/multi-select, move/duplicate/delete, hierarchy search, inspector numeric editing and clipboard remapping.

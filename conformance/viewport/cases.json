@@ -1,0 +1,13 @@
+{
+  "description": "ML-010 viewport fixtures. Original owned CC0 data, per docs/PROVENANCE.md. Unit interpreter and real WebKit/Chromium tests prove signed CSS transforms, DPR, wheel/pointer/focus, resize and overlay isolation. Source map remains R1 forest, unchanged.",
+  "base": {
+    "path": "placeholder-library/maps/forest.map.json",
+    "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b"
+  },
+  "files": {
+    "coordinates.json": "14fcd602ac582deb05865a686fc759136df6c7a7899f35a1d7c0ac104bb8578a",
+    "gesture.json": "a5fcb292c06091973f083eef109ebd045352bef209b4e31583a973e5fac09589",
+    "snap.json": "b44a141a09108b775957d668aee5064b2e99b1a894bfb5bd9251a5f07551f356",
+    "hierarchies.json": "4e8a2b7c0c1522419fb8ef94a6366d08d4b7d7b5e93492acdc0c806ce16ef9ba"
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
+import { Viewport } from './Viewport';
 import { mapName, objectIds } from '../editor/document';
 import { canRedo, canUndo, isDirty } from '../editor/history';
 import type { LibraryEntry, LibrarySnapshot } from '../library/protocol';
@@ -191,6 +192,9 @@ function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: 
       )}
       <NameField doc={doc} />
       {doc.readOnly === null && <SaveAs key={doc.id} doc={doc} />}
+      {entry && entry.errors > 0
+        ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
+        : <Viewport key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
       <section aria-label="Objects">
         <h3>Objects</h3>
         {ids.map(([collection, list]) => (

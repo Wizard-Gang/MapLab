@@ -1,0 +1,13 @@
+{
+  "id": "valid-deep-source-graphs",
+  "description": "Owned CC0 mutation recipe over the pinned forest. Contracts permit these acyclic depths; rendering must neither drop anchors nor overflow the call stack.",
+  "entityCount": 66,
+  "entityPrefix": "probe.chain.",
+  "templateEntity": "chest.right",
+  "terminalPoint": [60, 640],
+  "entityOffset": [0.0625, -0.125],
+  "firstAnchor": [64.0625, 631.875],
+  "groupCount": 4000,
+  "groupPrefix": "probe.group.",
+  "sceneLayerCount": 4007
+}
