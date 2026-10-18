@@ -1,9 +1,10 @@
 // The editor's library session (R1 C2, H2): open documents, their histories and the library mirror. React reads it
 // through useSyncExternalStore; large models never live in component state. Disk is the authority, so every
 // library operation re-reads the server's snapshot afterwards.
-import { parseJson, validateSourceGraph, type JsonValue } from '../contracts';
+import { parseJson, validateSourceGraph, validateTileset, type JsonValue, type TilesetDocument } from '../contracts';
 import { denormalize } from '../domain/model';
 import { SelectionSession } from '../editor/selection';
+import { TerrainSession } from '../editor/terrain-session';
 import { candidate, editProblems } from '../editor/editing';
 import { commit } from '../editor/history';
 import type { Transaction } from '../domain/transaction';
@@ -57,9 +58,11 @@ export interface AppView {
   readonly drafts: 'unknown' | 'available' | 'unavailable';
   /** Drafts of documents that are not in the library (new maps never saved). */
   readonly orphanDrafts: readonly Draft[];
+  /** Valid library tilesets by ID: the terrain palette and tile art. Small editor-library documents, never maps. */
+  readonly tilesets: ReadonlyMap<string, TilesetDocument>;
 }
 
-const initial: AppView = { phase: 'loading', library: null, docs: [], activeId: null, status: 'Connecting to the library…', problems: [], busy: false, drafts: 'unknown', orphanDrafts: [] };
+const initial: AppView = { phase: 'loading', library: null, docs: [], activeId: null, status: 'Connecting to the library…', problems: [], busy: false, drafts: 'unknown', orphanDrafts: [], tilesets: new Map() };
 const DRAFT_DELAY_MS = 250;
 
 const describe = (r: Refusal): string[] => [
@@ -80,6 +83,17 @@ export class LibraryStore {
     }
     return session;
   }
+  private readonly terrains = new Map<string, TerrainSession>();
+  terrain(id: string): TerrainSession {
+    let session = this.terrains.get(id);
+    if (!session) {
+      session = new TerrainSession(() => this.doc(id)!.state.model, (tilesetId) => this.view.tilesets.get(tilesetId), (tx) => this.edit(id, tx), () => { const d = this.doc(id); return !!d && !lockReason(d); });
+      this.terrains.set(id, session);
+    }
+    return session;
+  }
+  /** Cancels any pointer gesture of the document: selection, physical handle or terrain preview. */
+  cancelGestures(id: string): void { this.selections.get(id)?.cancel(); this.terrains.get(id)?.cancel(); }
   edit(id: string, tx: Transaction): boolean {
     const d = this.doc(id); if (!d || lockReason(d)) return false;
     try {
@@ -145,6 +159,9 @@ export class LibraryStore {
       for (const file of read.documents) { const p = parseJson(file.text); if (p.ok) sources.set(file.id, p.value); }
     }
     this.sources = sources;
+    const tilesets = new Map<string, TilesetDocument>();
+    for (const [id, value] of sources) if (validateTileset(value).ok) tilesets.set(id, value as unknown as TilesetDocument);
+    this.set({ tilesets });
     await this.listOrphanDrafts();
   }
 
@@ -199,6 +216,7 @@ export class LibraryStore {
   async close(id: string): Promise<void> {
     if (this.doc(id)) await this.journal(id);
     this.selections.get(id)?.cancel(); this.selections.delete(id);
+    this.terrains.get(id)?.cancel(); this.terrains.delete(id);
     this.viewports.delete(id);
     const docs = this.view.docs.filter((d) => d.id !== id);
     this.set({ docs, activeId: this.view.activeId === id ? (docs.at(-1)?.id ?? null) : this.view.activeId });
@@ -215,7 +233,7 @@ export class LibraryStore {
     // An offered draft stays offered: only the user's restore or discard may consume it.
     const torn = this.view.library?.documents.find((e) => e.id === id)?.state !== 'ok';
     this.patchDoc(id, { state, savedModel: staged.model, conflicts: [], changedOnDisk: false, confirmRevert: false, torn });
-    this.selections.get(id)?.sync();
+    this.selections.get(id)?.sync(); this.terrains.get(id)?.sync();
     await this.journal(id);
     this.set({ status });
   }
@@ -225,7 +243,7 @@ export class LibraryStore {
 
   private edited(id: string, state: DocumentState): void {
     this.patchDoc(id, { state, confirmRevert: false });
-    this.selections.get(id)?.sync();
+    this.selections.get(id)?.sync(); this.terrains.get(id)?.sync();
     const t = this.timers.get(id);
     if (t) clearTimeout(t);
     this.timers.set(id, setTimeout(() => { this.timers.delete(id); void this.journal(id); }, DRAFT_DELAY_MS));

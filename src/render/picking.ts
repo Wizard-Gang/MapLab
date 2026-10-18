@@ -7,11 +7,12 @@ import { cssLengthInWorld, cssToWorld, type ViewTransform } from './transform';
 import type { Primitive, Scene } from './scene';
 import type { Overlay } from '../editor/viewport';
 
-export const PICK_MODES = ['All', 'Objects', 'Platforms', 'Collision', 'Traversal', 'Gameplay'] as const;
+/** Terrain mode paints instead of picking (ML-013), so it picks nothing. */
+export const PICK_MODES = ['All', 'Terrain', 'Objects', 'Platforms', 'Collision', 'Traversal', 'Gameplay'] as const;
 export type PickMode = (typeof PICK_MODES)[number];
 export interface Pickable { readonly key: ObjectKey; readonly primitive: Primitive; readonly pass: Overlay; readonly layerId?: string }
 export const overlaps = (a: Rect, b: Rect): boolean => a[0] <= b[0] + b[2] && a[0] + a[2] >= b[0] && a[1] <= b[1] + b[3] && a[1] + a[3] >= b[1];
-const allowed = (p: Pickable, mode: PickMode): boolean => mode === 'All' || (mode === 'Platforms' ? p.key.collection === 'footholds' : mode === 'Collision' ? p.key.collection === 'bodies' : mode === 'Traversal' ? p.key.collection === 'traversals' : mode === 'Objects' ? p.key.collection === 'visuals' : ['entities', 'waypoints', 'regions', 'routes'].includes(p.key.collection));
+const allowed = (p: Pickable, mode: PickMode): boolean => mode === 'All' || (mode === 'Terrain' ? false : mode === 'Platforms' ? p.key.collection === 'footholds' : mode === 'Collision' ? p.key.collection === 'bodies' : mode === 'Traversal' ? p.key.collection === 'traversals' : mode === 'Objects' ? p.key.collection === 'visuals' : ['entities', 'waypoints', 'regions', 'routes'].includes(p.key.collection));
 function distance(p: Vec2, a: Vec2, b: Vec2): number {
   const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy;
   const t = l ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l)) : 0;

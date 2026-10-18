@@ -3,6 +3,8 @@ import type { Rect, Vec2 } from '../contracts/common-types';
 import type { ViewportState } from '../editor/viewport';
 import { backingSize, canvasMatrix, cssLengthInWorld, floorDiv, visibleWorld, type ViewTransform } from './transform';
 import type { Primitive, Scene } from './scene';
+import { drawPreview, drawTerrain, type TileArt } from './terrain';
+import type { TerrainPreview } from '../editor/terrain-session';
 
 const overlaps = (a: Rect, b: Rect): boolean => a[0] <= b[0] + b[2] && a[0] + a[2] >= b[0] && a[1] <= b[1] + b[3] && a[1] + a[3] >= b[1];
 function draw(ctx: CanvasRenderingContext2D, list: readonly Primitive[], view: ViewTransform, size: Vec2): void {
@@ -44,6 +46,13 @@ export class CanvasViewport {
   private handles: readonly Primitive[] = [];
   setHandles(handles: readonly Primitive[]): void {
     this.handles = handles; this.overlayDirty = true;
+    if (this.frame === null) this.frame = requestAnimationFrame(() => this.render());
+  }
+  private preview: { readonly preview: TerrainPreview; readonly count: number; readonly art: TileArt | undefined } | null = null;
+  /** A terrain gesture's affected cells, drawn on the overlay only: the art canvas keeps the committed cells. */
+  setTerrainPreview(preview: TerrainPreview | null, art?: TileArt): void {
+    if (preview === (this.preview?.preview ?? null) && preview?.count === this.preview?.count) return;
+    this.preview = preview && { preview, count: preview.count, art }; this.overlayDirty = true;
     if (this.frame === null) this.frame = requestAnimationFrame(() => this.render());
   }
   private frame: number | null = null;
@@ -89,7 +98,7 @@ export class CanvasViewport {
       this.notice('');
       const ctx = this.context(this.art);
       const hiddenLayers = new Map<string, boolean>();
-      if (ctx && overlays.Art) for (const { layer, commands, visible, opacity } of this.scene.art) {
+      if (ctx && overlays.Art) for (const { layer, commands, visible, opacity, terrain } of this.scene.art) {
         // A hidden group hides all art descendants, but never touches physical overlays.
         const hidden = this.state.hiddenLayers.has(layer.id) || (layer.parentId !== null && hiddenLayers.get(layer.parentId) === true);
         hiddenLayers.set(layer.id, hidden);
@@ -115,7 +124,10 @@ export class CanvasViewport {
               draw(ctx, [command], { ...artView, camera: [artView.camera[0] - shift[0], artView.camera[1] - shift[1]] }, size); ctx.restore();
             }
           }
-        } else draw(ctx, commands, artView, size);
+        } else {
+          if (terrain) drawTerrain(ctx, terrain, artView, size);
+          draw(ctx, commands, artView, size);
+        }
         ctx.restore();
       }
       this.rendered(this.art); this.artDirty = false;
@@ -125,6 +137,10 @@ export class CanvasViewport {
       if (ctx) {
         if (overlays.Grid) grid(ctx, this.state);
         for (const [name, commands] of this.scene.passes) if (overlays[name]) draw(ctx, commands, view, size);
+        if (this.preview) {
+          const { preview: p, art } = this.preview;
+          this.overlay.dataset.previewCells = String(drawPreview(ctx, { grid: p.grid, value: p.value, xs: p.cells.xs, ys: p.cells.ys, count: p.count }, art, view, size));
+        } else delete this.overlay.dataset.previewCells;
         draw(ctx, this.handles, view, size);
       }
       this.rendered(this.overlay); this.overlayDirty = false;

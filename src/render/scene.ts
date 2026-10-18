@@ -1,10 +1,13 @@
 // Backend-neutral viewport primitives, built once per model identity. No document clones on input.
-// Asset decoding, tile painting/caches, selection and derived navigation arrive in their reserved tasks.
+// Terrain cells draw from the packed store (ML-013); asset decoding and derived navigation arrive in their reserved tasks.
 import type { Anchor, BodyShape, Rect, RegionShape, Transform, Vec2 } from '../contracts/common-types';
 import type { CollisionBody, Foothold, Layer, Traversal, Visual } from '../contracts/geometry-types';
 import type { Entity, Region, Route, Waypoint } from '../contracts/gameplay-types';
 import type { CollectionName, MapModel } from '../domain/model';
 import type { Overlay } from '../editor/viewport';
+import type { TilesetDocument } from '../contracts';
+import { gridOf } from '../editor/terrain';
+import { tileArt, type TerrainArt } from './terrain';
 
 export interface Primitive {
   readonly points: readonly Vec2[];
@@ -15,7 +18,7 @@ export interface Primitive {
   readonly bounds: Rect;
   readonly objectId?: string;
 }
-export interface ArtLayer { readonly layer: Layer; readonly commands: readonly Primitive[]; readonly visible: boolean; readonly opacity: number }
+export interface ArtLayer { readonly layer: Layer; readonly commands: readonly Primitive[]; readonly visible: boolean; readonly opacity: number; readonly terrain?: TerrainArt }
 export interface Scene {
   readonly bounds: Rect;
   readonly art: readonly ArtLayer[];
@@ -45,7 +48,8 @@ function transformed(p: Vec2, t: Transform): Vec2 {
   const x = p[0] * t.scale[0] * (t.mirrorX ? -1 : 1), y = p[1] * t.scale[1] * (t.mirrorY ? -1 : 1), r = t.rotation * Math.PI / 180;
   return [t.position[0] + x * Math.cos(r) - y * Math.sin(r), t.position[1] + x * Math.sin(r) + y * Math.cos(r)];
 }
-export function buildScene(model: MapModel): Scene {
+/** `tilesets` supplies tile art by tileset ID; a tile layer whose tileset is absent draws its cells as missing markers. */
+export function buildScene(model: MapModel, tilesets: ReadonlyMap<string, TilesetDocument> = new Map()): Scene {
   const bodies = new Map(records<CollisionBody>(model, 'bodies').map((b) => [b.id, b]));
   const footholds = new Map(records<Foothold>(model, 'footholds').map((f) => [f.id, f]));
   const regions = new Map(records<Region>(model, 'regions').map((r) => [r.id, r]));
@@ -111,7 +115,9 @@ export function buildScene(model: MapModel): Scene {
       if (commands.length) commands[commands.length - 1] = { ...commands[commands.length - 1]!, objectId: v.id };
     }
     const inherited = { visible: visible && layer.visible, opacity: opacity * layer.opacity };
-    order.push({ layer, commands, ...inherited });
+    const t = layer.kind === 'tile' ? model.terrain?.byLayer.get(layer.id) : undefined;
+    const terrain: TerrainArt | undefined = t && { grid: gridOf(t), cells: t.cells, tiles: tileArt(tilesets.get(t.settings.tilesetId as string)) };
+    order.push({ layer, commands, ...inherited, ...(terrain ? { terrain } : {}) });
     const descendants = children.get(layer.id) ?? [];
     for (let i = descendants.length - 1; i >= 0; i--) stack.push({ layer: descendants[i]!, ...inherited });
   }

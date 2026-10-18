@@ -1,7 +1,7 @@
 {
-  "id": "ML-012",
+  "id": "ML-013",
   "type": "FEATURE",
-  "title": "[ML-012] [FEATURE] Add physical geometry handles and atomic topology edits",
-  "record": "docs/changes/ML-012.md",
-  "branch": "ml-012-geometry-editing"
+  "title": "[ML-013] [FEATURE] Add sparse terrain painting tools and tileset palette",
+  "record": "docs/changes/ML-013.md",
+  "branch": "ml-013-terrain-painting"
 }
