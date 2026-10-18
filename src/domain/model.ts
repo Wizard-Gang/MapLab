@@ -66,13 +66,13 @@ export function nestedIds(owner: string, value: JsonValue | undefined, at: strin
 export const recordIds = (collection: ObjectCollection, record: JsonObject, at = '$'): [string, string][] =>
   [[record.id as string, `${at}.id`], ...nestedIds(collection, record, at)];
 
-export function normalize(document: JsonValue): NormalizeResult {
+export function normalize(source: JsonValue): NormalizeResult {
   const problems: ModelProblem[] = [];
   const problem = (code: string, path: string, message: string): void => { problems.push({ code, path, message }); };
-  if (!isObject(document) || document.format !== 'maplab.map' || document.version !== 1 || !isId(document.id)) {
+  if (!isObject(source) || source.format !== 'maplab.map' || source.version !== 1 || !isId(source.id)) {
     return { ok: false, problems: [{ code: 'model.format', path: '$', message: 'Expected a maplab.map v1 document with a valid ID' }] };
   }
-  const doc = deepFreeze(structuredClone(document) as JsonObject);
+  const doc = deepFreeze(structuredClone(source) as JsonObject);
   const owners = new Map<string, string>();
   const claim = (id: string, owner: string, path: string): void => {
     if (!isId(id)) problem('model.id', path, `${JSON.stringify(id)} is not a persistent ID`);
