@@ -1,7 +1,7 @@
 {
-  "id": "ML-010",
+  "id": "ML-011",
   "type": "FEATURE",
-  "title": "[ML-010] [FEATURE] Add Canvas viewport, transforms and independent overlays",
-  "record": "docs/changes/ML-010.md",
-  "branch": "ml-010-canvas-viewport"
+  "title": "[ML-011] [FEATURE] Add selection, atomic editing and remapped clipboard",
+  "record": "docs/changes/ML-011.md",
+  "branch": "ml-011-selection-editing"
 }

@@ -53,3 +53,8 @@ form { display: grid; gap: 0.4rem; margin-top: 0.4rem; }
 .viewport.panning { cursor: grabbing; }
 .viewport canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .cursor { display: block; min-height: 1.5em; font-variant-numeric: tabular-nums; }
+.selection-panel { margin: 0.75rem 0; }
+.numeric-fields { display: flex; gap: 0.5rem; flex-wrap: wrap; max-height: 18rem; overflow: auto; }
+.numeric-fields input { width: 8rem; }
+textarea { width: 100%; box-sizing: border-box; user-select: text; -webkit-user-select: text; background: #0b1412; color: inherit; }
+button[aria-pressed="true"] { border-color: #8fd3b8; }

@@ -1,4 +1,6 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
+import { shortcut } from '../editor/shortcuts';
+import { SelectionPanel, Hierarchy } from './SelectionPanel';
 import { Viewport } from './Viewport';
 import { mapName, objectIds } from '../editor/document';
 import { canRedo, canUndo, isDirty } from '../editor/history';
@@ -13,19 +15,39 @@ const isField = (t: EventTarget | null): boolean => t instanceof HTMLElement && 
 function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
-      const key = e.key.toLowerCase();
-      if (key === 's' && !e.shiftKey) {
+      if (e.defaultPrevented) return;
+      const action = shortcut(e);
+      if (action === 'save') {
         e.preventDefault();
-        // Blurring commits a field being edited before the save reads the document (RigLab's WebKit lesson, R1 C8).
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-        void store.save();
-        return;
+        if (store.active()) store.selection(store.active()!.id).cancel();
+        void store.save(); return;
       }
-      if (key === 'z' && !isField(e.target)) { e.preventDefault(); if (e.shiftKey) store.redo(); else store.undo(); }
+      if (!action || isField(e.target) || !store.active()) return;
+      const id = store.active()!.id, selection = store.selection(id);
+      // Native copy/paste events carry the browser clipboard payload; fields keep those events.
+      if (action === 'copy' || action === 'paste') return;
+      e.preventDefault();
+      if (action === 'undo') { selection.cancel(); store.undo(); }
+      if (action === 'redo') { selection.cancel(); store.redo(); }
+      if (action === 'duplicate') selection.duplicate();
+      if (action === 'delete') selection.askDelete();
+      if (action === 'escape') selection.escape();
+      if (action === 'select' && store.viewport(id).getSnapshot().panTool) store.viewport(id).panTool();
+      if (action === 'grid') store.viewport(id).toggle('Grid');
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const copy = (e: ClipboardEvent): void => {
+      if (isField(e.target) || !store.active()) return;
+      const selection = store.selection(store.active()!.id);
+      if (!selection.getSnapshot().keys.length) return;
+      e.preventDefault(); store.clipboard = selection.copy(); e.clipboardData?.setData('text/plain', store.clipboard); selection.message('Copied objects');
+    };
+    const paste = (e: ClipboardEvent): void => {
+      if (isField(e.target) || !store.active()) return;
+      e.preventDefault(); store.selection(store.active()!.id).paste(e.clipboardData?.getData('text/plain') || store.clipboard);
+    };
+    window.addEventListener('keydown', onKey); window.addEventListener('copy', copy); window.addEventListener('paste', paste);
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('copy', copy); window.removeEventListener('paste', paste); };
   }, []);
 }
 
@@ -194,16 +216,9 @@ function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: 
       {doc.readOnly === null && <SaveAs key={doc.id} doc={doc} />}
       {entry && entry.errors > 0
         ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
-        : <Viewport key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
-      <section aria-label="Objects">
-        <h3>Objects</h3>
-        {ids.map(([collection, list]) => (
-          <details key={collection}>
-            <summary>{collection} ({list.length})</summary>
-            <ul data-collection={collection}>{[...list].sort().map((id) => <li key={id}><code>{id}</code></li>)}</ul>
-          </details>
-        ))}
-      </section>
+        : <Viewport selection={store.selection(doc.id)} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
+      <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
+      <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>
   );
 }

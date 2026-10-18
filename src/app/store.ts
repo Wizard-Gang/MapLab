@@ -1,6 +1,12 @@
 // The editor's library session (R1 C2, H2): open documents, their histories and the library mirror. React reads it
 // through useSyncExternalStore; large models never live in component state. Disk is the authority, so every
 // library operation re-reads the server's snapshot afterwards.
+import { parseJson, validateSourceGraph, type JsonValue } from '../contracts';
+import { denormalize } from '../domain/model';
+import { SelectionSession } from '../editor/selection';
+import { candidate, editProblems } from '../editor/editing';
+import { commit } from '../editor/history';
+import type { Transaction } from '../domain/transaction';
 import { ViewportSession } from '../editor/viewport';
 import { duplicateMap, mapName, modelDigest, modelText, newMapDocument, openFromFile, renameMap, stageMap, type NewMapOptions } from '../editor/document';
 import { beginSave, completeSave, isDirty, noteDigest, openDocument, redo, restoreDraft, revert, undo, type DocumentState } from '../editor/history';
@@ -63,6 +69,34 @@ const describe = (r: Refusal): string[] => [
 
 export class LibraryStore {
   private view: AppView = initial;
+  private sources = new Map<string, JsonValue>();
+  private readonly selections = new Map<string, SelectionSession>();
+  clipboard = '';
+  selection(id: string): SelectionSession {
+    let session = this.selections.get(id);
+    if (!session) {
+      session = new SelectionSession(() => this.doc(id)!.state.model, (tx) => this.edit(id, tx), () => { const d = this.doc(id); return !!d && !lockReason(d); });
+      this.selections.set(id, session);
+    }
+    return session;
+  }
+  edit(id: string, tx: Transaction): boolean {
+    const d = this.doc(id); if (!d || lockReason(d)) return false;
+    try {
+      const model = candidate(d.state.model, tx), problems = editProblems(model);
+      if (problems.length) { this.selection(id).message(`Edit refused: ${problems.join('; ')}`); return false; }
+      const inputs = new Map(this.sources);
+      for (const open of this.view.docs) inputs.set(open.id, denormalize(open.state.model));
+      inputs.set(id, denormalize(model));
+      const graph = validateSourceGraph([...inputs.values()]);
+      if (!graph.ok) { this.selection(id).message(`Edit refused: ${graph.diagnostics.filter((x) => x.severity === 'error').slice(0, 8).map((x) => `${x.jsonPath}: ${x.message}`).join('; ')}`); return false; }
+      const r = commit(d.state, tx);
+      if (r.outcome === 'refused') { this.selection(id).message(r.problem.message); return false; }
+      if (r.outcome === 'recorded') this.edited(id, r.state);
+      this.selection(id).message(r.outcome === 'noop' ? 'No change' : tx.label);
+      return true;
+    } catch (e) { this.selection(id).message(e instanceof Error ? e.message : String(e)); return false; }
+  }
   private readonly viewports = new Map<string, ViewportSession>();
   viewport(id: string): ViewportSession {
     let session = this.viewports.get(id);
@@ -102,6 +136,15 @@ export class LibraryStore {
       return;
     }
     this.set({ phase: 'ready', library, status: this.view.phase === 'ready' ? this.view.status : `Library: ${library.label}${library.readOnly ? ' (read-only)' : ''}` });
+    // Cache the source graph outside React for semantic/reference validation at command boundaries.
+    const entries = library.documents.filter((e) => ['map', 'movement', 'catalog', 'tileset', 'prefab'].includes(e.kind) && e.state === 'ok');
+    const sources = new Map<string, JsonValue>();
+    for (let at = 0; at < entries.length; at += 64) {
+      const read = await readDocuments(entries.slice(at, at + 64).map((e) => e.id));
+      if (!read.ok) continue;
+      for (const file of read.documents) { const p = parseJson(file.text); if (p.ok) sources.set(file.id, p.value); }
+    }
+    this.sources = sources;
     await this.listOrphanDrafts();
   }
 
@@ -155,6 +198,7 @@ export class LibraryStore {
   /** Closes a tab after journaling its latest edits, so a dirty document's draft is offered when it is reopened. */
   async close(id: string): Promise<void> {
     if (this.doc(id)) await this.journal(id);
+    this.selections.get(id)?.cancel(); this.selections.delete(id);
     this.viewports.delete(id);
     const docs = this.view.docs.filter((d) => d.id !== id);
     this.set({ docs, activeId: this.view.activeId === id ? (docs.at(-1)?.id ?? null) : this.view.activeId });
@@ -171,6 +215,7 @@ export class LibraryStore {
     // An offered draft stays offered: only the user's restore or discard may consume it.
     const torn = this.view.library?.documents.find((e) => e.id === id)?.state !== 'ok';
     this.patchDoc(id, { state, savedModel: staged.model, conflicts: [], changedOnDisk: false, confirmRevert: false, torn });
+    this.selections.get(id)?.sync();
     await this.journal(id);
     this.set({ status });
   }
@@ -180,6 +225,7 @@ export class LibraryStore {
 
   private edited(id: string, state: DocumentState): void {
     this.patchDoc(id, { state, confirmRevert: false });
+    this.selections.get(id)?.sync();
     const t = this.timers.get(id);
     if (t) clearTimeout(t);
     this.timers.set(id, setTimeout(() => { this.timers.delete(id); void this.journal(id); }, DRAFT_DELAY_MS));

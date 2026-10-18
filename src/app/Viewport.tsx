@@ -1,14 +1,22 @@
+import { flushSync } from 'react-dom';
 import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import type { Rect, Vec2 } from '../contracts/common-types';
+import type { SelectionSession } from '../editor/selection';
+import { moveKeys } from '../editor/editing';
+import { PickIndex, selectionPrimitives } from '../render/picking';
 import type { MapModel } from '../domain/model';
 import { OVERLAYS, type ViewportSession } from '../editor/viewport';
 import { CanvasViewport } from '../render/canvas';
 import { buildScene, mapBounds } from '../render/scene';
 import { cssToWorld, snapWorld } from '../render/transform';
 
-export function Viewport({ model, session }: { readonly model: MapModel; readonly session: ViewportSession }): ReactNode {
+export function Viewport({ model, session, selection }: { readonly model: MapModel; readonly session: ViewportSession; readonly selection: SelectionSession }): ReactNode {
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const selected = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot);
   const scene = useMemo(() => buildScene(model), [model]);
+  const movingKeys = useMemo(() => moveKeys(model, selected.keys), [model, selected.keys]);
+  const index = useMemo(() => new PickIndex(model, scene), [model, scene]);
+  const picking = useRef(index); picking.current = index;
   const host = useRef<HTMLDivElement>(null), art = useRef<HTMLCanvasElement>(null), overlay = useRef<HTMLCanvasElement>(null);
   const notice = useRef<HTMLParagraphElement>(null);
   const cursor = useRef<HTMLSpanElement>(null);
@@ -18,38 +26,47 @@ export function Viewport({ model, session }: { readonly model: MapModel; readonl
     const el = host.current, a = art.current, o = overlay.current;
     if (!el || !a || !o) return;
     const r = new CanvasViewport(a, o, scene, session.getSnapshot(), (text) => { if (notice.current) notice.current.textContent = text; }); renderer.current = r;
-    const resize = new ResizeObserver(([entry]) => { if (entry) session.resize([entry.contentRect.width, entry.contentRect.height], bounds.current); });
+    const resize = new ResizeObserver(([entry]) => { if (entry) { selection.cancel(); session.resize([entry.contentRect.width, entry.contentRect.height], bounds.current); } });
     resize.observe(el);
     let resolution: MediaQueryList;
     const dpr = (): void => { resolution?.removeEventListener('change', dpr); r.invalidateDpr(); resolution = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`); resolution.addEventListener('change', dpr); };
     dpr();
-    let space = false, captured: number | null = null;
+    let space = false, captured: number | null = null, selecting = false;
     const position = (e: MouseEvent): Vec2 => { const rect = el.getBoundingClientRect(); return [e.clientX - rect.left, e.clientY - rect.top]; };
     const release = (cancel: boolean): void => {
+      if (selecting) { if (cancel) selection.cancel(); else selection.end(); selecting = false; }
       if (cancel) session.cancel(); else if (captured !== null) session.end(captured);
       const id = captured; captured = null;
       if (id !== null && el.hasPointerCapture(id)) el.releasePointerCapture(id);
       el.classList.remove('panning');
     };
     const down = (e: PointerEvent): void => {
-      if (!e.isPrimary || captured !== null || !(e.button === 1 || (e.button === 0 && (space || session.getSnapshot().panTool)))) return;
-      e.preventDefault(); el.focus({ preventScroll: true });
-      session.begin(e.pointerId, position(e)); captured = e.pointerId; el.setPointerCapture(e.pointerId); el.classList.add('panning');
+      if (!e.isPrimary || captured !== null || ![0, 1].includes(e.button)) return;
+      e.preventDefault();
+      // Blurring first commits the numeric field before picking reads the latest committed scene.
+      flushSync(() => { if (document.activeElement instanceof HTMLElement && document.activeElement !== el) document.activeElement.blur(); });
+      el.focus({ preventScroll: true });
+      if (e.button === 1 || space || session.getSnapshot().panTool) {
+        session.begin(e.pointerId, position(e)); el.classList.add('panning');
+      } else {
+        selecting = true; selection.down(position(e), picking.current, session.getSnapshot(), e.shiftKey, e.altKey);
+      }
+      captured = e.pointerId; el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent): void => {
-      session.move(e.pointerId, position(e));
+      if (selecting) selection.move(position(e)); else session.move(e.pointerId, position(e));
       const s = session.getSnapshot(), world = cssToWorld(s.view, position(e)), snapped = snapWorld(world, s.snap);
       if (cursor.current) cursor.current.textContent = `World ${world.map((v) => v.toFixed(4)).join(', ')} WU · ${s.snap.free ? 'Free → 1/16 WU' : 'Grid → 1/16 WU'}: ${snapped.join(', ')}`;
     };
-    const up = (e: PointerEvent): void => { if (e.pointerId === captured) { session.move(e.pointerId, position(e)); release(false); } };
+    const up = (e: PointerEvent): void => { if (e.pointerId === captured) { if (selecting) selection.move(position(e)); else session.move(e.pointerId, position(e)); release(false); } };
     const cancel = (e: PointerEvent): void => { if (e.pointerId === captured) release(true); };
     const blur = (): void => { space = false; release(true); };
     const keydown = (e: KeyboardEvent): void => {
       if (e.target !== el || e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.code === 'Space') { e.preventDefault(); space = true; }
-      if (e.key === 'Escape') { e.preventDefault(); release(true); space = false; }
+      if (e.key === 'Escape') { e.preventDefault(); const active = captured !== null; release(true); if (!active) selection.escape(); space = false; }
       const delta: Record<string, Vec2> = { ArrowLeft: [40, 0], ArrowRight: [-40, 0], ArrowUp: [0, 40], ArrowDown: [0, -40] };
-      if (Object.hasOwn(delta, e.key)) { e.preventDefault(); session.pan(delta[e.key]!); }
+      if (captured === null && Object.hasOwn(delta, e.key)) { e.preventDefault(); session.pan(delta[e.key]!); }
     };
     const keyup = (e: KeyboardEvent): void => { if (e.code === 'Space') { e.preventDefault(); space = false; } };
     const wheel = (e: WheelEvent): void => {
@@ -69,8 +86,11 @@ export function Viewport({ model, session }: { readonly model: MapModel; readonl
       el.removeEventListener('blur', blur); window.removeEventListener('blur', blur); el.removeEventListener('wheel', wheel);
     };
     // Model changes update the renderer below without replacing input handlers or camera state.
-  }, [session]);
+  }, [session, selection]);
   useEffect(() => { renderer.current?.update(scene, state); }, [scene, state]);
+  useEffect(() => {
+    renderer.current?.setHandles(selectionPrimitives(index, selected.delta.some((v) => v !== 0) ? movingKeys : selected.keys, state.view, selected.delta, selected.marquee));
+  }, [index, movingKeys, selected, state.view]);
   const center: Vec2 = [state.size[0] / 2, state.size[1] / 2];
   return (
     <section className="viewport-panel" aria-label="Map viewport">
@@ -78,6 +98,8 @@ export function Viewport({ model, session }: { readonly model: MapModel; readonl
         <button type="button" onClick={() => session.fit(scene.bounds)}>Fit bounds</button>
         <button type="button" onClick={() => session.zoom(center, state.view.zoom / 1.25)} aria-label="Zoom out">−</button>
         <button type="button" onClick={() => session.zoom(center, state.view.zoom * 1.25)} aria-label="Zoom in">+</button>
+        <button type="button" aria-pressed={!state.panTool} onClick={() => { selection.cancel(); if (state.panTool) session.panTool(); }}>Select tool</button>
+        <button type="button" disabled={!selected.keys.length} onClick={() => { const b = index.bounds(moveKeys(model, selected.keys)); if (b) session.fit(b); }}>Zoom to selection</button>
         <button type="button" aria-pressed={state.panTool} onClick={() => session.panTool()}>Pan tool</button>
         <button type="button" aria-pressed={state.physicsFocus} onClick={() => session.focusPhysics()}>Physics focus</button>
         <span aria-label="View scale">{(state.view.zoom * 100).toFixed(1)}%</span>
@@ -102,9 +124,9 @@ export function Viewport({ model, session }: { readonly model: MapModel; readonl
           </label>))}
         </div>
       </details>
-      <p className="note" id={`view-help-${model.id}`}>Space + drag or middle drag to pan. Wheel pans; Ctrl/⌘ + wheel zooms at the pointer. Focus the viewport for arrow keys. Escape cancels a pan.</p>
+      <p className="note" id={`view-help-${model.id}`}>Space + drag or middle drag to pan. Wheel pans; Ctrl/⌘ + wheel zooms at the pointer. Focus the viewport for arrow keys. Click selects; Shift toggles; Alt-click cycles overlaps; drag empty space for marquee. Drag selection to move. Escape cancels a gesture or clears selection.</p>
       <div ref={host} className="viewport" tabIndex={0} role="group" aria-label="World canvas" aria-describedby={`view-help-${model.id}`}
-        data-camera-x={state.view.camera[0]} data-camera-y={state.view.camera[1]} data-zoom={state.view.zoom} data-width={state.size[0]} data-height={state.size[1]}>
+        data-preview-x={selected.delta[0]} data-preview-y={selected.delta[1]} data-camera-x={state.view.camera[0]} data-camera-y={state.view.camera[1]} data-zoom={state.view.zoom} data-width={state.size[0]} data-height={state.size[1]}>
         <canvas ref={art} className="art-canvas" aria-label="Art canvas" />
         <canvas ref={overlay} className="overlay-canvas" aria-label="Overlay canvas" />
       </div>
