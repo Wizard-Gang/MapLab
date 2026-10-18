@@ -83,14 +83,12 @@ export class CanvasViewport {
     if (this.artDirty) {
       this.notice('');
       const ctx = this.context(this.art);
+      const hiddenLayers = new Map<string, boolean>();
       if (ctx && overlays.Art) for (const { layer, commands, visible, opacity } of this.scene.art) {
         // A hidden group hides all art descendants, but never touches physical overlays.
-        const hidden = (id: string | null): boolean => {
-          let depth = 0;
-          while (id && depth++ <= this.scene.art.length) { if (this.state.hiddenLayers.has(id)) return true; id = this.scene.art.find((a) => a.layer.id === id)?.layer.parentId ?? null; }
-          return false;
-        };
-        if (!visible || hidden(layer.id)) continue;
+        const hidden = this.state.hiddenLayers.has(layer.id) || (layer.parentId !== null && hiddenLayers.get(layer.parentId) === true);
+        hiddenLayers.set(layer.id, hidden);
+        if (!visible || hidden) continue;
         ctx.save(); ctx.globalAlpha = opacity * (this.state.physicsFocus ? 0.3 : 1);
         const artView: ViewTransform = layer.kind === 'background' ? { ...view, camera: layer.space === 'camera' ? [0, 0] : [layer.origin[0] + layer.parallax[0] * (view.camera[0] - layer.origin[0]), layer.origin[1] + layer.parallax[1] * (view.camera[1] - layer.origin[1])] } : view;
         ctx.setTransform(...canvasMatrix(artView, [this.art.width / size[0], this.art.height / size[1]]));

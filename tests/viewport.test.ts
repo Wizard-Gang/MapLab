@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import type { Rect, Vec2 } from '../src/contracts/common-types';
-import type { JsonValue } from '../src/contracts';
+import { validateSourceGraph, type JsonValue } from '../src/contracts';
 import { encode, normalize } from '../src/domain/model';
 import { isDirty, openDocument } from '../src/editor/history';
 import { OVERLAYS, ViewportSession } from '../src/editor/viewport';
@@ -12,6 +12,7 @@ import coordinates from '../conformance/viewport/coordinates.json';
 import snap from '../conformance/viewport/snap.json';
 import gesture from '../conformance/viewport/gesture.json';
 import fixtures from '../conformance/viewport/cases.json';
+import hierarchies from '../conformance/viewport/hierarchies.json';
 
 const pair = (a: readonly number[], b: readonly number[]): void => a.forEach((n, i) => expect(n).toBeCloseTo(b[i]!, 8));
 const root = new URL('../', import.meta.url);
@@ -77,4 +78,43 @@ test('real source produces independent named passes, body-local geometry, normal
   expect(scene.passes.get('Footholds')?.[1]?.points).toEqual([[240, 640], [240, 624]]);
   expect(scene.passes.get('Navigation')?.every((p) => p.label.includes('(intent)'))).toBe(true);
   expect(encode(m)).toBe(before);
+});
+
+
+const sourceGraph = (): any[] => {
+  const base = 'docs/specifications/2026-10-17-maplab-r1/examples/forest/';
+  return ['maps/forest.map.json', 'maps/clearing.map.json', 'catalogs/core.catalog.json', 'movement/player.movement.json',
+    'movement/ground.movement.json', 'movement/flyer.movement.json', 'tilesets/forest.tileset.json', 'prefabs/tree.prefab.json']
+    .map((file) => JSON.parse(readFileSync(new URL(base + file, root), 'utf8')));
+};
+const sceneOf = (source: JsonValue) => { const normalized = normalize(source); if (!normalized.ok) throw new Error('fixture failed'); return buildScene(normalized.model); };
+
+test('valid long entity-anchor chains preserve every marker and route endpoint; cycles terminate', () => {
+  const docs = sourceGraph(), source = docs[0], f = hierarchies;
+  const template = source.entities.find((e: any) => e.id === f.templateEntity);
+  const chain = Array.from({ length: f.entityCount }, (_, i) => ({ ...structuredClone(template), id: `${f.entityPrefix}${i}`,
+    anchor: i === f.entityCount - 1 ? { kind: 'world', point: f.terminalPoint } : { kind: 'entity', entityId: `${f.entityPrefix}${i + 1}`, point: f.entityOffset } }));
+  source.entities.push(...chain);
+  source.waypoints[0].anchor = { kind: 'entity', entityId: `${f.entityPrefix}0`, point: [0, 0] };
+  expect(validateSourceGraph(docs).ok).toBe(true);
+  const scene = sceneOf(source), markers = scene.passes.get('Spawns & routes')!;
+  expect(markers.filter((p) => p.label.startsWith(f.entityPrefix))).toHaveLength(f.entityCount);
+  expect(markers.find((p) => p.label === `${f.entityPrefix}0`)!.points[1]).toEqual([f.firstAnchor[0], f.firstAnchor[1]! - 8]);
+  expect(markers.find((p) => p.label === 'route.ground')!.points[0]).toEqual(f.firstAnchor);
+  chain.at(-1)!.anchor = { kind: 'entity', entityId: `${f.entityPrefix}0`, point: [0, 0] };
+  expect(validateSourceGraph(docs).ok).toBe(false);
+  expect(sceneOf(source).passes.get('Spawns & routes')!.some((p) => p.label.startsWith(f.entityPrefix))).toBe(false);
+});
+
+test('valid deep layer hierarchies retain paint order, inherited visibility/opacity without recursion', () => {
+  const docs = sourceGraph(), source = docs[0], f = hierarchies;
+  for (const layer of source.layers) if (layer.parentId === null) layer.parentId = `${f.groupPrefix}${f.groupCount - 1}`;
+  source.layers.unshift(...Array.from({ length: f.groupCount }, (_, i) => ({ id: `${f.groupPrefix}${i}`, name: `Group ${i}`, kind: 'group',
+    parentId: i === 0 ? null : `${f.groupPrefix}${i - 1}`, order: 0, visible: i !== 1, opacity: i === 2 ? 0.5 : 1 })));
+  expect(validateSourceGraph(docs).ok).toBe(true);
+  const scene = sceneOf(source);
+  expect(scene.art).toHaveLength(f.sceneLayerCount);
+  expect(scene.art.slice(0, f.groupCount).map((a) => a.layer.id)).toEqual(Array.from({ length: f.groupCount }, (_, i) => `${f.groupPrefix}${i}`));
+  expect(scene.art.slice(f.groupCount).map((a) => a.layer.id)).toEqual(buildScene(model()).art.map((a) => a.layer.id));
+  expect(scene.art.at(-1)!.visible).toBe(false); expect(scene.art.at(-1)!.opacity).toBe(0.5);
 });

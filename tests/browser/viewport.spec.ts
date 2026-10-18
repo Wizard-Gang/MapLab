@@ -1,5 +1,6 @@
 // ML-010: actual WebKit/Chromium wheel, pointer capture/cancel, focus, DPR, resize and canvas pixels.
 import { expect, test, type Page } from '@playwright/test';
+import hierarchies from '../../conformance/viewport/hierarchies.json';
 import { command, libraryFile, nameField, openEditor, openMap, resetLibrary, saveElsewhere } from './support';
 
 const canvas = (page: Page) => page.getByRole('group', { name: 'World canvas', exact: true });
@@ -168,4 +169,25 @@ test('invalid maps keep their recovery UI and dense background repetition stays 
   await expect(page.getByLabel('Viewport notice')).toContainText('Zoom in to show tightly repeated backgrounds');
   await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
   await expect(command(page, 'Undo')).toBeDisabled(); expect(errors).toEqual([]);
+});
+
+
+test('valid deep layer and entity hierarchies remain visible and responsive to viewport input', async ({ page }) => {
+  const path = 'maps/forest.map.json', source = JSON.parse(libraryFile(path).toString('utf8')), f = hierarchies;
+  const template = source.entities.find((e: any) => e.id === f.templateEntity);
+  source.entities.push(...Array.from({ length: f.entityCount }, (_, i) => ({ ...structuredClone(template), id: `${f.entityPrefix}${i}`,
+    anchor: i === f.entityCount - 1 ? { kind: 'world', point: f.terminalPoint } : { kind: 'entity', entityId: `${f.entityPrefix}${i + 1}`, point: f.entityOffset } })));
+  for (const layer of source.layers) if (layer.parentId === null) layer.parentId = `${f.groupPrefix}${f.groupCount - 1}`;
+  source.layers.unshift(...Array.from({ length: f.groupCount }, (_, i) => ({ id: `${f.groupPrefix}${i}`, name: `Group ${i}`, kind: 'group',
+    parentId: i === 0 ? null : `${f.groupPrefix}${i - 1}`, order: 0, visible: true, opacity: 1 })));
+  saveElsewhere(path, `${JSON.stringify(source, null, 2)}\n`);
+  const errors: string[] = []; page.on('pageerror', (e) => errors.push(e.message));
+  await ready(page); const before = await state(page), point = await at(page);
+  await page.mouse.move(point.x, point.y); await page.mouse.wheel(40, 0);
+  await expect.poll(async () => (await state(page)).x).toBeCloseTo(before.x + 40 / before.z, 6);
+  await page.getByText('Overlays and snap', { exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Art layer Group 0', exact: true }).uncheck();
+  await expect.poll(async () => (await pixels(page, 'Art canvas')).filled).toBe(0);
+  expect((await pixels(page, 'Overlay canvas')).filled).toBeGreaterThan(0);
+  expect(errors).toEqual([]); await expect(command(page, 'Undo')).toBeDisabled();
 });

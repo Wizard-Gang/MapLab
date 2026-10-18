@@ -51,42 +51,68 @@ export function buildScene(model: MapModel): Scene {
   const entities = new Map(records<Entity>(model, 'entities').map((e) => [e.id, e]));
   const visuals = new Map(records<Visual>(model, 'visuals').map((v) => [v.id, v]));
   const bodyPosition = (id: string | null): Vec2 => (id ? bodies.get(id)?.position : null) ?? [0, 0];
-  const resolve = (a: Anchor, depth = 0): Vec2 | null => {
-    if (depth > 64) return null;
+  const entityPoints = new Map<string, Vec2 | null>();
+  const baseAnchor = (a: Exclude<Anchor, { readonly kind: 'entity' }>): Vec2 | null => {
     if (a.kind === 'world') return a.point;
     if (a.kind === 'body') return plus(bodyPosition(a.bodyId), a.point);
-    if (a.kind === 'entity') { const e = entities.get(a.entityId), p = e ? resolve(e.anchor, depth + 1) : null; return p ? plus(p, a.point) : null; }
     const f = footholds.get(a.footholdId);
     if (!f) return null;
     const dx = f.b[0] - f.a[0], dy = f.b[1] - f.a[1], length = Math.hypot(dx, dy);
     return plus(bodyPosition(f.ownerBodyId), [f.a[0] + dx * a.u + dy / length * a.normalOffset, f.a[1] + dy * a.u - dx / length * a.normalOffset]);
   };
+  const resolveEntity = (id: string): Vec2 | null => {
+    const path: { readonly id: string; readonly offset: Vec2 }[] = [], seen = new Set<string>();
+    let current = id, point: Vec2 | null = null;
+    while (true) {
+      if (entityPoints.has(current)) { point = entityPoints.get(current)!; break; }
+      if (seen.has(current)) break; // Invalid cycles terminate without fabricating a location.
+      seen.add(current);
+      const e = entities.get(current);
+      if (!e) break;
+      if (e.anchor.kind !== 'entity') { point = baseAnchor(e.anchor); entityPoints.set(current, point); break; }
+      path.push({ id: current, offset: e.anchor.point }); current = e.anchor.entityId;
+    }
+    for (let i = path.length - 1; i >= 0; i--) {
+      const entry = path[i]!; point = point ? plus(point, entry.offset) : null; entityPoints.set(entry.id, point);
+    }
+    return point;
+  };
+  const resolve = (a: Anchor): Vec2 | null => {
+    if (a.kind !== 'entity') return baseAnchor(a);
+    const point = resolveEntity(a.entityId); return point ? plus(point, a.point) : null;
+  };
   const layers = records<Layer>(model, 'layers');
   const order: ArtLayer[] = [];
   const sorted = <T extends { readonly order: number; readonly id: string }>(items: readonly T[]): T[] => [...items].sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const visit = (parentId: string | null, visible: boolean, opacity: number, depth = 0): void => {
-    if (depth > layers.length) return;
-    for (const layer of sorted(layers.filter((l) => l.parentId === parentId))) {
-      const commands: Primitive[] = [];
-      for (const v of sorted([...visuals.values()].filter((v) => v.layerId === layer.id))) {
-        // Resolve source-local visual hierarchy, then its rigid body attachment.
-        const worldPoint = (p: Vec2): Vec2 => {
-          let at = transformed(p, v.transform), parent = v.parentId, body = v.bodyId, depth = 0;
-          while (parent && depth++ < visuals.size) {
-            const pv = visuals.get(parent); if (!pv) break;
-            at = transformed(at, pv.transform); body = pv.bodyId ?? body; parent = pv.parentId;
-          }
-          return plus(at, bodyPosition(body));
-        };
-        if (v.source.kind === 'shape') commands.push(primitive(shapePoints(v.source.shape).map(worldPoint), v.source.fill, '', true, true));
-        // Raster/SVG loading belongs to ML-015; mark existing references instead of claiming to decode them.
-        else commands.push(primitive(([[0, 0], [16, 0], [16, 16], [0, 16]] as Vec2[]).map(worldPoint), '#a5bbb3', `${v.id} (asset)`, true));
-      }
-      order.push({ layer, commands, visible: visible && layer.visible, opacity: opacity * layer.opacity });
-      visit(layer.id, visible && layer.visible, opacity * layer.opacity, depth + 1);
+  const children = new Map<string | null, Layer[]>();
+  for (const layer of layers) { const list = children.get(layer.parentId) ?? []; list.push(layer); children.set(layer.parentId, list); }
+  for (const [parent, list] of children) children.set(parent, sorted(list));
+  const stack = [...(children.get(null) ?? [])].reverse().map((layer) => ({ layer, visible: true, opacity: 1 }));
+  const visited = new Set<string>();
+  while (stack.length) {
+    const { layer, visible, opacity } = stack.pop()!;
+    if (visited.has(layer.id)) continue;
+    visited.add(layer.id);
+    const commands: Primitive[] = [];
+    for (const v of sorted([...visuals.values()].filter((v) => v.layerId === layer.id))) {
+      // Resolve source-local visual hierarchy, then its rigid body attachment.
+      const worldPoint = (p: Vec2): Vec2 => {
+        let at = transformed(p, v.transform), parent = v.parentId, body = v.bodyId, depth = 0;
+        while (parent && depth++ < visuals.size) {
+          const pv = visuals.get(parent); if (!pv) break;
+          at = transformed(at, pv.transform); body = pv.bodyId ?? body; parent = pv.parentId;
+        }
+        return plus(at, bodyPosition(body));
+      };
+      if (v.source.kind === 'shape') commands.push(primitive(shapePoints(v.source.shape).map(worldPoint), v.source.fill, '', true, true));
+      // Raster/SVG loading belongs to ML-015; mark existing references instead of claiming to decode them.
+      else commands.push(primitive(([[0, 0], [16, 0], [16, 16], [0, 16]] as Vec2[]).map(worldPoint), '#a5bbb3', `${v.id} (asset)`, true));
     }
-  };
-  visit(null, true, 1);
+    const inherited = { visible: visible && layer.visible, opacity: opacity * layer.opacity };
+    order.push({ layer, commands, ...inherited });
+    const descendants = children.get(layer.id) ?? [];
+    for (let i = descendants.length - 1; i >= 0; i--) stack.push({ layer: descendants[i]!, ...inherited });
+  }
   const passes = new Map<Overlay, Primitive[]>();
   const add = (name: Overlay, p: Primitive): void => { const list = passes.get(name) ?? []; list.push(p); passes.set(name, list); };
   for (const f of footholds.values()) {
