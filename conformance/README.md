@@ -70,4 +70,59 @@ Additional executable regressions cover every ObjectRef kind, cross-map scopes,
 non-map cycles, decimal quanta, unused-profile extensions, resolved nav-anchor
 ranges, compatibility reports, warning saturation and immutable outputs. A separate
 process checks final catalog bytes and closed schema rejection without importing
-the editor. Full independent bundle/fixture loading remains ML-007.
+the editor. Full independent bundle/fixture loading is ML-007's `bundle/` below.
+
+## `bundle/` (ML-007)
+
+`cases.json` pins the golden inputs for the independent reader
+`tests/consumer/reader/read-bundle.mjs`. The inputs are the unchanged R1 forest
+source documents and `maplab.project.json` index, each listed with its declared
+schema, and the R1 export bundle with bundle digest `0a39dafd…`. The source digests
+must equal the project index digests. Each source document must validate against its
+declared schema under the reader's own evaluator.
+
+Tests copy only the reader folder and `schemas/` into a scratch folder and spawn the
+reader there. It must read both maps and resolve the reciprocal portals. Each of the
+104 inert edit records changes a temporary copy of the export bundle. JSON edits
+re-encode the edited file as JCS, using the helper's own encoder, and re-hash it,
+unless the record says otherwise, so each negative record isolates one defect. It
+must then produce exactly its expected diagnostic code, file and JSON path. The
+records cover:
+
+- inventory: symlinks, FIFOs, empty directories, depth, unsafe or reserved names,
+  case aliases (case-sensitive hosts only), nested archives, unlisted or missing files;
+- manifest: tampering, order, duplicate keys, non-canonical bytes, unindexed or
+  non-authored documents, schema mismatch;
+- document bytes: malformed JSON, UTF-8, BOM, duplicate members, lone surrogates;
+- document limits: out-of-range numbers and nesting deeper than 64 containers;
+- negotiation: versions, formats, contracts, external maps, and contracts bound to
+  the wrong role (collision contract, camera model, required feature, controller),
+  including a duplicate required feature;
+- closure: missing, duplicate or mismatched dependencies, unreachable documents,
+  absent optional dependencies with two paths or aliasing another file;
+- references: duplicates outside maps, dangling, wrong-kind, wrong-owner and
+  out-of-closure references, catalog entries without params, movement-profile uses,
+  profile refs that dangle in any map whose closure holds the profile, and terrain
+  naming a tileset its map does not declare;
+- asset paths: reserved, traversal, media mismatch, unbundled.
+
+Ten positive records must still be accepted:
+
+- a listed asset;
+- the five pinned schemas in the F4 layout;
+- a self portal;
+- a third map with a transitive portal;
+- an in-closure cross-map ref;
+- a declared profile catalog use;
+- reference-like parameter names;
+- a map-scoped profile ref used from a map that does not declare the profile;
+- terrain naming a directly declared tileset;
+- a group-kind layer as a `group` target.
+
+A test requires every diagnostic code the reader can emit to have a record, or one of
+six named in-process tests for codes no bundle edit can produce: a non-directory
+input, schema-directory defects, unclassified members and non-map dependency cycles.
+On a case-insensitive host the case-alias record is reported as skipped. A differential
+test runs the reader's parser and evaluator against `src/contracts` on every owned
+conformance file and R1 example. The two must agree on byte acceptance and
+closed-schema validity.

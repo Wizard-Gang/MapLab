@@ -1,7 +1,7 @@
 {
-  "id": "ML-006",
+  "id": "ML-007",
   "type": "FEATURE",
-  "title": "[ML-006] [FEATURE] Finalize gameplay and catalog schemas",
-  "record": "docs/changes/ML-006.md",
-  "branch": "ml-006-gameplay-contracts"
+  "title": "[ML-007] [FEATURE] Add independent final-byte fixture reader",
+  "record": "docs/changes/ML-007.md",
+  "branch": "ml-007-fixture-reader"
 }

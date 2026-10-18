@@ -71,4 +71,33 @@ scope boundaries; only the full graph reader establishes gameplay/catalog closur
 Geometry checks retain stable shape/edge ownership, exact welds, polygons,
 actor planes, anchor cycles, motion legs, terrain permissions and prefab provenance.
 Profile-dependent resting stance/full-body clearance and controller replay remain
-explicitly deferred. ML-007 owns the complete independent final-byte fixture reader.
+explicitly deferred.
+
+ML-007 adds the independent final-byte reader in `tests/consumer/reader/`. It is a
+separate Node program that imports only Node built-ins and its own folder, never
+`src/`. It reads a folder bundle plus the pinned `schemas/` from disk and performs
+the following parts of adopted G1 steps 1–4:
+
+- a bounded safe-path inventory that refuses symlinks, special files, empty
+  directories, hidden, reserved and aliased names, and nested archives;
+- duplicate-key-rejecting strict UTF-8 JSON;
+- a canonical JCS manifest with complete inventory, exact sizes, SHA-256 and the
+  bundle digest;
+- exact format/version and contract negotiation, for closed bundles only (external
+  maps are deferred). Each contract member is checked for its role: `requiredFeatures`
+  names distinct semantic contracts, `collisionContract` only `maplab.collision` v1,
+  the camera `model` only `maplab.camera` v1 and a profile `controller` only
+  `maplab.reference-controller` v1;
+- independent closed-schema evaluation and dependency closure, where an absent
+  optional dependency still names one path per ID and one ID per case-folded path;
+- reference resolution inside each map's dependency closure, including portals,
+  typed parameter refs, every catalog entry a map uses, and asset paths. Every
+  movement profile in a map's closure is resolved in that map, whether or not the
+  map declares it, and terrain must declare its tileset directly.
+
+Every `*Id`/`*Ids` member and every `{key, version}` member of the published v1
+schemas is classified explicitly: as a contract, a catalog entry or a solver
+declaration. An unknown member fails closed. The reader checks that catalog entries
+exist. It does not check handler kinds, parameter semantics or the F3 semantic
+rules, which remain `src/contracts` validation. It constructs no world, renderer,
+engine or navigation, and its report says so.
