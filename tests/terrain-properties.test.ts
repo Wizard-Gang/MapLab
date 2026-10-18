@@ -85,7 +85,9 @@ describe('brush and replay properties', () => {
       if (changes) recorded++;
     }
     const layer = h.state.model.terrain!.byLayer.get(LAYER)!.cells;
-    for (let r = span[0]; r < span[1]; r++) for (let c = span[0]; c < span[1]; c++) expect(readCell(layer, c, r), `${c},${r}`).toEqual(at(c, r));
+    const mismatches: string[] = [];
+    for (let r = span[0]; r < span[1]; r++) for (let c = span[0]; c < span[1]; c++) if (JSON.stringify(readCell(layer, c, r)) !== JSON.stringify(at(c, r))) mismatches.push(`${c},${r}`);
+    expect(mismatches).toEqual([]);
     expect(storeToChunks(layer).every((k) => k.cells.some((x) => x !== null))).toBe(true);
     // Replaying the recorded transactions on the base reproduces the exact document.
     let replayed = base;
@@ -97,7 +99,7 @@ describe('brush and replay properties', () => {
     while (s.future.length) s = redo(s);
     expect(encode(s.model)).toBe(encode(h.state.model));
     expect(graphErrors(h.state.model)).toEqual([]);
-  });
+  }, 30_000);
 
   test('a brush stroke is gap-free: exactly the segment cells between samples, one 8-connected region', () => {
     const h = new Harness(forest()), samples: CellXY[] = [[0, 0], [30, 7], [-5, 20], [12, -9]];

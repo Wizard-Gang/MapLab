@@ -2,8 +2,8 @@
 import type { Rect, Vec2 } from '../contracts/common-types';
 import type { ViewportState } from '../editor/viewport';
 import { backingSize, canvasMatrix, cssLengthInWorld, floorDiv, visibleWorld, type ViewTransform } from './transform';
-import type { Primitive, Scene } from './scene';
-import { drawPreview, drawTerrain, type TileArt } from './terrain';
+import type { Primitive, Scene, TileArt } from './scene';
+import { drawPreview, drawTerrain } from './terrain';
 import type { TerrainPreview } from '../editor/terrain-session';
 
 const overlaps = (a: Rect, b: Rect): boolean => a[0] <= b[0] + b[2] && a[0] + a[2] >= b[0] && a[1] <= b[1] + b[3] && a[1] + a[3] >= b[1];

@@ -1,30 +1,15 @@
 // Canvas 2D terrain drawing (adopted H3, R1 H5). Committed cells paint on the art canvas inside their tile layer's
 // paint order; a gesture's affected cells paint on the overlay. Only chunks and cells inside the visible world
 // rectangle are drawn, read straight from the packed store: never one DOM node per cell, never a model copy.
-import type { Cell, TilesetDocument, Vec2 } from '../contracts';
+import type { Cell, Vec2 } from '../contracts';
 import type { Rect } from '../contracts/common-types';
 import type { CellStore } from '../domain/paint';
 import { CHUNK_SIZE, unpack } from '../domain/paint';
 import { cssLengthInWorld, visibleWorld, type ViewTransform } from './transform';
-import { shapePoints } from './scene';
+import type { TerrainArt, TileArt } from './scene';
 import type { Grid } from '../editor/terrain';
 
-/** A tile's art in unit-cell coordinates: its fill and outline, or null points for a full-cell rectangle. */
-export interface TileArt { readonly color: string; readonly points: readonly Vec2[] | null; readonly asset: boolean }
-export interface TerrainArt { readonly grid: Grid; readonly cells: CellStore; readonly tiles: ReadonlyMap<string, TileArt> }
-
 const MISSING = '#ff4fd8';
-export function tileArt(t: TilesetDocument | undefined): Map<string, TileArt> {
-  const out = new Map<string, TileArt>();
-  for (const tile of t?.tiles ?? []) {
-    const v = tile.visual;
-    if (v.kind !== 'shape') { out.set(tile.id, { color: '#7d8f88', points: null, asset: true }); continue; }
-    const s = v.shape, size = t!.cellSize;
-    const full = s.kind === 'rect' && s.rect[0] === 0 && s.rect[1] === 0 && s.rect[2] === size[0] && s.rect[3] === size[1];
-    out.set(tile.id, { color: v.fill, points: full ? null : shapePoints(s).map((p): Vec2 => [p[0] / size[0], p[1] / size[1]]), asset: false });
-  }
-  return out;
-}
 
 /** Editor preview convention: mirror inside the cell, then turn clockwise on screen about its centre. */
 export function cellPoints(points: readonly Vec2[], cell: Pick<Cell, 'quarterTurns' | 'mirrorX' | 'mirrorY'>): Vec2[] {

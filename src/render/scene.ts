@@ -6,8 +6,8 @@ import type { Entity, Region, Route, Waypoint } from '../contracts/gameplay-type
 import type { CollectionName, MapModel } from '../domain/model';
 import type { Overlay } from '../editor/viewport';
 import type { TilesetDocument } from '../contracts';
-import { gridOf } from '../editor/terrain';
-import { tileArt, type TerrainArt } from './terrain';
+import type { CellStore } from '../domain/paint';
+import { gridOf, type Grid } from '../editor/terrain';
 
 export interface Primitive {
   readonly points: readonly Vec2[];
@@ -17,6 +17,22 @@ export interface Primitive {
   readonly label: string;
   readonly bounds: Rect;
   readonly objectId?: string;
+}
+/** A tile's art in unit-cell coordinates: its fill, and its outline or null for a full-cell rectangle. */
+export interface TileArt { readonly color: string; readonly points: readonly Vec2[] | null; readonly asset: boolean }
+/** One tile layer's committed cells as the art pass draws them (src/render/terrain.ts). */
+export interface TerrainArt { readonly grid: Grid; readonly cells: CellStore; readonly tiles: ReadonlyMap<string, TileArt> }
+/** Tile art from a tileset's shape visuals. Asset-backed tiles get a neutral placeholder until assets decode (ML-015). */
+export function tileArt(t: TilesetDocument | undefined): Map<string, TileArt> {
+  const out = new Map<string, TileArt>();
+  for (const tile of t?.tiles ?? []) {
+    const v = tile.visual;
+    if (v.kind !== 'shape') { out.set(tile.id, { color: '#7d8f88', points: null, asset: true }); continue; }
+    const s = v.shape, size = t!.cellSize;
+    const full = s.kind === 'rect' && s.rect[0] === 0 && s.rect[1] === 0 && s.rect[2] === size[0] && s.rect[3] === size[1];
+    out.set(tile.id, { color: v.fill, points: full ? null : shapePoints(s).map((p): Vec2 => [p[0] / size[0], p[1] / size[1]]), asset: false });
+  }
+  return out;
 }
 export interface ArtLayer { readonly layer: Layer; readonly commands: readonly Primitive[]; readonly visible: boolean; readonly opacity: number; readonly terrain?: TerrainArt }
 export interface Scene {
