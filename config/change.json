@@ -1,7 +1,7 @@
 {
-  "id": "ML-007",
+  "id": "ML-008",
   "type": "FEATURE",
-  "title": "[ML-007] [FEATURE] Add independent final-byte fixture reader",
-  "record": "docs/changes/ML-007.md",
-  "branch": "ml-007-fixture-reader"
+  "title": "[ML-008] [FEATURE] Add transactional document history and paint deltas",
+  "record": "docs/changes/ML-008.md",
+  "branch": "ml-008-document-history"
 }
