@@ -54,7 +54,9 @@ test('welded solid seam and collider vertices update physical authority with sta
 });
 
 test('mismatched solid/one-way connect and owner edges refuse explicitly without history',async({page})=>{
-  await ready(page);await choose(page,'fh.east');await page.getByLabel('Target foothold',{exact:true}).selectOption('fh.upper');await page.getByRole('button',{name:'Snap and connect',exact:true}).click();await expect(notice(page)).toContainText('Incompatible');await expect(command(page,'Undo')).toBeDisabled();
+  await ready(page);await choose(page,'fh.east');
+  await page.getByRole('button',{name:'Make one-way',exact:true}).click();await expect(notice(page)).toContainText('Solid and one-way');await expect(command(page,'Undo')).toBeDisabled();
+  await page.getByLabel('Target foothold',{exact:true}).selectOption('fh.upper');await page.getByRole('button',{name:'Snap and connect',exact:true}).click();await expect(notice(page)).toContainText('Incompatible');await expect(command(page,'Undo')).toBeDisabled();
   await choose(page,'fh.upper');await page.getByLabel('Solid owner edge',{exact:true}).selectOption({label:'body.west / shape.west / 0'});await page.getByRole('button',{name:'Assign solid edge',exact:true}).click();await expect(notice(page)).toContainText('refused');await expect(command(page,'Undo')).toBeDisabled();
   await choose(page,'fh.east');await page.getByRole('button',{name:'Disconnect endpoint',exact:true}).click();await expect(notice(page)).toHaveText('Disconnect foothold endpoint');
   await page.getByLabel('Target foothold',{exact:true}).selectOption('fh.slope');await page.getByRole('button',{name:'Snap and connect',exact:true}).click();await expect(notice(page)).toHaveText('Snap and connect footholds');

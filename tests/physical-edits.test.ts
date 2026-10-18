@@ -68,6 +68,7 @@ test('owner assignment cannot silently commit a mismatched or overlapping solid;
   const b=records<CollisionBody>(m,'bodies').find(b=>b.id==='body.west')!;
   const next=candidate(m,editShape(m,b.id,{id:'shape.west',kind:'rect',rect:[0,640,496,160]}));expect(foothold(next,'fh.west').b).toEqual([496,640]);full(next);
   expect(foothold(candidate(m,assignSolidEdge(m,'fh.west',null)),'fh.west').mode).toBe('oneWay');
+  expect(()=>assignSolidEdge(m,'fh.east',null)).toThrow('Solid and one-way');
 });
 test('all physical handle previews cancel without model/history mutation, stale release refuses, one drag one undo',()=>{
   let state=openDocument(m),count=0; const session=new SelectionSession(()=>state.model,tx=>{state=commit(state,tx).state;count++;return true;},()=>true);
@@ -76,6 +77,9 @@ test('all physical handle previews cancel without model/history mutation, stale 
   for(let i=0;i<5;i++){session.down(css,index,vp.getSnapshot(),false,false);session.move([css[0]+32,css[1]]);expect(session.getSnapshot().handlePreview).not.toBeNull();session.cancel();session.end();expect(state.model).toBe(m);expect(state.past).toHaveLength(0);}
   session.down(css,index,vp.getSnapshot(),false,false);session.move([css[0]+32,css[1]]);session.end();expect(count).toBe(1);expect(state.past).toHaveLength(1);
   expect(encode(undo(state).model)).toBe(encode(m));
+  state=openDocument(m);session.down(css,index,vp.getSnapshot(),false,false);session.move([css[0]+32,css[1]]);
+  state=commit(state,transaction('Outside edit',[setOp(state.model,'footholds','fh.right','name','Outside name')])).state;
+  const changed=state;session.end();expect(state).toBe(changed);expect(count).toBe(1);expect(session.getSnapshot().handlePreview).toBeNull();
 });
 test('independent isolated consumer accepts final split/join bytes and rejects dangling support corruption',()=>{
   const scratch=realpathSync(mkdtempSync(join(tmpdir(),'maplab-physical-consumer-')));
