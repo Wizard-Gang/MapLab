@@ -1,6 +1,7 @@
 // The editor's library session (R1 C2, H2): open documents, their histories and the library mirror. React reads it
 // through useSyncExternalStore; large models never live in component state. Disk is the authority, so every
 // library operation re-reads the server's snapshot afterwards.
+import { ViewportSession } from '../editor/viewport';
 import { duplicateMap, mapName, modelDigest, modelText, newMapDocument, openFromFile, renameMap, stageMap, type NewMapOptions } from '../editor/document';
 import { beginSave, completeSave, isDirty, noteDigest, openDocument, redo, restoreDraft, revert, undo, type DocumentState } from '../editor/history';
 import { normalize, type MapModel } from '../domain/model';
@@ -62,6 +63,12 @@ const describe = (r: Refusal): string[] => [
 
 export class LibraryStore {
   private view: AppView = initial;
+  private readonly viewports = new Map<string, ViewportSession>();
+  viewport(id: string): ViewportSession {
+    let session = this.viewports.get(id);
+    if (!session) { session = new ViewportSession(); this.viewports.set(id, session); }
+    return session;
+  }
   private readonly listeners = new Set<() => void>();
   private drafts: DraftStore | null = null;
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -148,6 +155,7 @@ export class LibraryStore {
   /** Closes a tab after journaling its latest edits, so a dirty document's draft is offered when it is reopened. */
   async close(id: string): Promise<void> {
     if (this.doc(id)) await this.journal(id);
+    this.viewports.delete(id);
     const docs = this.view.docs.filter((d) => d.id !== id);
     this.set({ docs, activeId: this.view.activeId === id ? (docs.at(-1)?.id ?? null) : this.view.activeId });
   }

@@ -1,0 +1,8 @@
+{
+  "id": "pan-zoom-resize",
+  "description": "Owned CC0 session script. Pan is transient; Escape/cancel restores its start. Resize preserves center, source and history.",
+  "bounds": [-128, -64, 256, 128], "size": [552, 296],
+  "pointer": [120, 90], "move": [200, 50], "deltaWorld": [-40, 20],
+  "zoomAt": [81, 43], "zoom": 4,
+  "resize": [752, 396]
+}

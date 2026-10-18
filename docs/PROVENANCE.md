@@ -10,7 +10,7 @@ Owned numeric fixture data, including numerical examples in the supplied design,
 is separately dedicated under **CC0 1.0 Universal** to the extent the contributors
 hold rights: https://creativecommons.org/publicdomain/zero/1.0/ . No executable
 world fixtures shipped in ML-001. R1's `examples/` (adopted at ML-003) and the
-ML-003 parser, ML-004 geometry ML-005 movement fixtures/digest vectors and ML-006 gameplay fixtures/mutation records and ML-007 bundle-reader mutation records and ML-008 history step scripts and ML-009 library storage step scripts in `conformance/`, and the `placeholder-library/` byte-identical copy of R1's forest example, are owned
+ML-003 parser, ML-004 geometry ML-005 movement fixtures/digest vectors and ML-006 gameplay fixtures/mutation records and ML-007 bundle-reader mutation records and ML-008 history step scripts and ML-009 library storage step scripts and ML-010 viewport numerical/session fixtures in `conformance/`, and the `placeholder-library/` byte-identical copy of R1's forest example, are owned
 CC0 data. Their indexes pin the source bytes and expected diagnostics. Future fixture files must
 identify provenance and this dedication explicitly; third-party data retains its original terms and must
 never be represented as owned CC0 material.

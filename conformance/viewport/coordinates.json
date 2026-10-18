@@ -1,0 +1,9 @@
+{
+  "id": "signed-world-css",
+  "description": "Owned CC0 numerical vectors. CSS expectations are independent of DPR; backing dimensions alone scale.",
+  "view": { "camera": [-64, -32], "origin": [10, 20], "zoom": 2, "pixelsPerWU": 1.5 },
+  "world": [-80, -48], "css": [-38, -28],
+  "size": [333.5, 201.25], "dprs": [1, 2, 3],
+  "backings": [[334, 201], [667, 403], [1001, 604]],
+  "negativeCell": [-0.0625, -1024.0625], "cellSize": [32, 32], "cell": [-1, -33], "chunk": [-1, -2]
+}
