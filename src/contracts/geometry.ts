@@ -273,6 +273,7 @@ function contentChecks(content: GeometryContent, layers: readonly Layer[] | read
       const atLink = [...at, 'connections', endpoint, j]; const target = footholdMap.get(link.footholdId);
       if (!target) report('endpoint-link', 'reference', atLink, 'Missing connected foothold', f.id);
       else if (target.id === f.id || target.ownerBodyId !== f.ownerBodyId || !same(f[endpoint], target[link.endpoint])) report('endpoint-link', 'weld', atLink, 'Welds require distinct surfaces and equal endpoints in the same owner frame', f.id);
+      else if (target.mode !== f.mode) report('endpoint-link', 'compatibility', atLink, 'Solid and one-way supports cannot share a welded link', f.id);
       else if (!target.connections[link.endpoint].some((back) => back.footholdId === f.id && back.endpoint === endpoint)) report('endpoint-link', 'reciprocity', atLink, 'Weld must have a reciprocal endpoint link', f.id);
     });
   });

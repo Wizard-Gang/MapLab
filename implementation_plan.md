@@ -4,7 +4,7 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** ML-001–010 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-011 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-012–044 are reserved, not active.
+**Completion status:** ML-001–011 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-012 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-013–044 are reserved, not active.
 
 ## Completed history
 
@@ -19,30 +19,12 @@
 - **ML-008** — completed at `b7016dcedb201649fac124e3883b347f2cba69ac` by protected squash of PR #7 (tested head `a9a658b583b4b816a0ad46e4f8e23bc2e65c6785`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39096778933)); a blocking exact-head review at `61856eb` was repaired and re-reviewed, then archived head-guarded merge/policy evidence and authenticated read-back confirmed all three required checks, no bypass and deleted branches. Its [change record](docs/changes/ML-008.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-009** — completed at `211a18acf02595525dd4ffbeb0c19c2ad844c615` by protected squash of PR #8 (tested head `d73001f8a8ae162b7ab81375f2756b6dd89b7fee`, successful [main CI](https://github.com/Wizard-Gang/MapLab/actions/runs/39148593281)); the independent exact-head review, authenticated delivery verification and all three main jobs passed without bypass; both completed branches were deleted. Its [change record](docs/changes/ML-009.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-010** — completed at `61b4e2878def14dcca909cafd83bdf0d25d0d0eb` by protected squash of PR #9 (tested head `6a711aeb209473804e806ad0709ff98b97047c6d`, successful [main CI 39151143271](https://github.com/Wizard-Gang/MapLab/actions/runs/39151143271)); repaired independent exact-head review, authenticated delivery verification and all three main checks passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-010.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
+- **ML-011** — completed at `5727a5e5c11634b582d901c3d391d16a0a8247e7` by protected squash of PR #10 (tested head `df9e2a5fbfa459ea4432f13fc70def329ae30e15`, successful [main CI 39154719115](https://github.com/Wizard-Gang/MapLab/actions/runs/39154719115)); independent exact-head review, authenticated delivery verification and all three resulting-main jobs passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-011.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-011 / P0
-
-- **Source scope:** Selection/multi-select, move/duplicate/delete, hierarchy search, inspector numeric editing and clipboard remapping.
-- **Non-goals:** No foothold-specialized tools or prefab live updates.
-- **Acceptance:** Escape restores preview; one drag=one undo; dangling refs require explicit repair; focus-safe shortcuts tested.
-- **Depends on:** ML-010 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C2](docs/specifications/2026-10-16-maplab.md#c2-modes-and-tools), [H2](docs/specifications/2026-10-16-maplab.md#h2-state-and-history), [H3](docs/specifications/2026-10-16-maplab.md#h3-rendering-and-hit-testing), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement pick hierarchy, multi-selection, move/duplicate/delete and inspector numeric edits via reversible commands.
-  2. Implement clipboard ID/reference remapping and focus-aware keyboard shortcuts with explicit dangling-ref repair.
-  3. Create owned fixture(s): Selection escape/cancel, clipboard cycles, mixed drag, broken reference and focused text input.
-  4. Add executable checks: One drag one undo and zero unintended source mutations on cancel.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-012 / P0
 
 - **Source scope:** Foothold/collider handles, snap/connect/split/join and solid-edge ownership editing.
@@ -57,6 +39,11 @@
   4. Add executable checks: Edit roundtrip and semantic schema tests with collision overlay independent of art.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-013 / P0
 
 - **Source scope:** Sparse 32² tile chunks and brush/rectangle/line/fill/erase transactions; tileset palette.

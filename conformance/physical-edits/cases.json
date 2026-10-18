@@ -1,0 +1,10 @@
+{
+  "license": "CC0-1.0",
+  "splits": [
+    {"id":"fh.west","x":240,"right":"fh.west-2","a":[0,640],"seam":[240,640],"b":[480,640]},
+    {"id":"fh.slope","x":864,"right":"fh.slope-2","a":[800,640],"seam":[864,608],"b":[928,576]},
+    {"id":"fh.elevated","x":304,"right":"fh.elevated-2","a":[224,496],"seam":[304,496],"b":[384,496]}
+  ],
+  "reject": ["solid/one-way weld", "owner mismatch", "noncollinear join", "property mismatch", "off-line split", "dangling support", "edge-dependent split"],
+  "cancel": ["Escape", "pointercancel", "lostpointercapture", "focus loss", "resize"]
+}

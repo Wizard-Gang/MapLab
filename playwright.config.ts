@@ -1,7 +1,7 @@
 // WebKit and Chromium end-to-end tests (R1 I3, C8). Browsers come from `npx playwright install`, never from npm
 // lifecycle scripts. Two dev servers run: one on a scratch copy of the placeholder library that the tests write
 // and reset, and one on the read-only placeholder itself. Neither ever reads ~/Documents/MapLab.
-import { cpSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ export const WRITABLE_PORT = 5191;
 export const PLACEHOLDER_PORT = 5192;
 // Workers re-evaluate this file, so the scratch folder is made once and handed down through the environment.
 if (!process.env.MAPLAB_E2E_LIBRARY) {
-  const parent = mkdtempSync(join(tmpdir(), 'maplab-e2e-'));
+  const parent = mkdtempSync(join(realpathSync(tmpdir()), 'maplab-e2e-'));
   const scratch = join(parent, 'library');
   cpSync(join(root, 'placeholder-library'), scratch, { recursive: true });
   process.env.MAPLAB_E2E_LIBRARY = scratch;

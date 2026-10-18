@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
 import { shortcut } from '../editor/shortcuts';
 import { SelectionPanel, Hierarchy } from './SelectionPanel';
+import { GeometryPanel } from './GeometryPanel';
 import { Viewport } from './Viewport';
 import { mapName, objectIds } from '../editor/document';
 import { canRedo, canUndo, isDirty } from '../editor/history';
@@ -218,6 +219,7 @@ function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: 
         ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
         : <Viewport selection={store.selection(doc.id)} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
+      <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>
   );
