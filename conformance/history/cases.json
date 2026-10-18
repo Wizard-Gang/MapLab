@@ -1,0 +1,82 @@
+{
+  "description": "ML-008 document history conformance. Each case is an inert step script over the unchanged R1 forest source map, pinned by SHA-256. tests/history-conformance.test.ts interprets the steps through src/domain and src/editor and checks every expectation; after every step it also checks that history bytes stay within the budget and equal the sum of its entries. Owned CC0 data.",
+  "base": {
+    "path": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/forest.map.json",
+    "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+    "savedDigest": "disk-0"
+  },
+  "cases": [
+    {
+      "id": "paint-10000-cell-delta",
+      "steps": [
+        { "do": "brush", "layerId": "layer.tiles", "rect": [-50, -50, 100, 100], "tile": "tile.grass", "moves": 100,
+          "expect": { "outcome": "recorded", "entries": 1, "deltaCells": 10000, "deltaChunks": 16, "entryBytesAtMost": 100768, "dirty": true } },
+        { "do": "undo", "expect": { "entries": 0, "future": 1, "dirty": false, "matches": "base" } },
+        { "do": "redo", "expect": { "entries": 1, "future": 0, "dirty": true, "cell": [49, 49, "tile.grass"] } }
+      ]
+    },
+    {
+      "id": "undo-redo-no-op",
+      "steps": [
+        { "do": "undo", "expect": { "revision": 0, "entries": 0, "unchanged": true } },
+        { "do": "redo", "expect": { "revision": 0, "future": 0, "unchanged": true } },
+        { "do": "set", "collection": "bodies", "id": "body.gate", "member": "name", "same": true, "expect": { "outcome": "noop", "revision": 0, "unchanged": true } },
+        { "do": "brush", "layerId": "layer.tiles", "cells": [[3, 3, "tile.grass"], [3, 3, null]], "expect": { "outcome": "noop", "entries": 0, "unchanged": true } },
+        { "do": "drag", "collection": "bodies", "id": "body.gate", "member": "name", "values": ["Moved", "Moved again"], "back": true, "expect": { "outcome": "noop", "entries": 0, "dirty": false } }
+      ]
+    },
+    {
+      "id": "one-gesture-one-entry",
+      "steps": [
+        { "do": "drag", "collection": "bodies", "id": "body.gate", "member": "position", "values": [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0]],
+          "expect": { "outcome": "recorded", "entries": 1, "dirty": true } },
+        { "do": "brush", "layerId": "layer.tiles", "rect": [0, 0, 40, 40], "tile": "tile.dirt", "moves": 40, "cancel": true,
+          "expect": { "outcome": "cancelled", "entries": 1, "future": 0 } },
+        { "do": "undo", "expect": { "entries": 0, "dirty": false, "matches": "base" } }
+      ]
+    },
+    {
+      "id": "duplicate-ids",
+      "steps": [
+        { "do": "normalize", "pointer": "/flags/0/id", "value": "region.pit", "expect": { "problems": [{ "code": "model.duplicate-id", "path": "$.flags[0].id" }] } },
+        { "do": "normalize", "pointer": "/bodies/1/shapes/0/id", "value": "shape.west", "expect": { "problems": [{ "code": "model.duplicate-id", "path": "$.bodies[1].shapes[0].id" }] } },
+        { "do": "insert", "collection": "flags", "record": { "id": "region.pit", "initial": true }, "expect": { "outcome": "refused", "code": "transaction.duplicate-id", "unchanged": true } },
+        { "do": "paste", "items": [["bodies", "body.west"], ["footholds", "fh.west"]],
+          "expect": { "outcome": "recorded", "entries": 1, "mapping": { "body.west": "body.west-2", "shape.west": "shape.west-2", "fh.west": "fh.west-2" }, "renormalizes": true } },
+        { "do": "paste", "items": [["bodies", "body.west"], ["footholds", "fh.west"]],
+          "expect": { "outcome": "recorded", "entries": 2, "mapping": { "body.west": "body.west-3", "shape.west": "shape.west-3", "fh.west": "fh.west-3" }, "renormalizes": true } },
+        { "do": "undo", "expect": { "entries": 1 } },
+        { "do": "undo", "expect": { "entries": 0, "matches": "base" } }
+      ]
+    },
+    {
+      "id": "saved-revision-conflict",
+      "steps": [
+        { "do": "set", "collection": "bodies", "id": "body.gate", "member": "name", "value": "A", "expect": { "outcome": "recorded", "dirty": true } },
+        { "do": "beginSave", "ticket": "early" },
+        { "do": "set", "collection": "bodies", "id": "body.gate", "member": "name", "value": "B", "expect": { "outcome": "recorded" } },
+        { "do": "beginSave", "ticket": "late" },
+        { "do": "completeSave", "ticket": "late", "digest": "disk-2", "expect": { "outcome": "saved", "dirty": false, "baseDigest": "disk-2" } },
+        { "do": "completeSave", "ticket": "early", "digest": "disk-1", "expect": { "outcome": "refused", "code": "save.stale-base", "dirty": false, "baseDigest": "disk-2", "unchanged": true } },
+        { "do": "undo", "expect": { "dirty": true } },
+        { "do": "redo", "expect": { "dirty": false } }
+      ]
+    },
+    {
+      "id": "memory-bound",
+      "budget": 400000,
+      "steps": [
+        { "do": "strokes", "count": 20, "layerId": "layer.tiles", "rect": [-50, -50, 100, 100], "tiles": ["tile.grass", "tile.dirt"],
+          "expect": { "entries": 3, "dropped": 17, "notices": 17, "bytesAtMost": 400000, "cell": [0, 0, "tile.dirt"] } },
+        { "do": "undoAll", "expect": { "entries": 0, "future": 3, "cell": [0, 0, "tile.grass"] } }
+      ]
+    },
+    {
+      "id": "gesture-chunk-bound",
+      "steps": [
+        { "do": "brush", "layerId": "layer.tiles", "rect": [0, 0, 64, 64], "tile": "tile.grass", "moves": 4, "maxChunks": 4, "expect": { "outcome": "recorded", "deltaChunks": 4 } },
+        { "do": "brush", "layerId": "layer.tiles", "rect": [0, 0, 160, 1], "tile": "tile.dirt", "moves": 1, "maxChunks": 4, "expect": { "outcome": "refused", "code": "gesture.budget", "entries": 1 } }
+      ]
+    }
+  ]
+}

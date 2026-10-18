@@ -126,3 +126,29 @@ On a case-insensitive host the case-alias record is reported as skipped. A diffe
 test runs the reader's parser and evaluator against `src/contracts` on every owned
 conformance file and R1 example. The two must agree on byte acceptance and
 closed-schema validity.
+
+## `history/` (ML-008)
+
+`cases.json` holds inert step scripts over R1's unchanged
+`examples/forest/maps/forest.map.json`, pinned by SHA-256.
+`tests/history-conformance.test.ts` interprets each step through `src/domain` and
+`src/editor` and checks its expectations. After every step it also checks that
+history bytes stay within the budget and equal the sum of the entries. The cases:
+
+- `paint-10000-cell-delta`: one brush gesture over 100 pointer moves paints a
+  100×100 rectangle across 16 signed chunks. It records one entry with exactly
+  10,000 changed cells in at most 100,768 accounted bytes. Undo restores the saved
+  bytes and a clean state, and redo makes the document dirty again.
+- `undo-redo-no-op`: empty undo/redo, an unchanged set, a stroke painted and erased
+  within one gesture, and a drag back to its start all record nothing.
+- `one-gesture-one-entry`: eight drag moves make one entry. A cancelled brush
+  gesture records nothing.
+- `duplicate-ids`: duplicate top-level and nested IDs refuse to normalize. An
+  insert with a taken ID is refused. Two pastes allocate `-2`, then `-3`, IDs and
+  re-normalize cleanly.
+- `saved-revision-conflict`: a save ticket whose base a later save replaced is
+  refused. Dirty state follows the saved content identity through undo and redo.
+- `memory-bound`: twenty 10,000-cell strokes under a 400,000-byte budget keep three
+  entries. They drop 17 with visible notices, and the authored content keeps every
+  stroke.
+- `gesture-chunk-bound`: a gesture limited to four working chunks refuses a fifth.

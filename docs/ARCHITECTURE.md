@@ -21,7 +21,10 @@ Planned dependency direction is UI → application/domain → pure contracts/mat
 Contracts and independent consumers must never import the editor; `tests/consumer/reader/`
 (ML-007) imports neither the editor nor `src/contracts`. Authored state,
 ephemeral view state, derived navigation, and engine runtime state stay separate.
-Edits use reversible deltas/checkpoints and one gesture per transaction. Canvas 2D
+Edits use reversible deltas/checkpoints and one gesture per transaction; since ML-008
+`src/domain/` holds the normalized model, pure transactions with exact inverses, stable
+ID remapping and packed chunk paint deltas, and `src/editor/history.ts` and `gesture.ts`
+hold per-document history, revision/dirty/saved state and gestures. Canvas 2D
 handles bulk art/overlays; DOM handles controls; workers handle expensive validation
 and navigation. Viewport math uses one world-to-CSS transform with DPR separated.
 
