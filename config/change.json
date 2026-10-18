@@ -1,7 +1,7 @@
 {
-  "id": "ML-013",
+  "id": "ML-014",
   "type": "FEATURE",
-  "title": "[ML-013] [FEATURE] Add sparse terrain painting tools and tileset palette",
-  "record": "docs/changes/ML-013.md",
-  "branch": "ml-013-terrain-painting"
+  "title": "[ML-014] [FEATURE] Add deterministic terrain rules, variation and transform permissions",
+  "record": "docs/changes/ML-014.md",
+  "branch": "ml-014-terrain-rules"
 }
