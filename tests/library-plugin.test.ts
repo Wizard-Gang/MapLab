@@ -75,6 +75,8 @@ describe('the plugin on a dev server', () => {
     expect((await call(writable.port, '/__maplab/library', { method: 'GET', body: '' })).body.code).toBe('guard.method');
     expect((await call(writable.port, '/__maplab/library', { body: 'x'.repeat(REQUEST_LIMIT + 1) })).status).toBe(413);
     expect((await call(writable.port, '/__maplab/save', { body: '{not json' })).body.code).toBe('request.json');
+    const invalid = await call(writable.port, '/__maplab/save', { body: Buffer.from([0x7b, 0xff, 0x7d]) });
+    expect([invalid.status, invalid.body.code]).toEqual([400, 'request.encoding']);
   });
 
   test('the placeholder library refuses saves and recovery and is never written', async () => {

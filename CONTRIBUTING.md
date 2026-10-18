@@ -18,7 +18,9 @@ first-open ID, and preserve later definitions. Split oversized scope only by a
 separately governed plan/spec revision; do not reuse, skip or delete IDs.
 
 Canonical checks run without credentials or external asset directories. Add tests
-for meaningful invariants and failure cases. Future format/physics changes need
+for meaningful invariants and failure cases. WebKit and Chromium tests run with
+`npm run test:browser` after `npx playwright install chromium webkit`; they use a
+scratch copy of `placeholder-library/` and never read `~/Documents/MapLab/`. Future format/physics changes need
 consumer-impact and numerical fixture evidence. Browser interaction claims need
 browser interaction tests. Do not describe proposed schemas, conformance or
 performance targets as implemented or measured.

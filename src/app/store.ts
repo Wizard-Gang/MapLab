@@ -121,7 +121,8 @@ export class LibraryStore {
     const draft = this.drafts && this.libraryId ? await this.drafts.get(draftKey(this.libraryId, id)) : null;
     const offered = draft && draft.text !== modelText(staged.model) ? draft : null;
     const doc: OpenDoc = { id, path: file.path, state, savedModel: staged.model, readOnly, draft: offered, drafted: false, conflicts: [], changedOnDisk: false, confirmRevert: false };
-    this.set({ docs: [...this.view.docs, doc], activeId: id, status: `Opened ${file.path}`, problems: [] });
+    const problems = entry.errors ? library.diagnostics.filter((x) => x.documentId === id && x.severity === 'error').map((x) => `${x.jsonPath}: ${x.message}`) : [];
+    this.set({ docs: [...this.view.docs, doc], activeId: id, status: `Opened ${file.path}`, problems });
   }
 
   close(id: string): void {

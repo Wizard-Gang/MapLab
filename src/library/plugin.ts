@@ -40,13 +40,19 @@ export class RecentWrites {
   }
 }
 
-/** The request body as text, or null past `limit` bytes; an oversized body is drained so the client reads the refusal. */
+/**
+ * The request body as text, or null past `limit` bytes; an oversized body is drained so the client reads the refusal.
+ * Bytes that are not UTF-8 reject, so a save never writes text that differs from what the page sent.
+ */
 export function readBody(request: IncomingMessage, limit: number): Promise<string | null> {
   return new Promise((done, fail) => {
     const chunks: Buffer[] = [];
     let size = 0;
     request.on('data', (chunk: Buffer) => { size += chunk.length; if (size <= limit) chunks.push(chunk); });
-    request.on('end', () => done(size > limit ? null : Buffer.concat(chunks).toString('utf8')));
+    request.on('end', () => {
+      if (size > limit) return done(null);
+      try { done(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks))); } catch { fail(new LibraryError('request.encoding', 'The request body is not UTF-8')); }
+    });
     request.on('error', fail);
   });
 }
@@ -133,7 +139,7 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
         })().catch((e: unknown) => {
           const known = e instanceof LibraryError;
           if (!known) server.config.logger.error(`MapLab library request failed: ${e instanceof Error ? e.stack : String(e)}`);
-          if (!response.headersSent) send(response, known ? 409 : 500, no(known ? e.code : 'library.failed', e instanceof Error ? e.message : String(e)));
+          if (!response.headersSent) send(response, known ? (e.code === 'request.encoding' ? 400 : 409) : 500, no(known ? e.code : 'library.failed', e instanceof Error ? e.message : String(e)));
         });
       });
 

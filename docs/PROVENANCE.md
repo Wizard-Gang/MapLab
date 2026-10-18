@@ -10,12 +10,14 @@ Owned numeric fixture data, including numerical examples in the supplied design,
 is separately dedicated under **CC0 1.0 Universal** to the extent the contributors
 hold rights: https://creativecommons.org/publicdomain/zero/1.0/ . No executable
 world fixtures shipped in ML-001. R1's `examples/` (adopted at ML-003) and the
-ML-003 parser, ML-004 geometry ML-005 movement fixtures/digest vectors and ML-006 gameplay fixtures/mutation records and ML-007 bundle-reader mutation records and ML-008 history step scripts in `conformance/` are owned
+ML-003 parser, ML-004 geometry ML-005 movement fixtures/digest vectors and ML-006 gameplay fixtures/mutation records and ML-007 bundle-reader mutation records and ML-008 history step scripts and ML-009 library storage step scripts in `conformance/`, and the `placeholder-library/` byte-identical copy of R1's forest example, are owned
 CC0 data. Their indexes pin the source bytes and expected diagnostics. Future fixture files must
 identify provenance and this dedication explicitly; third-party data retains its original terms and must
 never be represented as owned CC0 material.
 
 npm dependencies retain their own package licenses and integrity metadata in the
-lockfile. They are installed tooling/runtime dependencies, not copied source.
+lockfile. ML-009 added `@playwright/test` (Apache-2.0) as a reviewed dev dependency;
+the browsers it installs through `npx playwright install` keep their own terms and
+are never committed. They are installed tooling/runtime dependencies, not copied source.
 Action revisions are pinned in CI. Review licensing and registry/security evidence
 in the scoped dependency/security task before public release.

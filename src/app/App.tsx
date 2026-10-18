@@ -14,7 +14,13 @@ function useShortcuts(): void {
     const onKey = (e: KeyboardEvent): void => {
       if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
       const key = e.key.toLowerCase();
-      if (key === 's' && !e.shiftKey) { e.preventDefault(); void store.save(); return; }
+      if (key === 's' && !e.shiftKey) {
+        e.preventDefault();
+        // Blurring commits a field being edited before the save reads the document (RigLab's WebKit lesson, R1 C8).
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        void store.save();
+        return;
+      }
       if (key === 'z' && !isField(e.target)) { e.preventDefault(); if (e.shiftKey) store.redo(); else store.undo(); }
     };
     window.addEventListener('keydown', onKey);

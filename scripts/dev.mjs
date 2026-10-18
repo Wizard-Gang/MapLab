@@ -13,8 +13,11 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const vite = join(root, 'node_modules/vite/bin/vite.js');
 const step = (message) => console.log(`\n\x1b[36m▸ ${message}\x1b[0m`);
 
+// Vite bundles vite.config.ts and its plugin imports; its notice about a future native config loader is not actionable here.
+const env = { ...process.env, VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true' };
+
 function run(file, args) {
-  const result = spawnSync(file, args, { cwd: root, stdio: 'inherit' });
+  const result = spawnSync(file, args, { cwd: root, stdio: 'inherit', env });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`${[file, ...args].join(' ')} exited with status ${result.status}`);
 }
@@ -68,11 +71,11 @@ try {
   phase = 'start';
   step(`Start: Vite on ${url}`);
   // Its own process group, so stopping it stops everything it started; no stdin, so it never reads the terminal.
-  child = spawn(process.execPath, [vite, '--host', '127.0.0.1', '--port', String(port), '--strictPort'], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'], detached: true });
+  child = spawn(process.execPath, [vite, '--host', '127.0.0.1', '--port', String(port), '--strictPort'], { cwd: root, env, stdio: ['ignore', 'inherit', 'inherit'], detached: true });
   child.once('error', (error) => { console.error(`[maplab] start failed: ${error.message}`); void stop(1); });
   child.once('exit', (code, signal) => {
     if (stopping) return;
-    console.error(`[maplab] Vite exited with ${signal ?? `status ${code}`}${signal === 'SIGTERM' ? '; a newer npm start on this port replaces the running server' : ''}`);
+    console.error(`[maplab] Vite exited with ${signal ?? `status ${code}`}${signal === 'SIGTERM' || code === 143 ? '; a newer npm start on this port replaces the running server' : ''}`);
     process.exit(code ?? 1);
   });
   for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(signal, () => void stop(0));

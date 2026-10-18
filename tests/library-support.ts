@@ -82,11 +82,11 @@ export async function startServer(library: string): Promise<Server> {
 export interface Reply { readonly status: number; readonly body: Record<string, unknown> & { code?: string; ok?: boolean }; readonly raw: string }
 
 /** A raw request; headers default to MapLab's own page on this server, and `null` removes one. */
-export function call(port: number, path: string, options: { method?: string; headers?: Record<string, string | null>; body?: string | object } = {}): Promise<Reply> {
+export function call(port: number, path: string, options: { method?: string; headers?: Record<string, string | null>; body?: string | object | Buffer } = {}): Promise<Reply> {
   const defaults: Record<string, string> = { host: `127.0.0.1:${port}`, origin: `http://127.0.0.1:${port}`, 'content-type': 'application/json' };
   const headers: Record<string, string> = {};
   for (const [k, v] of Object.entries({ ...defaults, ...options.headers })) if (v !== null && v !== undefined) headers[k] = v;
-  const body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body ?? {});
+  const body = typeof options.body === 'string' || Buffer.isBuffer(options.body) ? options.body : JSON.stringify(options.body ?? {});
   return new Promise((done, fail) => {
     const req = request({ host: '127.0.0.1', port, path, method: options.method ?? 'POST', headers: { ...headers, 'content-length': String(Buffer.byteLength(body)) } }, (res) => {
       const chunks: Buffer[] = [];

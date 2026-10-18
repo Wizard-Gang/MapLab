@@ -36,7 +36,10 @@ engine rebuilds under its solver or reports fixture-qualified compatibility.
 
 Since R1 (adopted at ML-003), storage is a library folder written through a
 loopback-only dev-server plugin, the RigLab pattern; IndexedDB keeps unsaved drafts
-only, and picker/OPFS adapters are optional later work. Save writes authored data; export
+only, and picker/OPFS adapters are optional later work. ML-009 implements it in
+`src/library/`: the Node-only `plugin.ts`, `folder.ts` and `writer.ts` run on the dev
+server, and the browser imports only `client.ts`, `drafts.ts` and pure helpers.
+`src/editor/document.ts` and `src/app/store.ts` connect it to ML-008's history. Save writes authored data; export
 creates dependency-closed deterministic consumer bytes. Closed data-only catalogs,
 bounded inert assets, canonical domain ordering and hashes are required. No hosted
 write authority or implicit gameplay server is part of the architecture.
