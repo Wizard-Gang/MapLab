@@ -30,3 +30,12 @@ SHA-256. `tests/selection.test.ts` interprets the numeric expectations; real
 Chromium/WebKit tests in `tests/browser/selection.spec.ts` exercise pointer,
 keyboard, cancellation, references, clipboard, history and saved source bytes.
 No third-party art, fixtures or implementation source was borrowed.
+
+## ML-012 physical edit fixtures
+
+`conformance/physical-edits/cases.json` is original owned CC0-1.0 data over the
+owned R1 forest geometry, with a SHA-256 index. `tests/physical-edits.test.ts`
+checks its flat, sloped and one-way split seams, exact topology and reference
+remaps, negatives, history and separate-process final-byte consumer results.
+`tests/browser/physical-edits.spec.ts` checks real Chromium/WebKit interactions.
+No third-party assets or source were borrowed.

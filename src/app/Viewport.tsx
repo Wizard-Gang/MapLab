@@ -2,6 +2,9 @@ import { flushSync } from 'react-dom';
 import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import type { Rect, Vec2 } from '../contracts/common-types';
 import type { SelectionSession } from '../editor/selection';
+import { physicalHandles } from '../editor/geometry';
+import { primitive } from '../render/scene';
+import { cssLengthInWorld } from '../render/transform';
 import { moveKeys } from '../editor/editing';
 import { PickIndex, selectionPrimitives } from '../render/picking';
 import type { MapModel } from '../domain/model';
@@ -54,6 +57,7 @@ export function Viewport({ model, session, selection }: { readonly model: MapMod
       captured = e.pointerId; el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent): void => {
+      if (captured !== null && e.pointerId !== captured) return;
       if (selecting) selection.move(position(e)); else session.move(e.pointerId, position(e));
       const s = session.getSnapshot(), world = cssToWorld(s.view, position(e)), snapped = snapWorld(world, s.snap);
       if (cursor.current) cursor.current.textContent = `World ${world.map((v) => v.toFixed(4)).join(', ')} WU · ${s.snap.free ? 'Free → 1/16 WU' : 'Grid → 1/16 WU'}: ${snapped.join(', ')}`;
@@ -89,8 +93,11 @@ export function Viewport({ model, session, selection }: { readonly model: MapMod
   }, [session, selection]);
   useEffect(() => { renderer.current?.update(scene, state); }, [scene, state]);
   useEffect(() => {
-    renderer.current?.setHandles(selectionPrimitives(index, selected.delta.some((v) => v !== 0) ? movingKeys : selected.keys, state.view, selected.delta, selected.marquee));
-  }, [index, movingKeys, selected, state.view]);
+    const handles = ['Platforms', 'Collision'].includes(selected.mode) ? physicalHandles(model, selected.keys) : [];
+    const r = cssLengthInWorld(state.view, 5);
+    const physical = handles.map(h => { const p = selected.handlePreview?.handle.label === h.label ? selected.handlePreview.point : h.point; return primitive([[p[0]-r,p[1]-r],[p[0]+r,p[1]-r],[p[0]+r,p[1]+r],[p[0]-r,p[1]+r]], '#ffcf70', h.label, true); });
+    renderer.current?.setHandles([...selectionPrimitives(index, selected.delta.some((v) => v !== 0) ? movingKeys : selected.keys, state.view, selected.delta, selected.marquee), ...physical]);
+  }, [index, model, movingKeys, selected, state.view]);
   const center: Vec2 = [state.size[0] / 2, state.size[1] / 2];
   return (
     <section className="viewport-panel" aria-label="Map viewport">
@@ -126,7 +133,7 @@ export function Viewport({ model, session, selection }: { readonly model: MapMod
       </details>
       <p className="note" id={`view-help-${model.id}`}>Space + drag or middle drag to pan. Wheel pans; Ctrl/⌘ + wheel zooms at the pointer. Focus the viewport for arrow keys. Click selects; Shift toggles; Alt-click cycles overlaps; drag empty space for marquee. Drag selection to move. Escape cancels a gesture or clears selection.</p>
       <div ref={host} className="viewport" tabIndex={0} role="group" aria-label="World canvas" aria-describedby={`view-help-${model.id}`}
-        data-preview-x={selected.delta[0]} data-preview-y={selected.delta[1]} data-camera-x={state.view.camera[0]} data-camera-y={state.view.camera[1]} data-zoom={state.view.zoom} data-width={state.size[0]} data-height={state.size[1]}>
+        data-handle-preview={selected.handlePreview ? selected.handlePreview.point.join(',') : ''} data-preview-x={selected.delta[0]} data-preview-y={selected.delta[1]} data-camera-x={state.view.camera[0]} data-camera-y={state.view.camera[1]} data-zoom={state.view.zoom} data-width={state.size[0]} data-height={state.size[1]}>
         <canvas ref={art} className="art-canvas" aria-label="Art canvas" />
         <canvas ref={overlay} className="overlay-canvas" aria-label="Overlay canvas" />
       </div>

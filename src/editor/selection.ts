@@ -1,4 +1,6 @@
 // External per-document selection/gesture session; only commit() may cross into authored history.
+import { physicalHandles, moveHandle, type PhysicalHandle } from './geometry';
+import { worldToCss } from '../render/transform';
 import type { Vec2 } from '../contracts';
 import type { MapModel } from '../domain/model';
 import type { Transaction } from '../domain/transaction';
@@ -11,15 +13,17 @@ export interface SelectionState {
   readonly keys: readonly ObjectKey[];
   readonly mode: PickMode;
   readonly delta: Vec2;
+  readonly handlePreview: { readonly handle: PhysicalHandle; readonly point: Vec2 } | null;
   readonly marquee: readonly [Vec2, Vec2] | null;
   readonly message: string;
   readonly deleting: readonly ObjectKey[] | null;
   readonly cascadePreview: boolean;
 }
 export class SelectionSession {
-  private state: SelectionState = { keys: [], mode: 'All', delta: [0, 0], marquee: null, message: '', deleting: null, cascadePreview: false };
+  private state: SelectionState = { keys: [], mode: 'All', handlePreview: null, delta: [0, 0], marquee: null, message: '', deleting: null, cascadePreview: false };
   private listeners = new Set<() => void>();
   private drag: { base: MapModel; start: Vec2; css: Vec2; index: PickIndex; state: ViewportState; keys: readonly ObjectKey[]; before: readonly ObjectKey[]; marquee: boolean; shift: boolean; moved: boolean } | null = null;
+  private handleDrag: { base: MapModel; handle: PhysicalHandle; view: ViewportState; point: Vec2; css: Vec2; moved: boolean } | null = null;
   constructor(private readonly model: () => MapModel, private readonly commit: (tx: Transaction) => boolean, private readonly editable: () => boolean) {}
   readonly getSnapshot = (): SelectionState => this.state;
   readonly subscribe = (f: () => void): (() => void) => { this.listeners.add(f); return () => this.listeners.delete(f); };
@@ -33,6 +37,7 @@ export class SelectionSession {
     this.set({ keys: [...next.values()], deleting: null, message: '' });
   }
   sync(): void {
+    if (this.handleDrag && this.handleDrag.base !== this.model()) this.cancel();
     if (this.drag && this.drag.base !== this.model()) this.cancel();
     const keys = this.state.keys.filter((k) => recordOf(this.model(), k));
     if (keys.length !== this.state.keys.length) this.set({ keys });
@@ -41,6 +46,11 @@ export class SelectionSession {
   }
   down(at: Vec2, index: PickIndex, state: ViewportState, shift: boolean, cycle: boolean): void {
     this.cancel();
+    if (this.editable() && ['Platforms', 'Collision'].includes(this.state.mode)) {
+      const handles = physicalHandles(this.model(), this.state.keys);
+      const handle = handles.find(h => { const p = worldToCss(state.view, h.point); return Math.hypot(p[0]-at[0], p[1]-at[1]) <= 7; });
+      if (handle) { this.handleDrag = { base: this.model(), handle, view: state, point: handle.point, css: at, moved: false }; return; }
+    }
     const before = this.state.keys, hits = index.pick(at, state, this.state.mode);
     let hit = hits[0];
     if (cycle && hits.length) { const i = hits.findIndex((k) => before.some((s) => keyOf(s) === keyOf(k))); hit = hits[(i + 1) % hits.length]; }
@@ -51,6 +61,13 @@ export class SelectionSession {
     this.drag = { base: this.model(), start: world, css: at, index, state, keys: this.state.keys, before, marquee: !hit, shift, moved: false };
   }
   move(at: Vec2): void {
+    const h = this.handleDrag;
+    if (h) {
+      if (h.base !== this.model()) { this.cancel(); return; }
+      if (!h.moved && Math.hypot(at[0]-h.css[0], at[1]-h.css[1]) < 3) return;
+      h.moved = true; h.point = snapWorld(cssToWorld(h.view.view, at), h.view.snap);
+      this.set({ handlePreview: { handle: h.handle, point: h.point }, message: 'Physical handle preview — release to commit; Escape cancels' }); return;
+    }
     const d = this.drag; if (!d) return;
     if (d.base !== this.model()) { this.cancel(); return; }
     if (Math.hypot(at[0] - d.css[0], at[1] - d.css[1]) < 3 && !d.moved) return;
@@ -63,6 +80,8 @@ export class SelectionSession {
     }
   }
   end(): void {
+    const h = this.handleDrag;
+    if (h) { this.handleDrag = null; this.set({ handlePreview: null }); if (h.moved && h.base === this.model()) this.run(() => moveHandle(h.base, h.handle, h.point)); return; }
     const d = this.drag; if (!d) return;
     const { delta, marquee } = this.state;
     this.drag = null; this.set({ delta: [0, 0], marquee: null });
@@ -75,9 +94,11 @@ export class SelectionSession {
     else this.message('');
   }
   cancel(): boolean {
+    const h = this.handleDrag; this.handleDrag = null;
+    if (h) this.set({ handlePreview: null, message: 'Gesture cancelled' });
     const d = this.drag; this.drag = null;
     if (d) this.set({ keys: d.before, delta: [0, 0], marquee: null, message: 'Gesture cancelled' });
-    return d !== null;
+    return d !== null || h !== null;
   }
   escape(): void { if (!this.cancel()) this.set({ keys: [], deleting: null, message: '', delta: [0, 0], marquee: null }); }
   run(build: () => Transaction): boolean {

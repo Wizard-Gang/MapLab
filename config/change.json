@@ -1,7 +1,7 @@
 {
-  "id": "ML-011",
+  "id": "ML-012",
   "type": "FEATURE",
-  "title": "[ML-011] [FEATURE] Add selection, atomic editing and remapped clipboard",
-  "record": "docs/changes/ML-011.md",
-  "branch": "ml-011-selection-editing"
+  "title": "[ML-012] [FEATURE] Add physical geometry handles and atomic topology edits",
+  "record": "docs/changes/ML-012.md",
+  "branch": "ml-012-geometry-editing"
 }
