@@ -58,6 +58,21 @@ test.each([
   ...['check', 'check:change', 'test', 'security'].map((name) => [
     `stubbed ${name} command`, (p) => editJson(p, 'package.json', (v) => { v.scripts[name] = 'node -e "process.exit(0)"'; }), 'Required executable command',
   ]),
+  ['floating browser runner', (p) => editJson(p, 'package.json', (v) => { v.devDependencies['@playwright/test'] = '^1.64.1'; }), 'dependency pins'],
+  ['an unreviewed extra dependency', (p) => editJson(p, 'package.json', (v) => { v.devDependencies['left-pad'] = '1.3.0'; }), 'dependency pins'],
+  ...['start', 'test:browser'].map((name) => [
+    `stubbed ${name} command`, (p) => editJson(p, 'package.json', (v) => { v.scripts[name] = 'node -e "process.exit(0)"'; }), 'Required executable command',
+  ]),
+  ['skipped browser tests', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace('        run: npm run test:browser\n', '        run: echo skipped\n'));
+  }, 'browser tests'],
+  ['browsers installed after the browser tests', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    const text = readFileSync(f, 'utf8').replace('        run: npx playwright install --with-deps chromium webkit\n', '').replace('        run: npm run test:browser\n', '        run: npm run test:browser\n      - name: Late install\n        run: npx playwright install --with-deps chromium webkit\n');
+    writeFileSync(f, text);
+  }, 'browser tests'],
+  ['missing placeholder library', (p) => rmSync(join(p, 'placeholder-library/maplab.project.json')), 'Missing or empty'],
   ['disabled security job', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
     writeFileSync(f, readFileSync(f, 'utf8').replace('  security:\n', '  security:\n    if: false\n'));
