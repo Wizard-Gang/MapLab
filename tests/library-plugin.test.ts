@@ -1,6 +1,7 @@
 // ML-009: the library plugin on a real Vite dev server. Wrong Host/Origin/site/method/type requests are refused
 // before anything is read or written; the placeholder refuses writes; saves and reads go through the endpoints.
-import { cpSync, mkdirSync } from 'node:fs';
+import { cpSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { chooseLibrary } from '../src/library/folder';
 import { guardRefusal } from '../src/library/guard';
@@ -54,6 +55,13 @@ describe('the plugin on a dev server', () => {
     const read = await call(writable.port, '/__maplab/read', { body: { ids: ['map.forest'] } });
     expect(read.body).toMatchObject({ ok: true, documents: [{ id: 'map.forest', path: FOREST, digest: sha256(file(f, FOREST)), text: text(f, FOREST) }] });
     expect((await call(writable.port, '/__maplab/read', { body: { ids: ['map.absent'] } })).status).toBe(404);
+    const latin1 = scratchLibrary();
+    const other = await startServer(latin1.dir);
+    try {
+      writeFileSync(join(latin1.dir, FOREST), Buffer.concat([file(latin1, FOREST), Buffer.from([0xff])]));
+      const bad = await call(other.port, '/__maplab/read', { body: { ids: ['map.forest'] } });
+      expect([bad.status, bad.body.code]).toEqual([422, 'read.encoding']);
+    } finally { await other.close(); }
     expect((await call(writable.port, '/__maplab/nothing')).body.code).toBe('route.unknown');
   });
 
@@ -77,6 +85,7 @@ describe('the plugin on a dev server', () => {
     expect((await call(writable.port, '/__maplab/save', { body: '{not json' })).body.code).toBe('request.json');
     const invalid = await call(writable.port, '/__maplab/save', { body: Buffer.from([0x7b, 0xff, 0x7d]) });
     expect([invalid.status, invalid.body.code]).toEqual([400, 'request.encoding']);
+    for (const body of ['null', '[]', '"x"']) expect((await call(writable.port, '/__maplab/read', { body })).status).toBe(400);
   });
 
   test('the placeholder library refuses saves and recovery and is never written', async () => {
@@ -122,9 +131,14 @@ describe('watcher filtering', () => {
     expect(['/lib/maplab.project.json', '/lib/maps/a.map.json', '/lib/maps/.a.map.json.x.tmp', '/lib/backups/s/maps/a.map.json', '/lib/maps/sub/a.json', '/lib/notes.txt', '/other/maps/a.map.json']
       .map((p) => watchedPath(f, p))).toEqual(['maplab.project.json', 'maps/a.map.json', null, null, null, null, null]);
     let now = 0;
-    const recent = new RecentWrites(() => now);
-    recent.add(['/lib/maps/a.map.json']);
-    expect(recent.owns('/lib/maps/a.map.json')).toBe(true);
+    const disk = new Map<string, string | null>([['/lib/maps/a.map.json', 'mine'], ['/lib/maps/gone.map.json', null]]);
+    const recent = new RecentWrites(() => now, (p) => disk.get(p) ?? null);
+    recent.add([{ path: '/lib/maps/a.map.json', digest: 'mine' }, { path: '/lib/maps/gone.map.json', digest: null }]);
+    expect([recent.owns('/lib/maps/a.map.json'), recent.owns('/lib/maps/gone.map.json'), recent.owns('/lib/maps/b.map.json')]).toEqual([true, true, false]);
+    // An outside edit right after the save is reported, even inside the window.
+    disk.set('/lib/maps/a.map.json', 'theirs');
+    expect(recent.owns('/lib/maps/a.map.json')).toBe(false);
+    disk.set('/lib/maps/a.map.json', 'mine');
     now = 2_001;
     expect(recent.owns('/lib/maps/a.map.json')).toBe(false);
   });

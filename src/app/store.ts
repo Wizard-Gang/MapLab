@@ -8,6 +8,7 @@ import { fetchLibrary, onLibraryEvents, readDocuments, recoverDocument, saveDocu
 import { draftKey, libraryKey, openIndexedDbDrafts, type Draft, type DraftStore } from '../library/drafts';
 import { documentPath } from '../library/layout';
 import type { Conflict, LibrarySnapshot, Refusal, SaveDocument } from '../library/protocol';
+import { COORDINATE_LIMIT, COORDINATE_QUANTUM } from '../contracts/grammar';
 
 export interface OpenDoc {
   readonly id: string;
@@ -23,7 +24,20 @@ export interface OpenDoc {
   readonly drafted: boolean;
   readonly conflicts: readonly Conflict[];
   readonly changedOnDisk: boolean;
+  /** The file disagrees with the project index (an interrupted save or an outside edit) until the user keeps or restores it. */
+  readonly torn: boolean;
   readonly confirmRevert: boolean;
+}
+
+/**
+ * Why the document may not be edited or saved now, or null. An offered draft locks it until the user restores or
+ * discards the draft (R1 C2), so nothing overwrites or deletes the draft first; a torn file locks it until kept or restored.
+ */
+export function lockReason(d: OpenDoc): string | null {
+  if (d.readOnly) return d.readOnly;
+  if (d.draft) return 'restore or discard the unsaved draft first';
+  if (d.torn) return 'keep the file or restore it from a backup first';
+  return null;
 }
 export interface AppView {
   readonly phase: 'loading' | 'offline' | 'ready' | 'failed';
@@ -54,6 +68,8 @@ export class LibraryStore {
   /** Draft journal writes run one at a time per document, in order, so a late write never resurrects a saved draft. */
   private readonly journals = new Map<string, Promise<void>>();
   private stop: (() => void) | null = null;
+  /** `openDrafts` picks the draft journal: IndexedDB in the browser, or a test's in-memory store. */
+  constructor(private readonly openDrafts: () => Promise<DraftStore | null> = () => openIndexedDbDrafts()) {}
 
   readonly subscribe = (listener: () => void): (() => void) => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
   readonly getSnapshot = (): AppView => this.view;
@@ -66,7 +82,7 @@ export class LibraryStore {
 
   async start(): Promise<void> {
     this.stop ??= onLibraryEvents({ saved: () => void this.refresh(), changed: () => void this.refresh() });
-    this.drafts = await openIndexedDbDrafts();
+    this.drafts = await this.openDrafts();
     this.set({ drafts: this.drafts ? 'available' : 'unavailable' });
     await this.load();
   }
@@ -82,12 +98,16 @@ export class LibraryStore {
     await this.listOrphanDrafts();
   }
 
-  /** Re-reads the library after a save or an outside edit. A clean open document whose file changed reloads; a dirty one is flagged. */
+  /**
+   * Re-reads the library after a save or an outside edit. A clean open document whose file changed reloads; a dirty
+   * one is flagged. Either way a file that now disagrees with the index locks its tab until the user decides.
+   */
   async refresh(): Promise<void> {
     await this.load();
     const entries = new Map(this.view.library?.documents.map((e) => [e.id, e]));
     for (const d of this.view.docs) {
       const e = entries.get(d.id);
+      if (e && (e.state !== 'ok') !== d.torn) this.patchDoc(d.id, { torn: e.state !== 'ok' });
       if (!e || d.state.baseDigest === null || e.digest === d.state.baseDigest) continue;
       if (isDirty(d.state)) this.patchDoc(d.id, { changedOnDisk: true });
       else if (e.digest !== null) await this.reload(d.id, `${d.path} changed on disk and was reloaded`);
@@ -120,12 +140,14 @@ export class LibraryStore {
     const readOnly = library.readOnly ? `${library.label} is read-only` : entry.errors ? `${entry.errors} validation error(s): opened read-only and never rewritten` : null;
     const draft = this.drafts && this.libraryId ? await this.drafts.get(draftKey(this.libraryId, id)) : null;
     const offered = draft && draft.text !== modelText(staged.model) ? draft : null;
-    const doc: OpenDoc = { id, path: file.path, state, savedModel: staged.model, readOnly, draft: offered, drafted: false, conflicts: [], changedOnDisk: false, confirmRevert: false };
+    const doc: OpenDoc = { id, path: file.path, state, savedModel: staged.model, readOnly, draft: offered, drafted: false, conflicts: [], changedOnDisk: false, torn: false, confirmRevert: false };
     const problems = entry.errors ? library.diagnostics.filter((x) => x.documentId === id && x.severity === 'error').map((x) => `${x.jsonPath}: ${x.message}`) : [];
     this.set({ docs: [...this.view.docs, doc], activeId: id, status: `Opened ${file.path}`, problems });
   }
 
-  close(id: string): void {
+  /** Closes a tab after journaling its latest edits, so a dirty document's draft is offered when it is reopened. */
+  async close(id: string): Promise<void> {
+    if (this.doc(id)) await this.journal(id);
     const docs = this.view.docs.filter((d) => d.id !== id);
     this.set({ docs, activeId: this.view.activeId === id ? (docs.at(-1)?.id ?? null) : this.view.activeId });
   }
@@ -138,7 +160,9 @@ export class LibraryStore {
     const staged = file ? stageMap(file.text) : null;
     if (!file || !staged?.ok) { this.set({ status: `${d.path} could not be reloaded` }); return; }
     const state = await openFromFile(staged.model, file.digest);
-    this.patchDoc(id, { state, savedModel: staged.model, conflicts: [], changedOnDisk: false, confirmRevert: false, draft: null });
+    // An offered draft stays offered: only the user's restore or discard may consume it.
+    const torn = this.view.library?.documents.find((e) => e.id === id)?.state !== 'ok';
+    this.patchDoc(id, { state, savedModel: staged.model, conflicts: [], changedOnDisk: false, confirmRevert: false, torn });
     await this.journal(id);
     this.set({ status });
   }
@@ -171,7 +195,8 @@ export class LibraryStore {
     const state = noteDigest(now.state, d.state.contentId, digest);
     if (state !== now.state) this.patchDoc(id, { state });
     const lib = this.libraryId;
-    if (!this.drafts || !lib || now.readOnly) return;
+    // While a draft is offered the journal entry is the user's to restore or discard; it is never overwritten or deleted.
+    if (!this.drafts || !lib || now.readOnly || now.draft) return;
     const key = draftKey(lib, id);
     if (isDirty(state)) {
       await this.drafts.put({ key, libraryId: lib, documentId: id, path: now.path, baseDigest: state.baseDigest, text: modelText(state.model), updatedAt: new Date().toISOString() });
@@ -184,19 +209,24 @@ export class LibraryStore {
 
   rename(name: string): void {
     const d = this.active();
-    if (!d || d.readOnly || !name.trim()) return;
+    if (!d || lockReason(d) || !name.trim()) return;
     const r = renameMap(d.state, name.trim());
     if (r.outcome === 'recorded') this.edited(d.id, r.state);
   }
-  undo(): void { const d = this.active(); if (d && !d.readOnly && d.state.past.length) this.edited(d.id, undo(d.state)); }
-  redo(): void { const d = this.active(); if (d && !d.readOnly && d.state.future.length) this.edited(d.id, redo(d.state)); }
+  undo(): void { const d = this.active(); if (d && !lockReason(d) && d.state.past.length) this.edited(d.id, undo(d.state)); }
+  redo(): void { const d = this.active(); if (d && !lockReason(d) && d.state.future.length) this.edited(d.id, redo(d.state)); }
 
   /** Saves every dirty open document in one request (R1 C2 Save). Content whose digest equals the saved digest is not sent. */
   async save(only?: readonly string[]): Promise<void> {
-    if (this.view.busy) return;
-    const library = this.view.library;
-    if (!library) return;
-    const candidates = this.view.docs.filter((d) => !d.readOnly && (!only || only.includes(d.id)));
+    // Busy from the first step, so a second Save (a double click, or Cmd+S plus a click) cannot race this one.
+    if (this.view.busy || !this.view.library) return;
+    this.set({ busy: true });
+    try { await this.saveNow(only); } finally { this.set({ busy: false }); }
+  }
+
+  private async saveNow(only?: readonly string[]): Promise<void> {
+    const library = this.view.library as LibrarySnapshot;
+    const candidates = this.view.docs.filter((d) => !lockReason(d) && (!only || only.includes(d.id)));
     const tickets = new Map<string, { ticket: ReturnType<typeof beginSave>; digest: string; text: string }>();
     for (const d of candidates) {
       if (!isDirty(d.state)) continue;
@@ -213,12 +243,12 @@ export class LibraryStore {
       return;
     }
     if (!tickets.size) { this.set({ status: 'Nothing to save', problems: [] }); return; }
-    this.set({ busy: true, status: 'Saving…', problems: [] });
+    this.set({ status: 'Saving…', problems: [] });
     const documents: SaveDocument[] = [...tickets].map(([id, t]) => ({ id, kind: 'map', text: t.text, baseDigest: t.ticket.baseDigest }));
     const result = await saveDocuments({ documents });
     if (!result.ok) {
       for (const c of result.conflicts ?? []) this.patchDoc(c.id, { conflicts: [c] });
-      this.set({ busy: false, status: result.code === 'save.stale-base' ? 'Save refused: a file changed on disk since it was opened. Nothing was written.' : `Save refused: ${result.message}`, problems: describe(result) });
+      this.set({ status: result.code === 'save.stale-base' ? 'Save refused: a file changed on disk since it was opened. Nothing was written.' : `Save refused: ${result.message}`, problems: describe(result) });
       await this.load();
       return;
     }
@@ -230,7 +260,7 @@ export class LibraryStore {
       if (done.ok) this.patchDoc(w.id, { state: done.state, savedModel: t.ticket.model, path: w.path, conflicts: [], changedOnDisk: false });
       await this.journal(w.id);
     }
-    this.set({ busy: false, status: `Saved ${result.written.map((w) => w.path).join(', ')} to ${result.label}; backup in ${result.backup}` });
+    this.set({ status: `Saved ${result.written.map((w) => w.path).join(', ')} to ${result.label}; backup in ${result.backup}` });
     await this.load();
   }
 
@@ -239,7 +269,7 @@ export class LibraryStore {
   }
 
   private addNew(model: MapModel, path: string, status: string): void {
-    const doc: OpenDoc = { id: model.id, path, state: openDocument(model), savedModel: null, readOnly: null, draft: null, drafted: false, conflicts: [], changedOnDisk: false, confirmRevert: false };
+    const doc: OpenDoc = { id: model.id, path, state: openDocument(model), savedModel: null, readOnly: null, draft: null, drafted: false, conflicts: [], changedOnDisk: false, torn: false, confirmRevert: false };
     this.set({ docs: [...this.view.docs, doc], activeId: model.id, status, problems: [] });
     void this.journal(model.id);
   }
@@ -260,6 +290,10 @@ export class LibraryStore {
     if (!library) return;
     const path = documentPath('map', options.id);
     if (path === null || this.taken(options.id)) { this.set({ status: `${options.id} is not a free map ID that can be a file name` }); return; }
+    // Bounds start at 0, so each side is at most the coordinate limit (R1 D1) and on the 1/16 WU quantum.
+    const side = (v: number): boolean => Number.isFinite(v) && v >= 64 && v <= COORDINATE_LIMIT && Number.isInteger(v / COORDINATE_QUANTUM);
+    if (!side(options.width) || !side(options.height)) { this.set({ status: `Width and height must be 64–${COORDINATE_LIMIT} WU on the 1/16 WU grid` }); return; }
+    if (options.tileSize !== null && !(Number.isInteger(options.tileSize) && options.tileSize > 0 && options.tileSize <= 4096)) { this.set({ status: 'Tile size must be a whole number of WU from 1 to 4096' }); return; }
     const movement = library.documents.find((e) => e.id === options.movementId && e.kind === 'movement');
     if (!movement) { this.set({ status: 'Choose a movement profile from this library' }); return; }
     const tileset = library.documents.find((e) => e.kind === 'tileset');
@@ -270,7 +304,7 @@ export class LibraryStore {
     this.addNew(n.model, path, `New map ${options.id}: Save writes ${path}`);
   }
 
-  askRevert(): void { const d = this.active(); if (d && d.savedModel && isDirty(d.state)) this.patchDoc(d.id, { confirmRevert: true }); }
+  askRevert(): void { const d = this.active(); if (d && !lockReason(d) && d.savedModel && isDirty(d.state)) this.patchDoc(d.id, { confirmRevert: true }); }
   cancelRevert(): void { const d = this.active(); if (d) this.patchDoc(d.id, { confirmRevert: false }); }
   confirmRevert(): void {
     const d = this.active();
@@ -311,12 +345,13 @@ export class LibraryStore {
     this.set({ orphanDrafts: this.view.orphanDrafts.filter((d) => d !== draft) });
   }
 
-  /** Torn-save recovery (R1 H4): the user chooses keep or restore; MapLab never guesses. */
-  async recover(id: string, action: 'keep' | 'restore'): Promise<void> {
+  /** Torn-save recovery (R1 H4): the user chooses keep, restore or (for a missing file) forget; MapLab never guesses. */
+  async recover(id: string, action: 'keep' | 'restore' | 'forget'): Promise<void> {
     const entry = this.view.library?.documents.find((e) => e.id === id);
     if (!entry) return;
     const r = await recoverDocument({ id, action, digest: entry.digest });
-    this.set({ status: r.ok ? `${entry.path}: ${action === 'keep' ? 'kept the file and updated the index' : 'restored from the newest matching backup'}` : `Recovery refused: ${r.message}`, problems: r.ok ? [] : describe(r) });
-    await this.load();
+    const done = { keep: 'kept the file and updated the index', restore: 'restored from the newest matching backup', forget: 'removed from the project index' }[action];
+    this.set({ status: r.ok ? `${entry.path}: ${done}` : `Recovery refused: ${r.message}`, problems: r.ok ? [] : describe(r) });
+    await this.refresh();
   }
 }

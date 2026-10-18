@@ -1,10 +1,10 @@
 // Node only: the dev-server plugin that serves and writes the library folder (adopted H4, R1 H4/H8, the RigLab
-// pattern). Its middleware is installed ahead of Vite's own, and every /__maplab/ request passes the loopback
-// guard before anything is read. Requests run one at a time, so a save never interleaves with another read or
+// pattern). Its middleware runs before Vite's transform and static middleware (Vite 8's own CORS and host checks
+// run earlier still), and every /__maplab/ request passes the loopback guard before anything is read. Requests run one at a time, so a save never interleaves with another read or
 // write. The watcher reports outside edits, ignoring this server's own recent writes. Vite restarts the server
 // when this code changes, because `vite.config.ts` imports it.
-import { randomUUID } from 'node:crypto';
-import { realpathSync } from 'node:fs';
+import { createHash, randomUUID } from 'node:crypto';
+import { readFileSync, realpathSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { join, relative, sep } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
@@ -26,18 +26,27 @@ export interface LibraryPluginOptions {
   readonly now?: () => Date;
 }
 
-/** Paths this server wrote, so its own saves are not reported back as outside edits. */
+/**
+ * Files this server just wrote, with the bytes' digest, so its own saves are not reported back as outside edits.
+ * An event counts as this server's own only while the file still holds exactly those bytes (or, for a removal, is
+ * still absent): an outside edit made right after a save is always reported.
+ */
 export class RecentWrites {
-  private readonly until = new Map<string, number>();
-  constructor(private readonly clock: () => number = Date.now) {}
-  add(paths: readonly string[]): void { for (const p of paths) this.until.set(p, this.clock() + RECENT_WRITE_MS); }
-  owns(path: string): boolean {
-    const t = this.until.get(path);
-    if (t === undefined) return false;
-    if (t >= this.clock()) return true;
-    this.until.delete(path);
-    return false;
+  private readonly recent = new Map<string, { until: number; digest: string | null }>();
+  constructor(private readonly clock: () => number = Date.now, private readonly digestOf: (path: string) => string | null = fileDigest) {}
+  add(entries: readonly Readonly<{ path: string; digest: string | null }>[]): void {
+    for (const e of entries) this.recent.set(e.path, { until: this.clock() + RECENT_WRITE_MS, digest: e.digest });
   }
+  owns(path: string): boolean {
+    const r = this.recent.get(path);
+    if (r === undefined) return false;
+    if (r.until < this.clock()) { this.recent.delete(path); return false; }
+    return this.digestOf(path) === r.digest;
+  }
+}
+
+function fileDigest(path: string): string | null {
+  try { return createHash('sha256').update(readFileSync(path)).digest('hex'); } catch { return null; }
 }
 
 /**
@@ -108,7 +117,9 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
           for (const id of ids as string[]) {
             const d = read.documents.find((x) => x.id === id);
             if (!d?.bytes || !d.digest) return send(response, 404, no('read.missing', `${id} is not readable in the library`));
-            out.push({ id, path: d.path, digest: d.digest, text: new TextDecoder('utf-8', { fatal: true }).decode(d.bytes) });
+            let text: string;
+            try { text = new TextDecoder('utf-8', { fatal: true }).decode(d.bytes); } catch { return send(response, 422, no('read.encoding', `${d.path} is not UTF-8`)); }
+            out.push({ id, path: d.path, digest: d.digest, text });
           }
           return send(response, 200, { ok: true, documents: out } satisfies ReadResponse);
         }
@@ -116,9 +127,10 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
           const saveId = randomUUID();
           const outcome = url === ROUTES.save ? await writeSave(f, body, saveId, now(), options.hooks) : await recoverDocument(f, body, saveId, now(), options.hooks);
           if (!outcome.ok) return send(response, outcome.status, outcome.refusal);
-          recent.add(outcome.touched.map((p) => join(f.dir, ...p.split('/'))));
-          notify(SAVED_EVENT, { saveId, paths: outcome.touched });
-          server.config.logger.info(`MapLab library: ${url === ROUTES.save ? 'saved' : 'recovered'} ${outcome.touched.join(', ')} in ${f.label}`);
+          recent.add(outcome.touched.map((t) => ({ path: join(f.dir, ...t.path.split('/')), digest: t.digest })));
+          const paths = outcome.touched.map((t) => t.path);
+          notify(SAVED_EVENT, { saveId, paths });
+          server.config.logger.info(`MapLab library: ${url === ROUTES.save ? 'saved' : 'recovered'} ${paths.join(', ')} in ${f.label}`);
           return send(response, 200, outcome.result);
         }
         return send(response, 404, no('route.unknown', `No library endpoint ${url}`));
@@ -135,6 +147,7 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
           if (text === null) return send(response, 413, no('request.too-large', 'The request body is too large'));
           let body: unknown;
           try { body = JSON.parse(text); } catch { return send(response, 400, no('request.json', 'The request body is not JSON')); }
+          if (typeof body !== 'object' || body === null || Array.isArray(body)) return send(response, 400, no('request.json', 'The request body must be a JSON object'));
           await serial(() => route(url, body, response));
         })().catch((e: unknown) => {
           const known = e instanceof LibraryError;

@@ -77,6 +77,10 @@ describe('a refused save writes nothing', () => {
   test('a new document reusing an indexed ID conflicts', () => refusedWith((f) => ({ documents: [{ ...renamed(f, FOREST, 'X'), baseDigest: null }] }), 409, 'save.stale-base'));
   test('another document torn by an interrupted save blocks every save until it is resolved', () =>
     refusedWith((f) => { put(f, CLEARING, text(f, CLEARING).replace('Clearing destination', 'Half')); return { documents: [renamed(f, FOREST, 'X')] }; }, 409, 'library.torn'));
+  test('a torn document is never saved over implicitly, even from its own current bytes', () =>
+    refusedWith((f) => { put(f, CLEARING, text(f, CLEARING).replace('Clearing destination', 'Outside')); return { documents: [renamed(f, CLEARING, 'Mine')] }; }, 409, 'library.torn'));
+  test('a removal must name a real digest', () =>
+    refusedWith(() => ({ documents: [], remove: [{ id: 'map.clearing', baseDigest: null }] }), 400, 'save.request'));
   test('text that is not library form', () => refusedWith((f) => ({ documents: [{ ...renamed(f, FOREST, 'X'), text: text(f, FOREST) }] }), 422, 'save.invalid'));
   test('a document whose identity disagrees with the request', () =>
     refusedWith((f) => ({ documents: [{ ...renamed(f, FOREST, 'X'), id: 'map.clearing', baseDigest: sha256(file(f, CLEARING)) }] }), 422, 'save.invalid'));
@@ -110,6 +114,55 @@ describe('a refused save writes nothing', () => {
     await expect(readLibrary(f)).rejects.toMatchObject({ code: 'library.symlink' });
     const r = await writeSave(f, { documents: [renamed(f, 'maps-real/forest.map.json', 'X', 'map.forest')] }, ID, NOW);
     expect(r.ok ? 'ok' : r.refusal.code).toBe('library.symlink');
+  });
+});
+
+describe('interrupted new documents and missing files', () => {
+  test('a retry of an interrupted new-document save may replace its stray file only with identical bytes', async () => {
+    const f = scratchLibrary();
+    const copy = json(f, CLEARING);
+    copy.id = 'map.glade';
+    const glade = { id: 'map.glade', kind: 'map' as const, text: libraryForm(copy as never), baseDigest: null };
+    const crash = (s: WriteStep): void => { if (s.step === 'index') throw new Error('power cut'); };
+    await expect(writeSave(f, { documents: [glade] }, ID, NOW, { onStep: crash })).rejects.toThrow('power cut');
+    expect((await readLibrary(f)).unindexed).toEqual(['maps/glade.map.json']);
+    const different = { ...glade, text: libraryForm({ ...copy, metadata: { ...copy.metadata, name: 'Other' } } as never) };
+    const refused = await writeSave(f, { documents: [different] }, ID, NOW);
+    expect(refused.ok ? 'ok' : refused.refusal.code).toBe('save.stale-base');
+    const steps: WriteStep[] = [];
+    const retried = await writeSave(f, { documents: [glade] }, ID.replace('0', '3'), NOW, { onStep: (s) => steps.push(s) });
+    expect(retried.ok).toBe(true);
+    expect(steps.map((s) => `${s.step} ${s.path}`).slice(0, 2)).toEqual(['backup maps/glade.map.json', 'backup maplab.project.json']);
+    expect(indexOf(f).documents.find((d) => d.id === 'map.glade')?.sha256).toBe(sha256(file(f, 'maps/glade.map.json')));
+  });
+
+  test('a file deleted outside MapLab can be removed from the index by the user, after which saves work again', async () => {
+    const f = scratchLibrary();
+    const { rmSync } = await import('node:fs');
+    rmSync(join(f.dir, 'prefabs/tree.prefab.json'));
+    expect(await recoverDocument(f, { id: 'prefab.tree', action: 'keep', digest: null }, ID, NOW)).toMatchObject({ ok: false, refusal: { code: 'recover.missing' } });
+    expect(await recoverDocument(f, { id: 'map.forest', action: 'forget', digest: sha256(file(f, FOREST)) }, ID, NOW)).toMatchObject({ ok: false, refusal: { code: 'recover.not-torn' } });
+    const blocked = await writeSave(f, { documents: [renamed(f, CLEARING, 'Y')] }, ID, NOW);
+    expect(blocked.ok ? 'ok' : blocked.refusal.code).toBe('library.torn');
+    const forgot = await recoverDocument(f, { id: 'prefab.tree', action: 'forget', digest: null }, ID, NOW);
+    expect(forgot).toMatchObject({ ok: true, result: { id: 'prefab.tree', digest: null } });
+    expect(indexOf(f).documents.some((d) => d.id === 'prefab.tree')).toBe(false);
+    expect(file(f, `backups/${backups(f)[0]}/maplab.project.json`)).toBeTruthy();
+    // The forest map lists the prefab as optional, so the library still validates and saves succeed again.
+    expect((await writeSave(f, { documents: [renamed(f, CLEARING, 'Saves again')] }, ID.replace('0', '4'), NOW)).ok).toBe(true);
+  });
+
+  test('a backup that is a symbolic link never stops the backup search', async () => {
+    const f = scratchLibrary();
+    const forest = file(f, FOREST);
+    put(f, `backups/20261018T000000000Z-good0000/${FOREST}`, forest);
+    mkdirSync(join(f.dir, 'backups/20261019T000000000Z-link0000/maps'), { recursive: true });
+    symlinkSync(join(f.dir, FOREST), join(f.dir, `backups/20261019T000000000Z-link0000/${FOREST}`));
+    put(f, FOREST, text(f, FOREST).replace('Forest acceptance world', 'Torn'));
+    const snap = await snapshot(await readLibrary(f));
+    expect(snap.documents.find((d) => d.id === 'map.forest')).toMatchObject({ state: 'torn', restorable: true });
+    expect((await recoverDocument(f, { id: 'map.forest', action: 'restore', digest: sha256(file(f, FOREST)) }, ID, NOW)).ok).toBe(true);
+    expect(file(f, FOREST)).toEqual(forest);
   });
 });
 

@@ -2,7 +2,7 @@
 // torn-save recovery, drafts, Save As, New map, Revert, the placeholder library and cross-origin refusal.
 import { expect, test } from '@playwright/test';
 import {
-  backups, command, fileIds, index, libraryFile, nameField, openEditor, openMap, placeholder, placeholderUrl, rename, resetLibrary, sha256, shownIds, status, writeLibraryFile,
+  backups, command, fileIds, index, libraryFile, nameField, openEditor, openMap, placeholder, placeholderUrl, rename, resetLibrary, saveElsewhere, sha256, shownIds, status, writeLibraryFile,
 } from './support';
 
 const FOREST = 'maps/forest.map.json';
@@ -41,16 +41,33 @@ test('a stale base digest conflict refuses the save and writes nothing', async (
   await openEditor(page);
   await openMap(page, 'map.forest');
   await rename(page, 'Edited in MapLab');
-  const outside = libraryFile(FOREST).toString('utf8').replace('"Forest acceptance world"', '"Edited outside MapLab"');
-  writeLibraryFile(FOREST, outside);
+  // Another MapLab tab saved this map since it was opened here: file and index agree, so it is stale, not torn.
+  const outside = libraryFile(FOREST).toString('utf8').replace('"Forest acceptance world"', '"Saved by another tab"');
+  saveElsewhere(FOREST, outside);
+  const indexBefore = libraryFile('maplab.project.json');
   await command(page, 'Save').click();
   await expect(status(page)).toContainText('Save refused: a file changed on disk since it was opened. Nothing was written.');
   await expect(page.getByRole('group', { name: 'Conflict' })).toBeVisible();
   expect(libraryFile(FOREST).toString('utf8')).toBe(outside);
+  expect(libraryFile('maplab.project.json')).toEqual(indexBefore);
   expect(backups()).toEqual([]);
   await page.getByRole('button', { name: 'Reload from disk' }).click();
-  await expect(nameField(page)).toHaveValue('Edited outside MapLab');
+  await expect(nameField(page)).toHaveValue('Saved by another tab');
   await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+});
+
+test('an outside edit to an open file reloads it locked until the user keeps or restores the file', async ({ page }) => {
+  await openEditor(page);
+  await openMap(page, 'map.forest');
+  writeLibraryFile(FOREST, libraryFile(FOREST).toString('utf8').replace('"Forest acceptance world"', '"Edited in a text editor"'));
+  const doc = page.getByRole('region', { name: 'Document map.forest' });
+  await expect(nameField(page)).toHaveValue('Edited in a text editor');
+  await expect(doc.getByRole('group', { name: 'Torn map.forest' })).toBeVisible();
+  await expect(nameField(page)).toBeDisabled();
+  await doc.getByRole('button', { name: 'Keep file map.forest' }).click();
+  await expect(status(page)).toContainText('kept the file and updated the index');
+  await expect(nameField(page)).toBeEnabled();
+  expect(index().documents.find((d) => d.id === 'map.forest')?.sha256).toBe(sha256(libraryFile(FOREST)));
 });
 
 test('a save backs up the replaced bytes before it replaces them', async ({ page }) => {
@@ -147,6 +164,29 @@ test('an unsaved edit survives a reload as a draft that is restored or discarded
   await page.reload();
   await openMap(page, 'map.forest');
   await expect(page.getByRole('group', { name: 'Draft' })).toHaveCount(0);
+});
+
+test('an offered draft is never consumed by an outside save or by edits: only restore or discard decide', async ({ page }) => {
+  await openEditor(page);
+  await openMap(page, 'map.forest');
+  await rename(page, 'Precious draft');
+  await expect(page.getByText('Draft kept in this browser')).toBeVisible();
+  await page.reload();
+  await openMap(page, 'map.forest');
+  const draft = page.getByRole('group', { name: 'Draft' });
+  await expect(draft).toContainText('editing waits until you restore or discard it');
+  await expect(nameField(page)).toBeDisabled();
+  saveElsewhere(FOREST, libraryFile(FOREST).toString('utf8').replace('"Forest acceptance world"', '"Saved by another tab"'));
+  await expect(nameField(page)).toHaveValue('Saved by another tab');
+  await expect(draft).toBeVisible();
+  await page.reload();
+  await openMap(page, 'map.forest');
+  await page.getByRole('group', { name: 'Draft' }).getByRole('button', { name: 'Restore draft' }).click();
+  await expect(nameField(page)).toHaveValue('Precious draft');
+  // The draft was edited from the earlier file, so Save refuses instead of overwriting the other tab's save.
+  await command(page, 'Save').click();
+  await expect(status(page)).toContainText('Save refused');
+  expect(metadataName(FOREST)).toBe('Saved by another tab');
 });
 
 test('Save As writes a new identity and New map writes a valid new map', async ({ page }) => {

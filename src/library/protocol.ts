@@ -66,8 +66,8 @@ export interface SaveSuccess {
   readonly label: string;
   readonly written: readonly Readonly<{ id: string; path: string; digest: string }>[];
   readonly removed: readonly string[];
-  /** Library-relative backup folder, or null when nothing was replaced. */
-  readonly backup: string | null;
+  /** Library-relative backup folder; every save backs up at least the old index there. */
+  readonly backup: string;
 }
 export interface Refusal {
   readonly ok: false;
@@ -78,9 +78,12 @@ export interface Refusal {
 }
 export type SaveResponse = SaveSuccess | Refusal;
 
-/** "keep": accept the file as it is and record its digest. "restore": put back the newest backup that matches the index. */
-export interface RecoverRequest { readonly id: string; readonly action: 'keep' | 'restore'; readonly digest: string | null }
-export type RecoverResponse = { readonly ok: true; readonly id: string; readonly digest: string; readonly backup: string | null } | Refusal;
+/**
+ * "keep": accept the file as it is and record its digest. "restore": put back the newest backup that matches the
+ * index. "forget": drop a document whose file is gone from the index.
+ */
+export interface RecoverRequest { readonly id: string; readonly action: 'keep' | 'restore' | 'forget'; readonly digest: string | null }
+export type RecoverResponse = { readonly ok: true; readonly id: string; readonly digest: string | null; readonly backup: string | null } | Refusal;
 
 export interface SavedEvent { readonly saveId: string; readonly paths: readonly string[] }
 export interface ChangedEvent { readonly paths: readonly string[] }

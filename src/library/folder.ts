@@ -120,7 +120,12 @@ export function backupStamps(folder: LibraryFolder): string[] {
 /** The newest backup of `path` whose bytes have `digest`, with those bytes; null when none does. */
 export async function newestMatchingBackup(folder: LibraryFolder, path: string, digest: string): Promise<{ stamp: string; bytes: Uint8Array } | null> {
   for (const stamp of backupStamps(folder)) {
-    const bytes = readLibraryFile(folder, `${BACKUP_FOLDER}/${stamp}/${path}`);
+    let bytes: Uint8Array | null;
+    // A backup that is a link, not a file or too large is never restored, and never stops the search.
+    try { bytes = readLibraryFile(folder, `${BACKUP_FOLDER}/${stamp}/${path}`); } catch (e) {
+      if (e instanceof LibraryError) continue;
+      throw e;
+    }
     if (bytes && await sha256Hex(bytes) === digest) return { stamp, bytes };
   }
   return null;

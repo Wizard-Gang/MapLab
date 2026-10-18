@@ -22,7 +22,9 @@ export type WriteStep =
   | Readonly<{ step: 'remove'; path: string }>;
 export interface WriteHooks { readonly onStep?: (s: WriteStep) => void }
 
-export type WriteOutcome = { readonly ok: true; readonly result: SaveSuccess; readonly touched: readonly string[] } | { readonly ok: false; readonly status: number; readonly refusal: Refusal };
+/** A path this write changed and the SHA-256 it now holds, or null for a path it removed. */
+export interface Touched { readonly path: string; readonly digest: string | null }
+export type WriteOutcome = { readonly ok: true; readonly result: SaveSuccess; readonly touched: readonly Touched[] } | { readonly ok: false; readonly status: number; readonly refusal: Refusal };
 const refused = (status: number, code: string, message: string, extra: Partial<Refusal> = {}): WriteOutcome =>
   ({ ok: false, status, refusal: { ok: false, code, message, ...extra } });
 
@@ -32,8 +34,18 @@ const isKind = (v: unknown): v is DocumentKind => ['map', 'tileset', 'prefab', '
 /** UTC `YYYYMMDDTHHMMSSmmmZ` plus a save suffix: unique, and sorting by name sorts by time. */
 export const backupStamp = (now: Date, saveId: string): string => `${now.toISOString().replace(/[-:.]/g, '')}-${saveId.slice(0, 8)}`;
 
+/** Creates `dir` when needed and fsyncs the parent of every folder it created, so new folders survive a crash too. */
+function ensureDir(dir: string): void {
+  const first = mkdirSync(dir, { recursive: true });
+  if (first === undefined) return;
+  for (let d = dir; ; d = dirname(d)) {
+    syncDir(dirname(d));
+    if (d === first || dirname(d) === d) break;
+  }
+}
+
 function durableWrite(full: string, bytes: Uint8Array, temp: string): void {
-  mkdirSync(dirname(full), { recursive: true });
+  ensureDir(dirname(full));
   const fd = openSync(temp, 'wx', 0o644);
   try {
     for (let at = 0; at < bytes.length;) at += writeSync(fd, bytes, at, bytes.length - at);
@@ -65,7 +77,7 @@ function backup(folder: LibraryFolder, stamp: string, path: string, bytes: Uint8
   const to = `${BACKUP_FOLDER}/${stamp}/${path}`;
   hooks.onStep?.({ step: 'backup', path, to });
   const full = insidePath(folder, to);
-  mkdirSync(dirname(full), { recursive: true });
+  ensureDir(dirname(full));
   const fd = openSync(full, 'wx', 0o644);
   try {
     for (let at = 0; at < bytes.length;) at += writeSync(fd, bytes, at, bytes.length - at);
@@ -95,7 +107,8 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
   const seen = new Set<string>();
   const conflicts: Conflict[] = [];
   const problems: Diagnostic[] = [];
-  const incoming: { id: string; kind: DocumentKind; path: string; text: string; value: JsonValue; replaces: boolean }[] = [];
+  // `previous`: the bytes this write replaces, which are backed up first; null for a new file.
+  const incoming: { id: string; kind: DocumentKind; path: string; text: string; value: JsonValue; previous: Uint8Array | null }[] = [];
   for (const [i, d] of body.documents.entries()) {
     const at = ['documents', i];
     if (typeof d !== 'object' || d === null || typeof d.id !== 'string' || !isKind(d.kind) || typeof d.text !== 'string' || !(d.baseDigest === null || isDigest(d.baseDigest))) {
@@ -109,8 +122,11 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
     const path = current?.path ?? documentPath(d.kind, d.id);
     if (path === null) { problems.push(error('save.path', [...at, 'id'], `${d.id} cannot be a library file name`, d.id)); continue; }
     if (current && current.kind !== d.kind) { problems.push(error('save.kind', [...at, 'kind'], `${d.id} is a ${current.kind}`, d.id)); continue; }
-    if (d.baseDigest === null ? current !== undefined || readLibraryFile(folder, path) !== null : current?.digest !== d.baseDigest) {
-      conflicts.push({ id: d.id, path, baseDigest: d.baseDigest, currentDigest: current?.digest ?? null });
+    // A file left unindexed by an interrupted save of this same new document may be replaced by a retry with identical bytes.
+    const stray = d.baseDigest === null && current === undefined ? readLibraryFile(folder, path) : null;
+    const retry = stray !== null && (await sha256Hex(stray)) === (await sha256Hex(d.text));
+    if (d.baseDigest === null ? current !== undefined || (stray !== null && !retry) : current?.digest !== d.baseDigest) {
+      conflicts.push({ id: d.id, path, baseDigest: d.baseDigest, currentDigest: current?.digest ?? (stray ? await sha256Hex(stray) : null) });
       continue;
     }
     if (utf8Bytes(d.text).length > DOCUMENT_LIMIT) { problems.push(error('save.too-large', at, `${d.id} is larger than 64 MiB`, d.id)); continue; }
@@ -119,20 +135,21 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
     const v = parsed.value as Record<string, JsonValue>;
     if (v.format !== `maplab.${d.kind}` || v.id !== d.id) { problems.push(error('save.identity', at, `${d.id} must be a maplab.${d.kind} document with that ID`, d.id)); continue; }
     if (libraryForm(parsed.value) !== d.text) { problems.push(error('save.form', at, `${d.id} is not in library form`, d.id)); continue; }
-    incoming.push({ id: d.id, kind: d.kind, path, text: d.text, value: parsed.value, replaces: current !== undefined });
+    incoming.push({ id: d.id, kind: d.kind, path, text: d.text, value: parsed.value, previous: current ? current.bytes : stray });
   }
   const removing: { id: string; path: string }[] = [];
   for (const [i, r] of (body.remove ?? []).entries()) {
-    const current = typeof r?.id === 'string' ? byId.get(r.id) : undefined;
+    if (typeof r !== 'object' || r === null || typeof r.id !== 'string' || !isDigest(r.baseDigest)) return refused(400, 'save.request', `remove[${i}] must be {id, baseDigest}`);
+    const current = byId.get(r.id);
     if (!current || seen.has(current.id)) { problems.push(error('save.remove', ['remove', i], 'Remove names an indexed document not also saved', current?.id ?? null)); continue; }
     if (current.digest !== r.baseDigest) { conflicts.push({ id: current.id, path: current.path, baseDigest: r.baseDigest, currentDigest: current.digest }); continue; }
     seen.add(current.id);
     removing.push({ id: current.id, path: current.path });
   }
   if (conflicts.length) return refused(409, 'save.stale-base', 'A document changed on disk since it was opened; nothing was written', { conflicts });
-  // Any other document whose file disagrees with the index must be kept or restored first (never guessed at). A document
-  // in this save is not: its base digest matched its file, so the user has seen those bytes and this save replaces them.
-  const tornNow = torn(read).filter((c) => !seen.has(c.id));
+  // Any document whose file disagrees with the index, including one in this save, must first be kept, restored or
+  // forgotten by the user's explicit choice; a save never resolves it implicitly.
+  const tornNow = torn(read);
   if (tornNow.length) return refused(409, 'library.torn', 'An earlier save was interrupted or a file was edited outside MapLab; keep or restore it before saving', { conflicts: tornNow });
   if (problems.length) return refused(422, 'save.invalid', 'The save was refused; nothing was written', { diagnostics: problems.slice(0, 100) });
   // A new path must not alias one already in the library on a case-insensitive file system.
@@ -156,10 +173,10 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
     }
     if (problems.length) return refused(422, 'save.invalid', 'Dependency paths disagree with the project index; nothing was written', { diagnostics: problems.slice(0, 100) });
   }
-  const written: { id: string; path: string; digest: string; bytes: Uint8Array; replaces: boolean }[] = [];
+  const written: { id: string; path: string; digest: string; bytes: Uint8Array; previous: Uint8Array | null }[] = [];
   for (const d of incoming) {
     const bytes = utf8Bytes(d.text);
-    written.push({ id: d.id, path: d.path, digest: await sha256Hex(bytes), bytes, replaces: d.replaces });
+    written.push({ id: d.id, path: d.path, digest: await sha256Hex(bytes), bytes, previous: d.previous });
   }
   const entries = new Map<string, ProjectDocument['documents'][number]>(read.index.documents.map((d) => [d.id, d]));
   for (const r of removing) entries.delete(r.id);
@@ -171,8 +188,8 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
 
   // 4. Back up everything about to be replaced or removed, the index included.
   const stamp = backupStamp(now, saveId);
-  const replaced = [...written.filter((w) => w.replaces).map((w) => w.path), ...removing.map((r) => r.path)];
-  for (const path of replaced) backup(folder, stamp, path, read.documents.find((d) => d.path === path)?.bytes as Uint8Array, hooks);
+  for (const w of written) if (w.previous) backup(folder, stamp, w.path, w.previous, hooks);
+  for (const r of removing) backup(folder, stamp, r.path, read.documents.find((d) => d.id === r.id)?.bytes as Uint8Array, hooks);
   backup(folder, stamp, PROJECT_INDEX, read.indexBytes, hooks);
   // 5. Each document: temp, fsync, rename. 6. The index, the commit point, last. 7. Removed files.
   for (const w of written) replaceFile(folder, w.path, w.bytes, saveId, 'write', hooks);
@@ -181,7 +198,8 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
     hooks.onStep?.({ step: 'remove', path: r.path });
     unlinkSync(insidePath(folder, r.path));
   }
-  const touched = [...written.map((w) => w.path), PROJECT_INDEX, ...removing.map((r) => r.path)];
+  const touched: Touched[] = [...written.map((w) => ({ path: w.path, digest: w.digest })), { path: PROJECT_INDEX, digest: await sha256Hex(indexBytes) },
+    ...removing.map((r) => ({ path: r.path, digest: null }))];
   return {
     ok: true, touched,
     result: { ok: true, saveId, label: folder.label, written: written.map(({ id, path, digest }) => ({ id, path, digest })), removed: removing.map((r) => r.path),
@@ -189,19 +207,21 @@ export async function writeSave(folder: LibraryFolder, request: unknown, saveId:
   };
 }
 
-export type RecoverOutcome = { readonly ok: true; readonly result: RecoverResponse & { ok: true }; readonly touched: readonly string[] } | { readonly ok: false; readonly status: number; readonly refusal: Refusal };
+export type RecoverOutcome = { readonly ok: true; readonly result: RecoverResponse & { ok: true }; readonly touched: readonly Touched[] } | { readonly ok: false; readonly status: number; readonly refusal: Refusal };
 
 /**
  * Resolves one torn or missing document, as the user chose; MapLab never picks. "keep" records the file's
  * current digest in the index. "restore" backs up the current bytes, then puts back the newest backup whose
- * bytes match the index. `digest` must be the file digest the user saw, so a later change is not resolved blind.
+ * bytes match the index. "forget" removes a document whose file is gone from the index (the old index is backed
+ * up), for a file deleted outside MapLab with no backup to restore. `digest` must be the file digest the user saw
+ * (null for a missing file), so a later change is not resolved blind.
  */
 export async function recoverDocument(folder: LibraryFolder, request: unknown, saveId: string, now: Date, hooks: WriteHooks = {}): Promise<RecoverOutcome> {
   const no = (status: number, code: string, message: string): RecoverOutcome => ({ ok: false, status, refusal: { ok: false, code, message } });
   if (folder.placeholder) return no(403, 'library.read-only', 'The placeholder library is read-only');
   const r = request as RecoverRequest;
-  if (typeof request !== 'object' || request === null || typeof r.id !== 'string' || !['keep', 'restore'].includes(r.action) || !(r.digest === null || isDigest(r.digest))) {
-    return no(400, 'recover.request', 'A recovery is {id, action: "keep" | "restore", digest}');
+  if (typeof request !== 'object' || request === null || typeof r.id !== 'string' || !['keep', 'restore', 'forget'].includes(r.action) || !(r.digest === null || isDigest(r.digest))) {
+    return no(400, 'recover.request', 'A recovery is {id, action: "keep" | "restore" | "forget", digest}');
   }
   let read: LibraryRead;
   try { read = await readLibrary(folder); } catch (e) {
@@ -213,16 +233,25 @@ export async function recoverDocument(folder: LibraryFolder, request: unknown, s
   if (doc.digest === doc.indexed) return no(409, 'recover.not-torn', `${r.id} matches the index; there is nothing to recover`);
   if (doc.digest !== r.digest) return no(409, 'recover.changed', `${r.id} changed again on disk; reload before recovering`);
   const stamp = backupStamp(now, saveId);
+  if (r.action === 'forget') {
+    if (doc.digest !== null) return no(409, 'recover.present', `${r.id} still has a file; keep or restore it instead`);
+    const index = { ...read.index, documents: read.index.documents.filter((d) => d.id !== r.id) } as unknown as JsonValue;
+    backup(folder, stamp, PROJECT_INDEX, read.indexBytes, hooks);
+    const bytes = utf8Bytes(libraryForm(index));
+    replaceFile(folder, PROJECT_INDEX, bytes, saveId, 'index', hooks);
+    return { ok: true, touched: [{ path: PROJECT_INDEX, digest: await sha256Hex(bytes) }], result: { ok: true, id: r.id, digest: null, backup: `${BACKUP_FOLDER}/${stamp}` } };
+  }
   if (r.action === 'keep') {
     if (!doc.digest) return no(409, 'recover.missing', `${r.id} has no file to keep; restore it from a backup`);
     const index = { ...read.index, documents: read.index.documents.map((d) => (d.id === r.id ? { ...d, sha256: doc.digest as string } : d)) } as unknown as JsonValue;
     backup(folder, stamp, PROJECT_INDEX, read.indexBytes, hooks);
-    replaceFile(folder, PROJECT_INDEX, utf8Bytes(libraryForm(index)), saveId, 'index', hooks);
-    return { ok: true, touched: [PROJECT_INDEX], result: { ok: true, id: r.id, digest: doc.digest, backup: `${BACKUP_FOLDER}/${stamp}` } };
+    const bytes = utf8Bytes(libraryForm(index));
+    replaceFile(folder, PROJECT_INDEX, bytes, saveId, 'index', hooks);
+    return { ok: true, touched: [{ path: PROJECT_INDEX, digest: await sha256Hex(bytes) }], result: { ok: true, id: r.id, digest: doc.digest, backup: `${BACKUP_FOLDER}/${stamp}` } };
   }
   const match = await newestMatchingBackup(folder, doc.path, doc.indexed);
   if (!match) return no(409, 'recover.no-backup', `No backup of ${doc.path} matches the index; keep the file instead`);
   if (doc.bytes) backup(folder, stamp, doc.path, doc.bytes, hooks);
   replaceFile(folder, doc.path, match.bytes, saveId, 'write', hooks);
-  return { ok: true, touched: [doc.path], result: { ok: true, id: r.id, digest: doc.indexed, backup: doc.bytes ? `${BACKUP_FOLDER}/${stamp}` : null } };
+  return { ok: true, touched: [{ path: doc.path, digest: doc.indexed }], result: { ok: true, id: r.id, digest: doc.indexed, backup: doc.bytes ? `${BACKUP_FOLDER}/${stamp}` : null } };
 }

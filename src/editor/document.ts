@@ -19,7 +19,10 @@ export type Staged = { readonly ok: true; readonly model: MapModel } | { readonl
 export function stageMap(text: string): Staged {
   const parsed = parseJson(text);
   if (!parsed.ok) return { ok: false, problems: [{ code: parsed.diagnostic.code, path: parsed.diagnostic.jsonPath, message: parsed.diagnostic.message }] };
-  return normalize(parsed.value);
+  // Staging never throws into the shell: an unexpected failure is a problem the user sees, and nothing is replaced.
+  try { return normalize(parsed.value); } catch (e) {
+    return { ok: false, problems: [{ code: 'model.failed', path: '$', message: e instanceof Error ? e.message : String(e) }] };
+  }
 }
 
 /** Opens a staged model read from a file with `fileDigest`: clean, with its library-form digest as the saved digest. */

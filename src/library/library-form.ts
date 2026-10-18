@@ -123,9 +123,10 @@ function mapContent(doc: JsonObject): JsonObject {
   const out: Record<string, JsonValue> = {};
   for (const [k, v] of Object.entries(doc)) {
     let x: JsonValue = v;
-    const order = MAP_SORTED[k];
+    // Own keys only: a member named like a built-in (`constructor`) is never mistaken for a rule.
+    const order = Object.hasOwn(MAP_SORTED, k) ? MAP_SORTED[k] : undefined;
     if (order) x = sorted(x, order) as JsonValue;
-    const nested = NESTED_SORTED[k];
+    const nested = Object.hasOwn(NESTED_SORTED, k) ? NESTED_SORTED[k] : undefined;
     if (nested) {
       const sortIn = (o: JsonValue): JsonValue => {
         if (!isObject(o)) return o;

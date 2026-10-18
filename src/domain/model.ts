@@ -67,7 +67,8 @@ export function deepFreeze<T>(value: T): T {
 /** Nested persistent IDs under `owner` (a collection name or a document member), with their JSON paths. */
 export function nestedIds(owner: string, value: JsonValue | undefined, at: string): [string, string][] {
   const out: [string, string][] = [];
-  for (const member of NESTED[owner] ?? []) {
+  // Own keys only: a member named like a built-in (`constructor`) has no nested IDs (ML-008 review note R2-1).
+  for (const member of Object.hasOwn(NESTED, owner) ? (NESTED[owner] as readonly string[]) : []) {
     const items = isObject(value) ? value[member] : undefined;
     if (Array.isArray(items)) items.forEach((item, i) => { if (isObject(item) && typeof item.id === 'string') out.push([item.id, `${at}.${member}[${i}].id`]); });
   }

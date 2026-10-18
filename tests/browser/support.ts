@@ -14,10 +14,29 @@ export const scratch = (): string => {
 };
 export const placeholderUrl = 'http://127.0.0.1:5192/';
 
-/** Puts the scratch library back to the placeholder's exact bytes. */
+/**
+ * Puts the scratch library back to the placeholder's exact bytes, in place: extra files go, folders the dev server
+ * watches stay, so a recreated folder never hides a later change from the watcher.
+ */
 export function resetLibrary(): void {
   const dir = scratch();
-  for (const name of readdirSync(dir)) rmSync(join(dir, name), { recursive: true, force: true });
+  const keep = new Set<string>();
+  const walk = (rel: string): void => {
+    for (const e of readdirSync(join(placeholder, rel), { withFileTypes: true })) {
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      keep.add(r);
+      if (e.isDirectory()) walk(r);
+    }
+  };
+  walk('');
+  const prune = (rel: string): void => {
+    for (const e of readdirSync(join(dir, rel), { withFileTypes: true })) {
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      if (!keep.has(r)) rmSync(join(dir, r), { recursive: true, force: true });
+      else if (e.isDirectory()) prune(r);
+    }
+  };
+  prune('');
   cpSync(placeholder, dir, { recursive: true });
 }
 
@@ -28,6 +47,13 @@ export function writeLibraryFile(path: string, bytes: string | Buffer, dir = scr
 }
 export const sha256 = (bytes: Buffer | string): string => createHash('sha256').update(bytes).digest('hex');
 export const index = (dir = scratch()): { documents: { id: string; path: string; sha256: string }[] } => JSON.parse(libraryFile('maplab.project.json', dir).toString('utf8'));
+/** What another MapLab tab's save leaves: new file bytes and an index that records them (so the file is not torn). */
+export function saveElsewhere(path: string, bytes: string, dir = scratch()): void {
+  writeLibraryFile(path, bytes, dir);
+  const value = index(dir);
+  for (const d of value.documents) if (d.path === path) d.sha256 = sha256(bytes);
+  writeLibraryFile('maplab.project.json', `${JSON.stringify(value, null, 2)}\n`, dir);
+}
 export const backups = (dir = scratch()): string[] => (existsSync(join(dir, 'backups')) ? readdirSync(join(dir, 'backups')).sort() : []);
 
 const COLLECTIONS = ['assets', 'presentations', 'layers', 'visuals', 'materials', 'bodies', 'footholds', 'traversals', 'regions', 'entities', 'waypoints',

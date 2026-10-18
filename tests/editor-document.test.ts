@@ -63,6 +63,15 @@ describe('dirty state compares digests', () => {
   });
 });
 
+test('a document with a top-level member named like a built-in stages and round-trips (ML-008 note R2-1)', () => {
+  const doc = JSON.parse(read('maps/clearing.map.json')) as Record<string, unknown>;
+  const odd = JSON.parse(JSON.stringify({ ...doc, constructor: { x: 1 }, toString: 'y' })) as JsonValue;
+  const staged = stageMap(JSON.stringify(odd));
+  expect(staged.ok).toBe(true);
+  if (staged.ok) expect(JSON.parse(modelText(staged.model))).toMatchObject({ constructor: { x: 1 }, toString: 'y' });
+  expect(stageMap('{"format":"maplab.map","version":1,"id":"map.x","bodies":"nope"}')).toMatchObject({ ok: false });
+});
+
 describe('Save As / Duplicate and New map', () => {
   test('a duplicate has a new map identity, keeps every local ID, retargets self-portals and keeps links to other maps', () => {
     const clearing = JSON.parse(read('maps/clearing.map.json')) as { entities: { kind: string; destination?: { mapId: string; entityId: string } }[] };

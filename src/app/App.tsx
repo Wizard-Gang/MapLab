@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNo
 import { mapName, objectIds } from '../editor/document';
 import { canRedo, canUndo, isDirty } from '../editor/history';
 import type { LibraryEntry, LibrarySnapshot } from '../library/protocol';
-import { LibraryStore, type AppView, type OpenDoc } from './store';
+import { LibraryStore, lockReason, type AppView, type OpenDoc } from './store';
 
 const store = new LibraryStore();
 
@@ -45,6 +45,7 @@ function TornEntry({ entry }: { readonly entry: LibraryEntry }): ReactNode {
       <p>{entry.path} does not match the project index: an earlier save was interrupted. Choose what to keep.</p>
       {entry.digest !== null && <button type="button" aria-label={`Keep file ${entry.id}`} onClick={() => void store.recover(entry.id, 'keep')}>Keep file</button>}
       <button type="button" aria-label={`Restore backup ${entry.id}`} disabled={!entry.restorable} onClick={() => void store.recover(entry.id, 'restore')}>Restore from newest backup</button>
+      {entry.digest === null && <button type="button" aria-label={`Forget ${entry.id}`} onClick={() => void store.recover(entry.id, 'forget')}>Remove from the index</button>}
     </div>
   );
 }
@@ -65,8 +66,8 @@ function NewMap({ library }: { readonly library: LibrarySnapshot }): ReactNode {
       <form onSubmit={submit} aria-label="New map">
         <label>Map ID <input name="id" required pattern="[a-z0-9][a-z0-9._\-]{0,95}" placeholder="map.meadow" /></label>
         <label>Name <input name="name" required aria-label="New map name" /></label>
-        <label>Width (WU) <input name="width" type="number" min={64} max={262144} step={16} defaultValue={1280} /></label>
-        <label>Height (WU) <input name="height" type="number" min={64} max={262144} step={16} defaultValue={720} /></label>
+        <label>Width (WU) <input name="width" type="number" min={64} max={131072} step={16} defaultValue={1280} /></label>
+        <label>Height (WU) <input name="height" type="number" min={64} max={131072} step={16} defaultValue={720} /></label>
         <label>Tile size (WU) <input name="tile" type="number" min={1} step={1} defaultValue={library.defaults.tileSize[0]} disabled={!tileset} /></label>
         <label>Movement profile
           <select value={movementId} onChange={(e) => setMovement(e.target.value)}>{movements.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}</select>
@@ -124,7 +125,7 @@ function NameField({ doc }: { readonly doc: OpenDoc }): ReactNode {
   useEffect(() => setValue(current), [current]);
   return (
     <label className="name">Map name
-      <input value={value} disabled={doc.readOnly !== null} onChange={(e) => setValue(e.target.value)} onBlur={() => store.rename(value)}
+      <input value={value} disabled={lockReason(doc) !== null} onChange={(e) => setValue(e.target.value)} onBlur={() => store.rename(value)}
         onKeyDown={(e) => { if (e.key === 'Enter') store.rename(value); if (e.key === 'Escape') setValue(current); }} />
     </label>
   );
@@ -148,8 +149,9 @@ function SaveAs({ doc }: { readonly doc: OpenDoc }): ReactNode {
   );
 }
 
-function Document({ doc, busy }: { readonly doc: OpenDoc; readonly busy: boolean }): ReactNode {
+function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: boolean; readonly entry: LibraryEntry | undefined }): ReactNode {
   const dirty = isDirty(doc.state);
+  const locked = lockReason(doc) !== null;
   const ids = [...objectIds(doc.state.model)];
   return (
     <section className="document" aria-label={`Document ${doc.id}`}>
@@ -161,11 +163,12 @@ function Document({ doc, busy }: { readonly doc: OpenDoc; readonly busy: boolean
       {doc.readOnly && <p className="banner" role="note">Read-only: {doc.readOnly}</p>}
       {doc.draft && (
         <div className="banner" role="group" aria-label="Draft">
-          <p>Unsaved draft from {new Date(doc.draft.updatedAt).toLocaleString()}. It is not saved. Safari can delete drafts of sites you have not used for a while.</p>
+          <p>Unsaved draft from {new Date(doc.draft.updatedAt).toLocaleString()}. It is not saved, and editing waits until you restore or discard it. Safari can delete drafts of sites you have not used for a while.</p>
           <button type="button" onClick={() => void store.restoreDraft()}>Restore draft</button>
           <button type="button" onClick={() => void store.discardDraft()}>Discard draft</button>
         </div>
       )}
+      {doc.torn && entry && entry.state !== 'ok' && <TornEntry entry={entry} />}
       {(doc.changedOnDisk || doc.conflicts.length > 0) && (
         <div className="banner bad" role="group" aria-label="Conflict">
           <p>{doc.path} changed on disk since it was opened. Save refuses to overwrite it: reload it, or keep editing and Save As a new map.</p>
@@ -173,11 +176,11 @@ function Document({ doc, busy }: { readonly doc: OpenDoc; readonly busy: boolean
         </div>
       )}
       <div className="commands" role="toolbar" aria-label="Document commands">
-        <button type="button" disabled={!canUndo(doc.state) || doc.readOnly !== null} onClick={() => store.undo()}>Undo</button>
-        <button type="button" disabled={!canRedo(doc.state) || doc.readOnly !== null} onClick={() => store.redo()}>Redo</button>
-        <button type="button" disabled={busy || !dirty || doc.readOnly !== null} onClick={() => void store.save()}>Save</button>
-        <button type="button" disabled={!dirty || !doc.savedModel || doc.readOnly !== null} onClick={() => store.askRevert()}>Revert…</button>
-        <button type="button" onClick={() => store.close(doc.id)}>Close</button>
+        <button type="button" disabled={!canUndo(doc.state) || locked} onClick={() => store.undo()}>Undo</button>
+        <button type="button" disabled={!canRedo(doc.state) || locked} onClick={() => store.redo()}>Redo</button>
+        <button type="button" disabled={busy || !dirty || locked} onClick={() => void store.save()}>Save</button>
+        <button type="button" disabled={!dirty || !doc.savedModel || locked} onClick={() => store.askRevert()}>Revert…</button>
+        <button type="button" onClick={() => void store.close(doc.id)}>Close</button>
       </div>
       {doc.confirmRevert && (
         <div className="banner" role="group" aria-label="Confirm revert">
@@ -205,6 +208,12 @@ export function App(): ReactNode {
   const view = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
   useShortcuts();
   useEffect(() => { void store.start(); return () => store.dispose(); }, []);
+  // Returning to the window re-reads the library, in case an outside change happened while the watcher could not see it.
+  useEffect(() => {
+    const again = (): void => { if (document.visibilityState === 'visible') void store.refresh(); };
+    window.addEventListener('focus', again);
+    return () => window.removeEventListener('focus', again);
+  }, []);
   const active = view.docs.find((d) => d.id === view.activeId);
   return (
     <main>
@@ -226,7 +235,7 @@ export function App(): ReactNode {
               ))}
             </nav>
           )}
-          {active ? <Document doc={active} busy={view.busy} /> : <p className="note">Open a map from the library.</p>}
+          {active ? <Document doc={active} busy={view.busy} entry={view.library?.documents.find((e) => e.id === active.id)} /> : <p className="note">Open a map from the library.</p>}
         </div>
       </div>
     </main>
