@@ -21,7 +21,7 @@ jobs:
   verify:
     name: verify
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Check out exact head
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -41,6 +41,10 @@ jobs:
         run: npm ci
       - name: Verify canonical contracts and build
         run: npm run check
+      - name: Install Chromium and WebKit outside npm lifecycle scripts
+        run: npx playwright install --with-deps chromium webkit
+      - name: Run WebKit and Chromium browser tests
+        run: npm run test:browser
   change-id:
     name: change-id
     runs-on: ubuntu-24.04
