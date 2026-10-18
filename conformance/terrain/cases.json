@@ -1,0 +1,48 @@
+{
+  "license": "CC0-1.0",
+  "description": "ML-013 terrain painting conformance. Inert gesture records over the unchanged R1 forest source map, pinned by SHA-256. Cells are [column, row]; tests/terrain.test.ts replays each record through src/editor/terrain-session.ts with pointer points at cell centres and checks every expectation. Owned CC0 data.",
+  "base": {
+    "path": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/forest.map.json",
+    "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+    "layerId": "layer.tiles"
+  },
+  "gestureCellLimit": 65536,
+  "negativeChunks": [
+    { "id": "rect-across-origin", "tool": "rect", "tile": "tile.dirt", "path": [[-33, -33], [0, 0]],
+      "expect": { "cells": 1156, "chunks": [[-2, -2], [-1, -2], [0, -2], [-2, -1], [-1, -1], [0, -1], [-2, 0], [-1, 0], [0, 0]],
+        "probes": [[-33, -33, "tile.dirt"], [-1, -1, "tile.dirt"], [0, 0, "tile.dirt"], [1, 1, null], [-34, -33, null]],
+        "index": [[-33, -33, -2, -2, 1023], [-1, -1, -1, -1, 1023], [0, 0, 0, 0, 0], [-32, 0, -1, 0, 0]] } },
+    { "id": "line-negative", "tool": "line", "tile": "tile.grass", "path": [[-40, 5], [3, -2]],
+      "expect": { "cells": 44, "chunks": [[-1, -1], [0, -1], [-2, 0], [-1, 0]], "probes": [[-40, 5, "tile.grass"], [3, -2, "tile.grass"]] } },
+    { "id": "brush-negative", "tool": "brush", "tile": "tile.grass", "path": [[-70, -70], [-60, -75], [-64, -64]],
+      "expect": { "cells": 22, "chunks": [[-3, -3], [-2, -3], [-2, -2]], "probes": [[-70, -70, "tile.grass"], [-60, -75, "tile.grass"], [-64, -64, "tile.grass"]] } },
+    { "id": "fill-negative-bounds", "tool": "fill", "tile": "tile.grass", "bounds": [-320, -320, 640, 640], "path": [[-5, -5]],
+      "expect": { "cells": 400, "chunks": [[-1, -1], [0, -1], [-1, 0], [0, 0]], "probes": [[-10, -10, "tile.grass"], [9, 9, "tile.grass"], [10, 9, null]] } }
+  ],
+  "fills": [
+    { "id": "bounded-above-line", "setup": [{ "tool": "line", "tile": "tile.dirt", "path": [[0, 10], [39, 10]] }], "tile": "tile.grass", "at": [5, 5],
+      "expect": { "status": "done", "cells": 400, "outcome": "recorded" } },
+    { "id": "bounded-below-line", "setup": [{ "tool": "line", "tile": "tile.dirt", "path": [[0, 10], [39, 10]] }], "tile": "tile.grass", "at": [5, 20],
+      "expect": { "status": "done", "cells": 560, "outcome": "recorded" } },
+    { "id": "same-value-no-op", "setup": [{ "tool": "line", "tile": "tile.dirt", "path": [[0, 10], [39, 10]] }], "tile": "tile.dirt", "at": [5, 10],
+      "expect": { "status": "done", "cells": 40, "outcome": "noop" } },
+    { "id": "region-over-limit", "tile": "tile.grass", "at": [5, 5], "limit": 999, "sessionBounds": [0, 0, 9600, 9600],
+      "expect": { "status": "exceeded", "outcome": "refused" } },
+    { "id": "start-outside-bounds", "tile": "tile.grass", "at": [-1, 5],
+      "expect": { "status": "outside", "outcome": "refused" } }
+  ],
+  "cancel": { "tools": ["brush", "rect", "line", "fill", "erase"], "path": [[2, 2], [9, 6]], "kinds": ["cancel", "stale"],
+    "fillSlices": { "at": [5, 5], "slice": 64, "cancelAfter": 3 } },
+  "history": {
+    "gesture": { "tool": "rect", "tile": "tile.grass", "path": [[-50, -50], [49, 49]] },
+    "expect": { "entries": 1, "deltaCells": 10000, "deltaChunks": 16, "entryBytesAtMost": 100768, "undoRedoP95Ms": 100, "warmRuns": 5 },
+    "budget": { "bytes": 400000, "gestures": 5, "columnStep": 100, "expect": { "entries": 3, "dropped": 2, "paintedCells": 50000 } }
+  },
+  "artOnly": { "tools": ["brush", "rect", "line", "fill", "erase"], "path": [[0, 18], [12, 22]] },
+  "forbidden": [
+    { "cell": { "tileId": "tile.grass", "quarterTurns": 1, "mirrorX": false, "mirrorY": false }, "message": "does not allow 1 quarter turn" },
+    { "cell": { "tileId": "tile.slope.up", "quarterTurns": 0, "mirrorX": false, "mirrorY": true }, "message": "does not allow that mirror" },
+    { "cell": { "tileId": "tile.missing", "quarterTurns": 0, "mirrorX": false, "mirrorY": false }, "message": "has no tile" }
+  ],
+  "replay": { "seed": 1301, "gestures": 60, "span": [-80, 80], "tiles": ["tile.grass", "tile.dirt", "tile.slope.up"] }
+}

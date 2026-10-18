@@ -2,6 +2,8 @@ import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNo
 import { shortcut } from '../editor/shortcuts';
 import { SelectionPanel, Hierarchy } from './SelectionPanel';
 import { GeometryPanel } from './GeometryPanel';
+import { TerrainPanel } from './TerrainPanel';
+import { TERRAIN_TOOLS, type TerrainTool } from '../editor/terrain';
 import { Viewport } from './Viewport';
 import { mapName, objectIds } from '../editor/document';
 import { canRedo, canUndo, isDirty } from '../editor/history';
@@ -21,7 +23,7 @@ function useShortcuts(): void {
       if (action === 'save') {
         e.preventDefault();
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-        if (store.active()) store.selection(store.active()!.id).cancel();
+        if (store.active()) store.cancelGestures(store.active()!.id);
         void store.save(); return;
       }
       if (!action || isField(e.target) || !store.active()) return;
@@ -29,11 +31,12 @@ function useShortcuts(): void {
       // Native copy/paste events carry the browser clipboard payload; fields keep those events.
       if (action === 'copy' || action === 'paste') return;
       e.preventDefault();
-      if (action === 'undo') { selection.cancel(); store.undo(); }
-      if (action === 'redo') { selection.cancel(); store.redo(); }
+      if (action === 'undo') { store.cancelGestures(id); store.undo(); }
+      if (action === 'redo') { store.cancelGestures(id); store.redo(); }
       if (action === 'duplicate') selection.duplicate();
       if (action === 'delete') selection.askDelete();
-      if (action === 'escape') selection.escape();
+      if (action === 'escape' && !store.terrain(id).cancel()) selection.escape();
+      if ((TERRAIN_TOOLS as readonly string[]).includes(action) && selection.getSnapshot().mode === 'Terrain') store.terrain(id).tool(action as TerrainTool);
       if (action === 'select' && store.viewport(id).getSnapshot().panTool) store.viewport(id).panTool();
       if (action === 'grid') store.viewport(id).toggle('Grid');
     };
@@ -173,7 +176,7 @@ function SaveAs({ doc }: { readonly doc: OpenDoc }): ReactNode {
   );
 }
 
-function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: boolean; readonly entry: LibraryEntry | undefined }): ReactNode {
+function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; readonly busy: boolean; readonly entry: LibraryEntry | undefined; readonly tilesets: AppView['tilesets'] }): ReactNode {
   const dirty = isDirty(doc.state);
   const locked = lockReason(doc) !== null;
   const ids = [...objectIds(doc.state.model)];
@@ -217,8 +220,9 @@ function Document({ doc, busy, entry }: { readonly doc: OpenDoc; readonly busy: 
       {doc.readOnly === null && <SaveAs key={doc.id} doc={doc} />}
       {entry && entry.errors > 0
         ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
-        : <Viewport selection={store.selection(doc.id)} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
+        : <Viewport selection={store.selection(doc.id)} terrain={store.terrain(doc.id)} tilesets={tilesets} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
+      <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />
       <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>
@@ -256,7 +260,7 @@ export function App(): ReactNode {
               ))}
             </nav>
           )}
-          {active ? <Document doc={active} busy={view.busy} entry={view.library?.documents.find((e) => e.id === active.id)} /> : <p className="note">Open a map from the library.</p>}
+          {active ? <Document doc={active} busy={view.busy} tilesets={view.tilesets} entry={view.library?.documents.find((e) => e.id === active.id)} /> : <p className="note">Open a map from the library.</p>}
         </div>
       </div>
     </main>

@@ -58,3 +58,6 @@ form { display: grid; gap: 0.4rem; margin-top: 0.4rem; }
 .numeric-fields input { width: 8rem; }
 textarea { width: 100%; box-sizing: border-box; user-select: text; -webkit-user-select: text; background: #0b1412; color: inherit; }
 button[aria-pressed="true"] { border-color: #8fd3b8; }
+.palette button { display: inline-flex; align-items: center; gap: 0.35rem; }
+.swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 0.15rem; border: 1px solid #39524b; }
+label.inline { flex-direction: row; align-items: center; gap: 0.3rem; }
