@@ -18,8 +18,9 @@ try {
     || /\/src\/|localhost|https?:\/\//.test(html)) throw new Error('Production HTML identity/locality failed');
   if (!entry?.isEntry || !html.includes(entry.file)) throw new Error('Production entry is not linked');
   const js = readAsset(entry.file);
-  if (!js.includes('MapLab') || !js.includes('Planning stage') || !js.includes('Foundation only')) {
-    throw new Error('Built shell identity/status is missing');
+  // The static build is the library client only: it calls the dev server's loopback endpoints and says when none answers.
+  if (!js.includes('MapLab') || !js.includes('/__maplab/library') || !js.includes('no MapLab library server')) {
+    throw new Error('Built shell identity/library client is missing');
   }
   if (!entry.css?.length) throw new Error('Production stylesheet is missing');
   for (const css of entry.css) {
@@ -29,7 +30,7 @@ try {
     readAsset(chunk.file);
     for (const file of [...(chunk.css ?? []), ...(chunk.assets ?? [])]) readAsset(file);
   }
-  console.log('Build smoke passed: local production entry, linked assets, MapLab planning identity');
+  console.log('Build smoke passed: local production entry, linked assets, MapLab identity and library client');
 } catch (error) {
   console.error(`Build smoke rejected: ${error.message}`);
   process.exitCode = 1;

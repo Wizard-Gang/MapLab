@@ -38,6 +38,9 @@ export const requiredFiles = [
   '.github/pull_request_template.md', 'docs/deliveries.json',
   'scripts/check-change.mjs', 'scripts/check-queue.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
   'tests/change.test.mjs', 'tests/policy.test.mjs', 'docs/DELIVERY-GATES.md',
+  // ML-009: the library folder, its loopback plugin, the npm start launcher and the browser gate.
+  'playwright.config.ts', 'scripts/dev.mjs', 'scripts/dev-lifecycle.mjs', 'src/library/plugin.ts',
+  'placeholder-library/maplab.project.json',
 ];
 
 function demand(condition, message) {
@@ -60,10 +63,11 @@ export function checkFoundation(root) {
   demand(pkg.engines?.node === '26.10.0' && pkg.engines?.npm === '12.1.0'
     && pkg.packageManager === 'npm@12.1.0' && read('.node-version').trim() === '26.10.0',
   'Toolchain pins disagree');
+  // ML-009 added the reviewed browser runner. Its browsers are installed by `npx playwright install`, never by npm.
   const pins = {
     react: '19.3.0', 'react-dom': '19.3.0', '@types/node': '26.6.5',
     '@types/react': '19.3.0', '@types/react-dom': '19.3.0',
-    typescript: '7.0.2', vite: '8.3.1', vitest: '5.0.2',
+    typescript: '7.0.2', vite: '8.3.1', vitest: '5.0.2', '@playwright/test': '1.64.1',
   };
   const actual = { ...pkg.dependencies, ...pkg.devDependencies };
   demand(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(pins).sort()),
@@ -79,6 +83,7 @@ export function checkFoundation(root) {
     'policy:check': 'node scripts/repository-policy.mjs',
     'policy:apply': 'node scripts/repository-policy.mjs --apply',
     'delivery:verify': 'node scripts/verify-pr.mjs',
+    start: 'node scripts/dev.mjs', 'test:browser': 'playwright test',
   };
   for (const [name, command] of Object.entries(commands)) {
     demand(pkg.scripts?.[name] === command, `Required executable command changed: ${name}`);
@@ -134,6 +139,11 @@ export function checkFoundation(root) {
   for (const [job, command] of Object.entries({ verify: 'npm run check', 'change-id': 'npm run check:change', security: 'npm run security' })) {
     demand(jobs[job]?.includes(`    name: ${job}\n`) && jobs[job].split('\n').some((line) => line.trim() === `run: ${command}`), `Required CI job/command missing: ${job}`);
   }
+  const verifySteps = (jobs.verify ?? '').split('\n').map((line) => line.trim());
+  const at = (command) => verifySteps.indexOf(`run: ${command}`);
+  demand(at('npm run check') >= 0 && at('npx playwright install --with-deps chromium webkit') > at('npm run check')
+    && at('npm run test:browser') > at('npx playwright install --with-deps chromium webkit'),
+  'CI verify must install Chromium and WebKit outside npm, then run the browser tests');
   for (const file of [...requiredFiles.filter((p) => p.endsWith('.md')), change.record]) {
     for (const [, target] of read(file).matchAll(/\]\(([^\s)]+)\)/g)) {
       if (/^(?:https?:|#|mailto:)/.test(target)) continue;

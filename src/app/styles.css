@@ -6,15 +6,37 @@
 }
 
 body { margin: 0; }
-main {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  box-sizing: border-box;
-  text-align: center;
-}
-h1 { font-size: clamp(3rem, 8vw, 5rem); margin: 0; letter-spacing: -0.05em; }
-p { color: #a5bbb3; line-height: 1.6; }
+/* RigLab's WebKit lesson (R1 C8): no text selection outside fields. */
+main { min-height: 100svh; display: flex; flex-direction: column; box-sizing: border-box; padding: 0.75rem 1rem; gap: 0.75rem; user-select: none; -webkit-user-select: none; }
+input, select, code { user-select: text; -webkit-user-select: text; }
+h1 { font-size: 1.4rem; margin: 0; letter-spacing: -0.03em; }
+h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+h3 { font-size: 0.9rem; margin: 0.75rem 0 0.25rem; text-transform: capitalize; color: #a5bbb3; }
+p { color: #a5bbb3; line-height: 1.5; margin: 0.25rem 0; }
+ul { margin: 0; padding-left: 1.1rem; }
+button { font: inherit; padding: 0.25rem 0.6rem; border-radius: 0.3rem; border: 1px solid #39524b; background: #1b2c29; color: inherit; cursor: pointer; }
+button:disabled { opacity: 0.45; cursor: default; }
+input, select { font: inherit; background: #0b1412; color: inherit; border: 1px solid #39524b; border-radius: 0.3rem; padding: 0.2rem 0.4rem; }
+label { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.85rem; color: #a5bbb3; }
+form { display: grid; gap: 0.4rem; margin-top: 0.4rem; }
+.toolbar { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.library-name { color: #8fd3b8; }
+.status { flex: 1; text-align: right; margin: 0; }
+.workspace { display: grid; grid-template-columns: minmax(14rem, 20rem) 1fr; gap: 1rem; align-items: start; }
+.library, .document { background: #14231f; border: 1px solid #23372f; border-radius: 0.5rem; padding: 0.75rem; }
+.library li { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: 0.15rem 0; }
+.badges { display: inline-flex; gap: 0.25rem; }
+.badge { font-size: 0.7rem; padding: 0.05rem 0.35rem; border-radius: 0.6rem; background: #23372f; }
+.badge.bad, .banner.bad { background: #4a2020; }
+.banner { background: #22332d; border-radius: 0.4rem; padding: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.torn { width: 100%; background: #4a2020; border-radius: 0.4rem; padding: 0.4rem; }
+.tabs { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+.tabs button[aria-pressed="true"] { border-color: #8fd3b8; }
+.commands { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.5rem 0; }
+.identity code { font-size: 0.8rem; }
+.dirty { color: #f2c66d; }
+.clean { color: #8fd3b8; }
+.note { font-size: 0.85rem; }
+.problems { color: #f2a2a2; }
+.name { max-width: 24rem; }
+@media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } }

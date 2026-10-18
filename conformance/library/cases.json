@@ -1,0 +1,80 @@
+{
+  "description": "ML-009 library storage conformance (adopted I2 Asset/storage; R1 I2 group A). Each case is an inert step script run against the real library plugin on a Vite dev server, over a fresh copy of the base library, which is pinned file by file. Saves rename maps from the content as opened, with the base digests of the files as opened. tests/library-conformance.test.ts interprets every step and checks every expectation. Owned CC0 data.",
+  "base": {
+    "folder": "placeholder-library",
+    "copyOf": "docs/specifications/2026-10-17-maplab-r1/examples/forest",
+    "files": {
+      "maplab.project.json": "2789a355d2aead4b685f6a035d8f978e7b686327457744119e6b69247c0d85be",
+      "catalogs/core.catalog.json": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada",
+      "maps/clearing.map.json": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a",
+      "maps/forest.map.json": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+      "movement/flyer.movement.json": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72",
+      "movement/ground.movement.json": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735",
+      "movement/player.movement.json": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a",
+      "prefabs/tree.prefab.json": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed",
+      "tilesets/forest.tileset.json": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    }
+  },
+  "cases": [
+    {
+      "id": "two-map-library-reopen",
+      "steps": [
+        { "do": "save", "rename": { "maps/forest.map.json": "Forest, saved", "maps/clearing.map.json": "Clearing, saved" },
+          "expect": { "status": 200, "written": ["maps/forest.map.json", "maps/clearing.map.json"] } },
+        { "do": "reopen",
+          "expect": { "allOk": true, "names": { "maps/forest.map.json": "Forest, saved", "maps/clearing.map.json": "Clearing, saved" },
+            "idsAsOpened": ["maps/forest.map.json", "maps/clearing.map.json"], "indexMatchesFiles": true } }
+      ]
+    },
+    {
+      "id": "stale-base-digest-conflict",
+      "steps": [
+        { "do": "outside-edit", "path": "maps/forest.map.json", "name": "Edited outside MapLab" },
+        { "do": "save", "rename": { "maps/forest.map.json": "Edited in MapLab" },
+          "expect": { "status": 409, "code": "save.stale-base", "conflicts": ["map.forest"], "unchanged": true, "noBackups": true } },
+        { "do": "save", "rename": { "maps/clearing.map.json": "Unrelated save" }, "expect": { "status": 409, "code": "library.torn", "unchanged": true } }
+      ]
+    },
+    {
+      "id": "torn-save",
+      "steps": [
+        { "do": "save", "rename": { "maps/forest.map.json": "Forest, half saved", "maps/clearing.map.json": "Clearing, never written" },
+          "crashAt": { "step": "rename", "path": "maps/clearing.map.json" }, "expect": { "status": 500 } },
+        { "do": "reopen", "expect": { "torn": ["map.forest"], "restorable": ["map.forest"], "matchesBase": ["maps/clearing.map.json", "maplab.project.json"] } },
+        { "do": "save", "rename": { "maps/clearing.map.json": "Blocked" }, "expect": { "status": 409, "code": "library.torn", "unchanged": true } },
+        { "do": "recover", "id": "map.forest", "action": "restore", "expect": { "status": 200 } },
+        { "do": "reopen", "expect": { "allOk": true, "matchesBase": ["maps/forest.map.json", "maps/clearing.map.json", "maplab.project.json"] } }
+      ]
+    },
+    {
+      "id": "backup-before-replacement",
+      "steps": [
+        { "do": "save", "rename": { "maps/forest.map.json": "Backed up" },
+          "expect": { "status": 200,
+            "order": ["backup maps/forest.map.json", "backup maplab.project.json", "write maps/forest.map.json", "rename maps/forest.map.json", "index maplab.project.json", "rename maplab.project.json"],
+            "backupMatchesBase": ["maps/forest.map.json", "maplab.project.json"] } }
+      ]
+    },
+    {
+      "id": "wrong-host-origin-request",
+      "steps": [
+        { "do": "request", "label": "DNS-rebound Host", "headers": { "host": "evil.example:{port}", "origin": "http://evil.example:{port}" }, "expect": { "status": 403, "unchanged": true } },
+        { "do": "request", "label": "loopback-looking Host", "headers": { "host": "127.0.0.1.nip.io:{port}", "origin": "http://127.0.0.1.nip.io:{port}" }, "expect": { "status": 403, "unchanged": true } },
+        { "do": "request", "label": "another local origin", "headers": { "origin": "http://127.0.0.1:1" }, "expect": { "status": 403, "code": "guard.origin", "unchanged": true } },
+        { "do": "request", "label": "localhost origin against a 127.0.0.1 Host", "headers": { "origin": "http://localhost:{port}" }, "expect": { "status": 403, "code": "guard.origin", "unchanged": true } },
+        { "do": "request", "label": "no Origin", "headers": { "origin": null }, "expect": { "status": 403, "code": "guard.origin", "unchanged": true } },
+        { "do": "request", "label": "cross-site fetch metadata", "headers": { "sec-fetch-site": "cross-site" }, "expect": { "status": 403, "code": "guard.site", "unchanged": true } },
+        { "do": "request", "label": "form-style post", "headers": { "content-type": "application/x-www-form-urlencoded" }, "expect": { "status": 415, "code": "guard.content-type", "unchanged": true } },
+        { "do": "request", "label": "MapLab's own page", "headers": {}, "expect": { "status": 200 } }
+      ]
+    },
+    {
+      "id": "placeholder-write-refusal",
+      "library": "placeholder",
+      "steps": [
+        { "do": "save", "rename": { "maps/forest.map.json": "Never written" }, "expect": { "status": 403, "code": "library.read-only", "unchanged": true, "noBackups": true } },
+        { "do": "recover", "id": "map.forest", "action": "keep", "expect": { "status": 403, "code": "library.read-only", "unchanged": true } }
+      ]
+    }
+  ]
+}

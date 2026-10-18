@@ -15,11 +15,13 @@
   },
   "packageManager": "npm@12.1.0",
   "scripts": {
+    "start": "node scripts/dev.mjs",
     "dev": "vite --host 127.0.0.1",
     "preview": "vite preview --host 127.0.0.1",
     "check:foundation": "node scripts/check-foundation.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:browser": "playwright test",
     "build": "vite build",
     "smoke": "node scripts/check-build.mjs",
     "check": "npm run check:foundation && npm run typecheck && npm test && npm run build && npm run smoke",
@@ -34,6 +36,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

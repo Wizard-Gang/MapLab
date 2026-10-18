@@ -23,6 +23,14 @@ Never evaluate imported strings, execute scripts, fetch arbitrary asset URLs, or
 let archives/helpers escape granted roots. Follow specification H4 and I3; these
 requirements are planning authority, not existing importer functionality.
 
+ML-009 adds the only write surface: the dev server's loopback `/__maplab/` endpoints.
+Each accepts only a POST with a loopback `Host`, `Origin` equal to `http://<Host>`,
+same-origin `Sec-Fetch-Site` when sent and a JSON content type, inside the plugin's
+own middleware. Bodies are bounded (64 MiB per document, 128 MiB per save). Reads
+refuse symbolic links and paths that leave the library; the placeholder library is
+read-only. The static build has no endpoint, and there is no hosted write API,
+directory picker or OPFS authority.
+
 Desired repository settings do not establish live protections. ML-002 must read
 provider state back and preserve exact-head evidence. Ordinary changes never
 publish packages, release tags, or deployments.

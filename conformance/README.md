@@ -152,3 +152,14 @@ history bytes stay within the budget and equal the sum of the entries. The cases
   entries. They drop 17 with visible notices, and the authored content keeps every
   stroke.
 - `gesture-chunk-bound`: a gesture limited to four working chunks refuses a fifth.
+
+## `library/` (ML-009)
+
+`cases.json` holds inert step scripts for adopted I2's asset/storage group (R1 I2
+group A): two-map library reopen, stale `baseDigest` conflict, torn save, backup
+before replacement, wrong Host/Origin requests and placeholder write refusal.
+`tests/library-conformance.test.ts` runs each case against the real library plugin
+on a Vite dev server, over a fresh copy of `placeholder-library/`. The index pins
+every base file by SHA-256, and the test checks that the base is a byte-identical
+copy of R1's `examples/forest`. Saves rename maps from the content as opened, with
+the file digests as opened; refused steps must leave every library byte unchanged.
