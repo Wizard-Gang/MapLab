@@ -31,9 +31,9 @@ function run(record: Case): void {
     const per = Math.ceil(cells.length / (step.moves ?? 1));
     for (let i = 0; i < cells.length; i += per) {
       const w = g.paint(step.layerId, cells.slice(i, i + per));
-      if (!w.ok) { g.cancel(); return { outcome: 'refused', code: w.code }; }
+      if (!w.ok) { s = g.cancel(s); return { outcome: 'refused', code: w.code }; }
     }
-    if (step.cancel) { s = g.cancel(); return { outcome: 'cancelled' }; }
+    if (step.cancel) { s = g.cancel(s); return { outcome: 'cancelled' }; }
     return fromCommit(g.commit(s));
   };
   for (const [n, step] of record.steps.entries()) {

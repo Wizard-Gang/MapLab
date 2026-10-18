@@ -144,7 +144,7 @@ describe('gestures', () => {
     for (let i = 0; i < 50; i++) g.set('bodies', 'body.gate', 'position', [i, i]);
     g.paint('layer.tiles', rectangle(0, 0, 40, 40, grass));
     expect(g.preview().collections.get('bodies')?.byId.get('body.gate')?.position).toEqual([49, 49]);
-    expect(g.cancel()).toBe(s0);
+    expect(g.cancel(s0)).toBe(s0);
     expect(encode(s0.model)).toBe(before);
     expect(g.paint('layer.tiles', [{ column: 0, row: 0, cell: grass }])).toMatchObject({ ok: false, code: 'gesture.closed' });
     expect(g.commit(s0).outcome).toBe('refused');

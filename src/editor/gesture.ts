@@ -11,7 +11,7 @@ import { commit, type CommitResult, type DocumentState } from './history';
 
 export type GestureWrite =
   | { readonly ok: true }
-  | { readonly ok: false; readonly code: 'gesture.closed' | 'gesture.budget' | 'gesture.missing'; readonly written: number };
+  | { readonly ok: false; readonly code: 'gesture.closed' | 'gesture.budget' | 'gesture.missing' | 'gesture.refused'; readonly written: number };
 
 /** Working copies a gesture may hold: half the history budget in 4 KiB chunks, at least one. */
 export const defaultMaxChunks = (budget: number): number => Math.max(1, Math.floor(budget / 2 / (CHUNK_CELLS * 4)));
@@ -46,7 +46,10 @@ export class Gesture {
     return { ok: true };
   }
 
-  /** Sets one member relative to the base; setting it back to the base value removes the pending change. */
+  /**
+   * Sets one member relative to the base; setting it back to the base value removes the pending change.
+   * A change the base would refuse (a colliding nested ID) is rejected here, so `preview` never fails.
+   */
   set(collection: CollectionName | 'terrain', id: string, member: string, value: JsonValue | undefined): GestureWrite {
     if (!this.open) return { ok: false, code: 'gesture.closed', written: 0 };
     let op: Operation | null;
@@ -55,7 +58,12 @@ export class Gesture {
       throw e;
     }
     const key = JSON.stringify([collection, id, member]);
+    const prior = this.pending.get(key);
     if (op) this.pending.set(key, op); else this.pending.delete(key);
+    if (!applyTransaction(this.base.model, { label: this.label, ops: [...this.pending.values()] }).ok) {
+      if (prior) this.pending.set(key, prior); else this.pending.delete(key);
+      return { ok: false, code: 'gesture.refused', written: 0 };
+    }
     return { ok: true };
   }
 
@@ -90,12 +98,15 @@ export class Gesture {
     return result;
   }
 
-  /** Escape or pointer cancellation: drops the working copies; the document is exactly its base. */
-  cancel(): DocumentState {
+  /**
+   * Escape or pointer cancellation: drops the working copies and returns `current` unchanged. The gesture
+   * never wrote the document, so anything that happened meanwhile, such as a completed save, is kept.
+   */
+  cancel(current: DocumentState): DocumentState {
     this.open = false;
     this.buffers.clear();
     this.pending.clear();
-    return this.base;
+    return current;
   }
 }
 

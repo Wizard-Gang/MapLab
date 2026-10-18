@@ -3,8 +3,8 @@
 // model; the input model is never written. Paint operations carry compact cell deltas.
 import { canonical, isId, type JsonValue } from '../contracts';
 import {
-  FIXED_MEMBERS, STRUCTURED, deepFreeze, isObject, nestedIds, recordIds, same,
-  type CollectionName, type JsonObject, type MapModel, type ObjectCollection,
+  FIXED_MEMBERS, Namespace, STRUCTURED, deepFreeze, fieldClaim, isObject, ownMember as own, recordClaim, same, setOwn,
+  type Claim, type CollectionName, type JsonObject, type MapModel, type ObjectCollection,
 } from './model';
 import { applyDelta, deltaBytes, deltaProblem, invertDelta, type PaintDelta } from './paint';
 
@@ -24,17 +24,28 @@ export type ApplyResult = { readonly ok: true; readonly model: MapModel } | { re
 class Refusal { constructor(readonly code: string, readonly message: string) {} }
 const refuse = (code: string, message: string): never => { throw new Refusal(code, message); };
 
-/** Owner bookkeeping for the object namespace: copied once per operation that changes it. */
-function reown(model: MapModel, removed: readonly string[], added: readonly [string, string][]): ReadonlyMap<string, string> {
-  if (removed.length === 0 && added.length === 0) return model.owners;
-  const owners = new Map(model.owners);
-  for (const id of removed) owners.delete(id);
-  for (const [id, owner] of added) {
-    if (!isId(id)) refuse('transaction.record', `${JSON.stringify(id)} is not a persistent ID`);
-    if (owners.has(id)) refuse('transaction.duplicate-id', `${id} is already used by ${owners.get(id)}`);
-    owners.set(id, owner);
+/** A private frozen copy, so a model never freezes or shares a caller's value. */
+const frozenCopy = <T extends JsonValue | undefined>(v: T): T => (v === undefined ? v : deepFreeze(structuredClone(v)));
+
+/** Releases then claims namespace entries, copying the namespace only when the claims differ. */
+function reclaim(m: MapModel, removed: readonly Claim[], added: readonly Claim[]): Pick<MapModel, 'owners' | 'groups'> {
+  const key = (cs: readonly Claim[]): string => JSON.stringify(cs.map((c) => [c.ids.map(([id, owner]) => [id, owner]), c.groups.map(([g]) => g), c.groupLayer]));
+  if (key(removed) === key(added)) return { owners: m.owners, groups: m.groups };
+  const ns = new Namespace(m);
+  for (const c of removed) ns.release(c);
+  for (const c of added) {
+    const hit = ns.claim(c);
+    if (hit) refuse(hit.code === 'id' ? 'transaction.record' : 'transaction.duplicate-id', hit.message);
   }
-  return owners;
+  return { owners: ns.owners, groups: ns.groups };
+}
+
+/** Sets or removes one own member, returning a new frozen object. */
+function withMember(o: JsonObject, member: string, value: JsonValue | undefined): JsonObject {
+  const next: Record<string, JsonValue> = {};
+  for (const [k, v] of Object.entries(o)) if (k !== member) setOwn(next, k, v);
+  if (value !== undefined) setOwn(next, member, frozenCopy(value));
+  return Object.freeze(next);
 }
 
 function applyOp(m: MapModel, op: Operation): MapModel {
@@ -50,62 +61,59 @@ function applyOp(m: MapModel, op: Operation): MapModel {
     if (FIXED_MEMBERS.has(op.member) || STRUCTURED.has(op.member)) refuse('transaction.member', `${op.member} cannot be set as a field`);
     if (!same(m.fields.get(op.member), op.before)) refuse('transaction.stale', `${op.member} differs from the operation's before value`);
     const fields = new Map(m.fields);
-    if (op.after === undefined) fields.delete(op.member); else fields.set(op.member, deepFreeze(op.after));
-    const owners = reown(m, nestedIds(op.member, op.before, '$').map(([id]) => id),
-      nestedIds(op.member, op.after, '$').map(([id]) => [id, op.member]));
-    return { ...m, fields, owners };
+    if (op.after === undefined) fields.delete(op.member); else fields.set(op.member, frozenCopy(op.after));
+    return { ...m, fields, ...reclaim(m, [fieldClaim(op.member, op.before)], [fieldClaim(op.member, op.after)]) };
   }
   if (op.op === 'set' && op.collection === 'terrain') {
     const layer = m.terrain?.byLayer.get(op.id);
     if (!layer || !m.terrain) return refuse('transaction.missing', `No terrain for layer ${op.id}`);
     if (op.member === 'layerId' || op.member === 'chunks') refuse('transaction.member', `Terrain ${op.member} cannot be set`);
-    if (!same(layer.settings[op.member], op.before)) refuse('transaction.stale', `Terrain ${op.id}.${op.member} differs from the operation's before value`);
-    const { [op.member]: _, ...rest } = layer.settings;
-    const settings = deepFreeze(op.after === undefined ? rest : { ...rest, [op.member]: op.after });
+    if (!same(own(layer.settings, op.member), op.before)) refuse('transaction.stale', `Terrain ${op.id}.${op.member} differs from the operation's before value`);
+    const settings = withMember(layer.settings, op.member, op.after);
     return { ...m, terrain: { order: m.terrain.order, byLayer: new Map(m.terrain.byLayer).set(op.id, { settings, cells: layer.cells }) } };
   }
-  const collection = m.collections.get(op.collection as CollectionName);
+  const name = op.collection as CollectionName;
+  const collection = m.collections.get(name);
   if (!collection) return refuse('transaction.collection', `The document has no ${op.collection} collection`);
-  const objects = op.collection !== 'dependencies';
-  const ids = (record: JsonObject): [string, string][] => (objects ? recordIds(op.collection as ObjectCollection, record) : []);
+  const claims = (records: readonly JsonObject[]): Claim[] => (name === 'dependencies' ? [] : records.map((r) => recordClaim(name as ObjectCollection, r)));
   const byId = new Map(collection.byId);
   if (op.op === 'set') {
     const record = byId.get(op.id);
     if (!record) return refuse('transaction.missing', `No ${op.collection} record ${op.id}`);
     if (op.member === 'id') refuse('transaction.immutable-id', 'Persistent IDs never change');
-    if (!same(record[op.member], op.before)) refuse('transaction.stale', `${op.id}.${op.member} differs from the operation's before value`);
-    const { [op.member]: _, ...rest } = record;
-    const next = deepFreeze(op.after === undefined ? rest : { ...rest, [op.member]: op.after });
-    const owner = `${op.collection}/${op.id}`;
-    const owners = objects ? reown(m, nestedIds(op.collection, record, '$').map(([id]) => id), nestedIds(op.collection, next, '$').map(([id]) => [id, owner])) : m.owners;
+    if (!same(own(record, op.member), op.before)) refuse('transaction.stale', `${op.id}.${op.member} differs from the operation's before value`);
+    const next = withMember(record, op.member, op.after);
+    const ns = reclaim(m, claims([record]), claims([next]));
     byId.set(op.id, next);
-    return { ...m, owners, collections: new Map(m.collections).set(op.collection as CollectionName, { order: collection.order, byId }) };
+    return { ...m, ...ns, collections: new Map(m.collections).set(name, { order: collection.order, byId }) };
   }
   const order = [...collection.order];
   op.entries.forEach((e, i) => { if (!Number.isSafeInteger(e.index) || (i > 0 && e.index <= (op.entries[i - 1] as RecordEntry).index)) refuse('transaction.index', 'Entry indices must ascend strictly'); });
-  let owners = m.owners;
+  let ns: Pick<MapModel, 'owners' | 'groups'>;
   if (op.op === 'insert') {
-    const added: [string, string][] = [];
+    const records: JsonObject[] = [];
     for (const { index, record } of op.entries) {
       if (!isObject(record) || !isId(record.id)) return refuse('transaction.record', 'An inserted record needs a persistent ID');
       if (byId.has(record.id)) refuse('transaction.duplicate-id', `${record.id} is already in ${op.collection}`);
       if (index < 0 || index > order.length) refuse('transaction.index', `Index ${index} is outside ${op.collection}`);
+      const stored = frozenCopy(record);
       order.splice(index, 0, record.id);
-      byId.set(record.id, deepFreeze(record));
-      added.push(...ids(record).map(([id], j): [string, string] => [id, j === 0 ? op.collection : `${op.collection}/${record.id}`]));
+      byId.set(record.id, stored);
+      records.push(stored);
     }
-    owners = reown(m, [], added);
+    ns = reclaim(m, [], claims(records));
   } else {
-    const removed: string[] = [];
+    const records: JsonObject[] = [];
     for (const { index, record } of op.entries) {
       const id = order[index];
-      if (id === undefined || id !== record.id || !same(byId.get(id), record)) refuse('transaction.stale', `${op.collection}[${index}] differs from the operation's record`);
-      removed.push(...ids(record).map(([nested]) => nested));
+      const current = id === undefined ? undefined : byId.get(id);
+      if (current === undefined || id !== record.id || !same(current, record)) refuse('transaction.stale', `${op.collection}[${index}] differs from the operation's record`);
+      records.push(current as JsonObject);
     }
     for (const { index, record } of op.entries.toReversed()) { order.splice(index, 1); byId.delete(record.id as string); }
-    owners = reown(m, removed, []);
+    ns = reclaim(m, claims(records), []);
   }
-  return { ...m, owners, collections: new Map(m.collections).set(op.collection, { order: Object.freeze(order), byId }) };
+  return { ...m, ...ns, collections: new Map(m.collections).set(name, { order: Object.freeze(order), byId }) };
 }
 
 /** Applies every operation in order, or none: on refusal the problem names the operation. */
@@ -143,4 +151,21 @@ export function transactionBytes(tx: Transaction): number {
   return tx.ops.reduce((n, op) => n + (op.op === 'paint' ? 32 + deltaBytes(op.delta)
     : op.op === 'set' || op.op === 'field' ? 64 + jsonBytes(op.before) + jsonBytes(op.after)
       : 32 + op.entries.reduce((k, e) => k + 32 + jsonBytes(e.record), 0)), 64 + tx.label.length * 2);
+}
+
+/**
+ * A private, frozen copy for history: JSON values are cloned and frozen, paint arrays are copied, so no
+ * caller can change an entry after it is recorded. Typed arrays cannot be frozen; the history never
+ * hands its copies out for writing.
+ */
+export function sealTransaction(tx: Transaction): Transaction {
+  const ops = tx.ops.map((op): Operation => {
+    switch (op.op) {
+      case 'insert': case 'delete': return Object.freeze({ ...op, entries: Object.freeze(op.entries.map((e) => Object.freeze({ index: e.index, record: frozenCopy(e.record) }))) });
+      case 'set': case 'field': return Object.freeze({ ...op, before: frozenCopy(op.before), after: frozenCopy(op.after) });
+      case 'paint': return Object.freeze({ ...op, delta: Object.freeze({ tiles: Object.freeze([...op.delta.tiles]),
+        chunks: Object.freeze(op.delta.chunks.map((c) => Object.freeze({ column: c.column, row: c.row, indices: c.indices.slice(), before: c.before.slice(), after: c.after.slice() }))) }) });
+    }
+  });
+  return Object.freeze({ label: tx.label, ops: Object.freeze(ops) });
 }

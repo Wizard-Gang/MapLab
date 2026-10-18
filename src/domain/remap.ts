@@ -2,7 +2,7 @@
 // receive new IDs, allocated deterministically, and every internal reference among them is rewritten
 // in the same transaction. A reference to another map, a document or a tile keeps its identity.
 import { isId, type JsonValue } from '../contracts';
-import { FIXED_MEMBERS, OBJECT_COLLECTIONS, isObject, nestedIds, recordIds, type JsonObject, type MapModel, type ObjectCollection } from './model';
+import { FIXED_MEMBERS, OBJECT_COLLECTIONS, isObject, nestedIds, recordIds, setOwn, type JsonObject, type MapModel, type ObjectCollection } from './model';
 import type { Operation, Transaction } from './transaction';
 
 /** Members of the published v1 map schema whose string (or string-array) values name objects of the same map. */
@@ -31,7 +31,7 @@ export function rewriteRefs(value: JsonValue, mapId: string, rewrite: Rewrite, a
   }
   if (!isObject(value) || (typeof value.mapId === 'string' && value.mapId !== mapId)) return value;
   let out: Record<string, JsonValue> | null = null;
-  const put = (k: string, v: JsonValue): void => { (out ??= { ...value })[k] = v; };
+  const put = (k: string, v: JsonValue): void => { setOwn((out ??= { ...value }), k, v); };
   const one = (v: string, p: string): string => { const r = rewrite(v, p); return r === undefined ? v : r; };
   const ref = isObjectRef(value) || isFlagCondition(value);
   for (const [k, v] of Object.entries(value)) {
@@ -67,7 +67,11 @@ export interface PastePlan {
   readonly unresolved: readonly Readonly<{ item: number; path: string; id: string }>[];
 }
 
-/** Assigns new persistent IDs to every pasted record and nested object, in item order, and rewrites internal refs. */
+/**
+ * Assigns new persistent IDs to every pasted record and nested object, in item order, and rewrites the
+ * references among them. A pasted encounter owns its group (ML-006: two encounters never share one), so
+ * its `groupId` gets a new group that pasted members follow; other members keep the group they name.
+ */
 export function planPaste(model: MapModel, items: readonly PasteItem[]): PastePlan {
   const originals = new Set<string>();
   for (const { collection, record } of items) {
@@ -77,10 +81,13 @@ export function planPaste(model: MapModel, items: readonly PasteItem[]): PastePl
       originals.add(id);
     }
   }
+  const groups = new Set(items.filter((i) => i.collection === 'encounters' && typeof i.record.groupId === 'string').map((i) => i.record.groupId as string));
+  for (const g of groups) if (originals.has(g)) throw new RangeError(`Clipboard group ${g} collides with a clipboard ID`);
   const mapping = new Map<string, string>();
   const allocated = new Set<string>();
-  for (const id of originals) {
-    const next = allocateId(id, (c) => model.owners.has(c) || allocated.has(c) || originals.has(c));
+  const taken = (c: string): boolean => model.owners.has(c) || model.groups.has(c) || allocated.has(c) || originals.has(c) || groups.has(c);
+  for (const id of [...originals, ...groups]) {
+    const next = allocateId(id, taken);
     mapping.set(id, next);
     allocated.add(next);
   }
@@ -88,13 +95,14 @@ export function planPaste(model: MapModel, items: readonly PasteItem[]): PastePl
   const out = items.map(({ collection, record }, item) => {
     const renamed = rewriteRefs(record, model.id, (id, path) => {
       const to = mapping.get(id);
-      if (to === undefined && !model.owners.has(id) && !IMPLICIT_MEMBERS.has(path.replace(/^.*\.|\[[0-9]+\]$/g, ''))) unresolved.push({ item, path, id });
+      const member = path.replace(/^.*\.|\[[0-9]+\]$/g, '');
+      if (to === undefined && !model.owners.has(id) && !model.groups.has(id) && !IMPLICIT_MEMBERS.has(member)) unresolved.push({ item, path, id });
       return to;
     }) as Record<string, JsonValue>;
     const nested = new Set(nestedIds(collection, record, '$').map(([id]) => id));
     const renest = (v: JsonValue): JsonValue => (Array.isArray(v) ? v.map((x) => (isObject(x) && typeof x.id === 'string' && nested.has(x.id) ? { ...x, id: mapping.get(x.id) as string } : x)) : v);
-    const copy: Record<string, JsonValue> = { ...renamed, id: mapping.get(record.id as string) as string };
-    for (const [member, v] of Object.entries(copy)) if (Array.isArray(v)) copy[member] = renest(v);
+    const copy: Record<string, JsonValue> = {};
+    for (const [member, v] of Object.entries(renamed)) setOwn(copy, member, member === 'id' ? (mapping.get(record.id as string) as string) : renest(v));
     return { collection, record: copy };
   });
   return { mapping, items: out, unresolved };

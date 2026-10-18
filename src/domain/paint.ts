@@ -5,8 +5,8 @@ import type { Cell, TerrainChunk } from '../contracts';
 
 export const CHUNK_SIZE = 32;
 export const CHUNK_CELLS = CHUNK_SIZE * CHUNK_SIZE;
-/** Largest tile-table index a packed `Uint32` cell can name. */
-const MAX_TILES = 2 ** 28 - 1;
+/** Largest tile-table index a packed `Uint32` cell can name: `(index + 1) · 16 + 15` stays below 2³². */
+const MAX_TILES = 2 ** 28 - 2;
 
 /** Interned tile IDs. Append-only, so packed values stay valid; never part of authored content. */
 export interface TileTable { readonly ids: readonly string[]; readonly index: ReadonlyMap<string, number> }

@@ -1,7 +1,7 @@
 // Builders that read pre-images from a model and return operations for one transaction. A builder that
 // would change nothing returns null, so a no-op gesture records nothing.
 import type { JsonValue } from '../contracts';
-import { isObject, same, type CollectionName, type JsonObject, type MapModel } from './model';
+import { isObject, ownMember, same, type CollectionName, type JsonObject, type MapModel } from './model';
 import { paintDelta, type CellWrite } from './paint';
 import type { Operation, RecordEntry, Transaction } from './transaction';
 
@@ -11,14 +11,14 @@ export const transaction = (label: string, ops: readonly (Operation | null)[]): 
 export function setOp(model: MapModel, collection: CollectionName, id: string, member: string, after: JsonValue | undefined): Operation | null {
   const record = model.collections.get(collection)?.byId.get(id);
   if (!record) throw new RangeError(`No ${collection} record ${id}`);
-  const before = record[member];
+  const before = ownMember(record, member);
   return same(before, after) ? null : { op: 'set', collection, id, member, before, after };
 }
 
 export function terrainOp(model: MapModel, layerId: string, member: string, after: JsonValue | undefined): Operation | null {
   const layer = model.terrain?.byLayer.get(layerId);
   if (!layer) throw new RangeError(`No terrain for layer ${layerId}`);
-  const before = layer.settings[member];
+  const before = ownMember(layer.settings, member);
   return same(before, after) ? null : { op: 'set', collection: 'terrain', id: layerId, member, before, after };
 }
 
