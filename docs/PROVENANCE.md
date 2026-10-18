@@ -39,3 +39,13 @@ checks its flat, sloped and one-way split seams, exact topology and reference
 remaps, negatives, history and separate-process final-byte consumer results.
 `tests/browser/physical-edits.spec.ts` checks real Chromium/WebKit interactions.
 No third-party assets or source were borrowed.
+
+## ML-013 terrain painting fixtures
+
+`conformance/terrain/cases.json` is original owned CC0-1.0 gesture data over the
+owned R1 forest map and tileset, with a SHA-256 index. `tests/terrain.test.ts`
+and `tests/terrain-properties.test.ts` replay its negative-chunk, bounded-fill,
+cancellation, 10,000-cell history, art-only, forbidden-transform and seeded
+replay cases, plus a separate-process final-byte consumer result.
+`tests/browser/terrain.spec.ts` checks real Chromium/WebKit interactions.
+No third-party assets or source were borrowed.
