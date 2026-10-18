@@ -21,3 +21,12 @@ the browsers it installs through `npx playwright install` keep their own terms a
 are never committed. They are installed tooling/runtime dependencies, not copied source.
 Action revisions are pinned in CI. Review licensing and registry/security evidence
 in the scoped dependency/security task before public release.
+
+## ML-011 selection and editing fixtures
+
+`conformance/selection/cases.json` contains original CC0 numeric movement vectors
+and interaction cases over the owned R1 forest primitives. `index.json` pins its
+SHA-256. `tests/selection.test.ts` interprets the numeric expectations; real
+Chromium/WebKit tests in `tests/browser/selection.spec.ts` exercise pointer,
+keyboard, cancellation, references, clipboard, history and saved source bytes.
+No third-party art, fixtures or implementation source was borrowed.

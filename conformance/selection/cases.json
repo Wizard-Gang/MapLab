@@ -1,0 +1,45 @@
+{
+  "license": "CC0-1.0",
+  "source": "Owned R1 forest numeric primitives; no borrowed assets",
+  "moves": [
+    {
+      "collection": "bodies",
+      "id": "body.west",
+      "delta": [
+        32,
+        -16
+      ],
+      "member": "position",
+      "expected": [
+        32,
+        -16
+      ]
+    },
+    {
+      "collection": "regions",
+      "id": "region.boss-enter",
+      "delta": [
+        32,
+        -16
+      ],
+      "member": "shape",
+      "expected": {
+        "kind": "rect",
+        "rect": [
+          1008,
+          464,
+          32,
+          96
+        ]
+      }
+    }
+  ],
+  "interactionCases": [
+    "Escape restores preview and selection",
+    "one multi-object drag is one undo",
+    "pointercancel and focus loss commit nothing",
+    "clipboard nested IDs and portal cycles remap",
+    "dangling references block until explicit repair",
+    "text fields retain shortcuts"
+  ]
+}

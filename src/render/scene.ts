@@ -13,6 +13,7 @@ export interface Primitive {
   readonly fill: boolean;
   readonly label: string;
   readonly bounds: Rect;
+  readonly objectId?: string;
 }
 export interface ArtLayer { readonly layer: Layer; readonly commands: readonly Primitive[]; readonly visible: boolean; readonly opacity: number }
 export interface Scene {
@@ -34,7 +35,7 @@ const boundsOf = (ps: readonly Vec2[]): Rect => {
 export function primitive(points: readonly Vec2[], color: string, label = '', closed = false, fill = false): Primitive {
   return { points, color, label, closed, fill, bounds: boundsOf(points) };
 }
-function shapePoints(shape: RegionShape | BodyShape): readonly Vec2[] {
+export function shapePoints(shape: RegionShape | BodyShape): readonly Vec2[] {
   if (shape.kind === 'rect') { const [x, y, w, h] = shape.rect; return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; }
   if (shape.kind === 'polygon') return shape.points;
   if (shape.kind === 'segment') return [shape.a, shape.b];
@@ -104,9 +105,10 @@ export function buildScene(model: MapModel): Scene {
         }
         return plus(at, bodyPosition(body));
       };
-      if (v.source.kind === 'shape') commands.push(primitive(shapePoints(v.source.shape).map(worldPoint), v.source.fill, '', true, true));
+      if (v.source.kind === 'shape') commands.push(primitive(shapePoints(v.source.shape).map(worldPoint), v.source.fill, v.id, true, true));
       // Raster/SVG loading belongs to ML-015; mark existing references instead of claiming to decode them.
       else commands.push(primitive(([[0, 0], [16, 0], [16, 16], [0, 16]] as Vec2[]).map(worldPoint), '#a5bbb3', `${v.id} (asset)`, true));
+      if (commands.length) commands[commands.length - 1] = { ...commands[commands.length - 1]!, objectId: v.id };
     }
     const inherited = { visible: visible && layer.visible, opacity: opacity * layer.opacity };
     order.push({ layer, commands, ...inherited });
@@ -133,6 +135,7 @@ export function buildScene(model: MapModel): Scene {
     add('Spawns & routes', primitive([[p[0] - 4, p[1]], [p[0], p[1] - 8], [p[0] + 4, p[1]], [p[0] - 4, p[1]]], '#f4baef', e.id));
   }
   const waypoints = new Map(records<Waypoint>(model, 'waypoints').map((w) => [w.id, w]));
+  for (const w of waypoints.values()) { const p = resolve(w.anchor); if (p) add('Spawns & routes', primitive([[p[0] - 3, p[1]], [p[0], p[1] - 3], [p[0] + 3, p[1]], [p[0], p[1] + 3]], '#f4baef', w.id, true)); }
   for (const r of records<Route>(model, 'routes')) {
     const ps = r.waypointIds.map((id) => waypoints.get(id)).map((w) => w ? resolve(w.anchor) : null).filter((p): p is Vec2 => p !== null);
     if (ps.length) add('Spawns & routes', primitive(ps, '#f4baef', r.id, r.mode === 'loop'));

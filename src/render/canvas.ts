@@ -41,6 +41,11 @@ function grid(ctx: CanvasRenderingContext2D, state: ViewportState): void {
 }
 
 export class CanvasViewport {
+  private handles: readonly Primitive[] = [];
+  setHandles(handles: readonly Primitive[]): void {
+    this.handles = handles; this.overlayDirty = true;
+    if (this.frame === null) this.frame = requestAnimationFrame(() => this.render());
+  }
   private frame: number | null = null;
   private artDirty = true;
   private overlayDirty = true;
@@ -120,6 +125,7 @@ export class CanvasViewport {
       if (ctx) {
         if (overlays.Grid) grid(ctx, this.state);
         for (const [name, commands] of this.scene.passes) if (overlays[name]) draw(ctx, commands, view, size);
+        draw(ctx, this.handles, view, size);
       }
       this.rendered(this.overlay); this.overlayDirty = false;
     }
