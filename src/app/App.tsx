@@ -61,7 +61,7 @@ function Badges({ entry, drafted }: { readonly entry: LibraryEntry; readonly dra
       {entry.state !== 'ok' && <span className="badge bad">{entry.state}</span>}
       {entry.errors > 0 && <span className="badge bad">{entry.errors} errors</span>}
       {entry.warnings > 0 && <span className="badge">{entry.warnings} warnings</span>}
-      {drafted && <span className="badge">draft</span>}
+      <span className={drafted ? "badge" : "badge reserved"} aria-hidden={!drafted}>draft</span>
     </span>
   );
 }
@@ -185,7 +185,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
       <header>
         <h2>{mapName(doc.state.model)}</h2>
         <p className="identity"><code>{doc.id}</code> · <code>{doc.path}</code> · <span className={dirty ? 'dirty' : 'clean'}>{dirty ? 'Unsaved changes' : 'Saved'}</span>
-          {doc.drafted && <> · <span>Draft kept in this browser</span></>}</p>
+          <span className={doc.drafted ? "draft-status" : "draft-status reserved"} aria-hidden={!doc.drafted}> · <span>Draft kept in this browser</span></span></p>
       </header>
       {doc.readOnly && <p className="banner" role="note">Read-only: {doc.readOnly}</p>}
       {doc.draft && (

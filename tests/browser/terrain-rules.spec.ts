@@ -98,8 +98,6 @@ test('the transform tool turns permitted cells and refuses an illegal 90-degree 
 test('literal tiles over intent clear it, and the variation seed is one undoable edit', async ({ page }) => {
   await ready(page); await terrainMode(page);
   await tool(page, 'Rectangle (R)').click(); await cellsDrag(page, [2, 2], [4, 4]);
-  // Start the next semantic gesture after the asynchronous draft notification has settled.
-  await expect(page.getByText('Draft kept in this browser', { exact: true })).toBeVisible();
   await page.getByLabel('Paint mode', { exact: true }).selectOption('tiles');
   await page.getByRole('button', { name: 'Tile tile.grass', exact: true }).click();
   await tool(page, 'Brush (B)').click(); await cellsDrag(page, [3, 3], [3, 3]);
@@ -133,4 +131,28 @@ test('a canvas layout shift or document scroll during a stationary brush discard
     expect(libraryFile('maps/forest.map.json')).toEqual(original);
     await page.evaluate(() => document.getElementById('test-layout-shift')?.remove());
   }
+});
+
+test('asynchronous draft status keeps a stationary captured brush on one cell', async ({ page }) => {
+  // Keep the real journal update pending long enough to begin the next gesture, then observe its completion.
+  await page.addInitScript(() => {
+    const schedule = window.setTimeout.bind(window);
+    window.setTimeout = ((handler: TimerHandler, timeout?: number, ...args: unknown[]) => schedule(handler, timeout === 250 ? 1500 : timeout, ...args)) as typeof window.setTimeout;
+  });
+  await ready(page); await terrainMode(page);
+  await tool(page, 'Rectangle (R)').click(); await cellsDrag(page, [2, 2], [4, 4]);
+  await page.getByLabel('Paint mode', { exact: true }).selectOption('tiles');
+  await page.getByRole('button', { name: 'Tile tile.grass', exact: true }).click();
+  await tool(page, 'Brush (B)').click();
+  const draft = page.getByText('Draft kept in this browser', { exact: true });
+  await expect(draft).toBeHidden();
+  await cellsDrag(page, [3, 3], [3, 3], false);
+  const before = await canvas(page).boundingBox();
+  await expect(draft).toBeVisible();
+  expect(await canvas(page).boundingBox()).toEqual(before);
+  await expect(canvas(page)).toHaveAttribute('data-terrain-preview', '1');
+  await page.mouse.up();
+  await expect(intent(page)).toHaveText('8 terrain intent cell(s) · rules version 1');
+  await command(page, 'Undo').click();
+  await expect(intent(page)).toHaveText('9 terrain intent cell(s) · rules version 1');
 });
