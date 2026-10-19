@@ -163,3 +163,15 @@ on a Vite dev server, over a fresh copy of `placeholder-library/`. The index pin
 every base file by SHA-256, and the test checks that the base is a byte-identical
 copy of R1's `examples/forest`. Saves rename maps from the content as opened, with
 the file digests as opened; refused steps must leave every library byte unchanged.
+
+## `visuals/` (ML-015)
+
+`index.json` pins original owned PNG/WebP/SVG and hostile/cyclic/oversized bytes.
+`scene-cases.json` pins primitive geometry, parent/pivot affine, negative repeat
+and parallax vectors. Unit probes independently assert these exact results and
+parser/cache/filesystem boundaries. Chromium/WebKit tests read real pixels,
+refuse unsafe imports without source/DOM/network mutation, exercise ordered
+frames and offscreen culling, abort reads on close, decode tile assets, and save
+then reopen valid parent-frame content. Final saved bytes are also checked by a
+separate archived Python consumer, without editor/runtime imports. ML-016's
+bundle/export work is not implemented here.

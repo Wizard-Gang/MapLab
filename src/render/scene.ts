@@ -1,12 +1,13 @@
 // Backend-neutral viewport primitives, built once per model identity. No document clones on input.
 // Terrain cells draw from the packed store (ML-013); asset decoding and derived navigation arrive in their reserved tasks.
-import type { Anchor, BodyShape, Rect, RegionShape, Transform, Vec2 } from '../contracts/common-types';
+import type { Anchor, BodyShape, Asset, Rect, RegionShape, Vec2 } from '../contracts/common-types';
 import type { CollisionBody, Foothold, Layer, Traversal, Visual } from '../contracts/geometry-types';
 import type { Entity, Region, Route, Waypoint } from '../contracts/gameplay-types';
 import type { CollectionName, MapModel } from '../domain/model';
 import type { Overlay } from '../editor/viewport';
 import type { TilesetDocument } from '../contracts';
 import type { CellStore } from '../domain/paint';
+import { IDENTITY, applyAffine, multiply, visualMatrix, type Affine } from './transform';
 import { gridOf, type Grid } from '../editor/terrain';
 
 export interface Primitive {
@@ -17,17 +18,18 @@ export interface Primitive {
   readonly label: string;
   readonly bounds: Rect;
   readonly objectId?: string;
+  readonly image?: { readonly asset: Asset; readonly matrix: Affine };
 }
 /** A tile's art in unit-cell coordinates: its fill, and its outline or null for a full-cell rectangle. */
-export interface TileArt { readonly color: string; readonly points: readonly Vec2[] | null; readonly asset: boolean }
+export interface TileArt { readonly color: string; readonly points: readonly Vec2[] | null; readonly asset: boolean; readonly image?: { readonly asset: Asset; readonly pivot: Vec2; readonly cellSize: Vec2 } }
 /** One tile layer's committed cells as the art pass draws them (src/render/terrain.ts). */
 export interface TerrainArt { readonly grid: Grid; readonly cells: CellStore; readonly tiles: ReadonlyMap<string, TileArt> }
 /** Tile art from a tileset's shape visuals. Asset-backed tiles get a neutral placeholder until assets decode (ML-015). */
-export function tileArt(t: TilesetDocument | undefined): Map<string, TileArt> {
+export function tileArt(t: TilesetDocument | undefined, tick = 0): Map<string, TileArt> {
   const out = new Map<string, TileArt>();
   for (const tile of t?.tiles ?? []) {
     const v = tile.visual;
-    if (v.kind !== 'shape') { out.set(tile.id, { color: '#7d8f88', points: null, asset: true }); continue; }
+    if (v.kind !== 'shape') { const id = v.kind === 'asset' ? v.assetId : frameAsset(v, tick), asset = t!.assets.find(a => a.id === id); out.set(tile.id, { color: '#7d8f88', points: null, asset: true, ...(asset ? { image: { asset, pivot: v.pivot, cellSize: t!.cellSize } } : {}) }); continue; }
     const s = v.shape, size = t!.cellSize;
     const full = s.kind === 'rect' && s.rect[0] === 0 && s.rect[1] === 0 && s.rect[2] === size[0] && s.rect[3] === size[1];
     out.set(tile.id, { color: v.fill, points: full ? null : shapePoints(s).map((p): Vec2 => [p[0] / size[0], p[1] / size[1]]), asset: false });
@@ -60,12 +62,13 @@ export function shapePoints(shape: RegionShape | BodyShape): readonly Vec2[] {
   if (shape.kind === 'segment') return [shape.a, shape.b];
   return Array.from({ length: 64 }, (_, i): Vec2 => [shape.center[0] + Math.cos(i * Math.PI / 32) * shape.radius, shape.center[1] + Math.sin(i * Math.PI / 32) * shape.radius]);
 }
-function transformed(p: Vec2, t: Transform): Vec2 {
-  const x = p[0] * t.scale[0] * (t.mirrorX ? -1 : 1), y = p[1] * t.scale[1] * (t.mirrorY ? -1 : 1), r = t.rotation * Math.PI / 180;
-  return [t.position[0] + x * Math.cos(r) - y * Math.sin(r), t.position[1] + x * Math.sin(r) + y * Math.cos(r)];
+/** Tick scrub is presentation only; no actor runtime or authored state changes. */
+export function frameAsset(source: Extract<Visual['source'],{kind:'frames'}>, tick:number):string {
+  const total=source.frameTicks.reduce((a,b)=>a+b,0);let t=source.loop?tick%total:Math.min(tick,total-1);
+  for(let i=0;i<source.assetIds.length;i++){if(t<source.frameTicks[i]!)return source.assetIds[i]!;t-=source.frameTicks[i]!;}return source.assetIds[0]!;
 }
 /** `tilesets` supplies tile art by tileset ID; a tile layer whose tileset is absent draws its cells as missing markers. */
-export function buildScene(model: MapModel, tilesets: ReadonlyMap<string, TilesetDocument> = new Map()): Scene {
+export function buildScene(model: MapModel, tilesets: ReadonlyMap<string, TilesetDocument> = new Map(), tick = 0): Scene {
   const bodies = new Map(records<CollisionBody>(model, 'bodies').map((b) => [b.id, b]));
   const footholds = new Map(records<Foothold>(model, 'footholds').map((f) => [f.id, f]));
   const regions = new Map(records<Region>(model, 'regions').map((r) => [r.id, r]));
@@ -102,6 +105,7 @@ export function buildScene(model: MapModel, tilesets: ReadonlyMap<string, Tilese
     if (a.kind !== 'entity') return baseAnchor(a);
     const point = resolveEntity(a.entityId); return point ? plus(point, a.point) : null;
   };
+  const assets = new Map(records<Asset>(model, 'assets').map(a => [a.id,a]));
   const layers = records<Layer>(model, 'layers');
   const order: ArtLayer[] = [];
   const sorted = <T extends { readonly order: number; readonly id: string }>(items: readonly T[]): T[] => [...items].sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
@@ -115,24 +119,25 @@ export function buildScene(model: MapModel, tilesets: ReadonlyMap<string, Tilese
     if (visited.has(layer.id)) continue;
     visited.add(layer.id);
     const commands: Primitive[] = [];
-    for (const v of sorted([...visuals.values()].filter((v) => v.layerId === layer.id))) {
-      // Resolve source-local visual hierarchy, then its rigid body attachment.
-      const worldPoint = (p: Vec2): Vec2 => {
-        let at = transformed(p, v.transform), parent = v.parentId, body = v.bodyId, depth = 0;
-        while (parent && depth++ < visuals.size) {
-          const pv = visuals.get(parent); if (!pv) break;
-          at = transformed(at, pv.transform); body = pv.bodyId ?? body; parent = pv.parentId;
-        }
-        return plus(at, bodyPosition(body));
-      };
-      if (v.source.kind === 'shape') commands.push(primitive(shapePoints(v.source.shape).map(worldPoint), v.source.fill, v.id, true, true));
-      // Raster/SVG loading belongs to ML-015; mark existing references instead of claiming to decode them.
-      else commands.push(primitive(([[0, 0], [16, 0], [16, 16], [0, 16]] as Vec2[]).map(worldPoint), '#a5bbb3', `${v.id} (asset)`, true));
-      if (commands.length) commands[commands.length - 1] = { ...commands[commands.length - 1]!, objectId: v.id };
+    const layerVisuals=[...visuals.values()].filter(v=>v.layerId===layer.id), childrenVisuals=new Map<string|null,Visual[]>();
+    for(const v of layerVisuals){const list=childrenVisuals.get(v.parentId)??[];list.push(v);childrenVisuals.set(v.parentId,list);}
+    const pending=sorted(childrenVisuals.get(null)??[]).reverse().map(v=>({v,parent:IDENTITY}));
+    while(pending.length){
+      const {v,parent}=pending.pop()!;const source=v.source,id=source.kind==='asset'?source.assetId:source.kind==='frames'?frameAsset(source,tick):null,asset=id?assets.get(id):undefined;
+      const unit=asset?.wuPerAssetUnit??1,pivot:Vec2=source.kind==='shape'?[0,0]:[source.pivot[0]*unit,source.pivot[1]*unit];
+      const matrix=multiply(parent,visualMatrix(v.transform,pivot));
+      const body=bodyPosition(v.bodyId),world=multiply([1,0,0,1,body[0],body[1]],matrix);
+      if(source.kind==='shape')commands.push({...primitive(shapePoints(source.shape).map(p=>applyAffine(world,p)),source.fill,v.id,true,true),objectId:v.id});
+      else {
+        const imageMatrix=multiply(world,[unit,0,0,unit,0,0]),size=asset?.size??[16,16];
+        const points=shapePoints({kind:'rect',rect:[0,0,size[0],size[1]]}).map(p=>applyAffine(imageMatrix,p));
+        commands.push({...primitive(points,'#a5bbb3',`${v.id} (asset)`,true),objectId:v.id,...(asset?{image:{asset,matrix:imageMatrix}}:{})});
+      }
+      for(const child of sorted(childrenVisuals.get(v.id)??[]).reverse())pending.push({v:child,parent:matrix});
     }
     const inherited = { visible: visible && layer.visible, opacity: opacity * layer.opacity };
     const t = layer.kind === 'tile' ? model.terrain?.byLayer.get(layer.id) : undefined;
-    const terrain: TerrainArt | undefined = t && { grid: gridOf(t), cells: t.cells, tiles: tileArt(tilesets.get(t.settings.tilesetId as string)) };
+    const terrain: TerrainArt | undefined = t && { grid: gridOf(t), cells: t.cells, tiles: tileArt(tilesets.get(t.settings.tilesetId as string), tick) };
     order.push({ layer, commands, ...inherited, ...(terrain ? { terrain } : {}) });
     const descendants = children.get(layer.id) ?? [];
     for (let i = descendants.length - 1; i >= 0; i--) stack.push({ layer: descendants[i]!, ...inherited });

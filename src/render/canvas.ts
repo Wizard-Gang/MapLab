@@ -1,19 +1,24 @@
 // Two canvases; coalesced dirty passes. Viewport input never rebuilds the authored scene.
 import type { Rect, Vec2 } from '../contracts/common-types';
 import type { ViewportState } from '../editor/viewport';
-import { backingSize, canvasMatrix, cssLengthInWorld, floorDiv, visibleWorld, type ViewTransform } from './transform';
+import { backingSize, canvasMatrix, backgroundShift, backgroundView, repeatRange, scaleOf, cssLengthInWorld, floorDiv, visibleWorld, type ViewTransform } from './transform';
+import { DecodedImages } from './assets';
 import type { Primitive, Scene, TileArt } from './scene';
 import { drawPreview, drawTerrain } from './terrain';
 import type { TerrainPreview } from '../editor/terrain-session';
 
 const overlaps = (a: Rect, b: Rect): boolean => a[0] <= b[0] + b[2] && a[0] + a[2] >= b[0] && a[1] <= b[1] + b[3] && a[1] + a[3] >= b[1];
-function draw(ctx: CanvasRenderingContext2D, list: readonly Primitive[], view: ViewTransform, size: Vec2): void {
+function draw(ctx: CanvasRenderingContext2D, list: readonly Primitive[], view: ViewTransform, size: Vec2, images?: DecodedImages): void {
   const rect = visibleWorld(view, size), pad = cssLengthInWorld(view, 160);
   const visible: Rect = [rect[0] - pad, rect[1] - pad, rect[2] + 2 * pad, rect[3] + 2 * pad];
   ctx.lineWidth = cssLengthInWorld(view, 1.5);
   ctx.font = `${cssLengthInWorld(view, 11)}px system-ui`;
   for (const p of list) {
     if (!overlaps(p.bounds, visible) || !p.points.length) continue;
+    if (p.image && images) {
+      const m=p.image.matrix;const decoded=images.get(p.image.asset,scaleOf(view)*Math.max(Math.hypot(m[0],m[1]),Math.hypot(m[2],m[3]))/p.image.asset.wuPerAssetUnit);
+      if(decoded){ctx.save();ctx.transform(...p.image.matrix);ctx.drawImage(decoded.source,0,0,p.image.asset.size[0],p.image.asset.size[1]);ctx.restore();continue;}
+    }
     ctx.beginPath(); ctx.moveTo(...p.points[0]!);
     for (const point of p.points.slice(1)) ctx.lineTo(...point);
     if (p.closed) ctx.closePath();
@@ -43,6 +48,7 @@ function grid(ctx: CanvasRenderingContext2D, state: ViewportState): void {
 }
 
 export class CanvasViewport {
+  private readonly images = new DecodedImages(() => { this.artDirty = true; if(this.frame===null)this.frame=requestAnimationFrame(()=>this.render()); }, (s) => this.notice(s));
   private handles: readonly Primitive[] = [];
   setHandles(handles: readonly Primitive[]): void {
     this.handles = handles; this.overlayDirty = true;
@@ -68,7 +74,7 @@ export class CanvasViewport {
   update(scene: Scene, state: ViewportState): void {
     const p = this.previous;
     const both = this.scene !== scene || !p || p.view !== state.view || p.size !== state.size;
-    this.artDirty ||= both || p?.overlays.Art !== state.overlays.Art || p?.hiddenLayers !== state.hiddenLayers || p?.physicsFocus !== state.physicsFocus;
+    this.artDirty ||= both || p?.overlays.Art !== state.overlays.Art || p?.hiddenLayers !== state.hiddenLayers || p?.physicsFocus !== state.physicsFocus || p?.artTick !== state.artTick;
     this.overlayDirty ||= both || p?.snap !== state.snap || Object.entries(state.overlays).some(([name, value]) => name !== 'Art' && p?.overlays[name as keyof typeof state.overlays] !== value);
     this.previous = state; this.state = state; this.scene = scene;
     this.invalidateDpr();
@@ -95,41 +101,34 @@ export class CanvasViewport {
     this.frame = null;
     const { view, size, overlays } = this.state;
     if (this.artDirty) {
-      this.notice('');
+      this.notice('');this.images.beginFrame();
       const ctx = this.context(this.art);
       const hiddenLayers = new Map<string, boolean>();
       if (ctx && overlays.Art) for (const { layer, commands, visible, opacity, terrain } of this.scene.art) {
         // A hidden group hides all art descendants, but never touches physical overlays.
         const hidden = this.state.hiddenLayers.has(layer.id) || (layer.parentId !== null && hiddenLayers.get(layer.parentId) === true);
         hiddenLayers.set(layer.id, hidden);
-        if (!visible || hidden) continue;
+        if (!visible || hidden || opacity === 0) continue;
         ctx.save(); ctx.globalAlpha = opacity * (this.state.physicsFocus ? 0.3 : 1);
-        const artView: ViewTransform = layer.kind === 'background' ? { ...view, camera: layer.space === 'camera' ? [0, 0] : [layer.origin[0] + layer.parallax[0] * (view.camera[0] - layer.origin[0]), layer.origin[1] + layer.parallax[1] * (view.camera[1] - layer.origin[1])] } : view;
-        ctx.setTransform(...canvasMatrix(artView, [this.art.width / size[0], this.art.height / size[1]]));
-        if (layer.kind === 'background' && layer.repeat !== 'none') {
-          const r = visibleWorld(artView, size);
-          // Culling each repeated primitive bounds the work by visible copies rather than world extent.
-          for (const command of commands) {
-            const axis = (i: 0 | 1, repeat: boolean): [number, number] => repeat && layer.repeatSize[i] > 0
-              ? [Math.ceil((r[i] - command.bounds[i] - command.bounds[i + 2]!) / layer.repeatSize[i]), Math.floor((r[i] + r[i + 2]! - command.bounds[i]) / layer.repeatSize[i])]
-              : [0, 0];
-            const xs = axis(0, layer.repeat.includes('x')), ys = axis(1, layer.repeat.includes('y'));
-            if ((xs[1] - xs[0] + 1) * (ys[1] - ys[0] + 1) > 4096) {
-              this.notice('Zoom in to show tightly repeated backgrounds (more than 4,096 visible copies).');
-              continue;
-            }
-            for (let x = xs[0]; x <= xs[1]; x++) for (let y = ys[0]; y <= ys[1]; y++) {
-              const shift: Vec2 = [x * layer.repeatSize[0], y * layer.repeatSize[1]];
-              ctx.save(); ctx.translate(...shift);
-              draw(ctx, [command], { ...artView, camera: [artView.camera[0] - shift[0], artView.camera[1] - shift[1]] }, size); ctx.restore();
+        const artView=layer.kind==='background'?backgroundView(view,layer):view;
+        ctx.setTransform(...canvasMatrix(artView,[this.art.width/size[0],this.art.height/size[1]]));
+        if(terrain)drawTerrain(ctx,terrain,artView,size,this.images);
+        if(layer.kind==='background') {
+          const phase=backgroundShift(layer,this.state.artTick),r=visibleWorld(artView,size);
+          for(const command of commands) {
+            const b:Rect=[command.bounds[0]+phase[0],command.bounds[1]+phase[1],command.bounds[2],command.bounds[3]];
+            const range=repeatRange(b,r,layer.repeatSize,layer.repeat);
+            if(!range){this.notice('Zoom in to show tightly repeated backgrounds, or reduce extreme parent transforms (unsafe range or more than 4,096 visible copies).');continue;}
+            const [x0,x1,y0,y1]=range;
+            for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++) {
+              const shift:Vec2=[phase[0]+x*layer.repeatSize[0],phase[1]+y*layer.repeatSize[1]];
+              ctx.save();ctx.translate(...shift);draw(ctx,[command],{...artView,camera:[artView.camera[0]-shift[0],artView.camera[1]-shift[1]]},size,this.images);ctx.restore();
             }
           }
-        } else {
-          if (terrain) drawTerrain(ctx, terrain, artView, size);
-          draw(ctx, commands, artView, size);
-        }
+        } else draw(ctx,commands,artView,size,this.images);
         ctx.restore();
       }
+      this.images.endFrame();this.art.dataset.decodedBytes=String(this.images.lru.bytes);
       this.rendered(this.art); this.artDirty = false;
     }
     if (this.overlayDirty) {
@@ -146,5 +145,5 @@ export class CanvasViewport {
       this.rendered(this.overlay); this.overlayDirty = false;
     }
   }
-  dispose(): void { if (this.frame !== null) cancelAnimationFrame(this.frame); this.frame = null; }
+  dispose(): void { this.images.dispose(); if (this.frame !== null) cancelAnimationFrame(this.frame); this.frame = null; }
 }

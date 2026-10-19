@@ -9,7 +9,7 @@ const files = (dir: string): string[] => readdirSync(join(repoRoot, dir), { with
   .flatMap((e) => (e.isDirectory() ? files(`${dir}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${dir}/${e.name}`] : []));
 const imports = (file: string): string[] => [...readFileSync(join(repoRoot, file), 'utf8').matchAll(/^\s*(?:import|export)\b[^'"]*?from\s+'([^']+)'/gm)].map((m) => m[1] as string);
 const resolveImport = (file: string, spec: string): string => (spec.startsWith('.') ? relative(repoRoot, join(repoRoot, file, '..', spec)) : spec);
-const NODE_ONLY = ['src/library/folder', 'src/library/writer', 'src/library/plugin'];
+const NODE_ONLY = ['src/library/folder', 'src/library/writer', 'src/library/plugin', 'src/library/assets'];
 
 describe('module boundaries', () => {
   test('only the Node-only library modules import node: built-ins or vite', () => {
@@ -48,7 +48,7 @@ describe('module boundaries', () => {
     for (const f of browser) expect(readFileSync(join(repoRoot, f), 'utf8'), f).not.toMatch(/(?:https?|wss?):\/\//);
     const client = readFileSync(join(repoRoot, 'src/library/client.ts'), 'utf8');
     expect([...client.matchAll(/fetch\(([^,]+),/g)].map((m) => m[1])).toEqual(['route']);
-    expect(readFileSync(join(repoRoot, 'src/library/protocol.ts'), 'utf8').match(/'\/__maplab\/[a-z]+'/g)).toEqual(
-      ["'/__maplab/identity'", "'/__maplab/library'", "'/__maplab/read'", "'/__maplab/save'", "'/__maplab/recover'"]);
+    expect(readFileSync(join(repoRoot, 'src/library/protocol.ts'), 'utf8').match(/'\/__maplab\/[a-z-]+'/g)).toEqual(
+      ["'/__maplab/asset-import'", "'/__maplab/asset-read'", "'/__maplab/identity'", "'/__maplab/library'", "'/__maplab/read'", "'/__maplab/save'", "'/__maplab/recover'"]);
   });
 });

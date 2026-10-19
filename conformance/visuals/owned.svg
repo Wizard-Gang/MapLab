@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 16 16"><defs><linearGradient id="color"><stop offset="0" stop-color="#ff8000"/><stop offset="1" stop-color="#0080ff"/></linearGradient><clipPath id="window"><rect x="-4" y="-4" width="16" height="16"/></clipPath></defs><g clip-path="url(#window)"><path d="M-4 -4H12V12H-4Z" fill="url(#color)"/></g></svg>

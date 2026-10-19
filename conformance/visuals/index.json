@@ -1,0 +1,46 @@
+{
+  "license": "CC0-1.0",
+  "provenance": "Original geometric SVG and procedural two-color raster fixtures generated for ML-015; no third-party assets.",
+  "files": [
+    {
+      "path": "complex.svg",
+      "type": "image/svg+xml",
+      "sha256": "21f442d009e26b94af0d435a3ff9991852fed5585efbb981cde30282345e96eb",
+      "accept": false
+    },
+    {
+      "path": "malicious.svg",
+      "type": "image/svg+xml",
+      "sha256": "0efbf017120db3ecd3cdc9f8cf73f4b00de496533396e23623860b9e4fff3697",
+      "accept": false
+    },
+    {
+      "path": "massive.png",
+      "type": "image/png",
+      "sha256": "e49a3db9e658383aabdddbf72cf9938938e9a16c8eb37842b73c570c49dfcd8b",
+      "accept": false
+    },
+    {
+      "path": "owned.png",
+      "type": "image/png",
+      "sha256": "987b299797c11ab6126e35645c3894d0758fa2a2c6873067412173755ff8f95a",
+      "accept": true
+    },
+    {
+      "path": "owned.svg",
+      "type": "image/svg+xml",
+      "sha256": "9d6fe8db5c26d3b7038d5f73492f6986da124b6b0b6094fa5f3992f3bd14d211",
+      "accept": true
+    },
+    {
+      "path": "owned.webp",
+      "type": "image/webp",
+      "sha256": "1d9d3e20c094ed6b8d512acebce8b7d941842e2a11aff8ae906e35a672372355",
+      "accept": true
+    }
+  ],
+  "sceneCases": {
+    "path": "scene-cases.json",
+    "sha256": "82ff15510f98cc4404baa6dd91a77a0ae5ce419809246066a20b768c392e4b1d"
+  }
+}

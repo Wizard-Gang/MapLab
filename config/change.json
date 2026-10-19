@@ -1,7 +1,7 @@
 {
-  "id": "ML-014",
+  "id": "ML-015",
   "type": "FEATURE",
-  "title": "[ML-014] [FEATURE] Add deterministic terrain rules, variation and transform permissions",
-  "record": "docs/changes/ML-014.md",
-  "branch": "ml-014-terrain-rules"
+  "title": "[ML-015] [FEATURE] Add visual authoring and safe inert asset imports",
+  "branch": "ml-015-visual-authoring",
+  "record": "docs/changes/ML-015.md"
 }

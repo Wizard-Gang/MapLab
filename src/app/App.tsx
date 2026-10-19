@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNo
 import { shortcut } from '../editor/shortcuts';
 import { SelectionPanel, Hierarchy } from './SelectionPanel';
 import { GeometryPanel } from './GeometryPanel';
+import { VisualPanel } from './VisualPanel';
 import { TerrainPanel } from './TerrainPanel';
 import { TERRAIN_TOOLS, type TerrainTool } from '../editor/terrain';
 import { Viewport } from './Viewport';
@@ -223,6 +224,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
         : <Viewport selection={store.selection(doc.id)} terrain={store.terrain(doc.id)} tilesets={tilesets} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
       <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />
+      {(!entry || entry.errors === 0) && <VisualPanel key={`visual-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />}
       <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>

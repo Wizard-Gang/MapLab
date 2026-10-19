@@ -20,7 +20,7 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
   const selected = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot);
   const painting = useSyncExternalStore(terrain.subscribe, terrain.getSnapshot, terrain.getSnapshot);
-  const scene = useMemo(() => buildScene(model, tilesets), [model, tilesets]);
+  const scene = useMemo(() => buildScene(model, tilesets, state.artTick), [model, tilesets, state.artTick]);
   const movingKeys = useMemo(() => moveKeys(model, selected.keys), [model, selected.keys]);
   const index = useMemo(() => new PickIndex(model, scene), [model, scene]);
   const picking = useRef(index); picking.current = index;
@@ -149,6 +149,7 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
         <button type="button" disabled={!selected.keys.length} onClick={() => { const b = index.bounds(moveKeys(model, selected.keys)); if (b) session.fit(b); }}>Zoom to selection</button>
         <button type="button" aria-pressed={state.panTool} onClick={() => session.panTool()}>Pan tool</button>
         <button type="button" aria-pressed={state.physicsFocus} onClick={() => session.focusPhysics()}>Physics focus</button>
+        <label>Art preview tick<input aria-label="Art preview tick" type="number" min={0} max={1000000} step={1} value={state.artTick} onChange={(e) => { selection.cancel(); terrain.cancel(); session.artTick(Number(e.target.value)); }} /></label>
         <span aria-label="View scale">{(state.view.zoom * 100).toFixed(1)}%</span>
       </div>
       <details className="overlay-controls">
@@ -180,7 +181,7 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
       </div>
       <span ref={cursor} className="note cursor" aria-label="World cursor">Move the pointer over the viewport for world and snap coordinates.</span>
       <p ref={notice} className="note" aria-label="Viewport notice" />
-      <p className="note">Navigation shows authored intent; no generated routes yet. Camera and environment show authored zones. Asset references are markers until asset loading is available.</p>
+      <p className="note">Navigation shows authored intent; no generated routes yet. Camera and environment show authored zones. Art preview tick scrubs frames and background scroll without changing source. Foreground is paint order after an actors plane.</p>
     </section>
   );
 }

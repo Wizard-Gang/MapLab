@@ -59,3 +59,15 @@ vectors were computed by an independent reference outside the repository,
 archived with the ML-014 delivery evidence. `tests/terrain-rules.test.ts`,
 `tests/terrain-rules-model.test.ts` and `tests/browser/terrain-rules.spec.ts`
 check them. No third-party assets or source were borrowed.
+
+## ML-015 visual and asset fixtures
+
+`conformance/visuals/` is original owned CC0-1.0 material. `owned.png` is an
+8×8 two-color RGBA pattern generated with Python stdlib PNG chunks/zlib.
+`owned.webp` is an independent green/purple 8×8 Canvas pattern encoded by the
+pinned Chromium browser. `owned.svg` is original literal geometry with an
+internal gradient and clip, including a negative viewBox origin. The hostile
+SVG, cyclic-reference SVG and oversized raster are deliberately invalid data.
+`index.json` pins all fixture bytes and expected acceptance. Runtime-generated
+budget probes test aggregate paths/nodes/reference expansion without storing
+megabytes of repeated source. No borrowed art, scripts or external asset URLs.
