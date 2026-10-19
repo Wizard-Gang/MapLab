@@ -126,7 +126,7 @@ test('picking excludes camera backgrounds, filters modes, honors hidden art, exa
   expect(t.index.pick(at, state, 'Collision').map((k) => k.id)).toContain('body.west');
   expect(t.index.pick(at, state, 'Platforms').map((k) => k.id)).toContain('fh.west');
   expect(t.index.pick(at, state, 'Objects').every((k) => k.collection === 'visuals')).toBe(true);
-  expect(t.index.items.filter((p) => p.pass === 'Art').every((p) => t.index.scene.art.find((a) => a.layer.id === p.layerId)?.layer.kind !== 'background')).toBe(true);
+  expect(t.index.items.filter((p) => p.pass === 'Art').every((p) => { const layer=t.index.scene.art.find((a) => a.layer.id === p.layerId)?.layer; return layer?.kind !== 'background' || layer.space !== 'camera'; })).toBe(true);
   const triangle = primitive([[0, 0], [10, 0], [0, 10]], '#ffffff', '', true);
   expect(contains(triangle, [9, 9], 0.1)).toBe(false); expect(contains(triangle, [2, 2], 0.1)).toBe(true);
   const h = selectionPrimitives(t.index, [body], { ...state.view, zoom: 2 }); expect(h[1]!.bounds[2] * 2).toBe(6);
@@ -180,8 +180,10 @@ test('body plus parented attached visual translates once and inverse parent tran
   const source = JSON.parse(encode(m));
   const child = source.visuals.find((v: any) => v.id === 'visual.gate'), parent = source.visuals.find((v: any) => v.id === 'visual.front');
   child.parentId = parent.id;
+  parent.layerId = child.layerId; parent.bodyId = child.bodyId; // A valid shared layer/body frame (ML-015).
   parent.transform.rotation = 90; parent.transform.scale = [2, 1];
   const normalized = normalize(source); if (!normalized.ok) throw new Error('invalid fixture');
+  expect(editProblems(normalized.model)).toEqual([]);
   const base = normalized.model, k = key('visuals', child.id), gate = key('bodies', 'body.gate');
   const both = candidate(base, moveSelection(base, [k, gate], [32, 16]));
   expect(recordOf(both, k)?.transform).toEqual(child.transform);

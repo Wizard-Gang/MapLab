@@ -1,16 +1,17 @@
 // Cached spatial grid, reverse painter order and geometry-aware CSS tolerance, sharing transform.ts.
+import type { Layer } from '../contracts/geometry-types';
 import type { Rect, Vec2 } from '../contracts/common-types';
 import { objects, type ObjectKey } from '../editor/editing';
 import type { MapModel } from '../domain/model';
 import type { ViewportState } from '../editor/viewport';
-import { cssLengthInWorld, cssToWorld, type ViewTransform } from './transform';
+import { backgroundShift, backgroundView, repeatRange, cssLengthInWorld, cssToWorld, type ViewTransform } from './transform';
 import type { Primitive, Scene } from './scene';
 import type { Overlay } from '../editor/viewport';
 
 /** Terrain mode paints instead of picking (ML-013), so it picks nothing. */
 export const PICK_MODES = ['All', 'Terrain', 'Objects', 'Platforms', 'Collision', 'Traversal', 'Gameplay'] as const;
 export type PickMode = (typeof PICK_MODES)[number];
-export interface Pickable { readonly key: ObjectKey; readonly primitive: Primitive; readonly pass: Overlay; readonly layerId?: string }
+export interface Pickable { readonly key: ObjectKey; readonly primitive: Primitive; readonly pass: Overlay; readonly layerId?: string; readonly background?: Extract<Layer,{kind:'background'}> }
 export const overlaps = (a: Rect, b: Rect): boolean => a[0] <= b[0] + b[2] && a[0] + a[2] >= b[0] && a[1] <= b[1] + b[3] && a[1] + a[3] >= b[1];
 const allowed = (p: Pickable, mode: PickMode): boolean => mode === 'All' || (mode === 'Terrain' ? false : mode === 'Platforms' ? p.key.collection === 'footholds' : mode === 'Collision' ? p.key.collection === 'bodies' : mode === 'Traversal' ? p.key.collection === 'traversals' : mode === 'Objects' ? p.key.collection === 'visuals' : ['entities', 'waypoints', 'regions', 'routes'].includes(p.key.collection));
 function distance(p: Vec2, a: Vec2, b: Vec2): number {
@@ -34,19 +35,20 @@ export class PickIndex {
   private broad: number[] = [];
   constructor(model: MapModel, readonly scene: Scene) {
     const keys = new Map(objects(model).map((k) => [k.id, k])), items: Pickable[] = [];
-    const add = (p: Primitive, pass: Overlay, layerId?: string): void => {
+    const add = (p: Primitive, pass: Overlay, layerId?: string, background?: Extract<Layer,{kind:'background'}>): void => {
       const id = p.objectId ?? p.label.split('/')[0]!, key = keys.get(id);
-      if (key) items.push({ key, primitive: p, pass, ...(layerId ? { layerId } : {}) });
+      if (key) items.push({ key, primitive: p, pass, ...(layerId ? { layerId } : {}),...(background?{background}:{}) });
     };
-    for (const { layer, commands, visible } of scene.art) {
-      // Parallax/repeated backgrounds have no single world footprint; hierarchy selection remains available.
-      if (visible && layer.kind !== 'background') for (const p of commands) add(p, 'Art', layer.id);
+    for (const { layer, commands, visible, opacity } of scene.art) {
+      // Camera-space backgrounds are selected through the hierarchy; world-space repeat copies share source IDs.
+      if (visible && opacity > 0 && (layer.kind !== 'background' || layer.space === 'world')) for (const p of commands) add(p, 'Art', layer.id, layer.kind==='background'?layer:undefined);
     }
     for (const [pass, commands] of scene.passes) for (const p of commands) add(p, pass);
     this.items = items;
     items.forEach(({ primitive: { bounds: b } }, i) => {
+      if(items[i]!.background){this.broad.push(i);return;}
       const x0 = Math.floor(b[0] / 128), y0 = Math.floor(b[1] / 128), x1 = Math.floor((b[0] + b[2]) / 128), y1 = Math.floor((b[1] + b[3]) / 128);
-      if ((x1 - x0 + 1) * (y1 - y0 + 1) > 256) { this.broad.push(i); return; }
+      if (![x0,y0,x1,y1].every(Number.isSafeInteger) || (x1 - x0 + 1) * (y1 - y0 + 1) > 256) { this.broad.push(i); return; }
       for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) { const k = `${x},${y}`, list = this.cells.get(k) ?? []; list.push(i); this.cells.set(k, list); }
     });
   }
@@ -56,10 +58,24 @@ export class PickIndex {
     else for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (const i of this.cells.get(`${x},${y}`) ?? []) ids.add(i);
     const hidden = new Map<string, boolean>();
     for (const { layer } of this.scene.art) hidden.set(layer.id, state.hiddenLayers.has(layer.id) || hidden.get(layer.parentId ?? '') === true);
-    return [...ids].sort((a, b) => b - a).map((i) => this.items[i]!).filter((p) => allowed(p, mode) && state.overlays[p.pass] && (!p.layerId || !hidden.get(p.layerId)) && overlaps(rect, p.primitive.bounds));
+    return [...ids].sort((a,b)=>b-a).map(i=>this.items[i]!).filter(p=>{
+      if(!allowed(p,mode)||!state.overlays[p.pass]||(p.layerId&&hidden.get(p.layerId)))return false;
+      if(!p.background)return overlaps(rect,p.primitive.bounds);
+      const layer=p.background,v=backgroundView(state.view,layer),shift=backgroundShift(layer,state.artTick);
+      const r:Rect=[rect[0]+v.camera[0]-state.view.camera[0]-shift[0],rect[1]+v.camera[1]-state.view.camera[1]-shift[1],rect[2],rect[3]],b=p.primitive.bounds;
+      const [x0,x1,y0,y1]=repeatRange(b,r,layer.repeatSize,layer.repeat);
+      return x0<=x1&&y0<=y1&&(x1-x0+1)*(y1-y0+1)<=4096&&(layer.repeat.includes('x')||r[0]<=b[0]+b[2]&&r[0]+r[2]>=b[0])&&(layer.repeat.includes('y')||r[1]<=b[1]+b[3]&&r[1]+r[3]>=b[1]);
+    });
   }
   pick(atCss: Vec2, state: ViewportState, mode: PickMode): ObjectKey[] {
-    const at = cssToWorld(state.view, atCss), t = cssLengthInWorld(state.view, 6), found = this.query([at[0] - t, at[1] - t, t * 2, t * 2], state, mode).filter((p) => contains(p.primitive, at, t));
+    const at=cssToWorld(state.view,atCss),t=cssLengthInWorld(state.view,6);
+    const found=this.query([at[0]-t,at[1]-t,t*2,t*2],state,mode).filter(p=>{
+      if(!p.background)return contains(p.primitive,at,t);
+      const layer=p.background,v=cssToWorld(backgroundView(state.view,layer),atCss),shift=backgroundShift(layer,state.artTick),q:Vec2=[v[0]-shift[0],v[1]-shift[1]];
+      const [x0,x1,y0,y1]=repeatRange(p.primitive.bounds,[q[0]-t,q[1]-t,t*2,t*2],layer.repeatSize,layer.repeat);
+      for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)if(contains(p.primitive,[q[0]-x*layer.repeatSize[0],q[1]-y*layer.repeatSize[1]],t))return true;
+      return false;
+    });
     return [...new Map(found.map((p) => [p.key.id, p.key])).values()];
   }
   marquee(a: Vec2, b: Vec2, state: ViewportState, mode: PickMode): ObjectKey[] {

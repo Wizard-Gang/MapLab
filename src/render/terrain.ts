@@ -1,6 +1,8 @@
 // Canvas 2D terrain drawing (adopted H3, R1 H5). Committed cells paint on the art canvas inside their tile layer's
 // paint order; a gesture's affected cells paint on the overlay. Only chunks and cells inside the visible world
 // rectangle are drawn, read straight from the packed store: never one DOM node per cell, never a model copy.
+import type { DecodedImages } from './assets';
+import { scaleOf } from './transform';
 import type { Cell, Vec2 } from '../contracts';
 import type { Rect } from '../contracts/common-types';
 import type { CellStore } from '../domain/paint';
@@ -20,8 +22,12 @@ export function cellPoints(points: readonly Vec2[], cell: Pick<Cell, 'quarterTur
   });
 }
 
-function drawCell(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, cell: Cell | null, art: TileArt | undefined): void {
+function drawCell(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, cell: Cell | null, art: TileArt | undefined, images?: DecodedImages, scale=1): void {
   if (!art) { ctx.strokeStyle = MISSING; ctx.strokeRect(x, y, w, h); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); ctx.stroke(); return; }
+  if(art.image&&images&&cell){const {asset,pivot,cellSize}=art.image,decoded=images.get(asset,scale);if(decoded){
+    ctx.save();ctx.translate(x+w/2,y+h/2);ctx.scale(w,h);ctx.rotate(cell.quarterTurns*Math.PI/2);ctx.scale(cell.mirrorX?-1:1,cell.mirrorY?-1:1);ctx.translate(-0.5,-0.5);
+    ctx.drawImage(decoded.source,-pivot[0]*asset.wuPerAssetUnit/cellSize[0],-pivot[1]*asset.wuPerAssetUnit/cellSize[1],asset.size[0]*asset.wuPerAssetUnit/cellSize[0],asset.size[1]*asset.wuPerAssetUnit/cellSize[1]);ctx.restore();return;
+  }}
   ctx.fillStyle = art.color;
   if (!art.points || !cell) { ctx.fillRect(x, y, w, h); return; }
   const ps = cellPoints(art.points, cell);
@@ -36,8 +42,16 @@ const visibleRange = (g: Grid, r: Rect): [number, number, number, number] => [
 ];
 
 /** Committed cells of one terrain layer, culled to the visible chunks and cells. Returns the cells drawn. */
-export function drawTerrain(ctx: CanvasRenderingContext2D, t: TerrainArt, view: ViewTransform, size: Vec2): number {
-  const [c0, r0, c1, r1] = visibleRange(t.grid, visibleWorld(view, size)), [w, h] = t.grid.cellSize;
+export function drawTerrain(ctx: CanvasRenderingContext2D, t: TerrainArt, view: ViewTransform, size: Vec2, images?: DecodedImages): number {
+  // Tile visuals may overhang their cell (pivot/asset scale). Expand the query by the largest possible
+  // quarter-turn/mirror footprint so an offscreen cell's visible art is never omitted.
+  let reach = 1;
+  for (const art of t.tiles.values()) {
+    if(art.image){const {asset,pivot,cellSize}=art.image;reach=Math.max(reach,...([0,1] as const).flatMap(i=>[Math.abs(pivot[i]*asset.wuPerAssetUnit/cellSize[i]),Math.abs((asset.size[i]-pivot[i])*asset.wuPerAssetUnit/cellSize[i])]));}
+    for(const p of art.points??[])reach=Math.max(reach,Math.abs(p[0]),Math.abs(p[1]));
+  }
+  const rect=visibleWorld(view,size),pad=(Math.ceil(reach)+1)*Math.max(...t.grid.cellSize);
+  const [c0,r0,c1,r1]=visibleRange(t.grid,[rect[0]-pad,rect[1]-pad,rect[2]+2*pad,rect[3]+2*pad]),[w,h]=t.grid.cellSize;
   let drawn = 0;
   ctx.lineWidth = cssLengthInWorld(view, 1);
   for (const [key, cells] of t.cells.chunks) {
@@ -49,7 +63,7 @@ export function drawTerrain(ctx: CanvasRenderingContext2D, t: TerrainArt, view: 
       const c = cc * CHUNK_SIZE + (i % CHUNK_SIZE), r = cr * CHUNK_SIZE + Math.floor(i / CHUNK_SIZE);
       if (c < c0 || c > c1 || r < r0 || r > r1) continue;
       const cell = unpack(t.cells.tiles.ids, v)!;
-      drawCell(ctx, t.grid.origin[0] + c * w, t.grid.origin[1] + r * h, w, h, cell, t.tiles.get(cell.tileId));
+      drawCell(ctx, t.grid.origin[0] + c * w, t.grid.origin[1] + r * h, w, h, cell, t.tiles.get(cell.tileId),images,scaleOf(view));
       drawn++;
     }
   }

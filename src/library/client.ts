@@ -7,10 +7,10 @@ import {
 
 const offline = (message: string): Refusal => ({ ok: false, code: 'client.offline', message });
 
-async function post<T extends { ok: true }>(route: string, body: unknown): Promise<T | Refusal> {
+async function post<T extends { ok: true }>(route: string, body: unknown, signal?: AbortSignal): Promise<T | Refusal> {
   let response: Response;
   try {
-    response = await fetch(route, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store', credentials: 'same-origin' });
+    response = await fetch(route, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store', credentials: 'same-origin', ...(signal ? { signal } : {}) });
   } catch (e) {
     return offline(`The library server did not answer (${e instanceof Error ? e.message : String(e)})`);
   }
@@ -42,3 +42,7 @@ export function onLibraryEvents(events: LibraryEvents): () => void {
   hot.on(CHANGED_EVENT, changed);
   return () => { hot.off(SAVED_EVENT, saved); hot.off(CHANGED_EVENT, changed); };
 }
+
+export interface AssetReply { readonly ok: true; readonly asset: import('../contracts/common-types').Asset; readonly base64: string }
+export const importImage = (mediaType: string, base64: string): Promise<AssetReply | Refusal> => post<AssetReply>(ROUTES.assetImport, { mediaType, base64 });
+export const readImage = (path: string, signal?: AbortSignal): Promise<AssetReply | Refusal> => post<AssetReply>(ROUTES.assetRead, { path }, signal);

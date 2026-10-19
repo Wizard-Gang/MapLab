@@ -4,7 +4,7 @@
 
 **Selection rule:** read `docs/deliveries.json` and `config/change.json`. The **first open reserved ID** after the completed contiguous predecessor chain is the only executable task. That single task occupies the active block; every remaining reserved ID occupies the future block *once, in order*. On verified protected squash + resulting main CI, append predecessor evidence at the **next controlled activation**, retire the completed task to the historical block, move exactly the next ID to active and preserve all later task definitions. Never reuse, renumber, skip, implement or silently delete future IDs. PR branch/title/change record must equal the active ID. If a task proves oversized, submit a separately governed queue/spec revision before implementation; priority labels never authorize skipping a predecessor. Research and read-only review may overlap.
 
-**Completion status:** ML-001–013 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-014 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-015–044 are reserved, not active.
+**Completion status:** ML-001–014 have delivered; their evidence is in the history block and [delivery chain](docs/deliveries.json). Both live rulesets (`MapLab main`, `MapLab immutable versions`) are active with no bypass. ML-015 is the only active task. Passing CI is not delivery. There is no release or deployment. ML-016–044 are reserved, not active.
 
 ## Completed history
 
@@ -22,30 +22,12 @@
 - **ML-011** — completed at `5727a5e5c11634b582d901c3d391d16a0a8247e7` by protected squash of PR #10 (tested head `df9e2a5fbfa459ea4432f13fc70def329ae30e15`, successful [main CI 39154719115](https://github.com/Wizard-Gang/MapLab/actions/runs/39154719115)); independent exact-head review, authenticated delivery verification and all three resulting-main jobs passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-011.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-012** — completed at `4b1429e4df55f47e651fa228813eabbb4eb4ee6b` by protected squash of PR #11 (tested head `1fdca2b539b57ca5f92eb6311d490107da803631`, successful [main CI 39171661300](https://github.com/Wizard-Gang/MapLab/actions/runs/39171661300)); repaired independent exact-head review, authenticated delivery verification and all three resulting-main jobs passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-012.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 - **ML-013** — completed at `c435c2f42cabd67082aa1a4091c38a0b1a7e72a9` by protected squash of PR #12 (tested head `033aa5d307091f24aaafc353466ffd5f1baf374e`, successful [main CI 39175553538](https://github.com/Wizard-Gang/MapLab/actions/runs/39175553538)); independent exact-head review, authenticated delivery verification and all three resulting-main jobs passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-013.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
+- **ML-014** — completed at `99fe49aeff572b7ffa944d0eae2f77e97fd0c928` by protected squash of PR #13 (tested head `9937d61af40d31608344a47ab333af393c69a17d`, successful [main CI 39280345289](https://github.com/Wizard-Gang/MapLab/actions/runs/39280345289)); independent exact-head review, authenticated delivery verification and all three resulting-main checks passed without bypass; both branches were deleted. Its [change record](docs/changes/ML-014.md) and [delivery chain](docs/deliveries.json) preserve the evidence.
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-014 / P1
-
-- **Source scope:** Deterministic terrain adjacency rules, variation seeds, transitions, tile transform permissions.
-- **Non-goals:** No collision inference or unbounded multi-layer rule language.
-- **Acceptance:** Same seed/input gives same resolved tiles; illegal rotations reject; neighbors update in one undo transaction.
-- **Depends on:** ML-013 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C3](docs/specifications/2026-10-16-maplab.md#c3-visual-layers-and-reusable-content), [F4](docs/specifications/2026-10-16-maplab.md#f4-tileset-prefab-and-export-examples), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement deterministic 8-neighbor N/NE/E/SE/S/SW/W/NW terrain rule resolution and ID tie-breaking.
-  2. Pin seed hash, bounded variation weights and tile rotation/mirror permission enforcement in one edit transaction.
-  3. Create owned fixture(s): Neighbor edge/corner cases, illegal 90-degree turn, same-seed repeated build.
-  4. Add executable checks: Golden resolved tile bytes and single-undo neighbor update.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-015 / P0
 
 - **Source scope:** Sprite/layer/group/background/foreground editor, asset import allowlist and culling.
@@ -60,6 +42,11 @@
   4. Add executable checks: Browser layer/safety tests; reject executable SVG and untrusted remote asset fetches.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-016 / P0
 
 - **Source scope:** Deterministic dependency-closed export, inventory/hash verification and STORE ZIP.

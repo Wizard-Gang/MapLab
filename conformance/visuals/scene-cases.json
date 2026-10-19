@@ -1,0 +1,143 @@
+{
+  "license": "CC0-1.0",
+  "affine": {
+    "position": [
+      100,
+      50
+    ],
+    "rotation": 90,
+    "scale": [
+      2,
+      3
+    ],
+    "mirrorX": true,
+    "mirrorY": false,
+    "pivot": [
+      4,
+      2
+    ],
+    "point": [
+      6,
+      5
+    ],
+    "expected": [
+      91,
+      46
+    ]
+  },
+  "parent": {
+    "parentPosition": [
+      64,
+      32
+    ],
+    "parentRotation": 90,
+    "parentScale": [
+      2,
+      2
+    ],
+    "childPosition": [
+      16,
+      8
+    ],
+    "expected": [
+      48,
+      64
+    ]
+  },
+  "background": {
+    "camera": [
+      -100,
+      60
+    ],
+    "origin": [
+      100,
+      -20
+    ],
+    "parallax": [
+      0.5,
+      0.25
+    ],
+    "expectedCamera": [
+      0,
+      0
+    ],
+    "phase": [
+      -3,
+      -4
+    ],
+    "scroll": [
+      -1,
+      0.5
+    ],
+    "tick": 2,
+    "period": [
+      32,
+      16
+    ],
+    "expectedShift": [
+      27,
+      13
+    ]
+  },
+  "repeat": {
+    "bounds": [
+      0,
+      0,
+      8,
+      8
+    ],
+    "visible": [
+      -40,
+      -20,
+      48,
+      28
+    ],
+    "period": [
+      16,
+      16
+    ],
+    "axes": "xy",
+    "expectedIndices": [
+      -3,
+      0,
+      -1,
+      0
+    ]
+  },
+  "primitives": [
+    {
+      "kind": "rect",
+      "rect": [
+        -8,
+        -4,
+        16,
+        8
+      ]
+    },
+    {
+      "kind": "circle",
+      "center": [
+        0,
+        0
+      ],
+      "radius": 8
+    },
+    {
+      "kind": "polygon",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ]
+    }
+  ]
+}

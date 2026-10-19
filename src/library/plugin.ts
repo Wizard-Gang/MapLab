@@ -3,6 +3,7 @@
 // run earlier still), and every /__maplab/ request passes the loopback guard before anything is read. Requests run one at a time, so a save never interleaves with another read or
 // write. The watcher reports outside edits, ignoring this server's own recent writes. Vite restarts the server
 // when this code changes, because `vite.config.ts` imports it.
+import { ASSET_REQUEST_LIMIT, importAsset, readAsset } from './assets';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, realpathSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -108,6 +109,8 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
       async function route(url: string, body: unknown, response: ServerResponse): Promise<void> {
         const f = folder as LibraryFolder;
         if (url === ROUTES.identity) return send(response, 200, { app: 'maplab', pid: process.pid, root: realpathSync(server.config.root), library: f.label } satisfies Identity);
+        if (url === ROUTES.assetImport) return send(response, 200, importAsset(f, body));
+        if (url === ROUTES.assetRead) return send(response, 200, readAsset(f, body));
         if (url === ROUTES.library) return send(response, 200, await snapshot(await readLibrary(f)));
         if (url === ROUTES.read) {
           const ids = (body as { ids?: unknown }).ids;
@@ -143,7 +146,7 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
         if (!folder) { request.resume(); return send(response, 503, no('library.unavailable', unavailable)); }
         const url = (request.url ?? '').split('?')[0] as string;
         void (async () => {
-          const text = await readBody(request, url === ROUTES.save ? SAVE_LIMIT : REQUEST_LIMIT);
+          const text = await readBody(request, url === ROUTES.save ? SAVE_LIMIT : url === ROUTES.assetImport ? ASSET_REQUEST_LIMIT : REQUEST_LIMIT);
           if (text === null) return send(response, 413, no('request.too-large', 'The request body is too large'));
           let body: unknown;
           try { body = JSON.parse(text); } catch { return send(response, 400, no('request.json', 'The request body is not JSON')); }

@@ -11,11 +11,12 @@ export interface ViewportState {
   readonly hiddenLayers: ReadonlySet<string>;
   readonly physicsFocus: boolean;
   readonly panTool: boolean;
+  readonly artTick: number;
   readonly snap: SnapSettings;
 }
 export class ViewportSession {
   private state: ViewportState = { view: { camera: [0, 0], origin: [0, 0], zoom: 1, pixelsPerWU: 1 }, size: [0, 0],
-    overlays: Object.fromEntries(OVERLAYS.map((n) => [n, true])) as Record<Overlay, boolean>, hiddenLayers: new Set(), physicsFocus: false, panTool: false,
+    overlays: Object.fromEntries(OVERLAYS.map((n) => [n, true])) as Record<Overlay, boolean>, hiddenLayers: new Set(), physicsFocus: false, panTool: false, artTick: 0,
     snap: { free: false, spacing: [32, 32], origin: [0, 0] } };
   private listeners = new Set<() => void>();
   private drag: { readonly id: number; readonly at: Vec2; readonly view: ViewTransform } | null = null;
@@ -36,6 +37,7 @@ export class ViewportSession {
   focusPhysics(): void { this.set({ physicsFocus: !this.state.physicsFocus }); }
   panTool(): void { this.cancel(); this.set({ panTool: !this.state.panTool }); }
   snap(snap: SnapSettings): void { this.set({ snap }); }
+  artTick(tick: number): void { if (Number.isSafeInteger(tick) && tick >= 0 && tick <= 1_000_000) { this.cancel(); this.set({ artTick: tick }); } }
   begin(id: number, at: Vec2): void { if (!this.drag) this.drag = { id, at, view: this.state.view }; }
   move(id: number, at: Vec2): void {
     if (!this.drag || this.drag.id !== id) return;
