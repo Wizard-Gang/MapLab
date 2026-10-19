@@ -88,8 +88,22 @@ export function backgroundView(v:ViewTransform,layer:Extract<import('../contract
 export function backgroundShift(layer:Extract<import('../contracts/geometry-types').Layer,{kind:'background'}>,tick:number):Vec2 {
   return ([0,1] as const).map(i=>{const n=layer.phase[i]+layer.scrollWUPerTick[i]*tick;return layer.repeat.includes(i===0?'x':'y')?modulo(n,layer.repeatSize[i]):n;}) as unknown as Vec2;
 }
-/** Inclusive visible repeat indices, including negative world coordinates. */
-export function repeatRange(bounds:Rect,visible:Rect,period:Vec2,axes:string):readonly [number,number,number,number] {
-  const axis=(i:0|1):readonly[number,number]=>axes.includes(i===0?'x':'y')?[Math.ceil((visible[i]-bounds[i]-bounds[i+2]!)/period[i]),Math.floor((visible[i]+visible[i+2]!-bounds[i])/period[i])]:[0,0];
-  const x=axis(0),y=axis(1);return [x[0],x[1],y[0],y[1]];
+/** Inclusive repeat indices; null refuses unsafe arithmetic or more than 4,096 copies.
+ * Safe endpoints guarantee x++/y++ progress. Bound each span before multiplying,
+ * so cancellation/overflow cannot turn an excessive range into an admitted count.
+ */
+export function repeatRange(bounds:Rect,visible:Rect,period:Vec2,axes:string):readonly [number,number,number,number]|null {
+  if(![...bounds,...visible].every(Number.isFinite)||bounds[2]<0||bounds[3]<0||visible[2]<0||visible[3]<0)return null;
+  const axis=(i:0|1):readonly[number,number]|null=>{
+    if(!axes.includes(i===0?'x':'y'))return [0,0];
+    if(!Number.isFinite(period[i])||period[i]<=0)return null;
+    const lo=Math.ceil((visible[i]-bounds[i]-bounds[i+2]!)/period[i]),hi=Math.floor((visible[i]+visible[i+2]!-bounds[i])/period[i]);
+    if(!Number.isSafeInteger(lo)||!Number.isSafeInteger(hi)||![lo*period[i],hi*period[i]].every(Number.isFinite))return null;
+    return [lo,hi];
+  };
+  const x=axis(0),y=axis(1);if(!x||!y)return null;
+  if(x[0]>x[1]||y[0]>y[1])return [0,-1,0,-1];
+  const nx=x[1]-x[0]+1,ny=y[1]-y[0]+1;
+  if(nx>4096||ny>4096||nx*ny>4096)return null;
+  return [x[0],x[1],y[0],y[1]];
 }

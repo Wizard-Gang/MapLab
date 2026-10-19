@@ -117,8 +117,9 @@ export class CanvasViewport {
           const phase=backgroundShift(layer,this.state.artTick),r=visibleWorld(artView,size);
           for(const command of commands) {
             const b:Rect=[command.bounds[0]+phase[0],command.bounds[1]+phase[1],command.bounds[2],command.bounds[3]];
-            const [x0,x1,y0,y1]=repeatRange(b,r,layer.repeatSize,layer.repeat);
-            if((x1-x0+1)*(y1-y0+1)>4096){this.notice('Zoom in to show tightly repeated backgrounds (more than 4,096 visible copies).');continue;}
+            const range=repeatRange(b,r,layer.repeatSize,layer.repeat);
+            if(!range){this.notice('Zoom in to show tightly repeated backgrounds, or reduce extreme parent transforms (unsafe range or more than 4,096 visible copies).');continue;}
+            const [x0,x1,y0,y1]=range;
             for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++) {
               const shift:Vec2=[phase[0]+x*layer.repeatSize[0],phase[1]+y*layer.repeatSize[1]];
               ctx.save();ctx.translate(...shift);draw(ctx,[command],{...artView,camera:[artView.camera[0]-shift[0],artView.camera[1]-shift[1]]},size,this.images);ctx.restore();

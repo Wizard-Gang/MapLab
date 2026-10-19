@@ -224,7 +224,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
         : <Viewport selection={store.selection(doc.id)} terrain={store.terrain(doc.id)} tilesets={tilesets} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
       <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />
-      <VisualPanel key={`visual-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
+      {(!entry || entry.errors === 0) && <VisualPanel key={`visual-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />}
       <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>

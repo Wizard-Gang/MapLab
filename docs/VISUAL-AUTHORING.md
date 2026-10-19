@@ -23,7 +23,8 @@ backgrounds use camera zero in their own frame and are selected in the hierarchy
 Repeating axes reduce `phase + scrollWUPerTick * tick` by mathematical modulo,
 including negative positions. World-space repeat copies pick their source ID
 using the same parallax, phase and period math. Repeat work over4,096 visible
-copies refuses to draw with a notice; zooming in resolves it.
+copies refuses to draw or pick with a notice. Unsafe repeat indices from extreme
+composed parent transforms also refuse. Zoom in or reduce those transforms.
 
 Imports accept PNG, WebP and a closed SVG subset. Limits are checked before
 image decoding: raster16 MiB/4096 per dimension/16 MP; SVG2 MiB/20,000 XML nodes/

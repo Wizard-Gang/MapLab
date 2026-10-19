@@ -1,4 +1,6 @@
-import { expect,test } from 'vitest';
+import { expect,test,vi } from 'vitest';
+import { CanvasViewport } from '../src/render/canvas';
+import { forestDocument,modelOf } from './history-support';
 import type { Asset, Layer, Visual, Vec2 } from '../src/contracts';
 import { addLayer,addVisual,parentVisual,visualFrame } from '../src/editor/visuals';
 import { candidate,editProblems } from '../src/editor/editing';
@@ -42,4 +44,35 @@ test('owned numeric scene vectors pin affine, parent, parallax/repeat and primit
   const b=f.background,base={kind:'background',origin:b.origin,parallax:b.parallax,space:'world',phase:b.phase,scrollWUPerTick:b.scroll,repeatSize:b.period,repeat:'xy'} as Extract<Layer,{kind:'background'}>;expect(backgroundView({camera:b.camera,origin:[0,0],zoom:1,pixelsPerWU:1},base).camera).toEqual(b.expectedCamera);expect(backgroundShift(base,b.tick)).toEqual(b.expectedShift);
   const r=f.repeat;expect(repeatRange(r.bounds,r.visible,r.period,r.axes)).toEqual(r.expectedIndices);
   let m=forest();const l=addLayer(m,'sprite');m=candidate(m,l.tx);for(const shape of f.primitives){const a=addVisual(m,l.id,{kind:'shape',shape,fill:'#448866'});m=candidate(m,a.tx);}expect(editProblems(m)).toEqual([]);
+});
+
+
+test('repeat ranges reject unsafe arithmetic and excessive copies, preserving bounded negative indices',()=>{
+  expect(repeatRange([8.76874194493811e25,0,0,8],[0,0,800,600],[64,64],'x')).toBeNull();
+  expect(repeatRange([0,0,8,8],[0,0,800,600],[Number.MIN_VALUE,64],'x')).toBeNull();
+  expect(repeatRange([0,0,8,8],[Infinity,0,800,600],[64,64],'x')).toBeNull();
+  expect(repeatRange([0,0,8,8],[0,0,800,600],[0,64],'x')).toBeNull();
+  expect(repeatRange([0,0,8,8],[0,0,800,600],[0.0625,0.0625],'xy')).toBeNull();
+  expect(repeatRange([0,0,0,0],[-4095,0,4095,0],[1,1],'x')).toEqual([-4095,0,0,0]);
+  expect(repeatRange([0,0,0,0],[-4096,0,4096,0],[1,1],'x')).toBeNull();
+  expect(repeatRange([0,0,8,8],[20,20,1,1],[64,64],'xy')).toEqual([0,-1,0,-1]);
+});
+
+test('accepted cancelling parent scales cannot hang background rendering or picking',()=>{
+  const doc:any=forestDocument(),layer=doc.layers.find((l:Layer)=>l.id==='layer.far');Object.assign(layer,{repeat:'x',repeatSize:[64,64]});
+  doc.visuals=doc.visuals.filter((v:Visual)=>v.layerId!==layer.id);let parent:string|null=null;
+  for(let i=0;i<40;i++){const id=`visual.extreme${i}`;doc.visuals.push({id,name:id,layerId:layer.id,parentId:parent,order:i,bodyId:null,transform:{position:[64,0],rotation:0,scale:i<20?[16,16]:[1/16,1/16],mirrorX:false,mirrorY:false},source:shape});parent=id;}
+  const m=modelOf(doc);expect(editProblems(m)).toEqual([]);const before=modelText(m),scene=buildScene(m),leaf=scene.art.flatMap(a=>a.commands).find(p=>p.objectId===parent)!;
+  expect(leaf.bounds[0]).toBeGreaterThan(Number.MAX_SAFE_INTEGER);expect(repeatRange(leaf.bounds,[0,0,800,600],[64,64],'x')).toBeNull();
+  let translations=0;const ctx=new Proxy({translate(){if(++translations>10000)throw new Error('Repeat watchdog');}},{get:(t,k)=>k in t?Reflect.get(t,k):()=>{}});
+  const canvas=()=>({width:800,height:600,dataset:{},getContext:()=>ctx}) as unknown as HTMLCanvasElement;
+  const session=new ViewportSession();session.resize([800,600],[0,0,800,600]);const state={...session.getSnapshot(),view:{camera:[0,0] as Vec2,origin:[0,0] as Vec2,zoom:1,pixelsPerWU:1}};
+  vi.stubGlobal('window',{devicePixelRatio:1});vi.stubGlobal('requestAnimationFrame',()=>1);vi.stubGlobal('cancelAnimationFrame',()=>{});
+  const notices:string[]=[];const renderer=new CanvasViewport(canvas(),canvas(),scene,state,s=>notices.push(s));
+  try{
+    expect(()=>(renderer as any).render()).not.toThrow();expect(notices.join(' ')).toContain('extreme parent transforms');
+    const index=new PickIndex(m,scene);expect(index.pick([0,0],state,'Objects').some(k=>k.id===parent)).toBe(false);expect(index.marquee([0,0],[800,600],state,'Objects').some(k=>k.id===parent)).toBe(false);
+    const extreme={...state,view:{...state.view,camera:[1e26,1e26] as Vec2}};expect(()=>index.pick([0,0],extreme,'Objects')).not.toThrow();
+    expect(modelText(m)).toBe(before);
+  }finally{renderer.dispose();vi.unstubAllGlobals();}
 });

@@ -33,6 +33,11 @@ test('picking filters, Shift toggle, overlap cycle and marquee leave history cle
   pt = await at(page, 64, 640); await page.mouse.click(pt.x, pt.y); const first = await selected(page).textContent();
   await page.keyboard.down('Alt'); await page.mouse.click(pt.x, pt.y); await page.keyboard.up('Alt'); expect(await selected(page).textContent()).not.toBe(first);
   await page.getByLabel('Pick mode', { exact: true }).selectOption('Objects');
+  // World backgrounds now pick their source ID; hide them to start this marquee on empty space.
+  await page.getByText('Overlays and snap', { exact: true }).click();
+  await page.getByLabel('Art layer Distant forest', { exact: true }).uncheck();
+  await page.getByLabel('Art layer Near forest', { exact: true }).uncheck();
+  await page.getByText('Overlays and snap', { exact: true }).click();
   const start = await at(page, 16, 464), end = await at(page, 410, 532);
   await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y); await page.mouse.up();
   await expect(selected(page)).toContainText('visual.platforms'); await expect(command(page, 'Undo')).toBeDisabled();

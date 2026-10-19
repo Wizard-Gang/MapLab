@@ -54,7 +54,7 @@ export class PickIndex {
   }
   private query(rect: Rect, state: ViewportState, mode: PickMode): Pickable[] {
     const ids = new Set(this.broad), x0 = Math.floor(rect[0] / 128), x1 = Math.floor((rect[0] + rect[2]) / 128), y0 = Math.floor(rect[1] / 128), y1 = Math.floor((rect[1] + rect[3]) / 128);
-    if ((x1 - x0 + 1) * (y1 - y0 + 1) > 4096) this.items.forEach((_, i) => ids.add(i));
+    if (![x0,x1,y0,y1].every(Number.isSafeInteger) || (x1 - x0 + 1) * (y1 - y0 + 1) > 4096) this.items.forEach((_, i) => ids.add(i));
     else for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (const i of this.cells.get(`${x},${y}`) ?? []) ids.add(i);
     const hidden = new Map<string, boolean>();
     for (const { layer } of this.scene.art) hidden.set(layer.id, state.hiddenLayers.has(layer.id) || hidden.get(layer.parentId ?? '') === true);
@@ -63,7 +63,8 @@ export class PickIndex {
       if(!p.background)return overlaps(rect,p.primitive.bounds);
       const layer=p.background,v=backgroundView(state.view,layer),shift=backgroundShift(layer,state.artTick);
       const r:Rect=[rect[0]+v.camera[0]-state.view.camera[0]-shift[0],rect[1]+v.camera[1]-state.view.camera[1]-shift[1],rect[2],rect[3]],b=p.primitive.bounds;
-      const [x0,x1,y0,y1]=repeatRange(b,r,layer.repeatSize,layer.repeat);
+      const range=repeatRange(b,r,layer.repeatSize,layer.repeat);if(!range)return false;
+      const [x0,x1,y0,y1]=range;
       return x0<=x1&&y0<=y1&&(x1-x0+1)*(y1-y0+1)<=4096&&(layer.repeat.includes('x')||r[0]<=b[0]+b[2]&&r[0]+r[2]>=b[0])&&(layer.repeat.includes('y')||r[1]<=b[1]+b[3]&&r[1]+r[3]>=b[1]);
     });
   }
@@ -72,7 +73,8 @@ export class PickIndex {
     const found=this.query([at[0]-t,at[1]-t,t*2,t*2],state,mode).filter(p=>{
       if(!p.background)return contains(p.primitive,at,t);
       const layer=p.background,v=cssToWorld(backgroundView(state.view,layer),atCss),shift=backgroundShift(layer,state.artTick),q:Vec2=[v[0]-shift[0],v[1]-shift[1]];
-      const [x0,x1,y0,y1]=repeatRange(p.primitive.bounds,[q[0]-t,q[1]-t,t*2,t*2],layer.repeatSize,layer.repeat);
+      const range=repeatRange(p.primitive.bounds,[q[0]-t,q[1]-t,t*2,t*2],layer.repeatSize,layer.repeat);if(!range)return false;
+      const [x0,x1,y0,y1]=range;
       for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)if(contains(p.primitive,[q[0]-x*layer.repeatSize[0],q[1]-y*layer.repeatSize[1]],t))return true;
       return false;
     });
