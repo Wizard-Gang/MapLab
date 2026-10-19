@@ -71,3 +71,12 @@ SVG, cyclic-reference SVG and oversized raster are deliberately invalid data.
 `index.json` pins all fixture bytes and expected acceptance. Runtime-generated
 budget probes test aggregate paths/nodes/reference expansion without storing
 megabytes of repeated source. No borrowed art, scripts or external asset URLs.
+
+## ML-016 export fixtures
+
+`conformance/export/cases.json` and its SHA-256 index are original owned
+CC0-1.0 export mutation recipes over the existing owned forest/clearing source
+fixtures and ML-015 approved PNG. Tests generate final STORE archives rather
+than checking in timestamped tool output. The independent Python ZIP/inventory
+consumer and isolated ML-007 schema/reference reader use final files only.
+No engine, controller or navigation execution is claimed. No borrowed assets.

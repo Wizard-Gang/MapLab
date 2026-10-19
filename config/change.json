@@ -1,7 +1,7 @@
 {
-  "id": "ML-015",
+  "id": "ML-016",
   "type": "FEATURE",
-  "title": "[ML-015] [FEATURE] Add visual authoring and safe inert asset imports",
-  "branch": "ml-015-visual-authoring",
-  "record": "docs/changes/ML-015.md"
+  "title": "[ML-016] [FEATURE] Export deterministic dependency-closed STORE bundles",
+  "branch": "ml-016-deterministic-export",
+  "record": "docs/changes/ML-016.md"
 }
