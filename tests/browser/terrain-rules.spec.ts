@@ -98,6 +98,8 @@ test('the transform tool turns permitted cells and refuses an illegal 90-degree 
 test('literal tiles over intent clear it, and the variation seed is one undoable edit', async ({ page }) => {
   await ready(page); await terrainMode(page);
   await tool(page, 'Rectangle (R)').click(); await cellsDrag(page, [2, 2], [4, 4]);
+  // Start the next semantic gesture after the asynchronous draft notification has settled.
+  await expect(page.getByText('Draft kept in this browser', { exact: true })).toBeVisible();
   await page.getByLabel('Paint mode', { exact: true }).selectOption('tiles');
   await page.getByRole('button', { name: 'Tile tile.grass', exact: true }).click();
   await tool(page, 'Brush (B)').click(); await cellsDrag(page, [3, 3], [3, 3]);
@@ -110,4 +112,25 @@ test('literal tiles over intent clear it, and the variation seed is one undoable
   expect((await save(page)).terrain[0]!.variationSeed).toBe(99);
   await command(page, 'Undo').click();
   await expect(page.getByLabel('Variation seed', { exact: true })).toHaveValue('7');
+});
+
+// Position changes do not resize the canvas. They must discard its pointer preview just like resize does.
+test('a canvas layout shift or document scroll during a stationary brush discards the whole gesture', async ({ page }) => {
+  await ready(page); await terrainMode(page); await tool(page, 'Brush (B)').click();
+  const original = libraryFile('maps/forest.map.json');
+  for (const kind of ['layout', 'scroll']) {
+    await cellsDrag(page, [3, 3], [3, 3], false);
+    await expect(canvas(page)).toHaveAttribute('data-terrain-preview', '1');
+    if (kind === 'layout') await canvas(page).evaluate((el) => {
+      const spacer = document.createElement('div'); spacer.id = 'test-layout-shift'; spacer.style.height = '20px';
+      el.before(spacer);
+    });
+    else await page.evaluate(() => window.scrollBy(0, 20));
+    await expect(canvas(page)).toHaveAttribute('data-terrain-preview', '0');
+    await page.mouse.up();
+    await expect(command(page, 'Undo')).toBeDisabled();
+    await expect(intent(page)).toHaveText('0 terrain intent cell(s) · rules version 1');
+    expect(libraryFile('maps/forest.map.json')).toEqual(original);
+    await page.evaluate(() => document.getElementById('test-layout-shift')?.remove());
+  }
 });

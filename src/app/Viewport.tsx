@@ -33,14 +33,15 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
     const el = host.current, a = art.current, o = overlay.current;
     if (!el || !a || !o) return;
     const r = new CanvasViewport(a, o, scene, session.getSnapshot(), (text) => { if (notice.current) notice.current.textContent = text; }); renderer.current = r;
-    const resize = new ResizeObserver(([entry]) => { if (entry) { selection.cancel(); terrain.cancel(); session.resize([entry.contentRect.width, entry.contentRect.height], bounds.current); } });
-    resize.observe(el);
     let resolution: MediaQueryList;
     const dpr = (): void => { resolution?.removeEventListener('change', dpr); r.invalidateDpr(); resolution = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`); resolution.addEventListener('change', dpr); };
     dpr();
     let space = false, captured: number | null = null, selecting = false, paint = false;
+    let gestureRect: DOMRect | null = null, geometryFrame: number | null = null;
     const position = (e: MouseEvent): Vec2 => { const rect = el.getBoundingClientRect(); return [e.clientX - rect.left, e.clientY - rect.top]; };
     const release = (cancel: boolean): void => {
+      if (geometryFrame !== null) cancelAnimationFrame(geometryFrame);
+      geometryFrame = null; gestureRect = null;
       if (selecting) { if (cancel) selection.cancel(); else selection.end(); selecting = false; }
       if (paint) { if (cancel) terrain.cancel(); else terrain.end(); paint = false; }
       if (cancel) session.cancel(); else if (captured !== null) session.end(captured);
@@ -48,12 +49,28 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
       if (id !== null && el.hasPointerCapture(id)) el.releasePointerCapture(id);
       el.classList.remove('panning');
     };
+    // A same-size layout shift or document scroll moves the canvas without firing ResizeObserver.
+    // Cancel before consuming another coordinate; a stationary pointer must never become a paint stroke.
+    const geometryChanged = (): boolean => {
+      if (captured === null || gestureRect === null) return false;
+      const r = el.getBoundingClientRect(), b = gestureRect;
+      if (r.left === b.left && r.top === b.top && r.width === b.width && r.height === b.height) return false;
+      release(true); return true;
+    };
+    const watchGeometry = (): void => {
+      geometryFrame = null;
+      if (captured !== null && !geometryChanged()) geometryFrame = requestAnimationFrame(watchGeometry);
+    };
+    const scroll = (): void => { geometryChanged(); };
+    const resize = new ResizeObserver(([entry]) => { if (entry) { release(true); session.resize([entry.contentRect.width, entry.contentRect.height], bounds.current); } });
+    resize.observe(el);
     const down = (e: PointerEvent): void => {
       if (!e.isPrimary || captured !== null || ![0, 1].includes(e.button)) return;
       e.preventDefault();
       // Blurring first commits the numeric field before picking reads the latest committed scene.
       flushSync(() => { if (document.activeElement instanceof HTMLElement && document.activeElement !== el) document.activeElement.blur(); });
       el.focus({ preventScroll: true });
+      const startRect = el.getBoundingClientRect();
       if (e.button === 1 || space || session.getSnapshot().panTool) {
         session.begin(e.pointerId, position(e)); el.classList.add('panning');
       } else if (selection.getSnapshot().mode === 'Terrain') {
@@ -63,10 +80,12 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
       } else {
         selecting = true; selection.down(position(e), picking.current, session.getSnapshot(), e.shiftKey, e.altKey);
       }
-      captured = e.pointerId; el.setPointerCapture(e.pointerId);
+      captured = e.pointerId; gestureRect = startRect; el.setPointerCapture(e.pointerId);
+      geometryFrame = requestAnimationFrame(watchGeometry);
     };
     const move = (e: PointerEvent): void => {
       if (captured !== null && e.pointerId !== captured) return;
+      if (geometryChanged()) return;
       if (paint) terrain.move(cssToWorld(session.getSnapshot().view, position(e))); else if (selecting) selection.move(position(e)); else session.move(e.pointerId, position(e));
       const s = session.getSnapshot(), world = cssToWorld(s.view, position(e)), snapped = snapWorld(world, s.snap);
       const grid = selection.getSnapshot().mode === 'Terrain' ? terrain.grid() : null, cell = grid ? cellAt(grid, world) : null;
@@ -74,7 +93,7 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
         + (cell ? ` · Cell ${cell[0]}, ${cell[1]} (chunk ${floorDiv(cell[0], 32)}, ${floorDiv(cell[1], 32)})` : '');
     };
     const up = (e: PointerEvent): void => {
-      if (e.pointerId !== captured) return;
+      if (e.pointerId !== captured || geometryChanged()) return;
       if (paint) terrain.move(cssToWorld(session.getSnapshot().view, position(e))); else if (selecting) selection.move(position(e)); else session.move(e.pointerId, position(e));
       release(false);
     };
@@ -97,11 +116,13 @@ export function Viewport({ model, session, selection, terrain, tilesets }: { rea
     };
     el.addEventListener('pointerdown', down); el.addEventListener('pointermove', move); el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', cancel); el.addEventListener('lostpointercapture', cancel); el.addEventListener('keydown', keydown); el.addEventListener('keyup', keyup);
+    window.addEventListener('scroll', scroll, true);
     el.addEventListener('blur', blur); window.addEventListener('blur', blur); el.addEventListener('wheel', wheel, { passive: false });
     return () => {
       release(true); resize.disconnect(); resolution.removeEventListener('change', dpr); r.dispose(); renderer.current = null;
       el.removeEventListener('pointerdown', down); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up);
       el.removeEventListener('pointercancel', cancel); el.removeEventListener('lostpointercapture', cancel); el.removeEventListener('keydown', keydown); el.removeEventListener('keyup', keyup);
+      window.removeEventListener('scroll', scroll, true);
       el.removeEventListener('blur', blur); window.removeEventListener('blur', blur); el.removeEventListener('wheel', wheel);
     };
     // Model changes update the renderer below without replacing input handlers or camera state.
