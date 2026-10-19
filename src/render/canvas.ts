@@ -139,7 +139,7 @@ export class CanvasViewport {
         for (const [name, commands] of this.scene.passes) if (overlays[name]) draw(ctx, commands, view, size);
         if (this.preview) {
           const { preview: p, art } = this.preview;
-          this.overlay.dataset.previewCells = String(drawPreview(ctx, { grid: p.grid, value: p.value, xs: p.cells.xs, ys: p.cells.ys, count: p.count }, art, view, size));
+          this.overlay.dataset.previewCells = String(drawPreview(ctx, { grid: p.grid, value: p.value, xs: p.cells.xs, ys: p.cells.ys, count: p.count, outline: p.tool === 'transform' }, art, view, size));
         } else delete this.overlay.dataset.previewCells;
         draw(ctx, this.handles, view, size);
       }

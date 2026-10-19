@@ -16,7 +16,9 @@ export type Operation =
   | Readonly<{ op: 'set'; collection: CollectionName | 'terrain'; id: string; member: string; before: JsonValue | undefined; after: JsonValue | undefined }>
   /** One document member that is not a collection or `terrain`. */
   | Readonly<{ op: 'field'; member: string; before: JsonValue | undefined; after: JsonValue | undefined }>
-  | Readonly<{ op: 'paint'; layerId: string; delta: PaintDelta }>;
+  | Readonly<{ op: 'paint'; layerId: string; delta: PaintDelta }>
+  /** Terrain-intent cells (ML-014): the same compact delta, naming terrain IDs with no transform bits. */
+  | Readonly<{ op: 'intent'; layerId: string; delta: PaintDelta }>;
 export interface Transaction { readonly label: string; readonly ops: readonly Operation[] }
 export interface TransactionProblem { readonly code: string; readonly op: number; readonly message: string }
 export type ApplyResult = { readonly ok: true; readonly model: MapModel } | { readonly ok: false; readonly problem: TransactionProblem };
@@ -49,12 +51,15 @@ function withMember(o: JsonObject, member: string, value: JsonValue | undefined)
 }
 
 function applyOp(m: MapModel, op: Operation): MapModel {
-  if (op.op === 'paint') {
+  if (op.op === 'paint' || op.op === 'intent') {
     const layer = m.terrain?.byLayer.get(op.layerId);
     if (!layer || !m.terrain) return refuse('transaction.missing', `No terrain for layer ${op.layerId}`);
-    const problem = deltaProblem(layer.cells, op.delta);
+    const store = op.op === 'paint' ? layer.cells : layer.intent;
+    const problem = deltaProblem(store, op.delta);
     if (problem) refuse(problem.code, problem.message);
-    const byLayer = new Map(m.terrain.byLayer).set(op.layerId, { settings: layer.settings, cells: applyDelta(layer.cells, op.delta) });
+    if (op.op === 'intent' && op.delta.chunks.some((c) => c.after.some((v) => (v & 15) !== 0))) refuse('paint.malformed', 'Terrain intent carries no tile transform');
+    const next = applyDelta(store, op.delta);
+    const byLayer = new Map(m.terrain.byLayer).set(op.layerId, op.op === 'paint' ? { ...layer, cells: next } : { ...layer, intent: next });
     return { ...m, terrain: { order: m.terrain.order, byLayer } };
   }
   if (op.op === 'field') {
@@ -67,10 +72,10 @@ function applyOp(m: MapModel, op: Operation): MapModel {
   if (op.op === 'set' && op.collection === 'terrain') {
     const layer = m.terrain?.byLayer.get(op.id);
     if (!layer || !m.terrain) return refuse('transaction.missing', `No terrain for layer ${op.id}`);
-    if (op.member === 'layerId' || op.member === 'chunks') refuse('transaction.member', `Terrain ${op.member} cannot be set`);
+    if (op.member === 'layerId' || op.member === 'chunks' || op.member === 'terrainIntent') refuse('transaction.member', `Terrain ${op.member} cannot be set`);
     if (!same(own(layer.settings, op.member), op.before)) refuse('transaction.stale', `Terrain ${op.id}.${op.member} differs from the operation's before value`);
     const settings = withMember(layer.settings, op.member, op.after);
-    return { ...m, terrain: { order: m.terrain.order, byLayer: new Map(m.terrain.byLayer).set(op.id, { settings, cells: layer.cells }) } };
+    return { ...m, terrain: { order: m.terrain.order, byLayer: new Map(m.terrain.byLayer).set(op.id, { ...layer, settings }) } };
   }
   const name = op.collection as CollectionName;
   const collection = m.collections.get(name);
@@ -133,7 +138,7 @@ export function invertOperation(op: Operation): Operation {
     case 'insert': return { ...op, op: 'delete' };
     case 'delete': return { ...op, op: 'insert' };
     case 'set': case 'field': return { ...op, before: op.after, after: op.before };
-    case 'paint': return { ...op, delta: invertDelta(op.delta) };
+    case 'paint': case 'intent': return { ...op, delta: invertDelta(op.delta) };
   }
 }
 
@@ -141,14 +146,14 @@ export function invertOperation(op: Operation): Operation {
 export const invertTransaction = (tx: Transaction): Transaction => ({ label: tx.label, ops: tx.ops.toReversed().map(invertOperation) });
 
 const changes = (op: Operation): boolean => (op.op === 'set' || op.op === 'field' ? !same(op.before, op.after)
-  : op.op === 'paint' ? op.delta.chunks.length > 0 : op.entries.length > 0);
+  : op.op === 'paint' || op.op === 'intent' ? op.delta.chunks.length > 0 : op.entries.length > 0);
 /** Drops operations that change nothing. A transaction left with no operations records nothing. */
 export const pruneTransaction = (tx: Transaction): Transaction => ({ label: tx.label, ops: tx.ops.filter(changes) });
 
 const jsonBytes = (v: JsonValue | undefined): number => (v === undefined ? 0 : canonical(v).length * 2);
 /** Accounted retained bytes of a transaction: typed arrays exactly, JSON as UTF-16 canonical text plus overheads. */
 export function transactionBytes(tx: Transaction): number {
-  return tx.ops.reduce((n, op) => n + (op.op === 'paint' ? 32 + deltaBytes(op.delta)
+  return tx.ops.reduce((n, op) => n + (op.op === 'paint' || op.op === 'intent' ? 32 + deltaBytes(op.delta)
     : op.op === 'set' || op.op === 'field' ? 64 + jsonBytes(op.before) + jsonBytes(op.after)
       : 32 + op.entries.reduce((k, e) => k + 32 + jsonBytes(e.record), 0)), 64 + tx.label.length * 2);
 }
@@ -163,7 +168,7 @@ export function sealTransaction(tx: Transaction): Transaction {
     switch (op.op) {
       case 'insert': case 'delete': return Object.freeze({ ...op, entries: Object.freeze(op.entries.map((e) => Object.freeze({ index: e.index, record: frozenCopy(e.record) }))) });
       case 'set': case 'field': return Object.freeze({ ...op, before: frozenCopy(op.before), after: frozenCopy(op.after) });
-      case 'paint': return Object.freeze({ ...op, delta: Object.freeze({ tiles: Object.freeze([...op.delta.tiles]),
+      case 'paint': case 'intent': return Object.freeze({ ...op, delta: Object.freeze({ tiles: Object.freeze([...op.delta.tiles]),
         chunks: Object.freeze(op.delta.chunks.map((c) => Object.freeze({ column: c.column, row: c.row, indices: c.indices.slice(), before: c.before.slice(), after: c.after.slice() }))) }) });
     }
   });

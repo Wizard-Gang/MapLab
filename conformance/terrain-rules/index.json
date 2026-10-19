@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "cases.json",
+      "sha256": "87074affbfd25fd899673e55ba11b4e157585badd90298c2d1558b47bce97b40"
+    },
+    {
+      "path": "rules.tileset.json",
+      "sha256": "9426df75ca6fde2c894ef149ccaca581d164910bb3285c85a7599cee915acc33"
+    }
+  ]
+}

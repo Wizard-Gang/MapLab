@@ -49,3 +49,13 @@ cancellation, 10,000-cell history, art-only, forbidden-transform and seeded
 replay cases, plus a separate-process final-byte consumer result.
 `tests/browser/terrain.spec.ts` checks real Chromium/WebKit interactions.
 No third-party assets or source were borrowed.
+
+## ML-014 terrain rule fixtures
+
+`conformance/terrain-rules/rules.tileset.json` and `cases.json` are original
+owned CC0-1.0 data with a SHA-256 index: a two-terrain rule tileset and edit
+scripts over the owned R1 forest map. Their golden resolved cells and FNV-1a 64
+vectors were computed by an independent reference outside the repository,
+archived with the ML-014 delivery evidence. `tests/terrain-rules.test.ts`,
+`tests/terrain-rules-model.test.ts` and `tests/browser/terrain-rules.spec.ts`
+check them. No third-party assets or source were borrowed.

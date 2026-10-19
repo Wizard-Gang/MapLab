@@ -74,7 +74,7 @@ export class Gesture {
     const m = applied.model;
     if (!m.terrain || this.buffers.size === 0) return m;
     const byLayer = new Map(m.terrain.byLayer);
-    for (const [layerId, buffer] of this.buffers) byLayer.set(layerId, { settings: byLayer.get(layerId)?.settings ?? {}, cells: buffer.view() });
+    for (const [layerId, buffer] of this.buffers) byLayer.set(layerId, { ...byLayer.get(layerId)!, cells: buffer.view() });
     return { ...m, terrain: { order: m.terrain.order, byLayer } };
   }
 

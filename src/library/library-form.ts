@@ -137,9 +137,10 @@ function mapContent(doc: JsonObject): JsonObject {
       x = Array.isArray(x) ? x.map(sortIn) : sortIn(x);
     }
     if (k === 'terrain' && Array.isArray(x)) {
-      x = x.map((t) => (isObject(t) && Array.isArray(t.chunks)
-        ? { ...t, chunks: sorted(t.chunks, (a, b) => num(field(a, 'row')) - num(field(b, 'row')) || num(field(a, 'column')) - num(field(b, 'column'))) as JsonValue }
-        : t));
+      // Chunks and terrain-intent cells (ML-014) are sets keyed by coordinates: row, then column.
+      const byCell: Order = (a, b) => num(field(a, 'row')) - num(field(b, 'row')) || num(field(a, 'column')) - num(field(b, 'column'));
+      x = x.map((t) => (isObject(t) && Array.isArray(t.chunks) ? { ...t, chunks: sorted(t.chunks, byCell) as JsonValue } : t))
+        .map((t) => (isObject(t) && Array.isArray(t.terrainIntent) ? { ...t, terrainIntent: sorted(t.terrainIntent, byCell) as JsonValue } : t));
     }
     put(out, k, x);
   }

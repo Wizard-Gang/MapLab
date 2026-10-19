@@ -94,7 +94,7 @@ describe('packed sparse chunks', () => {
     const buffer = new PaintBuffer(m.terrain?.byLayer.get('layer.tiles')?.cells as never);
     for (let c = -40; c < 40; c++) buffer.write({ column: c, row: -c, cell: cell('tile.grass') });
     const layer = m.terrain?.byLayer.get('layer.tiles');
-    const painted = { ...m, terrain: { order: ['layer.tiles'], byLayer: new Map([['layer.tiles', { settings: layer?.settings ?? {}, cells: buffer.view() }]]) } };
+    const painted = { ...m, terrain: { order: ['layer.tiles'], byLayer: new Map([['layer.tiles', { ...layer!, cells: buffer.view() }]]) } };
     const out = JSON.parse(encode(painted)) as JsonValue;
     expect(encode(modelOf(out))).toBe(encode(painted));
     expect((out as any).terrain[0].chunks).toHaveLength(7);

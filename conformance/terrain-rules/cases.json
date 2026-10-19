@@ -1,0 +1,647 @@
+{
+ "license": "CC0-1.0",
+ "description": "ML-014 terrain rules version 1 conformance. Inert edit scripts over the unchanged R1 forest map with its terrain layer pointed at the owned rules.tileset.json. Rects are [[column,row],[column,row]] inclusive. Each expectation lists every non-empty cell as `column,row=tileId/quarterTurns/mirrorX/mirrorY` lines in row-then-column order, with the SHA-256 of that text. Expectations and FNV-1a 64 vectors were computed by an independent reference outside the repository (archived with the ML-014 evidence). tests/terrain-rules.test.ts replays each step through src/editor/terrain-session.ts. Owned CC0 data.",
+ "base": {
+  "path": "docs/specifications/2026-10-17-maplab-r1/examples/forest/maps/forest.map.json",
+  "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b",
+  "layerId": "layer.tiles",
+  "variationSeed": 7
+ },
+ "tileset": {
+  "path": "rules.tileset.json",
+  "sha256": "9426df75ca6fde2c894ef149ccaca581d164910bb3285c85a7599cee915acc33"
+ },
+ "hashVectors": [
+  [
+   0,
+   "layer.tiles",
+   0,
+   0,
+   "rule.fill",
+   "e163b7ac720c4f90"
+  ],
+  [
+   7,
+   "layer.tiles",
+   11,
+   11,
+   "rule.fill",
+   "fe13961872d5440d"
+  ],
+  [
+   7,
+   "layer.tiles",
+   -33,
+   -1,
+   "rule.fill",
+   "4a9c98ad5f6a6ba4"
+  ],
+  [
+   9007199254740991,
+   "layer.x:y",
+   -9007199254740991,
+   9007199254740991,
+   "rule.a-b:c",
+   "54245424dc0b3c49"
+  ]
+ ],
+ "cases": [
+  {
+   "id": "single-cell",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       5,
+       5
+      ],
+      [
+       5,
+       5
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 1,
+      "intent": 1,
+      "sha256": "3b0cbaa97ec7920df507c9f04f7e84c3cb27fd6834381ad54e262d329d0cfdaa",
+      "lines": "5,5=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "block-3x3",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "chunk-boundary",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       -2,
+       -2
+      ],
+      [
+       1,
+       1
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 16,
+      "intent": 16,
+      "sha256": "0a06ef95280108f5b63182318e103cac32b4831e438150aff6c7c45584f589a2",
+      "lines": "-2,-2=tile.dirt/0/0/0\n-1,-2=tile.grass/0/0/0\n0,-2=tile.grass/0/0/0\n1,-2=tile.dirt/0/0/0\n-2,-1=tile.dirt/0/0/0\n-1,-1=tile.dirt/0/0/0\n0,-1=tile.dirt.alt/0/0/0\n1,-1=tile.dirt/0/0/0\n-2,0=tile.dirt/0/0/0\n-1,0=tile.dirt.alt/0/0/0\n0,0=tile.dirt/0/0/0\n1,0=tile.dirt/0/0/0\n-2,1=tile.dirt/0/0/0\n-1,1=tile.dirt/0/0/0\n0,1=tile.dirt/0/0/0\n1,1=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "neighbor-update",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       11,
+       9
+      ],
+      [
+       11,
+       9
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 10,
+      "intent": 10,
+      "sha256": "539f1f4c6186d9848f839f4e9772fc8b9a023630c9c6e3a11f3d07933a41834c",
+      "lines": "11,9=tile.dirt/0/0/0\n10,10=tile.dirt/0/0/0\n11,10=tile.dirt/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "erase-intent",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       11,
+       11
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "terrainId": null,
+     "expect": {
+      "outcome": "recorded",
+      "cells": 8,
+      "intent": 8,
+      "sha256": "e7b0d376f407477b4441fdf05d3141cc77acc399c0872fd581c7c945a98743e9",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.dirt/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "literal-over-intent",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "tiles",
+     "rect": [
+      [
+       11,
+       11
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "tile": "tile.sand",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 8,
+      "sha256": "76b3afaa935339c9e8897ed639bf6bab22b99598ee0bf66670d86816113cdd1e",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.dirt/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.sand/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "transition",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       20,
+       5
+      ],
+      [
+       22,
+       5
+      ]
+     ],
+     "terrainId": "terrain.sand",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 3,
+      "intent": 3,
+      "sha256": "84e44e7c2c4c7c44febfdecdf440d104b589c79e8f39b88f1db075d7bebfe3cc",
+      "lines": "20,5=tile.sand/0/0/0\n21,5=tile.sand/0/0/0\n22,5=tile.sand/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       25,
+       5
+      ],
+      [
+       25,
+       5
+      ]
+     ],
+     "terrainId": "terrain.sand",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 4,
+      "intent": 4,
+      "sha256": "b970c9401521c385a8602304a78f5615ef009ab3aec4b8b7b8236a1de06b27dd",
+      "lines": "20,5=tile.sand/0/0/0\n21,5=tile.sand/0/0/0\n22,5=tile.sand/0/0/0\n25,5=tile.sand.edge/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       23,
+       5
+      ],
+      [
+       23,
+       5
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 5,
+      "intent": 5,
+      "sha256": "4f699492e0d6b833a9f5917ec8a947f93ba681d7449b052e87aef35984c98288",
+      "lines": "20,5=tile.sand/0/0/0\n21,5=tile.sand/0/0/0\n22,5=tile.sand/0/0/0\n23,5=tile.dirt/0/0/0\n25,5=tile.sand.edge/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "variation-seed",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       0,
+       20
+      ],
+      [
+       7,
+       27
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 64,
+      "intent": 64,
+      "sha256": "75ca6b1ce16735ec2209774ff20437ae6cf936ee8c579cb16ebed66be7509f6f",
+      "lines": "0,20=tile.dirt/0/0/0\n1,20=tile.grass/0/0/0\n2,20=tile.grass/0/0/0\n3,20=tile.grass/0/0/0\n4,20=tile.grass/0/0/0\n5,20=tile.grass/0/0/0\n6,20=tile.grass/0/0/0\n7,20=tile.dirt/0/0/0\n0,21=tile.dirt/0/0/0\n1,21=tile.dirt/0/0/0\n2,21=tile.dirt/0/0/0\n3,21=tile.dirt.alt/0/0/0\n4,21=tile.dirt/0/0/0\n5,21=tile.dirt/0/0/0\n6,21=tile.dirt/0/0/0\n7,21=tile.dirt/0/0/0\n0,22=tile.dirt/0/0/0\n1,22=tile.dirt/0/0/0\n2,22=tile.dirt.alt/0/0/0\n3,22=tile.dirt/0/0/0\n4,22=tile.dirt/0/0/0\n5,22=tile.dirt/0/0/0\n6,22=tile.dirt.alt/0/0/0\n7,22=tile.dirt/0/0/0\n0,23=tile.dirt/0/0/0\n1,23=tile.dirt.alt/0/0/0\n2,23=tile.dirt/0/0/0\n3,23=tile.dirt/0/0/0\n4,23=tile.dirt/0/0/0\n5,23=tile.dirt.alt/0/0/0\n6,23=tile.dirt/0/0/0\n7,23=tile.dirt/0/0/0\n0,24=tile.dirt/0/0/0\n1,24=tile.dirt/0/0/0\n2,24=tile.dirt/0/0/0\n3,24=tile.dirt/0/0/0\n4,24=tile.dirt.alt/0/0/0\n5,24=tile.dirt/0/0/0\n6,24=tile.dirt/0/0/0\n7,24=tile.dirt/0/0/0\n0,25=tile.dirt/0/0/0\n1,25=tile.dirt/0/0/0\n2,25=tile.dirt/0/0/0\n3,25=tile.dirt.alt/0/0/0\n4,25=tile.dirt/0/0/0\n5,25=tile.dirt/0/0/0\n6,25=tile.dirt/0/0/0\n7,25=tile.dirt/0/0/0\n0,26=tile.dirt/0/0/0\n1,26=tile.dirt/0/0/0\n2,26=tile.dirt.alt/0/0/0\n3,26=tile.dirt/0/0/0\n4,26=tile.dirt/0/0/0\n5,26=tile.dirt/0/0/0\n6,26=tile.dirt.alt/0/0/0\n7,26=tile.dirt/0/0/0\n0,27=tile.dirt/0/0/0\n1,27=tile.dirt/0/0/0\n2,27=tile.dirt/0/0/0\n3,27=tile.dirt/0/0/0\n4,27=tile.dirt/0/0/0\n5,27=tile.dirt/0/0/0\n6,27=tile.dirt/0/0/0\n7,27=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "reseed",
+     "seed": 8,
+     "expect": {
+      "outcome": "recorded",
+      "cells": 64,
+      "intent": 64,
+      "sha256": "a71c469406ae553291737b909482a43f0e2b5e9031e227b95a86c0a175cb048c",
+      "lines": "0,20=tile.dirt/0/0/0\n1,20=tile.grass/0/0/0\n2,20=tile.grass/0/0/0\n3,20=tile.grass/0/0/0\n4,20=tile.grass/0/0/0\n5,20=tile.grass/0/0/0\n6,20=tile.grass/0/0/0\n7,20=tile.dirt/0/0/0\n0,21=tile.dirt/0/0/0\n1,21=tile.dirt/0/0/0\n2,21=tile.dirt/0/0/0\n3,21=tile.dirt/0/0/0\n4,21=tile.dirt.alt/0/0/0\n5,21=tile.dirt/0/0/0\n6,21=tile.dirt/0/0/0\n7,21=tile.dirt/0/0/0\n0,22=tile.dirt/0/0/0\n1,22=tile.dirt.alt/0/0/0\n2,22=tile.dirt/0/0/0\n3,22=tile.dirt/0/0/0\n4,22=tile.dirt/0/0/0\n5,22=tile.dirt.alt/0/0/0\n6,22=tile.dirt/0/0/0\n7,22=tile.dirt/0/0/0\n0,23=tile.dirt/0/0/0\n1,23=tile.dirt/0/0/0\n2,23=tile.dirt.alt/0/0/0\n3,23=tile.dirt/0/0/0\n4,23=tile.dirt/0/0/0\n5,23=tile.dirt/0/0/0\n6,23=tile.dirt.alt/0/0/0\n7,23=tile.dirt/0/0/0\n0,24=tile.dirt/0/0/0\n1,24=tile.dirt/0/0/0\n2,24=tile.dirt/0/0/0\n3,24=tile.dirt.alt/0/0/0\n4,24=tile.dirt/0/0/0\n5,24=tile.dirt/0/0/0\n6,24=tile.dirt/0/0/0\n7,24=tile.dirt/0/0/0\n0,25=tile.dirt/0/0/0\n1,25=tile.dirt/0/0/0\n2,25=tile.dirt/0/0/0\n3,25=tile.dirt/0/0/0\n4,25=tile.dirt.alt/0/0/0\n5,25=tile.dirt/0/0/0\n6,25=tile.dirt/0/0/0\n7,25=tile.dirt/0/0/0\n0,26=tile.dirt/0/0/0\n1,26=tile.dirt.alt/0/0/0\n2,26=tile.dirt/0/0/0\n3,26=tile.dirt/0/0/0\n4,26=tile.dirt/0/0/0\n5,26=tile.dirt.alt/0/0/0\n6,26=tile.dirt/0/0/0\n7,26=tile.dirt/0/0/0\n0,27=tile.dirt/0/0/0\n1,27=tile.dirt/0/0/0\n2,27=tile.dirt/0/0/0\n3,27=tile.dirt/0/0/0\n4,27=tile.dirt/0/0/0\n5,27=tile.dirt/0/0/0\n6,27=tile.dirt/0/0/0\n7,27=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "reseed",
+     "seed": 7,
+     "expect": {
+      "outcome": "recorded",
+      "cells": 64,
+      "intent": 64,
+      "sha256": "75ca6b1ce16735ec2209774ff20437ae6cf936ee8c579cb16ebed66be7509f6f",
+      "lines": "0,20=tile.dirt/0/0/0\n1,20=tile.grass/0/0/0\n2,20=tile.grass/0/0/0\n3,20=tile.grass/0/0/0\n4,20=tile.grass/0/0/0\n5,20=tile.grass/0/0/0\n6,20=tile.grass/0/0/0\n7,20=tile.dirt/0/0/0\n0,21=tile.dirt/0/0/0\n1,21=tile.dirt/0/0/0\n2,21=tile.dirt/0/0/0\n3,21=tile.dirt.alt/0/0/0\n4,21=tile.dirt/0/0/0\n5,21=tile.dirt/0/0/0\n6,21=tile.dirt/0/0/0\n7,21=tile.dirt/0/0/0\n0,22=tile.dirt/0/0/0\n1,22=tile.dirt/0/0/0\n2,22=tile.dirt.alt/0/0/0\n3,22=tile.dirt/0/0/0\n4,22=tile.dirt/0/0/0\n5,22=tile.dirt/0/0/0\n6,22=tile.dirt.alt/0/0/0\n7,22=tile.dirt/0/0/0\n0,23=tile.dirt/0/0/0\n1,23=tile.dirt.alt/0/0/0\n2,23=tile.dirt/0/0/0\n3,23=tile.dirt/0/0/0\n4,23=tile.dirt/0/0/0\n5,23=tile.dirt.alt/0/0/0\n6,23=tile.dirt/0/0/0\n7,23=tile.dirt/0/0/0\n0,24=tile.dirt/0/0/0\n1,24=tile.dirt/0/0/0\n2,24=tile.dirt/0/0/0\n3,24=tile.dirt/0/0/0\n4,24=tile.dirt.alt/0/0/0\n5,24=tile.dirt/0/0/0\n6,24=tile.dirt/0/0/0\n7,24=tile.dirt/0/0/0\n0,25=tile.dirt/0/0/0\n1,25=tile.dirt/0/0/0\n2,25=tile.dirt/0/0/0\n3,25=tile.dirt.alt/0/0/0\n4,25=tile.dirt/0/0/0\n5,25=tile.dirt/0/0/0\n6,25=tile.dirt/0/0/0\n7,25=tile.dirt/0/0/0\n0,26=tile.dirt/0/0/0\n1,26=tile.dirt/0/0/0\n2,26=tile.dirt.alt/0/0/0\n3,26=tile.dirt/0/0/0\n4,26=tile.dirt/0/0/0\n5,26=tile.dirt/0/0/0\n6,26=tile.dirt.alt/0/0/0\n7,26=tile.dirt/0/0/0\n0,27=tile.dirt/0/0/0\n1,27=tile.dirt/0/0/0\n2,27=tile.dirt/0/0/0\n3,27=tile.dirt/0/0/0\n4,27=tile.dirt/0/0/0\n5,27=tile.dirt/0/0/0\n6,27=tile.dirt/0/0/0\n7,27=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "illegal-turn",
+   "steps": [
+    {
+     "do": "tiles",
+     "rect": [
+      [
+       30,
+       5
+      ],
+      [
+       30,
+       5
+      ]
+     ],
+     "tile": "tile.corner",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 1,
+      "intent": 0,
+      "sha256": "05ceeee43f30e6f46d444fcdbd4f763b6c6e63f21f4ed2333e0788087322842a",
+      "lines": "30,5=tile.corner/0/0/0\n"
+     }
+    },
+    {
+     "do": "tiles",
+     "rect": [
+      [
+       31,
+       5
+      ],
+      [
+       31,
+       5
+      ]
+     ],
+     "tile": "tile.dirt",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 2,
+      "intent": 0,
+      "sha256": "c0a194e28ecf3973bcc13088200f1d283e232f2aab42a74fa6554608272180f8",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       30,
+       5
+      ],
+      [
+       31,
+       5
+      ]
+     ],
+     "turn": "rotate",
+     "expect": {
+      "outcome": "refused",
+      "cells": 2,
+      "intent": 0,
+      "sha256": "c0a194e28ecf3973bcc13088200f1d283e232f2aab42a74fa6554608272180f8",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       31,
+       5
+      ],
+      [
+       31,
+       5
+      ]
+     ],
+     "turn": "rotate",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 2,
+      "intent": 0,
+      "sha256": "fde57e4aafcb0a1accf5b59e0d73ccada5566c681a5ea653534bd8da81142649",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/1/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       31,
+       5
+      ],
+      [
+       31,
+       5
+      ]
+     ],
+     "turn": "mirrorX",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 2,
+      "intent": 0,
+      "sha256": "d07cb3ac2d43edc4d541cbb3a7ffd5d61bca908aeb28b01bafa8629545c95843",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n"
+     }
+    },
+    {
+     "do": "tiles",
+     "rect": [
+      [
+       32,
+       5
+      ],
+      [
+       32,
+       5
+      ]
+     ],
+     "tile": "tile.grass",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 3,
+      "intent": 0,
+      "sha256": "03835c740169914379192d182af07fc9c7a3c467bf322f00174f6a779ff24ecd",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n32,5=tile.grass/0/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       32,
+       5
+      ],
+      [
+       32,
+       5
+      ]
+     ],
+     "turn": "mirrorY",
+     "expect": {
+      "outcome": "refused",
+      "cells": 3,
+      "intent": 0,
+      "sha256": "03835c740169914379192d182af07fc9c7a3c467bf322f00174f6a779ff24ecd",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n32,5=tile.grass/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       40,
+       5
+      ],
+      [
+       42,
+       7
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 12,
+      "intent": 9,
+      "sha256": "15535e9c51f1623f72ed475c3c2eefa5fafbbf2921a666c99a8973d59781b372",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n32,5=tile.grass/0/0/0\n40,5=tile.dirt/0/0/0\n41,5=tile.grass/0/0/0\n42,5=tile.dirt/0/0/0\n40,6=tile.dirt/0/0/0\n41,6=tile.dirt/0/0/0\n42,6=tile.dirt/0/0/0\n40,7=tile.dirt/0/0/0\n41,7=tile.dirt/0/0/0\n42,7=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       41,
+       5
+      ],
+      [
+       41,
+       5
+      ]
+     ],
+     "turn": "rotate",
+     "expect": {
+      "outcome": "refused",
+      "cells": 12,
+      "intent": 9,
+      "sha256": "15535e9c51f1623f72ed475c3c2eefa5fafbbf2921a666c99a8973d59781b372",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n32,5=tile.grass/0/0/0\n40,5=tile.dirt/0/0/0\n41,5=tile.grass/0/0/0\n42,5=tile.dirt/0/0/0\n40,6=tile.dirt/0/0/0\n41,6=tile.dirt/0/0/0\n42,6=tile.dirt/0/0/0\n40,7=tile.dirt/0/0/0\n41,7=tile.dirt/0/0/0\n42,7=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "turn",
+     "rect": [
+      [
+       41,
+       6
+      ],
+      [
+       41,
+       6
+      ]
+     ],
+     "turn": "rotate",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 12,
+      "intent": 8,
+      "sha256": "547ddd4fa7c6f24414000d8131c36b7727660c9172533fefedec5372f755d49b",
+      "lines": "30,5=tile.corner/0/0/0\n31,5=tile.dirt/3/1/0\n32,5=tile.grass/0/0/0\n40,5=tile.dirt/0/0/0\n41,5=tile.dirt/0/0/0\n42,5=tile.dirt/0/0/0\n40,6=tile.dirt/0/0/0\n41,6=tile.dirt/1/0/0\n42,6=tile.dirt/0/0/0\n40,7=tile.dirt/0/0/0\n41,7=tile.dirt/0/0/0\n42,7=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  },
+  {
+   "id": "same-value-no-op",
+   "steps": [
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "recorded",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    },
+    {
+     "do": "terrain",
+     "rect": [
+      [
+       10,
+       10
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "terrainId": "terrain.forest",
+     "expect": {
+      "outcome": "noop",
+      "cells": 9,
+      "intent": 9,
+      "sha256": "1a17f7c0486fc66f8fc70e5fcfddb5626be75f66f4baca72f52c87e062e06c2d",
+      "lines": "10,10=tile.dirt/0/0/0\n11,10=tile.grass/0/0/0\n12,10=tile.dirt/0/0/0\n10,11=tile.dirt/0/0/0\n11,11=tile.dirt/0/0/0\n12,11=tile.dirt/0/0/0\n10,12=tile.dirt/0/0/0\n11,12=tile.dirt/0/0/0\n12,12=tile.dirt/0/0/0\n"
+     }
+    }
+   ]
+  }
+ ]
+}

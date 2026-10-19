@@ -3,7 +3,7 @@
 // and denormalizing is lossless. Content validation stays in src/contracts. Pure: no React, DOM,
 // storage or network.
 import { canonical, isId, type JsonValue, type TerrainChunk } from '../contracts';
-import { storeFromChunks, storeToChunks, chunkKey, type CellStore } from './paint';
+import { intentEntries, storeFromChunks, storeFromIntents, storeToChunks, chunkKey, type CellStore, type IntentEntry } from './paint';
 
 export type JsonObject = { readonly [key: string]: JsonValue };
 
@@ -25,7 +25,11 @@ const NESTED: Readonly<Record<string, readonly string[]>> = {
 };
 
 export interface Collection { readonly order: readonly string[]; readonly byId: ReadonlyMap<string, JsonObject> }
-export interface TerrainLayerModel { readonly settings: JsonObject; readonly cells: CellStore }
+/**
+ * One terrain layer: its plain settings, its packed cells and its packed terrain intent (ML-014). Settings hold every
+ * member except `chunks` and `terrainIntent`; intent entries serialize in row-then-column order.
+ */
+export interface TerrainLayerModel { readonly settings: JsonObject; readonly cells: CellStore; readonly intent: CellStore }
 export interface MapModel {
   readonly id: string;
   /** Every member other than the collections and `terrain`, in source order. */
@@ -169,7 +173,15 @@ export function normalize(source: JsonValue): NormalizeResult {
     const byLayer = new Map<string, TerrainLayerModel>();
     if (!Array.isArray(layers) || !layers.every((t) => isObject(t) && typeof t.layerId === 'string' && Array.isArray(t.chunks))) problem('model.shape', '$.terrain', 'terrain must be an array of layers with chunks');
     else layers.forEach((t, i) => {
-      const { chunks, ...settings } = t as JsonObject & { chunks: readonly TerrainChunk[] };
+      const { chunks, terrainIntent, ...settings } = t as JsonObject & { chunks: readonly TerrainChunk[]; terrainIntent: unknown };
+      const intents = new Set<string>();
+      const wellFormed = Array.isArray(terrainIntent) && terrainIntent.every((x) => isObject(x) && Number.isSafeInteger(x.column) && Number.isSafeInteger(x.row) && typeof x.terrainId === 'string');
+      if (!wellFormed) problem('model.intent', `$.terrain[${i}].terrainIntent`, 'terrainIntent must be an array of {column, row, terrainId} cells');
+      else (terrainIntent as readonly IntentEntry[]).forEach((x, j) => {
+        const key = chunkKey(x.column, x.row);
+        if (intents.has(key)) problem('model.intent', `$.terrain[${i}].terrainIntent[${j}]`, `Terrain intent for cell ${key} is listed twice`);
+        intents.add(key);
+      });
       const keys = new Set<string>();
       chunks.forEach((c, j) => {
         const key = chunkKey(c.column, c.row);
@@ -177,7 +189,7 @@ export function normalize(source: JsonValue): NormalizeResult {
         keys.add(key);
       });
       if (byLayer.has(settings.layerId as string)) problem('model.duplicate-terrain', `$.terrain[${i}].layerId`, `Terrain for ${settings.layerId} is listed twice`);
-      else if (problems.length === 0) byLayer.set(settings.layerId as string, { settings: Object.freeze(settings), cells: storeFromChunks(chunks) });
+      else if (problems.length === 0) byLayer.set(settings.layerId as string, { settings: Object.freeze(settings), cells: storeFromChunks(chunks), intent: storeFromIntents(terrainIntent as readonly IntentEntry[]) });
     });
     terrain = { order: Object.freeze([...byLayer.keys()]), byLayer };
   }
@@ -192,7 +204,7 @@ export function denormalize(model: MapModel): JsonObject {
   if (model.terrain) {
     out.terrain = model.terrain.order.map((layerId) => {
       const t = model.terrain?.byLayer.get(layerId) as TerrainLayerModel;
-      return { ...t.settings, chunks: storeToChunks(t.cells) as unknown as JsonValue };
+      return { ...t.settings, chunks: storeToChunks(t.cells) as unknown as JsonValue, terrainIntent: intentEntries(t.intent) as unknown as JsonValue };
     });
   }
   return out;

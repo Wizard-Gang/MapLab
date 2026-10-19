@@ -62,7 +62,8 @@ describe('brush and replay properties', () => {
     const choices = palette(tileset).filter((t) => tiles.includes(t.id));
     let recorded = 0;
     for (let i = 0; i < gestures; i++) {
-      const tool = TERRAIN_TOOLS[int(0, TERRAIN_TOOLS.length - 1)]!, p = choices[int(0, choices.length - 1)]!;
+      // The ML-013 literal tools; ML-014's transform tool has its own fixture.
+      const literal = TERRAIN_TOOLS.filter((t) => t !== 'transform'), tool = literal[int(0, literal.length - 1)]!, p = choices[int(0, choices.length - 1)]!;
       const value: Cell | null = tool === 'erase' ? null : { tileId: p.id, quarterTurns: p.quarterTurns[int(0, p.quarterTurns.length - 1)]!, mirrorX: p.mirrorX && random() < 0.5, mirrorY: p.mirrorY && random() < 0.5 };
       const path: CellXY[] = Array.from({ length: tool === 'fill' ? 1 : int(2, 5) }, () => [int(span[0], span[1] - 1), int(span[0], span[1] - 1)]);
       // Reference: an independent cell map with the tool's documented cell set.

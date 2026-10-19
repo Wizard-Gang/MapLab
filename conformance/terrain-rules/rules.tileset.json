@@ -1,0 +1,329 @@
+{
+  "format": "maplab.tileset",
+  "version": 1,
+  "id": "tileset.rules",
+  "name": "ML-014 owned rule fixture tiles",
+  "cellSize": [
+    32,
+    32
+  ],
+  "assets": [],
+  "tiles": [
+    {
+      "id": "tile.grass",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#4f7a36"
+      },
+      "allowedQuarterTurns": [
+        0
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": false,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.dirt",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#6b4f2f"
+      },
+      "allowedQuarterTurns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": true,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.dirt.alt",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#7a5a35"
+      },
+      "allowedQuarterTurns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": true,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.corner",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "polygon",
+          "points": [
+            [
+              0,
+              32
+            ],
+            [
+              32,
+              0
+            ],
+            [
+              32,
+              32
+            ]
+          ]
+        },
+        "fill": "#8c6d3f"
+      },
+      "allowedQuarterTurns": [
+        0
+      ],
+      "allowMirrorX": false,
+      "allowMirrorY": false,
+      "terrainId": "terrain.forest",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.sand",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#d8c27a"
+      },
+      "allowedQuarterTurns": [
+        0,
+        2
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": false,
+      "terrainId": "terrain.sand",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tile.sand.edge",
+      "visual": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        },
+        "fill": "#c9ae5c"
+      },
+      "allowedQuarterTurns": [
+        0
+      ],
+      "allowMirrorX": true,
+      "allowMirrorY": true,
+      "terrainId": "terrain.sand",
+      "suggestedMaterialId": null,
+      "traceShapes": [
+        {
+          "id": "trace.full",
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ]
+        }
+      ]
+    }
+  ],
+  "terrains": [
+    {
+      "id": "terrain.forest",
+      "name": "Forest ground",
+      "biome": "forest",
+      "fallbackTileId": "tile.dirt"
+    },
+    {
+      "id": "terrain.sand",
+      "name": "Sand",
+      "biome": "beach",
+      "fallbackTileId": "tile.sand"
+    }
+  ],
+  "rulesVersion": 1,
+  "rules": [
+    {
+      "id": "rule.top",
+      "terrainId": "terrain.forest",
+      "neighborMask": 124,
+      "priority": 10,
+      "outputTileIds": [
+        "tile.grass"
+      ],
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "rule.fill",
+      "terrainId": "terrain.forest",
+      "neighborMask": 255,
+      "priority": 5,
+      "outputTileIds": [
+        "tile.dirt",
+        "tile.dirt.alt"
+      ],
+      "weights": [
+        3,
+        1
+      ]
+    },
+    {
+      "id": "rule.fill-b",
+      "terrainId": "terrain.forest",
+      "neighborMask": 255,
+      "priority": 5,
+      "outputTileIds": [
+        "tile.corner"
+      ],
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "rule.fill-z",
+      "terrainId": "terrain.forest",
+      "neighborMask": 255,
+      "priority": 1,
+      "outputTileIds": [
+        "tile.grass"
+      ],
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "rule.lone",
+      "terrainId": "terrain.sand",
+      "neighborMask": 0,
+      "priority": 0,
+      "outputTileIds": [
+        "tile.sand.edge"
+      ],
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "rule.sand-row",
+      "terrainId": "terrain.sand",
+      "neighborMask": 68,
+      "priority": 3,
+      "outputTileIds": [
+        "tile.sand"
+      ],
+      "weights": [
+        1
+      ]
+    }
+  ]
+}
