@@ -20,15 +20,16 @@ async function terrainMode(p: Page): Promise<void> {
   await p.getByLabel('Paint mode', { exact: true }).selectOption('terrain');
   await p.getByRole('button', { name: 'Terrain terrain.forest', exact: true }).click();
 }
-async function at(p: Page, x: number, y: number) {
-  await canvas(p).scrollIntoViewIfNeeded();
-  const d = await canvas(p).evaluate((el) => ({ ...(el as HTMLElement).dataset }));
-  const b = (await canvas(p).boundingBox())!;
-  return { x: b.x + (x - Number(d.cameraX)) * Number(d.zoom), y: b.y + (y - Number(d.cameraY)) * Number(d.zoom) };
-}
-/** Drags from the centre of one cell to the centre of another (32 WU cells) and releases unless told not to. */
+/** One geometry snapshot for both endpoints: scrolling between projections can turn a click into a stroke. */
 async function cellsDrag(p: Page, from: [number, number], to: [number, number], release = true): Promise<void> {
-  const a = await at(p, from[0] * 32 + 16, from[1] * 32 + 16), b = await at(p, to[0] * 32 + 16, to[1] * 32 + 16);
+  const world = canvas(p);
+  await world.scrollIntoViewIfNeeded();
+  const { rect, cameraX, cameraY, zoom } = await world.evaluate((el) => {
+    const r = el.getBoundingClientRect(), d = (el as HTMLElement).dataset;
+    return { rect: { x: r.x, y: r.y }, cameraX: Number(d.cameraX), cameraY: Number(d.cameraY), zoom: Number(d.zoom) };
+  });
+  const at = ([c, r]: [number, number]) => ({ x: rect.x + (c * 32 + 16 - cameraX) * zoom, y: rect.y + (r * 32 + 16 - cameraY) * zoom });
+  const a = at(from), b = at(to);
   await p.mouse.move(a.x, a.y); await p.mouse.down(); await p.mouse.move(b.x, b.y, { steps: 5 });
   if (release) await p.mouse.up();
 }
