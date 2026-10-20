@@ -67,7 +67,7 @@ export function checkFoundation(root) {
   const pins = {
     react: '19.3.0', 'react-dom': '19.3.0', '@types/node': '26.6.5',
     '@types/react': '19.3.0', '@types/react-dom': '19.3.0',
-    typescript: '7.0.2', vite: '8.3.1', vitest: '5.0.2', '@playwright/test': '1.64.1',
+    typescript: '7.0.2', vite: '8.3.4', vitest: '5.0.2', '@playwright/test': '1.64.1',
   };
   const actual = { ...pkg.dependencies, ...pkg.devDependencies };
   demand(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(pins).sort()),
