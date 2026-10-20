@@ -1,0 +1,184 @@
+{
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "d87e438e1f0ce16104aaf1c9a4cc9bd7e098f9aec9c03337e69de991c6085522"
+    },
+    {
+      "path": "airborne-rope.fixture.json",
+      "sha256": "13c8ca0732aa520fe6382c80fd06c29bd9890a24afe3a02ea86f98d7d2301c2c"
+    },
+    {
+      "path": "airborne-rope.trace.json",
+      "sha256": "0c3632af184efe2fca9f5b2adc9b4939dbf58e9edd45c420958491e596e55a60"
+    },
+    {
+      "path": "blocked-exit.fixture.json",
+      "sha256": "f3baeb8c8580b4984e05b603a7339d2dd400435fc1a1646841224ae8ccecf0a0"
+    },
+    {
+      "path": "blocked-exit.trace.json",
+      "sha256": "01de49ca0e8554cb2dbdcb25aab10ee7e270e345f4173e372929505fc1ed2c22"
+    },
+    {
+      "path": "blocked.map.json",
+      "sha256": "4d54327e21845c6ee16582e407d8958a95799d1a712813a5acaec2e5f4357b76"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "0a842e9066d110a06bd2912e4d8ed2a70fc79a4e0800b22afd9f0339e5c9cb0d"
+    },
+    {
+      "path": "climb.movement.json",
+      "sha256": "1250a7c477ffedaad12a933d7a0369654bf8159b76ce0d485f826c023ebadc6c"
+    },
+    {
+      "path": "direction-denied.fixture.json",
+      "sha256": "336966e07fd6016e14194877bfebaab112a523e393ccb4d2a72b248a28d53856"
+    },
+    {
+      "path": "direction-denied.trace.json",
+      "sha256": "573a94dd519c8d87d4e885a001f36ea2441874ef52d32eb61a72e208e57b9043"
+    },
+    {
+      "path": "endpoint-no-exit.fixture.json",
+      "sha256": "656c9474ebefbf1662772fc0a0762dcd7b743b56386e68bbdf44ae7bfcbd4049"
+    },
+    {
+      "path": "endpoint-no-exit.trace.json",
+      "sha256": "c706c3f1ee117dbf59693d3cd3f21f86e72972383a8dea8808f08e945daa41e4"
+    },
+    {
+      "path": "endpoint-stop.fixture.json",
+      "sha256": "89c9b6e843b839b5982419acf0f905d079d7d0f3e7d030a4a1b3c38982172cf7"
+    },
+    {
+      "path": "endpoint-stop.trace.json",
+      "sha256": "7a7390de2217661397591cafb6f855ad58e0dd8196d29231b1888f1827f61a3f"
+    },
+    {
+      "path": "endpoint.map.json",
+      "sha256": "d7fba227dd607d3007f5137594b6933d5182168ffe69259fa71a73fd64572864"
+    },
+    {
+      "path": "forest-ladder.fixture.json",
+      "sha256": "797a1ceee62459b48258f93152a949584e006ec233dc8d2b77bd0fc5339a233e"
+    },
+    {
+      "path": "forest-ladder.trace.json",
+      "sha256": "4d3f3f515f3508f8da2645f73d3c3eecf1d818c9d83820108b2290344a6dd4ec"
+    },
+    {
+      "path": "forest-rope.fixture.json",
+      "sha256": "bf3c5dd6641cd43a1942d4d639f7b32293a925f35b70d1cc1ed8dd94c83940d6"
+    },
+    {
+      "path": "forest-rope.trace.json",
+      "sha256": "5b13b7ffc9a95ad94dabd0b8b0ff2c743afed80982ae03a8a090e136d105a812"
+    },
+    {
+      "path": "forest.map.json",
+      "sha256": "8d134bcdea76a200f52b7b1f60e3f2e3b985ab43ce9e6f433b95da047aba2677"
+    },
+    {
+      "path": "ladder-bottom-top.fixture.json",
+      "sha256": "79351a94f2177dc04f2fa64ca2fb34e44bbe6ce12de85d38a8460b9ecefdda93"
+    },
+    {
+      "path": "ladder-bottom-top.trace.json",
+      "sha256": "a3859dba1fe1ae92d3bb9c88b5250cf0368b330fef88ce32c9bf0e60c5f5b6c1"
+    },
+    {
+      "path": "ladder-midpoint.fixture.json",
+      "sha256": "1debe8deca9becec923fcd5df04a1d8be1fb0ae4f11afc2b8a7b0f53401ce30d"
+    },
+    {
+      "path": "ladder-midpoint.trace.json",
+      "sha256": "8c3c5090b9959fe6ea19872be320506624ac9e10928a6f3774d8ab776f31d041"
+    },
+    {
+      "path": "ladder-top-bottom.fixture.json",
+      "sha256": "a106b6b1be3a73838b7560bb782831f57aec01404ba728465abc90cb2e74ff8f"
+    },
+    {
+      "path": "ladder-top-bottom.trace.json",
+      "sha256": "4e6542a385361edd31256921c6282c5bbdb1bc79a9013d1752c24022586ffec0"
+    },
+    {
+      "path": "ladder.map.json",
+      "sha256": "38fc7df0b540e912534c43ccc6dae7814b3f7ca611defc13141e3fb3fe137789"
+    },
+    {
+      "path": "midpoint.map.json",
+      "sha256": "78a039c7569e96114b1c83512d7c5587cae26c2d629043e6588e13741c03cfa9"
+    },
+    {
+      "path": "missing-permission.fixture.json",
+      "sha256": "a90164ca235edfac4ae71b1c7592a55147431f38b6ca322978855d87e421c01c"
+    },
+    {
+      "path": "missing-permission.trace.json",
+      "sha256": "e39d6689c063d4db2f2eb1b12232537bf4709b0ac5d0de6be0039a3d617ad03e"
+    },
+    {
+      "path": "missing.movement.json",
+      "sha256": "131b7f456f1eaf3eae32cd498189d089348d01ad0f70cfdcc8eecec7cc356b33"
+    },
+    {
+      "path": "rope-airborne-end.fixture.json",
+      "sha256": "6628f46ea56794f0bc2d87319ccbab0203995c36b46e8bc85ec37914cafbc3c9"
+    },
+    {
+      "path": "rope-airborne-end.trace.json",
+      "sha256": "a2b10bade96e07de35aae78c52cc26f3c0bce868dcfd04ee6b790e040c78a33a"
+    },
+    {
+      "path": "rope-leap-off.fixture.json",
+      "sha256": "ed5bcde88e98d2c4592d8da97b31610852eb59889b5f4988bf927fdfdf3d45c6"
+    },
+    {
+      "path": "rope-leap-off.trace.json",
+      "sha256": "abd40a20f9fe4d6a0a8c56ef3a931101619e90fc78fdc98e6c0030ed51e65aa7"
+    },
+    {
+      "path": "rope-radius-miss.fixture.json",
+      "sha256": "b882700657a293e0490ed75c70db7efbcb42b4b55be9a2bd4699845c102a669b"
+    },
+    {
+      "path": "rope-radius-miss.trace.json",
+      "sha256": "0bc57bb54bafae9350cff24ef8d50f8e78fa33820a5c0a2e1dcb07ca7540ed67"
+    },
+    {
+      "path": "rope.map.json",
+      "sha256": "a44f39b5088560fe0d43eccb8bfd68a8a2cbb4247666ad84f09e1d50a906fbaf"
+    },
+    {
+      "path": "unsupported-condition.fixture.json",
+      "sha256": "01620963805744ffeadaef621c1dd5e04cc1ce7f863e61fdb0aa948b7648ab80"
+    },
+    {
+      "path": "unsupported-condition.trace.json",
+      "sha256": "f85e9eb3a430f0acae6fd0dab85151a67c4d8080e825051883c7489c6a9acb50"
+    },
+    {
+      "path": "unsupported.map.json",
+      "sha256": "ae223757d6102190efe9769deb67714b19092210f49cf8f61f8b9a0ff8bfec18"
+    },
+    {
+      "path": "up.map.json",
+      "sha256": "d3f6ae208f3fc75bd5684b2da06bde264a60dd9b8002dd16d39ca096e30e23eb"
+    },
+    {
+      "path": "west-edge-rope.map.json",
+      "sha256": "6a8cdbe2f50bc36a09e571f1dbaf6d23a711698926cf5e881471a5cfc41353cb"
+    },
+    {
+      "path": "west-jump-tick10.fixture.json",
+      "sha256": "4dcb092e7f1c1577ceb8876bb30367f0acb60723f2ab0b177f502f7b5b1bf72a"
+    },
+    {
+      "path": "west-jump-tick10.trace.json",
+      "sha256": "3561718eac0ad53eaf21d676df9520383841dd91d02a736a55ca6f580fb8a8d7"
+    }
+  ]
+}

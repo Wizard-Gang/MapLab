@@ -1,4 +1,4 @@
-# Reference controller contact and jump/fall/drop subsets (ML-017/018)
+# Reference controller contact, jump/fall/drop and climb subsets (ML-017–019)
 
 `createWorld(map, profile)` validates the map geometry and movement profile and
 snapshots their source. `step(world, state, {moveX, run})` is the shared pure
@@ -45,8 +45,8 @@ The tests also calculate run/brake, lift and wall/ceiling numbers independently,
 and consume final fixture bytes from an isolated process. Chromium and WebKit
 execute this same module and compare exact serialized replay identities.
 
-`scope: "contact"` and `canCertify: false` are explicit for legacy contact state. Climbing,
-combat, sensors, moving-body resolution, advanced abilities, Test UI and navigation
+`scope: "contact"` and `canCertify: false` are explicit for legacy contact state. For that legacy subset, climbing is unavailable.
+Combat, sensors, moving-body resolution, advanced abilities, Test UI and navigation
 integration belong to later tasks. Additional input fields report `unsupported`;
 configured abilities are not executed. Moving enabled collision bodies, capsules,
 center-foot stance and unknown controller contracts reject. This module cannot
@@ -64,3 +64,12 @@ All legacy contact fixture bytes remain unchanged. Locomotion contacts include
 the axis-stage `pose` so witnesses remain bounded even when Y motion follows an
 X collision. The complete state/input/trace contract and numerical fixture notes
 are published in [conformance/jump](../../conformance/jump/README.md).
+
+ML-019 adds the opt-in `ClimbState` and `moveY` input to these same entry points,
+publishing `scope:"climb"`. The complete attach/climb/dismount, access conditions,
+body clearance, permission, rearm, debug identity and negative fixture contract
+is in [conformance/climb](../../conformance/climb/README.md). `validateClimbs(world)`
+returns profile/controller-qualified access and unsupported-condition diagnostics.
+The authoring panel commits structurally valid path/access edits atomically with
+undo/redo. It does not certify profile reachability. The capability registry stays
+conservative for the complete future runtime; no Test UI or navigation is added.

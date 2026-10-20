@@ -27,7 +27,7 @@ export async function replay(map:ContactMap,profile:MovementDocument,initial:Sta
     const frame=step(world,state,controls);frames.push(frame);state=frame.state;
     if(frame.status!=='ok')break;
   }
-  const body={format:'maplab.contact-replay' as const,version:1 as const,scope:(start.jumpHeldPrev===undefined?'contact':'jump-fall-drop') as Trace['scope'],canCertify:false as const,
+  const body={format:'maplab.contact-replay' as const,version:1 as const,scope:(start.traversalId!==undefined?'climb':start.jumpHeldPrev===undefined?'contact':'jump-fall-drop') as Trace['scope'],canCertify:false as const,
     controller:{key:'maplab.reference-controller' as const,version:1 as const},collision:{key:'maplab.collision' as const,version:1 as const},
     sourceSha256:await digest(world.source),profileSha256:await movementProfileDigest(world.profile),initial:start,input:schedule,frames};
   return {...body,traceSha256:await digest(body)};

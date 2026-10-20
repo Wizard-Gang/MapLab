@@ -1,0 +1,21 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    "ladder-bottom-top.fixture.json",
+    "ladder-top-bottom.fixture.json",
+    "ladder-midpoint.fixture.json",
+    "blocked-exit.fixture.json",
+    "missing-permission.fixture.json",
+    "unsupported-condition.fixture.json",
+    "airborne-rope.fixture.json",
+    "rope-radius-miss.fixture.json",
+    "rope-airborne-end.fixture.json",
+    "rope-leap-off.fixture.json",
+    "endpoint-stop.fixture.json",
+    "endpoint-no-exit.fixture.json",
+    "forest-ladder.fixture.json",
+    "forest-rope.fixture.json",
+    "west-jump-tick10.fixture.json",
+    "direction-denied.fixture.json"
+  ]
+}
