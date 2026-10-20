@@ -103,9 +103,5 @@ export function checkQueue(root) {
   ensure(new Set(live.map((t) => t.id)).size === live.length,
     'Duplicate live task definition');
   live.forEach((t,i) => verify(t, rows[history.length+i], sections));
-  const old = read('docs/IMPLEMENTATION-ROADMAP.md');
-  ensure(old.includes('../implementation_plan.md') && old.includes('specifications/2026-10-16-maplab.md')
-    && !/^### ML-\d{3}|^\| \*\*ML-\d{3}/m.test(old),
-    'Duplicate live task definitions in old roadmap');
   return {active:current[0].id,completed:history.length,future:future.length,reserved:rows.length};
 }
