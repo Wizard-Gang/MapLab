@@ -1,0 +1,1650 @@
+{
+  "id": "upward-pass-downward-land",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "upper-oneway.map.json",
+  "profile": "fixed.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 76800,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    }
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": true,
+      "jump": true,
+      "drop": false
+    }
+  ],
+  "ticks": 50,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16384,
+          "y": 74688,
+          "vx": 0,
+          "vy": -2016,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 1,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 16384,
+          "y": 72672,
+          "vx": 0,
+          "vy": -1920,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 2,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 16384,
+          "y": 70752,
+          "vx": 0,
+          "vy": -1824,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 3,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 16384,
+          "y": 68928,
+          "vx": 0,
+          "vy": -1728,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 4,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 4,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 16384,
+          "y": 67200,
+          "vx": 0,
+          "vy": -1632,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 5,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 5,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 6,
+        "state": {
+          "x": 16384,
+          "y": 65568,
+          "vx": 0,
+          "vy": -1536,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 6,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 6,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 7,
+        "state": {
+          "x": 16384,
+          "y": 64032,
+          "vx": 0,
+          "vy": -1440,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 7,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 7,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 8,
+        "state": {
+          "x": 16384,
+          "y": 62592,
+          "vx": 0,
+          "vy": -1344,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 8,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 8,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 9,
+        "state": {
+          "x": 16384,
+          "y": 61248,
+          "vx": 0,
+          "vy": -1248,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 9,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 9,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 10,
+        "state": {
+          "x": 16384,
+          "y": 60000,
+          "vx": 0,
+          "vy": -1152,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 10,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 10,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 11,
+        "state": {
+          "x": 16384,
+          "y": 58848,
+          "vx": 0,
+          "vy": -1056,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 11,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 11,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 12,
+        "state": {
+          "x": 16384,
+          "y": 57792,
+          "vx": 0,
+          "vy": -960,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 12,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 12,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 13,
+        "state": {
+          "x": 16384,
+          "y": 56832,
+          "vx": 0,
+          "vy": -864,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 13,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 13,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 14,
+        "state": {
+          "x": 16384,
+          "y": 55968,
+          "vx": 0,
+          "vy": -768,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 14,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 14,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 15,
+        "state": {
+          "x": 16384,
+          "y": 55200,
+          "vx": 0,
+          "vy": -672,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 15,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 15,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 16,
+        "state": {
+          "x": 16384,
+          "y": 54528,
+          "vx": 0,
+          "vy": -576,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 16,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 16,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 17,
+        "state": {
+          "x": 16384,
+          "y": 53952,
+          "vx": 0,
+          "vy": -480,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 17,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 17,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 18,
+        "state": {
+          "x": 16384,
+          "y": 53472,
+          "vx": 0,
+          "vy": -384,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 18,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 18,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 19,
+        "state": {
+          "x": 16384,
+          "y": 53088,
+          "vx": 0,
+          "vy": -288,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 19,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 19,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 20,
+        "state": {
+          "x": 16384,
+          "y": 52800,
+          "vx": 0,
+          "vy": -192,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 20,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 20,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 21,
+        "state": {
+          "x": 16384,
+          "y": 52608,
+          "vx": 0,
+          "vy": -96,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 21,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 21,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 22,
+        "state": {
+          "x": 16384,
+          "y": 52512,
+          "vx": 0,
+          "vy": 0,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 22,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 22,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 23,
+        "state": {
+          "x": 16384,
+          "y": 52512,
+          "vx": 0,
+          "vy": 96,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 23,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 23,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 24,
+        "state": {
+          "x": 16384,
+          "y": 52608,
+          "vx": 0,
+          "vy": 192,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 24,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 24,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 25,
+        "state": {
+          "x": 16384,
+          "y": 52800,
+          "vx": 0,
+          "vy": 288,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 25,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 25,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 26,
+        "state": {
+          "x": 16384,
+          "y": 53088,
+          "vx": 0,
+          "vy": 384,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 26,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 26,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 27,
+        "state": {
+          "x": 16384,
+          "y": 53472,
+          "vx": 0,
+          "vy": 480,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 27,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 27,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 28,
+        "state": {
+          "x": 16384,
+          "y": 53952,
+          "vx": 0,
+          "vy": 576,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 28,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 28,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 29,
+        "state": {
+          "x": 16384,
+          "y": 54528,
+          "vx": 0,
+          "vy": 672,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 29,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 29,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 30,
+        "state": {
+          "x": 16384,
+          "y": 55200,
+          "vx": 0,
+          "vy": 768,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 30,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 30,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 31,
+        "state": {
+          "x": 16384,
+          "y": 55968,
+          "vx": 0,
+          "vy": 864,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 31,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 31,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": []
+      },
+      {
+        "tick": 32,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 32,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 33,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 33,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 34,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 34,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 35,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 35,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 36,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 36,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 37,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 37,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 38,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 38,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 39,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 39,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 40,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 40,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 41,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 41,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 42,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 42,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 43,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 43,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 44,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 44,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 45,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 45,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 46,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 46,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 47,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 47,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 48,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 48,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 49,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 49,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 50,
+        "state": {
+          "x": 16384,
+          "y": 56320,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.upper",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 50,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.upper",
+            "normal": [
+              0,
+              -51200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 56320
+            },
+            "point": [
+              13312,
+              56320
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "b7473b9f28fac0d49bdf0672674d00726d83fb0ea6e49aaef8e4f29001f053a4"
+  }
+}

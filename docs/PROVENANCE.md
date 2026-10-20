@@ -90,3 +90,15 @@ welds, snap, solid and segment walls, ceilings, thin-wall sweep, overlap,
 tangency, clearance, source edge mapping, masks, traction/conveyor motion,
 contact budget and rational/stable-ID tie ordering. No third-party geometry,
 assets, physics implementation or engine source was borrowed.
+
+## ML-018 reference jump/fall/drop fixtures
+
+`conformance/jump/` contains original owned CC0-1.0 maps, movement profiles,
+tick checkpoints and canonical published traces. The forest-source map is an
+unchanged copy of the owned R1 forest example; tiny numeric worlds and the jump
+subset/variable profiles are original derivatives of existing owned data.
+No third-party art, geometry, code or engine trajectory is included. The index
+pins all final source and trace bytes. Analytical arc/drop checks, an isolated
+consumer and two browser engines verify the reference traces without widening
+their exact tolerances. See that folder's README for the finite-stance correction
+to R1's explicitly provisional edge-centered QA sketch.

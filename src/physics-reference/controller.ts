@@ -71,7 +71,7 @@ function contact(f:Face,axis:'x'|'y',s:State,point?:Point):Contact {
   if(f.twoSided){const d=axis==='x'?s.vx:s.vy;const n=normal[axis==='x'?0:1];if(mul(n,d)>0)normal=[integer(-normal[0]),integer(-normal[1])];}
   // Unnormalized exact normal: no floating point normalization enters the trace.
   return {axis,bodyId:f.bodyId,shapeId:f.shapeId,edgeIndex:f.edgeIndex,supportId:f.supportId,normal,
-    point:point??[s.x,s.y],kind:f.support?(f.registered?'support':'unregisteredSupport'):'blocking'};
+    ...(s.jumpHeldPrev===undefined?{}:{pose:{x:s.x,y:s.y}}),point:point??[s.x,s.y],kind:f.support?(f.registered?'support':'unregisteredSupport'):'blocking'};
 }
 // Quantize an actual face witness at the finite rectangle, never its remote midpoint.
 // Conservative sweep rounding can leave a gap below 1 su; floor-quantizing the
@@ -95,7 +95,7 @@ function blockingContact(world:World,f:Face,axis:'x'|'y',s:State):Contact {
 }
 const approach=(v:number,target:number,amount:number):number=>v<target?Math.min(integer(v+amount),target):Math.max(integer(v-amount),target);
 
-/** ML-017 contact subset of RC4. Jump/drop/climb/dash/sensors are deliberately absent. */
+/** RC4 contact and ground jump/fall/drop subsets. Advanced abilities remain unsupported. */
 export function step(world:World,old:State,input:Input):Step {
   try{return tick(world,old,input);}catch(e){if(e instanceof RangeError)return {status:'unsafeInteger',state:old,contacts:[],reason:e.message};throw e;}
 }
@@ -103,9 +103,19 @@ function tick(world:World,old:State,input:Input):Step {
   const fail=(status:Step['status'],reason:string):Step=>({status,state:old,contacts:[],reason});
   for(const n of [old.x,old.y,old.vx,old.vy,old.tick])integer(n);
   if(old.tick<0||!['ground','air'].includes(old.mode)||![-1,1].includes(old.facing)||![-1,0,1].includes(input.moveX)||typeof input.run!=='boolean')return fail('invalidState','state/input');
-  if(Object.keys(input).some(k=>!['moveX','run'].includes(k)))return fail('unsupported','only contact moveX/run input is implemented');
+  const locomotion=old.jumpHeldPrev!==undefined;
+  if(Object.keys(input).some(k=>!['moveX','run',...(locomotion?['jump','drop']:[])].includes(k)))return fail('unsupported','input outside selected controller subset');
+  if(!locomotion&&['jumpReleased','ticksSinceJump','dropSuppression','resources'].some(k=>k in old))return fail('invalidState','incomplete locomotion state');
+  if(locomotion){
+    if(typeof old.jumpHeldPrev!=='boolean'||typeof old.jumpReleased!=='boolean'||typeof input.jump!=='boolean'||typeof input.drop!=='boolean'||!Number.isSafeInteger(old.ticksSinceJump)||old.ticksSinceJump!<0||old.dropSuppression===undefined||!old.resources)return fail('invalidState','locomotion state/input');
+    const r=old.resources;
+    if(r.airJumps!==0||r.dashCharges!==0||Object.keys(r).sort().join(',')!=='airJumps,cooldowns,dashCharges'||!r.cooldowns||typeof r.cooldowns!=='object'||Array.isArray(r.cooldowns)||Object.keys(r.cooldowns).length!==0)return fail('invalidState','unsupported resources');
+    if(world.profile.abilities.some(a=>a.kind!=='jump'||a.airJumps!==0))return fail('unsupported','ability outside ground jump subset');
+    const d=old.dropSuppression;
+    if(d!==null&&(typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='group,ticksLeft'||typeof d.group!=='string'||!Number.isSafeInteger(d.ticksLeft)||d.ticksLeft<=0||d.ticksLeft>world.profile.drop.timeoutTicks||!world.profile.drop.canDrop||!world.faces.some(f=>f.bodyId===''&&world.source.footholds.some(v=>v.id===f.supportId&&v.dropGroupId===d.group))))return fail('invalidState','drop suppression');
+  }
   if(overlaps(world,old.x,old.y))return fail('invalidState','initial overlap');
-  const p=world.profile,contacts:Contact[]=[];
+  const p=world.profile,contacts:Contact[]=[],eligibleFaces=world.faces;
   let s={...old};
   let support:Stance|undefined;
   if(s.mode==='ground'){
@@ -114,6 +124,25 @@ function tick(world:World,old:State,input:Input):Step {
   }else if(s.supportId!==null)return fail('invalidState','air support');
   const material=world.source.materials.find(m=>m.id===support?.face.materialId);
   if(material?.tags.some(t=>p.forbiddenMaterialTags.includes(t)))return fail('unsupported','forbidden material');
+  const jump=p.abilities.find(a=>a.kind==='jump');
+  if(locomotion){
+    // Ground jump has priority when jump and drop are requested together (RC4).
+    if(input.jump&&!old.jumpHeldPrev&&s.mode==='ground'&&jump){
+      s.vy=integer(-jump.impulse);s.mode='air';s.supportId=null;s.ticksSinceJump=0;s.jumpReleased=false;support=undefined;
+    }else if(input.drop&&s.mode==='ground'&&p.drop.canDrop){
+      const f=world.source.footholds.find(f=>f.id===support?.face.supportId);
+      if(f?.mode==='oneWay'&&f.dropAllowed&&f.dropGroupId!==null){
+        s.dropSuppression={group:f.dropGroupId,ticksLeft:p.drop.timeoutTicks};
+        s.mode='air';s.supportId=null;s.vy=0;support=undefined;
+      }
+    }
+    if(s.dropSuppression){
+      const group=s.dropSuppression.group;
+      world={...world,faces:world.faces.filter(f=>f.bodyId!==''||!world.source.footholds.some(v=>v.id===f.supportId&&v.dropGroupId===group))};
+    }
+    // A restored ground state must still name an unsuppressed support.
+    if(s.mode==='ground'&&s.dropSuppression&&!resolveStance(world,s.x,s.supportId??'').some(v=>v.y===s.y))return fail('invalidState','suppressed support');
+  }
   const traction=material?.traction??256;
   let target=mul(input.moveX,s.mode==='ground'?(input.run?p.ground.runSpeed:p.ground.walkSpeed):p.air.maxSpeed);
   if(support&&input.moveX!==0&&support.face.b[1]!==support.face.a[1]){const slope=mul(support.face.b[1]-support.face.a[1],input.moveX);const ratio=slope<0?p.ground.uphill:p.ground.downhill;target=target<0?-floorDiv(mul(-target,ratio.num),ratio.den):floorDiv(mul(target,ratio.num),ratio.den);}
@@ -125,10 +154,10 @@ function tick(world:World,old:State,input:Input):Step {
   const startX=s.x,startY=s.y;
   s.x=xh?.coordinate??integer(s.x+dx);
   if(xh){for(const h of xhits.filter(h=>sameHit(h,xh)))contacts.push(blockingContact(world,h.face,'x',{...s,vx:dx}));s.vx=0;}
-  const stances=resolveStance(world,s.x,s.mode==='ground'?s.supportId??'':undefined);
+  const stances=resolveStance(locomotion&&s.mode==='air'?{...world,faces:world.faces.filter(f=>f.bodyId!=='')}:world,s.x,s.mode==='ground'?s.supportId??'':undefined);
   let stance:Stance|undefined;
   if(s.mode==='ground')stance=stances.find(v=>v.y-s.y<=p.ground.snapDistance);
-  else if(dx!==0)stance=stances.filter(v=>v.y<=s.y&&s.y-v.y<=floorDiv(mul(world.half,p.ground.maxSlope.rise),p.ground.maxSlope.run)+1)
+  else if(dx!==0&&(!locomotion||s.vy>=0))stance=stances.filter(v=>v.y<=s.y&&s.y-v.y<=floorDiv(mul(world.half,p.ground.maxSlope.rise),p.ground.maxSlope.run)+1)
     .find(v=>{const lead=startX+(dx>0?world.half:-world.half);return lead>=v.face.a[0]&&lead<=v.face.b[0]&&startY<=groundY(v.face,lead);});
   if(!stance&&s.mode==='air'&&dx!==0){
     const hits=sweep(world,{...s,x:startX},0,dx,true),hit=hits[0];
@@ -181,17 +210,39 @@ function tick(world:World,old:State,input:Input):Step {
       const landing=resolveStance(world,s.x).filter(v=>old.y<=v.y&&s.y<=v.y&&integer(s.y+s.vy)>=v.y).sort((a,b)=>a.y-b.y||supportOrder(a.face,b.face));
       const hit=landing[0];
       // Other blocking faces (including sloped two-sided segments) also stop downward motion.
-      const hits=sweep(world,s,1,s.vy),block=hits[0];
+      const hits=sweep(world,s,1,s.vy,locomotion),block=hits[0];
       if((hits.filter(h=>sameHit(h,block)).length>8)||(landing.filter(h=>h.y===hit?.y).length>8))return fail('contactBudget','y');
       if(block&&(!hit||block.coordinate<hit.y)){s.y=block.coordinate;for(const h of hits.filter(h=>sameHit(h,block)))contacts.push(blockingContact(world,h.face,'y',s));s.vy=0;}
       else if(hit){s.y=hit.y;s.vy=0;s.mode='ground';s.supportId=hit.face.supportId;support=hit;}
       else s.y=integer(s.y+s.vy);
     }
   }
-  if(s.mode==='air')s.vy=Math.min(integer(s.vy+p.air.gravity),p.air.maxFall);
+  if(s.mode==='air'){
+    const rising=s.vy<0;
+    const gravity=locomotion&&jump&&rising&&input.jump&&s.ticksSinceJump!<jump.holdTicks?jump.holdGravity:p.air.gravity;
+    s.vy=integer(s.vy+gravity);
+    if(locomotion&&jump&&rising&&!s.jumpReleased&&old.jumpHeldPrev&&!input.jump){
+      s.jumpReleased=true;
+      const product=mul(s.vy,jump.release.num);
+      s.vy=product<0?integer(-floorDiv(-product,jump.release.den)):floorDiv(product,jump.release.den);
+    }
+    s.vy=Math.min(s.vy,p.air.maxFall);
+  }
   else if(support){
     if(world.source.materials.find(m=>m.id===support.face.materialId)?.tags.some(t=>p.forbiddenMaterialTags.includes(t)))return fail('unsupported','forbidden material');
     s.planeId=support.face.planeId??world.defaultPlane;contacts.push(contact(support.face,'y',s,support.point));
+  }
+  if(locomotion){
+    s.jumpHeldPrev=input.jump!;
+    s.ticksSinceJump=s.mode==='air'?integer(s.ticksSinceJump!+1):0;
+    if(s.dropSuppression){
+      const d=s.dropSuppression,left=integer(s.x-world.half),right=integer(s.x+world.half),top=integer(s.y-world.height);
+      // Use the original world's eligible faces; the filtered world intentionally omits them.
+      const faces=eligibleFaces.filter(f=>f.bodyId===''&&world.source.footholds.some(v=>v.id===f.supportId&&v.dropGroupId===d.group));
+      const below=faces.every(f=>f.b[0]<=left||f.a[0]>=right||top>Math.max(groundY(f,Math.max(left,f.a[0])),groundY(f,Math.min(right,f.b[0]))));
+      const ticksLeft=integer(d.ticksLeft-1);
+      s.dropSuppression=below||ticksLeft===0?null:{group:d.group,ticksLeft};
+    }
   }
   if(overlaps(world,s.x,s.y))return fail('invalidState','result overlap');
   if(input.moveX!==0)s.facing=input.moveX;
