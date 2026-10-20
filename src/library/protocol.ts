@@ -4,7 +4,7 @@ import type { Diagnostic } from '../contracts';
 
 export const ROUTE_PREFIX = '/__maplab/';
 export const ROUTES = Object.freeze({
-  assetImport: '/__maplab/asset-import', assetRead: '/__maplab/asset-read', identity: '/__maplab/identity', library: '/__maplab/library', read: '/__maplab/read', save: '/__maplab/save', recover: '/__maplab/recover',
+  export: '/__maplab/export', assetImport: '/__maplab/asset-import', assetRead: '/__maplab/asset-read', identity: '/__maplab/identity', library: '/__maplab/library', read: '/__maplab/read', save: '/__maplab/save', recover: '/__maplab/recover',
 });
 /** HMR events: a save this server wrote, and outside changes the watcher saw. */
 export const SAVED_EVENT = 'maplab:library-saved';

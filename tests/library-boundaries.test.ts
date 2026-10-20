@@ -9,7 +9,7 @@ const files = (dir: string): string[] => readdirSync(join(repoRoot, dir), { with
   .flatMap((e) => (e.isDirectory() ? files(`${dir}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${dir}/${e.name}`] : []));
 const imports = (file: string): string[] => [...readFileSync(join(repoRoot, file), 'utf8').matchAll(/^\s*(?:import|export)\b[^'"]*?from\s+'([^']+)'/gm)].map((m) => m[1] as string);
 const resolveImport = (file: string, spec: string): string => (spec.startsWith('.') ? relative(repoRoot, join(repoRoot, file, '..', spec)) : spec);
-const NODE_ONLY = ['src/library/folder', 'src/library/writer', 'src/library/plugin', 'src/library/assets'];
+const NODE_ONLY = ['src/library/folder', 'src/library/writer', 'src/library/plugin', 'src/library/assets', 'src/library/export', 'src/export/bundle', 'src/export/zip'];
 
 describe('module boundaries', () => {
   test('only the Node-only library modules import node: built-ins or vite', () => {
@@ -34,9 +34,9 @@ describe('module boundaries', () => {
     expect(seen.has('src/library/client.ts') && seen.has('src/library/drafts.ts')).toBe(true);
   });
 
-  test('contracts, domain and history import no library, app or editor session code', () => {
-    for (const f of [...files('src/contracts'), ...files('src/domain'), 'src/editor/history.ts', 'src/editor/gesture.ts']) {
-      for (const spec of imports(f)) expect(`${f} -> ${spec}`).not.toMatch(/-> .*\/(library|app)\/|-> \.\/document$/);
+  test('contracts, export, domain and history import no library, app or editor session code', () => {
+    for (const f of [...files('src/contracts'), ...files('src/export'), ...files('src/domain'), 'src/editor/history.ts', 'src/editor/gesture.ts']) {
+      for (const spec of imports(f)) expect(`${f} -> ${spec}`).not.toMatch(/-> .*\/(library|app|editor)\/|-> \.\/document$/);
     }
   });
 
@@ -47,8 +47,10 @@ describe('module boundaries', () => {
     const browser = [...files('src/app'), 'src/library/client.ts', 'src/library/drafts.ts', 'src/library/protocol.ts'];
     for (const f of browser) expect(readFileSync(join(repoRoot, f), 'utf8'), f).not.toMatch(/(?:https?|wss?):\/\//);
     const client = readFileSync(join(repoRoot, 'src/library/client.ts'), 'utf8');
+    const exporter = readFileSync(join(repoRoot, 'src/app/ExportPanel.tsx'), 'utf8');
+    expect([...exporter.matchAll(/fetch\(([^,]+),/g)].map((m) => m[1])).toEqual(['ROUTES.export']);
     expect([...client.matchAll(/fetch\(([^,]+),/g)].map((m) => m[1])).toEqual(['route']);
     expect(readFileSync(join(repoRoot, 'src/library/protocol.ts'), 'utf8').match(/'\/__maplab\/[a-z-]+'/g)).toEqual(
-      ["'/__maplab/asset-import'", "'/__maplab/asset-read'", "'/__maplab/identity'", "'/__maplab/library'", "'/__maplab/read'", "'/__maplab/save'", "'/__maplab/recover'"]);
+      ["'/__maplab/export'", "'/__maplab/asset-import'", "'/__maplab/asset-read'", "'/__maplab/identity'", "'/__maplab/library'", "'/__maplab/read'", "'/__maplab/save'", "'/__maplab/recover'"]);
   });
 });

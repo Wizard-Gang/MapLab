@@ -1,0 +1,8 @@
+{
+  "license": "CC0-1.0",
+  "source": "placeholder-library: owned R1 forest/clearing portal cycle, movement, catalog, tileset; optional expanded prefab excluded",
+  "positive": ["repeat", "reordered-sets", "semantic-sequences", "approved-assets", "used-optional-dependencies", "both-engine-download"],
+  "inventory": ["path", "size", "unlisted", "digest", "missing", "duplicate", "self", "missing-dependency"],
+  "archive": ["compression", "bomb", "crc", "offset", "symlink", "trailing", "truncated", "extra", "name"],
+  "forged": ["contracts", "schema", "dependency-path", "document-order"]
+}

@@ -46,5 +46,5 @@ write authority or implicit gameplay server is part of the architecture.
 
 Specification C–I and K, as amended in place by the
 [R1 revision](specifications/2026-10-17-maplab-r1/README.md), remain the detailed
-product/data/controller/validation authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order; the former roadmap file is only a pointer.
+product/data/controller/validation authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order.
 No performance target or conformance fixture is claimed to pass before its task.

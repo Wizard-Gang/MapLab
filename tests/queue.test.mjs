@@ -11,7 +11,7 @@ afterEach(() => temporary.splice(0).forEach((p) => rmSync(p, { recursive: true, 
 function fixture() {
   const p = mkdtempSync(join(tmpdir(), 'maplab-queue-'));
   temporary.push(p);
-  for (const f of ['implementation_plan.md', 'docs/IMPLEMENTATION-ROADMAP.md',
+  for (const f of ['implementation_plan.md',
     'docs/specifications/2026-10-16-maplab.md', 'docs/deliveries.json', 'config/change.json']) {
     mkdirSync(dirname(join(p, f)), { recursive: true });
     cpSync(join(root, f), join(p, f));
@@ -43,7 +43,6 @@ test.each([
   ['wrong specification anchor', 'implementation_plan.md', (s) => s.replace(/(### ML-\d{3} \/[^\n]*\n[\s\S]*?\[[A-K]\d+\]\(docs\/specifications\/2026-10-16-maplab\.md#)[^)]+\)/, '$1wrong)'), 'Specification traceability'],
   ['missing fixture', 'implementation_plan.md', (s) => s.replace('Create owned fixture(s): ' + fixtures, 'Create owned fixture(s): TODO'), 'Executable subtasks'],
   ['premature completion', 'implementation_plan.md', (s) => s.replace('<!-- completed-history:end -->', '- **' + active + '** — prematurely complete\n<!-- completed-history:end -->'), 'Completed tasks'],
-  ['duplicated roadmap definition', 'docs/IMPLEMENTATION-ROADMAP.md', (s) => s + '\n### ' + active + ' / P0\n', 'Duplicate live task definitions'],
 ])('rejects %s', (_label, file, transform, diagnostic) => {
   const p=fixture();
   edit(p, file, transform);

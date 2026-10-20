@@ -25,7 +25,6 @@ the pieces the adopted spec lacked. Each section marks its content **Kept**, **C
 | I | [I-validation-acceptance.md](I-validation-acceptance.md): fixtures, test layers, engine conformance, final scenario |
 | J | [J-implementation-queue.md](J-implementation-queue.md): repo status, how R1 lands, ML-001…ML-044 with R1 deltas |
 | K | [K-decisions-risks.md](K-decisions-risks.md): decisions, rejected alternatives, risks, open questions |
-| — | [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md) |
 
 ## Recommendation
 
@@ -65,8 +64,7 @@ Keep the adopted architecture's backbone:
 **Prioritized queue** (IDs and order unchanged, J3):
 
 1. **ML-002**: done 17 October 2026 (`3e270930`, rulesets live).
-2. **ML-003** adopts R1 (owner chose option A) and builds base schemas. The prompt is in
-   [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+2. **ML-003** adopts R1 (owner chose option A) and builds base schemas.
 3. ML-004–007: contracts and an independent reader.
 4. ML-008–016: authoring, library, export.
 5. ML-017–023: controller, Test, navigation.

@@ -1,3 +1,5 @@
+import { exportLibrary } from './export';
+import { BundleError } from '../export/zip';
 // Node only: the dev-server plugin that serves and writes the library folder (adopted H4, R1 H4/H8, the RigLab
 // pattern). Its middleware runs before Vite's transform and static middleware (Vite 8's own CORS and host checks
 // run earlier still), and every /__maplab/ request passes the loopback guard before anything is read. Requests run one at a time, so a save never interleaves with another read or
@@ -108,6 +110,19 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
 
       async function route(url: string, body: unknown, response: ServerResponse): Promise<void> {
         const f = folder as LibraryFolder;
+        if (url === ROUTES.export) {
+          const b = body as { entryMapId?: unknown; baseDigest?: unknown };
+          if (typeof b.entryMapId !== 'string' || typeof b.baseDigest !== 'string' || !/^[a-f0-9]{64}$/.test(b.baseDigest)) return send(response, 400, no('export.request', 'A saved entry map ID and digest are required'));
+          const bundle = await exportLibrary(f, b.entryMapId, b.baseDigest);
+          response.statusCode = 200;
+          response.setHeader('Content-Type', 'application/zip');
+          response.setHeader('Content-Disposition', `attachment; filename="maplab-${bundle.digest.slice(0, 12)}.zip"`);
+          response.setHeader('Cache-Control', 'no-store');
+          response.setHeader('X-Content-Type-Options', 'nosniff');
+          response.setHeader('X-MapLab-Bundle-SHA256', bundle.digest);
+          response.setHeader('X-MapLab-Warning-Count', bundle.warnings.length);
+          response.end(bundle.zip); return;
+        }
         if (url === ROUTES.identity) return send(response, 200, { app: 'maplab', pid: process.pid, root: realpathSync(server.config.root), library: f.label } satisfies Identity);
         if (url === ROUTES.assetImport) return send(response, 200, importAsset(f, body));
         if (url === ROUTES.assetRead) return send(response, 200, readAsset(f, body));
@@ -153,7 +168,7 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
           if (typeof body !== 'object' || body === null || Array.isArray(body)) return send(response, 400, no('request.json', 'The request body must be a JSON object'));
           await serial(() => route(url, body, response));
         })().catch((e: unknown) => {
-          const known = e instanceof LibraryError;
+          const known = e instanceof LibraryError || e instanceof BundleError;
           if (!known) server.config.logger.error(`MapLab library request failed: ${e instanceof Error ? e.stack : String(e)}`);
           if (!response.headersSent) send(response, known ? (e.code === 'request.encoding' ? 400 : 409) : 500, no(known ? e.code : 'library.failed', e instanceof Error ? e.message : String(e)));
         });

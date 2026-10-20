@@ -6,7 +6,7 @@ import { checkPolicyConfig } from './repository-policy.mjs';
 
 // R1, adopted at ML-003, is a frozen revision record: every file stays present and link-checked.
 const revisionR1 = [
-  'README.md', 'NEXT-SESSION-PROMPT.md', 'A-research.md', 'B-riglab-hexframe-review.md', 'C-product.md',
+  'README.md', 'A-research.md', 'B-riglab-hexframe-review.md', 'C-product.md',
   'D-world-physics.md', 'D-reference-controller.md', 'E-navigation.md', 'F-formats.md',
   'G-engine-integration.md', 'H-editor-architecture.md', 'I-validation-acceptance.md',
   'J-implementation-queue.md', 'K-decisions-risks.md',
@@ -27,7 +27,7 @@ export const requiredFiles = [
   'docs/PHYSICS-CONFORMANCE.md', 'docs/CHANGE-MANAGEMENT.md',
   'docs/CONTROLLER-CONTRACT.md', 'schemas/maplab.movement.v1.schema.json',
   'contracts/maplab.reference-controller.v1.capabilities.json',
-  'docs/RELEASE-MANAGEMENT.md', 'docs/IMPLEMENTATION-ROADMAP.md',
+  'docs/RELEASE-MANAGEMENT.md',
   'docs/PROVENANCE.md', 'docs/specifications/2026-10-16-maplab.md',
   'config/github-repository-settings.json', 'config/lifecycle-scripts.json',
   'config/change.json', 'package.json', 'package-lock.json', '.node-version',

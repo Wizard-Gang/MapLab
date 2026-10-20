@@ -6,7 +6,7 @@ was read back before ML-002 activation. Its change record is preserved unchanged
 There is no root-commit path in current validation. Every new task uses one
 controlled branch, one scoped PR and one squash commit.
 
-`config/change.json`, the single active queue, the permanent roadmap, current
+`config/change.json`, the single active queue, the reserved future queue, current
 change record and preceding delivery chain must agree. The same validator accepts
 any reserved post-bootstrap task with a complete preceding chain; a synthetic
 ML-003 test proves it is not bound to ML-002. Offline evidence validation checks
@@ -100,6 +100,6 @@ failed predecessor, main CI, access or protection gate; preserve work and eviden
 
 ## Permanent plan and J2 traceability
 
-`implementation_plan.md` is the sole current/future task queue. Each reserved J2 ID retains exact scope, exclusions and acceptance and now has executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `docs/IMPLEMENTATION-ROADMAP.md` is a historical pointer only. `scripts/check-queue.mjs` enforces sequential first-open selection, uninterrupted delivered predecessor chain, retirement of completed IDs, future preservation, exact J2 fields, section link validity and no duplicate legacy roadmap definitions. `check:change` and canonical `check` invoke it. Synthetic next-task and malformed-queue tests demonstrate generic selection rather than ML-002-only parsing.
+`implementation_plan.md` is the sole current/future task queue. Each reserved J2 ID retains exact scope, exclusions and acceptance and now has executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `scripts/check-queue.mjs` enforces sequential first-open selection, uninterrupted delivered predecessor chain, retirement of completed IDs, future preservation, exact J2 fields, and section link validity. `check:change` and canonical `check` invoke it. Synthetic next-task and malformed-queue tests demonstrate generic selection rather than ML-002-only parsing.
 
 ML-002 delivered this governance scope. Later tasks change it only through their own controlled records; ML-003 generalized the queue tests to follow the delivery chain.
