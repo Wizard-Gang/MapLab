@@ -1,0 +1,296 @@
+{
+  "files": [
+    {
+      "path": "air-slope-catch.fixture.json",
+      "sha256": "7435c2ede25b9f8c15d49c0877520ae2c9e91e5e844ac81bf8b88fb5bb9d371f"
+    },
+    {
+      "path": "air-slope-catch.map.json",
+      "sha256": "0cc0609c3d64daaa46efbfba102028eaf9fd11cc61c63b3267d1950a8fc7483f"
+    },
+    {
+      "path": "axis-corner.fixture.json",
+      "sha256": "b428f9aec16a4581266cb964844e5e63fa8b88ab07b2cff598942fd904ecb62c"
+    },
+    {
+      "path": "axis-corner.map.json",
+      "sha256": "270dfbe754fc775da38db963334a161fcdda92d3eab78266079a55e5cfcba64a"
+    },
+    {
+      "path": "boundary-tangent.fixture.json",
+      "sha256": "e766bcf212374bde9d575df6bb14587a63f48638bc6bb5e747b2640c18ddabeb"
+    },
+    {
+      "path": "boundary-tangent.map.json",
+      "sha256": "4f2969dd7faa14471006ba1b2de1ce4c2df8af1b6e5ae08eeabf1ed6e0a3070e"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "cb9b3cf812fe13ede7d044909b01f92e757f7ff3e6cafe7ae4976d48d398404f"
+    },
+    {
+      "path": "ceiling-bump.fixture.json",
+      "sha256": "865805fdf728d99e9cf89ab35422c5a9ef9c6367ed76510118ff925350c560b4"
+    },
+    {
+      "path": "ceiling-bump.map.json",
+      "sha256": "7a6a66889fdc4f5a4479c8cc54548a1fbfc04e56f10e3a676f1dbbc9c2832429"
+    },
+    {
+      "path": "concave-source-edge.fixture.json",
+      "sha256": "38ef4c2c125ed1dfda2cc37fe7ae0cb96282dda11709348a1182a08b4fdee59c"
+    },
+    {
+      "path": "concave-source-edge.map.json",
+      "sha256": "7b90f5eeb03d5c6b695ab4be38570c8347fc5cbe063cf8de45917df757bd79e6"
+    },
+    {
+      "path": "contact-budget.fixture.json",
+      "sha256": "48cdc6c8e69222465373ebe16c18e7f985893bbd21cd9be0d25bf7dfb55cae77"
+    },
+    {
+      "path": "contact-budget.map.json",
+      "sha256": "c91f0563815a060b6b46ecbbdf80b442a90ccf57e8a174e89eca9b936ade7304"
+    },
+    {
+      "path": "contact-tie.fixture.json",
+      "sha256": "901b2e10d21f774cbeefe69a4c9489780be2c2bad9f6099b449ec2ebc59b6c7d"
+    },
+    {
+      "path": "contact-tie.map.json",
+      "sha256": "185193eba096a63d99c38b93963a551a085415b23e2e7e47086873ce50a9024a"
+    },
+    {
+      "path": "contact.movement.json",
+      "sha256": "47ef9c2e9d06ef8bce7693e8f5230b93ef73401200a6548c53045a3aa67a16c9"
+    },
+    {
+      "path": "conveyor.fixture.json",
+      "sha256": "3edee19f1de86272dcd3312de8031000b3783275875608b0277d8e79066d8407"
+    },
+    {
+      "path": "conveyor.map.json",
+      "sha256": "899b3ea71ed781f5511774321df85d3c737ba0e50602c785a89fab0a1c38cec5"
+    },
+    {
+      "path": "disabled-body.fixture.json",
+      "sha256": "b9761c42ecee8e92d7719f422ace22750ef65e04f965bc8532b648866f67da80"
+    },
+    {
+      "path": "disabled-body.map.json",
+      "sha256": "7c7701262f71190708ca7444a4acde2064fc656d54457f82e1327b630d37caa8"
+    },
+    {
+      "path": "exact-clearance.fixture.json",
+      "sha256": "7b14215a19ef74d1d5572635d8645554433d85160f81c5f97d2ff0eb75e98fab"
+    },
+    {
+      "path": "exact-clearance.map.json",
+      "sha256": "6f82dcb54d41a3eda85b6709773fba94995e93de9fc562e3ab92b72ddd260d16"
+    },
+    {
+      "path": "flat-rest.fixture.json",
+      "sha256": "9ad8c37bec12e2370884f0ae9d355c7860a6359cc2836e970963fe312b340f49"
+    },
+    {
+      "path": "flat-rest.map.json",
+      "sha256": "f4dd7d78448370d5c43284ee786a3e5a7b70ec38c71083328216a625632b76ca"
+    },
+    {
+      "path": "foothold-tie.fixture.json",
+      "sha256": "757a33c505a0f8a4ccd4abc7a7e67e2834959bd89aa9c06fa820fe92f47acaf3"
+    },
+    {
+      "path": "foothold-tie.map.json",
+      "sha256": "b8d2f5ee4932b52c486a4a5f4bce53df543f85ab395f893a81e95998b564573d"
+    },
+    {
+      "path": "fractional-contact-order.fixture.json",
+      "sha256": "375114b6a86608ffe28c1b74ac78a3077b1d768f867caa66d9abf970951df352"
+    },
+    {
+      "path": "fractional-contact-order.map.json",
+      "sha256": "ffa2384d81c4a035122dc02027af9eba586b6a14eb1c987e7e197163d84e1413"
+    },
+    {
+      "path": "ice-brake.fixture.json",
+      "sha256": "1445ad5fa222999c330e676fb7b3779dad0703bfcf2ca5377046bb1b17d83515"
+    },
+    {
+      "path": "ice-brake.map.json",
+      "sha256": "47e4bf2794009d830f78ade68d6b143e67fd2557431d3e51c161a4a9de3050f4"
+    },
+    {
+      "path": "initial-overlap.fixture.json",
+      "sha256": "56bba78fcfd95ef91ccc0bd5e902e1979fe8c6350da6d461f377857fe18bd53d"
+    },
+    {
+      "path": "initial-overlap.map.json",
+      "sha256": "de7b4f6793e19a7b1eb32dc01f8ed17d623c7580b91491d65c173ebe2071f860"
+    },
+    {
+      "path": "narrow-clearance.fixture.json",
+      "sha256": "6d802022a9637eaf5719945c0247462a35bcb8e53d944e5341b71c1707a50bee"
+    },
+    {
+      "path": "narrow-clearance.map.json",
+      "sha256": "6391b3a91f39f7c4d33226372eb1d896cae5d21cc2f2855d29e12238334e1973"
+    },
+    {
+      "path": "run-brake.fixture.json",
+      "sha256": "3552317dfe92e7e6f736da9347917ae486bd343de6fc8cd81b12d4a44c34908d"
+    },
+    {
+      "path": "run-brake.map.json",
+      "sha256": "a7e747562d65e0978065ea45236a2ff4af519bbdf6ed50970c027d513f67ba55"
+    },
+    {
+      "path": "segment-wall.fixture.json",
+      "sha256": "59dc9e9d148b0b435df3d4102f05bfb0d5097154d83a2722fdc24cf86dec6ee3"
+    },
+    {
+      "path": "segment-wall.map.json",
+      "sha256": "bb25de522b79f937ff4edf30da3d2f48b9d54d9171ba8131146ec70edc36da71"
+    },
+    {
+      "path": "separated-slope-ceilings.fixture.json",
+      "sha256": "8cf2b35992cfa5f6237a581efece425ecea026bc48a1c2020eaf14031ef97df4"
+    },
+    {
+      "path": "separated-slope-ceilings.map.json",
+      "sha256": "c637dc192215bfbb29bf0fcd069f6c286d3a3e72c57300e03f2f7e224e19ec5d"
+    },
+    {
+      "path": "slope-40-blocking.fixture.json",
+      "sha256": "1d1b7e8f6b861f8a1c2a5ceade328d178a69f3a4338b3e4868f8b697afc3977f"
+    },
+    {
+      "path": "slope-40-blocking.map.json",
+      "sha256": "c89d3457adf48d6fb6dee591f366d143dc84371a89cad3987fe1658baaaa4de2"
+    },
+    {
+      "path": "slope-40-blocking.movement.json",
+      "sha256": "976d0750496a1f746dc0a0b2043093db93b05bfb5967ef4f09f8aeb97564de66"
+    },
+    {
+      "path": "slope-40-walkable.fixture.json",
+      "sha256": "97ed04b08ab748937b9f6c059fa246e6477c87e453cca91da6ac50b1d9ac0898"
+    },
+    {
+      "path": "slope-40-walkable.map.json",
+      "sha256": "ac51a0080e429f2924aba7a6c66af20ff0f34a444b7364b39b0b553c8061807e"
+    },
+    {
+      "path": "slope-catch-limit.fixture.json",
+      "sha256": "6425ecb8f124f2481d61c4af88da1641bcd5632a472e4fa325bbaa554d7b2587"
+    },
+    {
+      "path": "slope-catch-limit.map.json",
+      "sha256": "a0eaea00b9287687f261aede607d1dbd342155dc163c46d61831ea20c84a38fd"
+    },
+    {
+      "path": "slope-clearance.fixture.json",
+      "sha256": "9630737abf28e7be2f35f0cbc09531b337eaee88fc11b9c42262ffd701bd8050"
+    },
+    {
+      "path": "slope-clearance.map.json",
+      "sha256": "14bb9ade6fe86ad5a3c3a4df602e41574e11d589b88d8cf810fbefc200cadb13"
+    },
+    {
+      "path": "slope-down.fixture.json",
+      "sha256": "a99d7219a922d9044a5bde340dd1da17b1e7d6fdd4846cd8fd65fe8e801209be"
+    },
+    {
+      "path": "slope-down.map.json",
+      "sha256": "c1b1e516425887ecc84c830b7cf1d75c04130eb8ebd1d8d99a2afbae5f5733ae"
+    },
+    {
+      "path": "slope-up.fixture.json",
+      "sha256": "b41ab8cfb1e9f1c5b3516ef30f5917a3b7b20e065dce5431408acf4bd581e186"
+    },
+    {
+      "path": "slope-up.map.json",
+      "sha256": "b1a6f333b7469db114398c513ebeb0b183f425d68f5435a1074c8dde4cf989c6"
+    },
+    {
+      "path": "snap-detach.fixture.json",
+      "sha256": "350c75310bd4206133e573d06cc54ef0c6a958c6be78dc4be2e58822386ddf48"
+    },
+    {
+      "path": "snap-detach.map.json",
+      "sha256": "158f19323a0da396e68212afcc32944381f30910f685fb97cc061257b899f083"
+    },
+    {
+      "path": "snap-detach.movement.json",
+      "sha256": "26782b9afab6ae440016c8808b0722527b1ad30754703b05938b5087e60517bf"
+    },
+    {
+      "path": "snap-follow.fixture.json",
+      "sha256": "d3562bbfeecb2a7404d267cde7145e6b280a7dca6e0eb4304c4eeeafcf87ea26"
+    },
+    {
+      "path": "snap-follow.map.json",
+      "sha256": "01615becbbbd0621407348805e5cc0b05783a1df5fbd35e63f67137a67a917be"
+    },
+    {
+      "path": "snap-follow.movement.json",
+      "sha256": "10cac247a639adae7485c1306285a70807f4d5dc6f7de40518c09db552f30486"
+    },
+    {
+      "path": "steep-oneway-ignored.fixture.json",
+      "sha256": "e1ba8eed2933fd33092b4d63c7e5f523e7feedd8e3fa6c112404a9028041f85e"
+    },
+    {
+      "path": "steep-oneway-ignored.map.json",
+      "sha256": "7bc90646c0c818a2162a6a9216ff194a7c1c8062900711d04e8bc63769bcd598"
+    },
+    {
+      "path": "symmetric-mask.fixture.json",
+      "sha256": "3c91aaafba1796d0aaa32f2ca0fa8467c5ab5942f7eff532b47cefc7b3f194e2"
+    },
+    {
+      "path": "symmetric-mask.map.json",
+      "sha256": "0fcbcd5c523701e265b0f45782f0a87c191fc7232ad01a5a252df3ad18ddfd95"
+    },
+    {
+      "path": "thin-wall.fixture.json",
+      "sha256": "8ba99f5599bddc4d2bd08e67cddea067db2ebf2b78a3c6b34f355cef029b5d26"
+    },
+    {
+      "path": "thin-wall.map.json",
+      "sha256": "1372d2e89866c01b440e8175cd40b863df45219e5308e1b9663ee7d32bfeb141"
+    },
+    {
+      "path": "translated-body-frame.fixture.json",
+      "sha256": "9fb9f8fa01485da3459d37bf67c4f0b7ae6352aa7a28b3120b40674a5e7b4e1a"
+    },
+    {
+      "path": "translated-body-frame.map.json",
+      "sha256": "30e4f3cfd7a68d5fc56b24eb319853f2d6fd640c1e61bcece4fd4f919d13cd5e"
+    },
+    {
+      "path": "unregistered-support.fixture.json",
+      "sha256": "4bcec6cfd85bbd6f2cb6c5ab4a886931fb143edcafa6a3dcf731ae03579251fc"
+    },
+    {
+      "path": "unregistered-support.map.json",
+      "sha256": "93da6eda0550c5feb81ef6eafb141a68bf45a28f674f0cddaaa2c8bca6824fd5"
+    },
+    {
+      "path": "unwelded-edge.fixture.json",
+      "sha256": "b9baf123c6775bf791f2fcc4fb1f752214099fec49726ac0dc6478966ad0c1d8"
+    },
+    {
+      "path": "unwelded-edge.map.json",
+      "sha256": "45ce58266437455a352ac0ad40c2225c1565a11d665e8b04f72c7f7073f35dfc"
+    },
+    {
+      "path": "welded-seam.fixture.json",
+      "sha256": "2a1cdb3b547cb4b901d08123b9963224038984ffeccfd201ee7f7267d826ba98"
+    },
+    {
+      "path": "welded-seam.map.json",
+      "sha256": "72aa49d2cc5cfae2281b514ae67c30c13798a1b97cda549eba22e49fc48eecaa"
+    }
+  ]
+}

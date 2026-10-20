@@ -1,0 +1,72 @@
+{
+  "id": "snap-follow",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "snap-follow.map.json",
+  "profile": "snap-follow.movement.json",
+  "initial": {
+    "x": 20480,
+    "y": 26112,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.b",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 21504,
+          "y": 26624,
+          "vx": 1024,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              8192,
+              -16384
+            ],
+            "point": [
+              18432,
+              26624
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "5c1d9b2df744c252471f2c3ceb355f529d23263deac78ffbf0db5c3eea261a0e"
+  }
+}

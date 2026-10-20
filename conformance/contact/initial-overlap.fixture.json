@@ -1,0 +1,55 @@
+{
+  "id": "initial-overlap",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "initial-overlap.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 25856,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "invalidState",
+    "checkpoints": [
+      {
+        "tick": 0,
+        "state": {
+          "x": 16384,
+          "y": 25856,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 0
+        },
+        "contacts": []
+      }
+    ],
+    "traceSha256": "bdbff673cb61920f5243cad02e60f304cc77430084e1f5261a904c1e39bdc3ac"
+  }
+}

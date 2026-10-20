@@ -1,0 +1,104 @@
+{
+  "id": "axis-corner",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "axis-corner.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 20480,
+    "y": 23040,
+    "vx": 8192,
+    "vy": 8192,
+    "mode": "air",
+    "supportId": null,
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 22528,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "x",
+            "bodyId": "body.wall",
+            "shapeId": "shape.wall",
+            "edgeIndex": 3,
+            "supportId": null,
+            "normal": [
+              -25600,
+              0
+            ],
+            "point": [
+              25600,
+              23040
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "x",
+            "bodyId": "body.wall",
+            "shapeId": "shape.wall",
+            "edgeIndex": 3,
+            "supportId": null,
+            "normal": [
+              -25600,
+              0
+            ],
+            "point": [
+              25600,
+              23040
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              19456,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "ac4adeaf9a37b741dd16a288021a01638edb42634171614c6f544b2c85c9cd7d"
+  }
+}

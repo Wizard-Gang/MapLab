@@ -1,0 +1,88 @@
+{
+  "id": "slope-40-blocking",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "slope-40-blocking.map.json",
+  "profile": "slope-40-blocking.movement.json",
+  "initial": {
+    "x": -4096,
+    "y": 20480,
+    "vx": 8192,
+    "vy": 0,
+    "mode": "air",
+    "supportId": null,
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 2996,
+          "y": 20480,
+          "vx": 0,
+          "vy": 96,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "x",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": null,
+            "normal": [
+              -13824,
+              -16384
+            ],
+            "point": [
+              2996,
+              23072
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "x",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": null,
+            "normal": [
+              -13824,
+              -16384
+            ],
+            "point": [
+              2996,
+              23072
+            ],
+            "kind": "blocking"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "652c5ef7378c7e8cd8e6da1f89ab7c5014f4f5e04b3babf451570aafc8b2d5b3"
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "id": "run-brake",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "run-brake.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 25600,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    },
+    {
+      "fromTick": 6,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 12,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16448,
+          "y": 25600,
+          "vx": 64,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              13376,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 16576,
+          "y": 25600,
+          "vx": 128,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              13504,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 16768,
+          "y": 25600,
+          "vx": 192,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              13696,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 17024,
+          "y": 25600,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 4
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              13952,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 17280,
+          "y": 25600,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 5
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14208,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 6,
+        "state": {
+          "x": 17536,
+          "y": 25600,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 6
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14464,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 7,
+        "state": {
+          "x": 17728,
+          "y": 25600,
+          "vx": 192,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 7
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14656,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 8,
+        "state": {
+          "x": 17856,
+          "y": 25600,
+          "vx": 128,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 8
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14784,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 9,
+        "state": {
+          "x": 17920,
+          "y": 25600,
+          "vx": 64,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 9
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14848,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 10,
+        "state": {
+          "x": 17920,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 10
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14848,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 11,
+        "state": {
+          "x": 17920,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 11
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14848,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 12,
+        "state": {
+          "x": 17920,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 12
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              14848,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "2185704f2f0d09749e9089df91e560b8344cbb4f94e1d6af903a9d7e58c7f3a4"
+  }
+}

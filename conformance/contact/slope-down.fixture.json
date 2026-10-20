@@ -1,0 +1,296 @@
+{
+  "id": "slope-down",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "slope-down.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 15872,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.slope",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": -1,
+      "run": false
+    }
+  ],
+  "ticks": 8,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16320,
+          "y": 15904,
+          "vx": -64,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              19392,
+              15904
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 16192,
+          "y": 15968,
+          "vx": -128,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 2
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              19264,
+              15968
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 16000,
+          "y": 16064,
+          "vx": -192,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 3
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              19072,
+              16064
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 15744,
+          "y": 16192,
+          "vx": -256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 4
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              18816,
+              16192
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 15488,
+          "y": 16320,
+          "vx": -256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 5
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              18560,
+              16320
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 6,
+        "state": {
+          "x": 15232,
+          "y": 16448,
+          "vx": -256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 6
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              18304,
+              16448
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 7,
+        "state": {
+          "x": 14976,
+          "y": 16576,
+          "vx": -256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 7
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              18048,
+              16576
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 8,
+        "state": {
+          "x": 14720,
+          "y": 16704,
+          "vx": -256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": -1,
+          "tick": 8
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -16384,
+              -32768
+            ],
+            "point": [
+              17792,
+              16704
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "cb457beb320960c14f70762c58278c115f92a2143ba5438443880cb5cdbc7ed6"
+  }
+}

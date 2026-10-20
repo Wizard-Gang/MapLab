@@ -1,0 +1,88 @@
+{
+  "id": "segment-wall",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "segment-wall.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 25600,
+    "vx": 16384,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 22528,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "x",
+            "bodyId": "body.wall",
+            "shapeId": "shape.wall",
+            "edgeIndex": 0,
+            "supportId": null,
+            "normal": [
+              -25600,
+              0
+            ],
+            "point": [
+              25600,
+              25600
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              19456,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "01dd5387471d5d7ba8c88c0e6fbbd820e349f2e423511ed66a6e02b2a9b0000b"
+  }
+}

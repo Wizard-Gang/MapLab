@@ -1,0 +1,120 @@
+{
+  "id": "separated-slope-ceilings",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "separated-slope-ceilings.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 10240,
+    "y": 44544,
+    "vx": 20000,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.slope",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 17408,
+          "y": 40960,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "x",
+            "bodyId": "body.ceiling-a",
+            "shapeId": "shape.ceiling-a",
+            "edgeIndex": 1,
+            "supportId": null,
+            "normal": [
+              30720,
+              0
+            ],
+            "point": [
+              16896,
+              30720
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "x",
+            "bodyId": "body.ceiling-a",
+            "shapeId": "shape.ceiling-a",
+            "edgeIndex": 2,
+            "supportId": null,
+            "normal": [
+              0,
+              512
+            ],
+            "point": [
+              16896,
+              30720
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "x",
+            "bodyId": "body.ceiling-a",
+            "shapeId": "shape.ceiling-a",
+            "edgeIndex": 3,
+            "supportId": null,
+            "normal": [
+              -30720,
+              0
+            ],
+            "point": [
+              16384,
+              30720
+            ],
+            "kind": "blocking"
+          },
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -32768,
+              -65536
+            ],
+            "point": [
+              20480,
+              40960
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "ff712d7f42cdede83897401fd2f661df6d9b7a263ce1f9f15d66aaa3f9be5247"
+  }
+}
