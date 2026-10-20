@@ -1,0 +1,32 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    "reachable-gap.fixture.json",
+    "blocked-gap.fixture.json",
+    "fixed-arc.fixture.json",
+    "no-auto-repeat.fixture.json",
+    "ground-rearm.fixture.json",
+    "no-air-jump.fixture.json",
+    "no-jump-ability.fixture.json",
+    "solid-drop-refusal.fixture.json",
+    "variable-hold.fixture.json",
+    "early-release.fixture.json",
+    "release-once.fixture.json",
+    "impossible-high.fixture.json",
+    "low-ceiling.fixture.json",
+    "upward-pass-downward-land.fixture.json",
+    "crossing-refusal.fixture.json",
+    "upward-side-pass.fixture.json",
+    "edge-fall.fixture.json",
+    "targeted-lower-landing.fixture.json",
+    "drop-timeout.fixture.json",
+    "drop-body-clear-rearm.fixture.json",
+    "drop-jump-back.fixture.json",
+    "drop-solid-lower.fixture.json",
+    "oneway-drop-refusal.fixture.json",
+    "finite-jump-wall.fixture.json",
+    "forest-source-ground-gap.fixture.json",
+    "forest-source-early-blocked.fixture.json",
+    "forest-source-high.fixture.json"
+  ]
+}

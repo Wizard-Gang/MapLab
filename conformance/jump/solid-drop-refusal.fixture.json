@@ -1,0 +1,276 @@
+{
+  "id": "solid-drop-refusal",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "flat.map.json",
+  "profile": "fixed.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 76800,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    }
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": true,
+      "jump": false,
+      "drop": true
+    }
+  ],
+  "ticks": 5,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16384,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 76800
+            },
+            "point": [
+              13312,
+              76800
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 16384,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 76800
+            },
+            "point": [
+              13312,
+              76800
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 16384,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 76800
+            },
+            "point": [
+              13312,
+              76800
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 16384,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 4,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 76800
+            },
+            "point": [
+              13312,
+              76800
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 16384,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 5,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          }
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "pose": {
+              "x": 16384,
+              "y": 76800
+            },
+            "point": [
+              13312,
+              76800
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "bafe0d18a29bd2c4000f536f7fc1e97b2d5411c7d210e4197b1db94fdee17e9a"
+  }
+}

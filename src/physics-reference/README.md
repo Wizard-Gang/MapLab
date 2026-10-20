@@ -1,4 +1,4 @@
-# Reference contact controller (ML-017)
+# Reference controller contact and jump/fall/drop subsets (ML-017/018)
 
 `createWorld(map, profile)` validates the map geometry and movement profile and
 snapshots their source. `step(world, state, {moveX, run})` is the shared pure
@@ -45,7 +45,7 @@ The tests also calculate run/brake, lift and wall/ceiling numbers independently,
 and consume final fixture bytes from an isolated process. Chromium and WebKit
 execute this same module and compare exact serialized replay identities.
 
-`scope: "contact"` and `canCertify: false` are explicit. Jump, drop, climbing,
+`scope: "contact"` and `canCertify: false` are explicit for legacy contact state. Climbing,
 combat, sensors, moving-body resolution, advanced abilities, Test UI and navigation
 integration belong to later tasks. Additional input fields report `unsupported`;
 configured abilities are not executed. Moving enabled collision bodies, capsules,
@@ -53,3 +53,14 @@ center-foot stance and unknown controller contracts reject. This module cannot
 certify a navigation edge or assert future-engine parity. The capability registry
 remains conservatively unavailable for the complete future runtime. The source
 digest identifies the passed map snapshot; it is not a future navigation-cache key.
+
+ML-018 adds `LocomotionState` and `{moveX,run,jump,drop}` controls to the same
+`step`/`replay` entry points, publishing `scope:"jump-fall-drop"`. It implements
+fresh ground jump, fixed/variable hold and one-time release, fall, one-way
+upward/lateral pass and downward landing, selected-group drop suppression,
+body-clear/timeout rearm and solid-floor refusal. Every runtime resource remains
+zero; extra jumps and other enabled ability solvers are unsupported in this subset.
+All legacy contact fixture bytes remain unchanged. Locomotion contacts include
+the axis-stage `pose` so witnesses remain bounded even when Y motion follows an
+X collision. The complete state/input/trace contract and numerical fixture notes
+are published in [conformance/jump](../../conformance/jump/README.md).

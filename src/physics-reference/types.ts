@@ -6,8 +6,17 @@ export interface State {
   readonly x:number; readonly y:number; readonly vx:number; readonly vy:number;
   readonly mode:'ground'|'air'; readonly supportId:string|null; readonly planeId:string|null;
   readonly facing:1|-1; readonly tick:number;
+  // All locomotion fields are required together for the jump/fall/drop subset.
+  readonly jumpHeldPrev?:boolean; readonly jumpReleased?:boolean; readonly ticksSinceJump?:number;
+  readonly dropSuppression?:{readonly group:string;readonly ticksLeft:number}|null;
+  readonly resources?:{readonly airJumps:number;readonly dashCharges:number;readonly cooldowns:Readonly<Record<string,number>>};
 }
-export interface Input { readonly moveX:-1|0|1; readonly run:boolean }
+export interface LocomotionState extends State {
+  readonly jumpHeldPrev:boolean; readonly jumpReleased:boolean; readonly ticksSinceJump:number;
+  readonly dropSuppression:{readonly group:string;readonly ticksLeft:number}|null;
+  readonly resources:{readonly airJumps:number;readonly dashCharges:number;readonly cooldowns:Readonly<Record<string,number>>};
+}
+export interface Input { readonly moveX:-1|0|1; readonly run:boolean; readonly jump?:boolean; readonly drop?:boolean }
 export interface Face {
   readonly bodyId:string; readonly shapeId:string; readonly edgeIndex:number;
   readonly a:Point; readonly b:Point; readonly normal:Point; readonly twoSided:boolean;
@@ -22,12 +31,13 @@ export interface Contact {
   readonly axis:'x'|'y'; readonly bodyId:string; readonly shapeId:string; readonly edgeIndex:number;
   readonly supportId:string|null; readonly normal:Point; readonly point:Point;
   readonly kind:'blocking'|'support'|'unregisteredSupport';
+  readonly pose?:{readonly x:number;readonly y:number};
 }
 export type Status = 'ok'|'invalidState'|'unsupported'|'contactBudget'|'unsafeInteger';
 export interface Step { readonly status:Status; readonly state:State; readonly contacts:readonly Contact[]; readonly reason?:string }
 export interface RunInput extends Input { readonly fromTick:number }
 export interface Trace {
-  readonly format:'maplab.contact-replay'; readonly version:1; readonly scope:'contact'; readonly canCertify:false;
+  readonly format:'maplab.contact-replay'; readonly version:1; readonly scope:'contact'|'jump-fall-drop'; readonly canCertify:false;
   readonly controller:{readonly key:'maplab.reference-controller';readonly version:1};
   readonly collision:{readonly key:'maplab.collision';readonly version:1};
   readonly sourceSha256:string; readonly profileSha256:string; readonly traceSha256:string;

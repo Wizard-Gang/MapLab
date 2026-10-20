@@ -1,7 +1,7 @@
 {
-  "id": "ML-017",
+  "id": "ML-018",
   "type": "FEATURE",
-  "title": "[ML-017] [FEATURE] Implement deterministic reference contact controller",
-  "branch": "ml-017-reference-contact",
-  "record": "docs/changes/ML-017.md"
+  "title": "[ML-018] [FEATURE] Implement ground jump and targeted one-way drop",
+  "branch": "ml-018-jump-drop",
+  "record": "docs/changes/ML-018.md"
 }

@@ -25,30 +25,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-014** — squash `99fe49a`, PR #13; [record](docs/changes/ML-014.md).
 - **ML-015** — squash `450e331`, PR #14; [record](docs/changes/ML-015.md).
 - **ML-016** — squash `3c51ff8`, PR #15; [record](docs/changes/ML-016.md).
+- **ML-017** — squash `87dcda0`, PR #16; [record](docs/changes/ML-017.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-017 / P0
-
-- **Source scope:** Reference controller flat/slope/wall/ceiling collision, finite rect stance, sweep/contact ordering.
-- **Non-goals:** No jump, climbing, actor combat or future-engine parity claim.
-- **Acceptance:** Contact fixture matrix including slope lift, seams, corners, thin wall and overlap; deterministic repeat replay.
-- **Depends on:** ML-016 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D2](docs/specifications/2026-10-16-maplab.md#d2-physical-geometry-and-authority), [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [I1](docs/specifications/2026-10-16-maplab.md#i1-reference-controller-identity), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement named deterministic reference controller's finite rectangular stance, static shape sweep, ordered contacts and slope projection.
-  2. Track exact support IDs/normals and profile constraints; serialize replay trace with version and digest.
-  3. Create owned fixture(s): Flat/run/brake, slope lift, welded seam, initial overlap, thin wall and corner tie-break.
-  4. Add executable checks: Contact I2 replay at intermediate ticks and deterministic repeat.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-018 / P0
 
 - **Source scope:** Fixed/variable-height ground jump, falling, one-way landing and targeted drop suppression.
@@ -63,6 +45,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Tick replay/landing and resource tests with support identity.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-019 / P0
 
 - **Source scope:** Ladder/rope authoring and reference attach/climb/dismount; grounded/air access/exit validation.
