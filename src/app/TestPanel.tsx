@@ -1,0 +1,84 @@
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { NEUTRAL, MAX_TICKS, type TestSession } from '../test-runtime/session';
+import type { Input } from '../physics-reference';
+import type { Entity } from '../contracts/gameplay-types';
+import { records } from '../render/scene';
+import { buildScene } from '../render/scene';
+import { normalize } from '../domain/model';
+import type { JsonValue } from '../contracts';
+import type { LibraryStore, OpenDoc } from './store';
+
+function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: () => void }): ReactNode {
+  const view = useSyncExternalStore(run.subscribe, run.getSnapshot, run.getSnapshot);
+  const controls = useRef<Input>(NEUTRAL), keys = useRef(new Set<string>());
+  const [text, setText] = useState(''), [notice, setNotice] = useState('');
+  const scene = useMemo(() => { const normalized = normalize(run.source as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run]);
+  const clear = (): void => { keys.current.clear(); controls.current = NEUTRAL; };
+  useEffect(() => {
+    // Wall time only schedules whole controller ticks. It never enters controller arithmetic.
+    if (view.paused) return;
+    const timer = setInterval(() => { if (!run.getSnapshot().paused) run.advance(controls.current); }, 1000 / 60);
+    const blur = (): void => { clear(); run.pause(); };
+    window.addEventListener('blur', blur);
+    const visibility = (): void => { if (document.hidden) blur(); };
+    document.addEventListener('visibilitychange', visibility);
+    return () => { clearInterval(timer); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); };
+  }, [run, view.paused]);
+  useEffect(() => () => { clear(); run.pause(); }, [run]);
+  const state = view.state, body = run.profile.collider;
+  const update = (code: string, down: boolean): void => {
+    if (down) keys.current.add(code); else keys.current.delete(code);
+    const k = keys.current;
+    controls.current = { moveX: (Number(k.has('ArrowRight')) - Number(k.has('ArrowLeft'))) as -1|0|1,
+      moveY: (Number(k.has('ArrowDown')) - Number(k.has('ArrowUp'))) as -1|0|1,
+      run: k.has('ShiftLeft') || k.has('ShiftRight'), jump: k.has('Space'), drop: k.has('KeyD') };
+  };
+  return <div>
+    <p>Generic debug actor · {run.profile.id} · {view.paused ? 'Paused' : 'Running'} · 60 Hz · {MAX_TICKS} tick recording limit</p>
+    <div role="toolbar" aria-label="Test controls">
+      <button onClick={() => run.pause(false)}>Run Test</button>
+      <button onClick={() => run.pause()}>Pause Test</button>
+      <button disabled={!view.paused || view.frame.status !== 'ok'} onClick={() => run.advance(controls.current)}>Step Test</button>
+      <button onClick={() => { clear(); run.reset(); setNotice('Reset to snapshot spawn'); }}>Reset Test</button>
+      <button onClick={() => { clear(); stop(); }}>Stop Test</button>
+      <button disabled={!view.frames.length} onClick={() => { setText(JSON.stringify(run.recording(), null, 2)); setNotice('Recording copied to replay input'); }}>Use recorded input</button>
+    </div>
+    <p>Focus the Test stage: arrows move/climb, Shift runs, Space jumps, D drops, N steps while paused. Blur pauses and clears keys.</p>
+    <svg aria-label="Test stage" role="application" tabIndex={0} viewBox={run.source.bounds.join(' ')} style={{ width:'100%', maxHeight:480, background:'#16251f' }}
+      onBlur={() => { clear(); run.pause(); }}
+      onKeyDown={e => { if (e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); if (view.paused && !e.repeat) run.advance(controls.current); return; } if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','ShiftLeft','ShiftRight','KeyD'].includes(e.code)) { e.preventDefault(); e.stopPropagation(); update(e.code, true); } }}
+      onKeyUp={e => { e.preventDefault(); e.stopPropagation(); update(e.code, false); }}>
+      {scene.art.filter(a => a.visible).flatMap(a => a.commands.map((p,i) => <polygon key={`${a.layer.id}-${i}`} points={p.points.map(v=>v.join(',')).join(' ')} fill={p.fill?p.color:'none'} stroke={p.color} opacity={a.opacity} />))}
+      {['Footholds','Collision'].flatMap(layer => (scene.passes.get(layer as 'Footholds'|'Collision')??[]).map((p,i)=><polyline key={`${layer}-${i}`} points={p.points.map(v=>v.join(',')).join(' ')} fill="none" stroke={p.color} strokeWidth={2}><title>{p.label}</title></polyline>))}
+      {run.source.traversals.filter(t=>'points' in t).map(t=><polyline key={t.id} points={'points' in t?t.points.map(p=>p.join(',')).join(' '):''} fill="none" stroke="#ffd98b" strokeWidth={3}><title>{t.id}</title></polyline>)}
+      {body.kind === 'rect' && <rect aria-label="Generic debug actor" x={state.x/256-body.width/2} y={state.y/256-body.height} width={body.width} height={body.height} fill="#86d7ff" stroke="white" />}
+      <circle cx={state.x/256} cy={state.y/256} r={3} fill="#ff5b79" />
+      {view.frame.contacts.map((c,i)=><circle key={i} cx={c.point[0]/256} cy={c.point[1]/256} r={3} fill="#fff"><title>{`${c.bodyId}/${c.shapeId}/${c.edgeIndex} ${c.kind}`}</title></circle>)}
+    </svg>
+    <output aria-label="Test movement HUD" data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''}>
+      Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
+    </output>
+    <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
+    <p aria-label="Test diagnosis">{view.frame.status}: {view.frame.reason??'shared reference controller'} · Preview only; cannot certify navigation. Graph/route unavailable until navigation generation; no failed-link claim.</p>
+    <label>Test replay input<textarea aria-label="Test replay input" value={text} onChange={e=>setText(e.target.value)} rows={5}/></label>
+    <button onClick={() => { clear(); try { run.replay(JSON.parse(text)); setNotice('Replay complete; paused'); } catch(e) { setNotice(`Replay refused: ${e instanceof Error?e.message:String(e)}`); } }}>Replay Test</button>
+    <p aria-label="Test notice">{notice}</p>
+  </div>;
+}
+
+export function TestPanel({ store, doc }: { readonly store: LibraryStore; readonly doc: OpenDoc }): ReactNode {
+  const profiles = store.testProfiles();
+  const start = records<Entity>(doc.state.model, 'entities').find(e=>e.enabled && e.kind==='playerStart' && e.default);
+  const [profileId, setProfileId] = useState(start?.kind==='playerStart'?start.movementId:profiles[0]?.id??''), [notice,setNotice] = useState('');
+  const run = store.test(doc.id);
+  return <section aria-label="Integrated Test">
+    <h3>Test</h3>
+    <p>Test freezes this map and movement profile. Edits stop Test; start again to take an explicit new snapshot. Gameplay is configured, not simulated.</p>
+    <label>Test movement profile<select aria-label="Test movement profile" value={profileId} onChange={e=>{ store.stopTest(doc.id); setProfileId(e.target.value); setNotice('Profile changed; start a new snapshot'); }}>
+      {profiles.map(p=><option key={p.id} value={p.id}>{p.id}</option>)}
+    </select></label>
+    {!run && <button onClick={()=>{ try { store.startTest(doc.id,profileId); setNotice(''); } catch(e) { setNotice(`Test refused: ${e instanceof Error?e.message:String(e)}`); } }}>Start Test snapshot</button>}
+    <p aria-label="Test startup notice">{notice}</p>
+    {run && <RunningTest key={profileId} run={run} stop={()=>store.stopTest(doc.id)}/>}
+  </section>;
+}

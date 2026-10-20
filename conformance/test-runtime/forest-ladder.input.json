@@ -1,0 +1,35 @@
+{
+  "initial": {
+    "x": 77824,
+    "y": 163840,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.west",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    },
+    "traversalId": null,
+    "climbReady": true
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "moveY": -1,
+      "run": false,
+      "jump": false,
+      "drop": false
+    }
+  ],
+  "ticks": 72
+}

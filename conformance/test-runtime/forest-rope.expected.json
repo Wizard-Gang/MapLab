@@ -1,0 +1,525 @@
+{
+  "traceSha256": "6baa936b1888379e94452795b35b6e3774eb63ea461726cf4c7048395a388388",
+  "frames": [
+    {
+      "status": "ok",
+      "state": {
+        "x": 120832,
+        "y": 161728,
+        "vx": 1024,
+        "vy": -2016,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 1,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 1,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 121856,
+        "y": 159712,
+        "vx": 1024,
+        "vy": -1920,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 2,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 2,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 122880,
+        "y": 157792,
+        "vx": 1024,
+        "vy": -1824,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 3,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 3,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 123904,
+        "y": 155968,
+        "vx": 1024,
+        "vy": -1728,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 4,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 4,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 124928,
+        "y": 154240,
+        "vx": 1024,
+        "vy": -1632,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 5,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 5,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 125952,
+        "y": 152608,
+        "vx": 1024,
+        "vy": -1536,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 6,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 6,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 126976,
+        "y": 151072,
+        "vx": 1024,
+        "vy": -1440,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 7,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 7,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 128000,
+        "y": 149632,
+        "vx": 1024,
+        "vy": -1344,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 8,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 8,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 129024,
+        "y": 148288,
+        "vx": 1024,
+        "vy": -1248,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 9,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 9,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 130048,
+        "y": 147040,
+        "vx": 1024,
+        "vy": -1152,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 10,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 10,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 131072,
+        "y": 145888,
+        "vx": 1024,
+        "vy": -1056,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 11,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 11,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 132096,
+        "y": 144832,
+        "vx": 1024,
+        "vy": -960,
+        "mode": "air",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 12,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 12,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 144320,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 13,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 143808,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 14,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 143296,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 15,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 142784,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 16,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 142272,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 17,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 141760,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 18,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 141248,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 19,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    },
+    {
+      "status": "ok",
+      "state": {
+        "x": 135168,
+        "y": 140736,
+        "vx": 0,
+        "vy": -512,
+        "mode": "climb",
+        "supportId": null,
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 20,
+        "jumpHeldPrev": true,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": "traversal.rope",
+        "climbReady": true
+      },
+      "contacts": []
+    }
+  ]
+}
