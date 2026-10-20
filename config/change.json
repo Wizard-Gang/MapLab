@@ -1,7 +1,7 @@
 {
-  "id": "ML-018",
+  "id": "ML-019",
   "type": "FEATURE",
-  "title": "[ML-018] [FEATURE] Implement ground jump and targeted one-way drop",
-  "branch": "ml-018-jump-drop",
-  "record": "docs/changes/ML-018.md"
+  "title": "[ML-019] [FEATURE] Implement ladder and rope traversal",
+  "branch": "ml-019-climb",
+  "record": "docs/changes/ML-019.md"
 }
