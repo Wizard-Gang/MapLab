@@ -1,0 +1,1947 @@
+{
+  "id": "ladder-top-bottom",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "ladder.map.json",
+  "profile": "climb.movement.json",
+  "initial": {
+    "x": 25600,
+    "y": 39936,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.elevated",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    },
+    "traversalId": null,
+    "climbReady": true
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "moveY": 1,
+      "run": false,
+      "jump": false,
+      "drop": false
+    }
+  ],
+  "ticks": 72,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 25600,
+          "y": 40448,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 25600,
+          "y": 40960,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 25600,
+          "y": 41472,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 25600,
+          "y": 41984,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 4,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 25600,
+          "y": 42496,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 5,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 6,
+        "state": {
+          "x": 25600,
+          "y": 43008,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 6,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 7,
+        "state": {
+          "x": 25600,
+          "y": 43520,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 7,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 8,
+        "state": {
+          "x": 25600,
+          "y": 44032,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 8,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 9,
+        "state": {
+          "x": 25600,
+          "y": 44544,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 9,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 10,
+        "state": {
+          "x": 25600,
+          "y": 45056,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 10,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 11,
+        "state": {
+          "x": 25600,
+          "y": 45568,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 11,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 12,
+        "state": {
+          "x": 25600,
+          "y": 46080,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 12,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 13,
+        "state": {
+          "x": 25600,
+          "y": 46592,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 13,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 14,
+        "state": {
+          "x": 25600,
+          "y": 47104,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 14,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 15,
+        "state": {
+          "x": 25600,
+          "y": 47616,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 15,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 16,
+        "state": {
+          "x": 25600,
+          "y": 48128,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 16,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 17,
+        "state": {
+          "x": 25600,
+          "y": 48640,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 17,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 18,
+        "state": {
+          "x": 25600,
+          "y": 49152,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 18,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 19,
+        "state": {
+          "x": 25600,
+          "y": 49664,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 19,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 20,
+        "state": {
+          "x": 25600,
+          "y": 50176,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 20,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 21,
+        "state": {
+          "x": 25600,
+          "y": 50688,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 21,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 22,
+        "state": {
+          "x": 25600,
+          "y": 51200,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 22,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 23,
+        "state": {
+          "x": 25600,
+          "y": 51712,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 23,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 24,
+        "state": {
+          "x": 25600,
+          "y": 52224,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 24,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 25,
+        "state": {
+          "x": 25600,
+          "y": 52736,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 25,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 26,
+        "state": {
+          "x": 25600,
+          "y": 53248,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 26,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 27,
+        "state": {
+          "x": 25600,
+          "y": 53760,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 27,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 28,
+        "state": {
+          "x": 25600,
+          "y": 54272,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 28,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 29,
+        "state": {
+          "x": 25600,
+          "y": 54784,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 29,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 30,
+        "state": {
+          "x": 25600,
+          "y": 55296,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 30,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 31,
+        "state": {
+          "x": 25600,
+          "y": 55808,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 31,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 32,
+        "state": {
+          "x": 25600,
+          "y": 56320,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 32,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 33,
+        "state": {
+          "x": 25600,
+          "y": 56832,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 33,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 34,
+        "state": {
+          "x": 25600,
+          "y": 57344,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 34,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 35,
+        "state": {
+          "x": 25600,
+          "y": 57856,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 35,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 36,
+        "state": {
+          "x": 25600,
+          "y": 58368,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 36,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 37,
+        "state": {
+          "x": 25600,
+          "y": 58880,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 37,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 38,
+        "state": {
+          "x": 25600,
+          "y": 59392,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 38,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 39,
+        "state": {
+          "x": 25600,
+          "y": 59904,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 39,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 40,
+        "state": {
+          "x": 25600,
+          "y": 60416,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 40,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 41,
+        "state": {
+          "x": 25600,
+          "y": 60928,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 41,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 42,
+        "state": {
+          "x": 25600,
+          "y": 61440,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 42,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 43,
+        "state": {
+          "x": 25600,
+          "y": 61952,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 43,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 44,
+        "state": {
+          "x": 25600,
+          "y": 62464,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 44,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 45,
+        "state": {
+          "x": 25600,
+          "y": 62976,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 45,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 46,
+        "state": {
+          "x": 25600,
+          "y": 63488,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 46,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 47,
+        "state": {
+          "x": 25600,
+          "y": 64000,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 47,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 48,
+        "state": {
+          "x": 25600,
+          "y": 64512,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 48,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 49,
+        "state": {
+          "x": 25600,
+          "y": 65024,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 49,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 50,
+        "state": {
+          "x": 25600,
+          "y": 65536,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 50,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 51,
+        "state": {
+          "x": 25600,
+          "y": 66048,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 51,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 52,
+        "state": {
+          "x": 25600,
+          "y": 66560,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 52,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 53,
+        "state": {
+          "x": 25600,
+          "y": 67072,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 53,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 54,
+        "state": {
+          "x": 25600,
+          "y": 67584,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 54,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 55,
+        "state": {
+          "x": 25600,
+          "y": 68096,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 55,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 56,
+        "state": {
+          "x": 25600,
+          "y": 68608,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 56,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 57,
+        "state": {
+          "x": 25600,
+          "y": 69120,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 57,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 58,
+        "state": {
+          "x": 25600,
+          "y": 69632,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 58,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 59,
+        "state": {
+          "x": 25600,
+          "y": 70144,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 59,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 60,
+        "state": {
+          "x": 25600,
+          "y": 70656,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 60,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 61,
+        "state": {
+          "x": 25600,
+          "y": 71168,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 61,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 62,
+        "state": {
+          "x": 25600,
+          "y": 71680,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 62,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 63,
+        "state": {
+          "x": 25600,
+          "y": 72192,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 63,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 64,
+        "state": {
+          "x": 25600,
+          "y": 72704,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 64,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 65,
+        "state": {
+          "x": 25600,
+          "y": 73216,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 65,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 66,
+        "state": {
+          "x": 25600,
+          "y": 73728,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 66,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 67,
+        "state": {
+          "x": 25600,
+          "y": 74240,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 67,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 68,
+        "state": {
+          "x": 25600,
+          "y": 74752,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 68,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 69,
+        "state": {
+          "x": 25600,
+          "y": 75264,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 69,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 70,
+        "state": {
+          "x": 25600,
+          "y": 75776,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 70,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 71,
+        "state": {
+          "x": 25600,
+          "y": 76288,
+          "vx": 0,
+          "vy": 512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 71,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.ladder",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 72,
+        "state": {
+          "x": 25600,
+          "y": 76800,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 72,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": null,
+          "climbReady": false
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -307200
+            ],
+            "point": [
+              22528,
+              76800
+            ],
+            "pose": {
+              "x": 25600,
+              "y": 76800
+            },
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "5ee59172b42492cf2dcac2e642ecfa4191fdedab5f7010a8ab324e1f7e012e78"
+  }
+}

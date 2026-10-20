@@ -1,3 +1,4 @@
+import { ClimbPanel } from './ClimbPanel';
 import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
 import { ExportPanel } from './ExportPanel';
 import { shortcut } from '../editor/shortcuts';
@@ -227,6 +228,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
       <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />
       {(!entry || entry.errors === 0) && <VisualPanel key={`visual-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />}
+      <ClimbPanel key={`climb-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />
     </section>

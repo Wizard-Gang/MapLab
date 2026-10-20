@@ -26,30 +26,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-015** — squash `450e331`, PR #14; [record](docs/changes/ML-015.md).
 - **ML-016** — squash `3c51ff8`, PR #15; [record](docs/changes/ML-016.md).
 - **ML-017** — squash `87dcda0`, PR #16; [record](docs/changes/ML-017.md).
+- **ML-018** — squash `6b462c1`, PR #17; [record](docs/changes/ML-018.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-018 / P0
-
-- **Source scope:** Fixed/variable-height ground jump, falling, one-way landing and targeted drop suppression.
-- **Non-goals:** No extra jumps/dash/wall abilities.
-- **Acceptance:** Reachable/blocked/ceiling/drop fixtures; body sweep and lower-platform rearm verified; reference trace format published.
-- **Depends on:** ML-017 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D3](docs/specifications/2026-10-16-maplab.md#d3-traversal-and-anchors), [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [I1](docs/specifications/2026-10-16-maplab.md#i1-reference-controller-identity), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Add ground takeoff, fixed/variable-height jump and fall with one-way upward pass/downward landing.
-  2. Implement targeted drop-group suppression, rearm and solid-floor refusal on continuous body sweeps.
-  3. Create owned fixture(s): Forest gap, impossible high target, low ceiling, release early, upper one-way and lower platform.
-  4. Add executable checks: Tick replay/landing and resource tests with support identity.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-019 / P0
 
 - **Source scope:** Ladder/rope authoring and reference attach/climb/dismount; grounded/air access/exit validation.
@@ -64,6 +46,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Controller trace/semantic access tests with explicit unsupported diagnoses.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-020 / P0
 
 - **Source scope:** Integrated Test snapshot, generic debug actor, pause/step/reset/replay and movement/contact HUD.

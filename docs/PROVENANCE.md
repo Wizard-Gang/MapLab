@@ -102,3 +102,10 @@ pins all final source and trace bytes. Analytical arc/drop checks, an isolated
 consumer and two browser engines verify the reference traces without widening
 their exact tolerances. See that folder's README for the finite-stance correction
 to R1's explicitly provisional edge-centered QA sketch.
+
+## ML-019 reference climb fixtures
+
+`conformance/climb/` is original owned CC0-1.0 geometry, movement profiles,
+run-length inputs, checkpoints and exact traces derived from the owned ML-018
+flat map/profile and unchanged owned forest source. The index pins every byte.
+No third-party assets, engine code, trajectory, swinging solver or art is used.

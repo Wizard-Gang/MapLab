@@ -1,0 +1,140 @@
+{
+  "id": "rope-leap-off",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "rope.map.json",
+  "profile": "climb.movement.json",
+  "initial": {
+    "x": 28160,
+    "y": 61440,
+    "vx": 0,
+    "vy": 100,
+    "mode": "air",
+    "supportId": null,
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    },
+    "traversalId": null,
+    "climbReady": true
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "moveY": -1,
+      "run": false,
+      "jump": false,
+      "drop": false
+    },
+    {
+      "fromTick": 2,
+      "moveX": 0,
+      "moveY": -1,
+      "run": false,
+      "jump": true,
+      "drop": false
+    }
+  ],
+  "ticks": 3,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 25600,
+          "y": 60928,
+          "vx": 0,
+          "vy": -512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.rope",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 25600,
+          "y": 60416,
+          "vx": 0,
+          "vy": -512,
+          "mode": "climb",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2,
+          "jumpHeldPrev": false,
+          "jumpReleased": false,
+          "ticksSinceJump": 0,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": "traversal.rope",
+          "climbReady": true
+        },
+        "contacts": []
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 26576,
+          "y": 58880,
+          "vx": 976,
+          "vy": -1440,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3,
+          "jumpHeldPrev": true,
+          "jumpReleased": false,
+          "ticksSinceJump": 1,
+          "dropSuppression": null,
+          "resources": {
+            "airJumps": 0,
+            "dashCharges": 0,
+            "cooldowns": {}
+          },
+          "traversalId": null,
+          "climbReady": false
+        },
+        "contacts": []
+      }
+    ],
+    "traceSha256": "4a6552cae9ebdbe7d01c83199b47aa59fd2da41b3ee65b288aad282f55a15ef2"
+  }
+}

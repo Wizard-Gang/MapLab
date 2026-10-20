@@ -1,3 +1,4 @@
+import { climbTick } from './climb';
 import { compare, cross, expanded, floorDiv, fractionOrder, integer, mul, section, strictlyInside, type Fraction, type Point } from './integer';
 import { faceOrder } from './world';
 import type { Contact, Face, Input, State, Step, World } from './types';
@@ -52,7 +53,7 @@ export function overlaps(world:World,x:number,y:number):boolean {
 }
 interface Hit {coordinate:number;at:Fraction;face:Face}
 const sameHit=(a:Hit,b:Hit|undefined):boolean=>b!==undefined&&fractionOrder(a.at,b.at)===0;
-function sweep(world:World,s:State,axis:0|1,delta:number,includeSupport=false):Hit[] {
+export function sweep(world:World,s:State,axis:0|1,delta:number,includeSupport=false):Hit[] {
   if(delta===0)return [];
   const start=axis===0?s.x:s.y,finish=integer(start+delta),hits:Hit[]=[];
   for(const f of world.faces){
@@ -76,7 +77,7 @@ function contact(f:Face,axis:'x'|'y',s:State,point?:Point):Contact {
 // Quantize an actual face witness at the finite rectangle, never its remote midpoint.
 // Conservative sweep rounding can leave a gap below 1 su; floor-quantizing the
 // rational witness adds less than 1 su in its interpolated coordinate.
-function blockingContact(world:World,f:Face,axis:'x'|'y',s:State):Contact {
+export function blockingContact(world:World,f:Face,axis:'x'|'y',s:State):Contact {
   const left=integer(s.x-world.half),right=integer(s.x+world.half),top=integer(s.y-world.height);
   const points:Point[]=[f.a,f.b];
   for(const axis of [0,1] as const){
@@ -102,18 +103,20 @@ export function step(world:World,old:State,input:Input):Step {
 function tick(world:World,old:State,input:Input):Step {
   const fail=(status:Step['status'],reason:string):Step=>({status,state:old,contacts:[],reason});
   for(const n of [old.x,old.y,old.vx,old.vy,old.tick])integer(n);
-  if(old.tick<0||!['ground','air'].includes(old.mode)||![-1,1].includes(old.facing)||![-1,0,1].includes(input.moveX)||typeof input.run!=='boolean')return fail('invalidState','state/input');
+  if(old.tick<0||!['ground','air',...(old.traversalId!==undefined?['climb']:[])].includes(old.mode)||![-1,1].includes(old.facing)||![-1,0,1].includes(input.moveX)||typeof input.run!=='boolean')return fail('invalidState','state/input');
   const locomotion=old.jumpHeldPrev!==undefined;
-  if(Object.keys(input).some(k=>!['moveX','run',...(locomotion?['jump','drop']:[])].includes(k)))return fail('unsupported','input outside selected controller subset');
+  if(Object.keys(input).some(k=>!['moveX','run',...(locomotion?['jump','drop']:[]),...(old.traversalId!==undefined?['moveY']:[])].includes(k)))return fail('unsupported','input outside selected controller subset');
   if(!locomotion&&['jumpReleased','ticksSinceJump','dropSuppression','resources'].some(k=>k in old))return fail('invalidState','incomplete locomotion state');
   if(locomotion){
     if(typeof old.jumpHeldPrev!=='boolean'||typeof old.jumpReleased!=='boolean'||typeof input.jump!=='boolean'||typeof input.drop!=='boolean'||!Number.isSafeInteger(old.ticksSinceJump)||old.ticksSinceJump!<0||old.dropSuppression===undefined||!old.resources)return fail('invalidState','locomotion state/input');
     const r=old.resources;
     if(r.airJumps!==0||r.dashCharges!==0||Object.keys(r).sort().join(',')!=='airJumps,cooldowns,dashCharges'||!r.cooldowns||typeof r.cooldowns!=='object'||Array.isArray(r.cooldowns)||Object.keys(r.cooldowns).length!==0)return fail('invalidState','unsupported resources');
-    if(world.profile.abilities.some(a=>a.kind!=='jump'||a.airJumps!==0))return fail('unsupported','ability outside ground jump subset');
+    if(world.profile.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:!(old.traversalId!==undefined&&a.kind==='climb')))return fail('unsupported','ability outside ground jump subset');
     const d=old.dropSuppression;
     if(d!==null&&(typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='group,ticksLeft'||typeof d.group!=='string'||!Number.isSafeInteger(d.ticksLeft)||d.ticksLeft<=0||d.ticksLeft>world.profile.drop.timeoutTicks||!world.profile.drop.canDrop||!world.faces.some(f=>f.bodyId===''&&world.source.footholds.some(v=>v.id===f.supportId&&v.dropGroupId===d.group))))return fail('invalidState','drop suppression');
   }
+  if(old.traversalId===undefined&&old.climbReady!==undefined)return fail('invalidState','incomplete climb state');
+  if(old.traversalId!==undefined&&(!locomotion||typeof old.climbReady!=='boolean'||![-1,0,1].includes(input.moveY!)||(old.traversalId!==null&&typeof old.traversalId!=='string')))return fail('invalidState','climb state/input');
   if(overlaps(world,old.x,old.y))return fail('invalidState','initial overlap');
   const p=world.profile,contacts:Contact[]=[],eligibleFaces=world.faces;
   let s={...old};
@@ -122,6 +125,7 @@ function tick(world:World,old:State,input:Input):Step {
     support=resolveStance(world,s.x,s.supportId??'').find(v=>v.y===s.y);
     if(!support||s.vy!==0)return fail('invalidState','stale or missing support');
   }else if(s.supportId!==null)return fail('invalidState','air support');
+  const climbed=climbTick(world,old,input,(s,i)=>step(world,s,i));if(climbed)return climbed;
   const material=world.source.materials.find(m=>m.id===support?.face.materialId);
   if(material?.tags.some(t=>p.forbiddenMaterialTags.includes(t)))return fail('unsupported','forbidden material');
   const jump=p.abilities.find(a=>a.kind==='jump');
@@ -245,6 +249,7 @@ function tick(world:World,old:State,input:Input):Step {
     }
   }
   if(overlaps(world,s.x,s.y))return fail('invalidState','result overlap');
+  if(s.traversalId!==undefined&&input.moveY===0)s.climbReady=true;
   if(input.moveX!==0)s.facing=input.moveX;
   s.tick=integer(s.tick+1);
   return {status:'ok',state:s,contacts};
