@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { command, libraryFile, nameField, openEditor, openMap, resetLibrary, placeholderUrl } from './support';
 import type { Recording } from '../../src/test-runtime/session';
 import type { Step } from '../../src/physics-reference';
@@ -14,7 +16,7 @@ test('integrated generic actor: forest walk/jump/climb/drop exact replays preser
  await page.getByRole('button',{name:'Start Test snapshot',exact:true}).click();
  await expect(page.getByLabel('Generic debug actor',{exact:true})).toBeVisible();
  const hud=page.getByLabel('Test movement HUD',{exact:true});await expect(hud).toHaveAttribute('data-tick','0');
- await page.getByRole('region',{name:'Integrated Test',exact:true}).screenshot({path:'/private/tmp/ml020-test-panel.png'});
+ await page.getByRole('region',{name:'Integrated Test',exact:true}).screenshot({path:join(realpathSync(tmpdir()),'ml020-test-panel.png')});
  for(const name of read<{cases:string[]}>('cases.json').cases){
   const input=read<Recording>(name+'.input.json'),expected=read<{frames:Step[]}>(name+'.expected.json');
   await page.getByLabel('Test replay input',{exact:true}).fill(JSON.stringify(input));await page.getByRole('button',{name:'Replay Test',exact:true}).click();
