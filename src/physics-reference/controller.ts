@@ -130,10 +130,10 @@ function tick(world:World,old:State,input:Input):Step {
   if(s.mode==='ground')stance=stances.find(v=>v.y-s.y<=p.ground.snapDistance);
   else if(dx!==0)stance=stances.filter(v=>v.y<=s.y&&s.y-v.y<=floorDiv(mul(world.half,p.ground.maxSlope.rise),p.ground.maxSlope.run)+1)
     .find(v=>{const lead=startX+(dx>0?world.half:-world.half);return lead>=v.face.a[0]&&lead<=v.face.b[0]&&startY<=groundY(v.face,lead);});
-  if(!stance&&!xh&&s.mode==='air'&&dx!==0){
+  if(!stance&&s.mode==='air'&&dx!==0){
     const hits=sweep(world,{...s,x:startX},0,dx,true),hit=hits[0];
     if(hits.filter(h=>sameHit(h,hit)).length>8)return fail('contactBudget','x support');
-    if(hit){s.x=hit.coordinate;for(const h of hits.filter(h=>sameHit(h,hit)))contacts.push(blockingContact(world,h.face,'x',{...s,vx:dx}));s.vx=0;}
+    if(hit){s.x=hit.coordinate;contacts.length=0;for(const h of hits.filter(h=>sameHit(h,hit)))contacts.push(blockingContact(world,h.face,'x',{...s,vx:dx}));s.vx=0;}
   }
   if(stance){
     // Search the swept footprint through blocker X intervals. Clearance need not be

@@ -91,6 +91,15 @@ test('blocking witnesses stay at the finite body and resolved X hits are unique'
  }}
 });
 
+test('an earlier uncaught slope replaces a farther X wall contact without tunneling',()=>{
+ const c=fixture('slope-catch-limit'),[map,p]=docs(c),body=map.bodies[0]!;
+ const wall={...body,id:'body.far-wall',shapes:[{id:'shape.far-wall',kind:'rect' as const,rect:[100,0,1,140] as const}]};
+ const result=step(createWorld({...map,bodies:[...map.bodies,wall]},p),c.initial,{moveX:1,run:true});
+ expect(result.status).toBe('ok');expect(result.state.x).toBe(58*256);
+ const hits=result.contacts.filter(c=>c.axis==='x');
+ expect(hits).toHaveLength(1);expect(hits[0]?.bodyId).toBe('body.slope');
+});
+
 test('all tied downward blocking contacts are emitted once in source-ID order',()=>{
  const c=fixture('flat-rest'),[m,p]=docs(c),base=createWorld(m,p);
  const face={bodyId:'body.segment-z',shapeId:'shape.segment',edgeIndex:0,a:[0,25600] as const,b:[65536,25600] as const,
