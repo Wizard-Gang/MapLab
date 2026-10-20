@@ -1,7 +1,7 @@
 {
-  "id": "ML-016",
+  "id": "ML-017",
   "type": "FEATURE",
-  "title": "[ML-016] [FEATURE] Export deterministic dependency-closed STORE bundles",
-  "branch": "ml-016-deterministic-export",
-  "record": "docs/changes/ML-016.md"
+  "title": "[ML-017] [FEATURE] Implement deterministic reference contact controller",
+  "branch": "ml-017-reference-contact",
+  "record": "docs/changes/ML-017.md"
 }

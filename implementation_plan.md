@@ -24,30 +24,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-013** — squash `c435c2f`, PR #12; [record](docs/changes/ML-013.md).
 - **ML-014** — squash `99fe49a`, PR #13; [record](docs/changes/ML-014.md).
 - **ML-015** — squash `450e331`, PR #14; [record](docs/changes/ML-015.md).
+- **ML-016** — squash `3c51ff8`, PR #15; [record](docs/changes/ML-016.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-016 / P0
-
-- **Source scope:** Deterministic dependency-closed export, inventory/hash verification and STORE ZIP.
-- **Non-goals:** No external-map resolution or derived nav cache export.
-- **Acceptance:** Repeat exports byte-identical; independent harness verifies final bytes; path/size/unlisted-file/digest corruption rejects.
-- **Depends on:** ML-015 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [F4](docs/specifications/2026-10-16-maplab.md#f4-tileset-prefab-and-export-examples), [F5](docs/specifications/2026-10-16-maplab.md#f5-canonicalization-versions-and-migrations), [G1](docs/specifications/2026-10-16-maplab.md#g1-exact-load-sequence), [H4](docs/specifications/2026-10-16-maplab.md#h4-project-storage-and-safe-assets), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Collect transitive required map/movement/catalog/assets and local schema closure; canonicalize properties, numbers and semantic arrays.
-  2. Build deterministic STORE ZIP with fixed metadata and final-byte SHA-256 inventory; independently verify final files and reject corruption.
-  3. Create owned fixture(s): Forest+clearing bundle, unlisted entry, duplicate paths, zip bomb, altered digest, missing dependency.
-  4. Add executable checks: Repeat export byte equality and independent process bundle verification.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-017 / P0
 
 - **Source scope:** Reference controller flat/slope/wall/ceiling collision, finite rect stance, sweep/contact ordering.
@@ -62,6 +44,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Contact I2 replay at intermediate ticks and deterministic repeat.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-018 / P0
 
 - **Source scope:** Fixed/variable-height ground jump, falling, one-way landing and targeted drop suppression.
