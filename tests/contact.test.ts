@@ -65,6 +65,47 @@ test('tie order is code-unit source identity, independent of body/shape arrays',
  expect(unregistered.frames[0]?.contacts[0]).toMatchObject({bodyId:'body.concave',shapeId:'shape.concave',edgeIndex:0,kind:'unregisteredSupport'});
 });
 
+test('blocking witnesses stay at the finite body and resolved X hits are unique',async()=>{
+ const slope=(await run(fixture('slope-40-blocking'))).frames[0]!;
+ expect(slope.contacts).toHaveLength(1);
+ // At y=80 WU the face x is 163840/27 su; the body right is 6068 su.
+ expect(slope.contacts[0]?.point).toEqual([6068,20480]);
+ const fractional=(await run(fixture('fractional-contact-order'))).frames[0]!;
+ // x=25600+y/127.0625; the face meets the body at its top.
+ expect(fractional.contacts[0]?.point).toEqual([25720,15360]);
+ for(const name of ['slope-40-blocking','fractional-contact-order','slope-catch-limit']){
+ const cased=fixture(name),world=createWorld(...docs(cased)),f=(await run(cased)).frames[0]!;
+ for(const c of f.contacts.filter(c=>c.kind==='blocking')){
+  expect(c.point[0]).toBeGreaterThanOrEqual(f.state.x-12*256-1);
+  expect(c.point[0]).toBeLessThanOrEqual(f.state.x+12*256+1);
+  expect(c.point[1]).toBeGreaterThanOrEqual(f.state.y-40*256-1);
+  expect(c.point[1]).toBeLessThanOrEqual(f.state.y+1);
+  const face=world.faces.find(v=>v.bodyId===c.bodyId&&v.shapeId===c.shapeId&&v.edgeIndex===c.edgeIndex)!;
+  const dx=face.b[0]-face.a[0],dy=face.b[1]-face.a[1];
+  const cross=dx*(c.point[1]-face.a[1])-dy*(c.point[0]-face.a[0]);
+  expect(Math.abs(cross)).toBeLessThanOrEqual(Math.max(Math.abs(dx),Math.abs(dy)));
+  expect(c.point[0]).toBeGreaterThanOrEqual(Math.min(face.a[0],face.b[0]));
+  expect(c.point[0]).toBeLessThanOrEqual(Math.max(face.a[0],face.b[0]));
+  expect(c.point[1]).toBeGreaterThanOrEqual(Math.min(face.a[1],face.b[1]));
+  expect(c.point[1]).toBeLessThanOrEqual(Math.max(face.a[1],face.b[1]));
+ }}
+});
+
+test('all tied downward blocking contacts are emitted once in source-ID order',()=>{
+ const c=fixture('flat-rest'),[m,p]=docs(c),base=createWorld(m,p);
+ const face={bodyId:'body.segment-z',shapeId:'shape.segment',edgeIndex:0,a:[0,25600] as const,b:[65536,25600] as const,
+  normal:[0,-65536] as const,twoSided:true,supportId:null,registered:false,materialId:base.faces[0]!.materialId,planeId:null,links:[],support:false};
+ const faces=[face,{...face,bodyId:'body.segment-a'}];
+ const state={...c.initial,y:25000,vy:1000,vx:0,mode:'air' as const,supportId:null};
+ const a=step({...base,faces,solids:[]},state,{moveX:0,run:false});
+ const b=step({...base,faces:[...faces].reverse(),solids:[]},state,{moveX:0,run:false});
+ expect(a.status).toBe('ok');expect(a).toEqual(b);
+ expect(a.state.y).toBe(25600);
+ expect(a.contacts.map(c=>c.bodyId)).toEqual(['body.segment-a','body.segment-z']);
+ expect(a.contacts.map(c=>c.point)).toEqual([[state.x-12*256,25600],[state.x-12*256,25600]]);
+ expect(a.contacts.every(c=>c.normal[1]===-65536)).toBe(true);
+});
+
 test('input, profile, overlap, stale support, integer and schedule negatives fail explicitly',async()=>{
  const c=fixture('flat-rest'),[m,p]=docs(c),w=createWorld(m,p);
  expect(step(w,{...c.initial,y:c.initial.y+1},{moveX:0,run:false}).status).toBe('invalidState');

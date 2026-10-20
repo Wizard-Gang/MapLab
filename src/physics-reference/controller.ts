@@ -73,18 +73,25 @@ function contact(f:Face,axis:'x'|'y',s:State,point?:Point):Contact {
   return {axis,bodyId:f.bodyId,shapeId:f.shapeId,edgeIndex:f.edgeIndex,supportId:f.supportId,normal,
     point:point??[s.x,s.y],kind:f.support?(f.registered?'support':'unregisteredSupport'):'blocking'};
 }
-// Blocking contact point is computed below from segment/rectangle intersection.
+// Quantize an actual face witness at the finite rectangle, never its remote midpoint.
+// Conservative sweep rounding can leave a gap below 1 su; floor-quantizing the
+// rational witness adds less than 1 su in its interpolated coordinate.
 function blockingContact(world:World,f:Face,axis:'x'|'y',s:State):Contact {
-  const c=contact(f,axis,s);
-  let x=Math.max(Math.min(f.a[0],f.b[0]),Math.min(s.x,Math.max(f.a[0],f.b[0])));
-  let y:number;
-  if(f.a[0]===f.b[0]){x=f.a[0];y=Math.max(Math.min(f.a[1],f.b[1]),Math.min(s.y,Math.max(f.a[1],f.b[1])));}
-  else {
-    x=Math.max(s.x-world.half,Math.min(x,s.x+world.half));
-    const a=f.a[0]<f.b[0]?f.a:f.b,b=f.a[0]<f.b[0]?f.b:f.a;
-    y=integer(a[1]+floorDiv(mul(x-a[0],b[1]-a[1]),b[0]-a[0]));
+  const left=integer(s.x-world.half),right=integer(s.x+world.half),top=integer(s.y-world.height);
+  const points:Point[]=[f.a,f.b];
+  for(const axis of [0,1] as const){
+    let a=f.a,b=f.b;if(a[axis]>b[axis])[a,b]=[b,a];
+    if(a[axis]===b[axis])continue;
+    const other=axis===0?1:0;
+    for(const bound of axis===0?[left,right]:[top,s.y]){
+      const v=Math.max(a[axis],Math.min(bound,b[axis]));
+      const value=integer(a[other]+floorDiv(mul(v-a[axis],b[other]-a[other]),b[axis]-a[axis]));
+      points.push(axis===0?[v,value]:[value,v]);
+    }
   }
-  return {...c,kind:'blocking',point:[x,y]};
+  const distance=([x,y]:Point):number=>Math.max(left-x,0,x-right,top-y,y-s.y);
+  points.sort((a,b)=>distance(a)-distance(b)||a[0]-b[0]||a[1]-b[1]);
+  return {...contact(f,axis,s),kind:'blocking',point:points[0]!};
 }
 const approach=(v:number,target:number,amount:number):number=>v<target?Math.min(integer(v+amount),target):Math.max(integer(v-amount),target);
 
@@ -123,10 +130,10 @@ function tick(world:World,old:State,input:Input):Step {
   if(s.mode==='ground')stance=stances.find(v=>v.y-s.y<=p.ground.snapDistance);
   else if(dx!==0)stance=stances.filter(v=>v.y<=s.y&&s.y-v.y<=floorDiv(mul(world.half,p.ground.maxSlope.rise),p.ground.maxSlope.run)+1)
     .find(v=>{const lead=startX+(dx>0?world.half:-world.half);return lead>=v.face.a[0]&&lead<=v.face.b[0]&&startY<=groundY(v.face,lead);});
-  if(!stance&&s.mode==='air'&&dx!==0){
+  if(!stance&&!xh&&s.mode==='air'&&dx!==0){
     const hits=sweep(world,{...s,x:startX},0,dx,true),hit=hits[0];
     if(hits.filter(h=>sameHit(h,hit)).length>8)return fail('contactBudget','x support');
-    if(hit){s.x=hit.coordinate;contacts.push(blockingContact(world,hit.face,'x',{...s,vx:dx}));s.vx=0;}
+    if(hit){s.x=hit.coordinate;for(const h of hits.filter(h=>sameHit(h,hit)))contacts.push(blockingContact(world,h.face,'x',{...s,vx:dx}));s.vx=0;}
   }
   if(stance){
     // Search the swept footprint through blocker X intervals. Clearance need not be
@@ -176,7 +183,7 @@ function tick(world:World,old:State,input:Input):Step {
       // Other blocking faces (including sloped two-sided segments) also stop downward motion.
       const hits=sweep(world,s,1,s.vy),block=hits[0];
       if((hits.filter(h=>sameHit(h,block)).length>8)||(landing.filter(h=>h.y===hit?.y).length>8))return fail('contactBudget','y');
-      if(block&&(!hit||block.coordinate<hit.y)){s.y=block.coordinate;contacts.push(blockingContact(world,block.face,'y',s));s.vy=0;}
+      if(block&&(!hit||block.coordinate<hit.y)){s.y=block.coordinate;for(const h of hits.filter(h=>sameHit(h,block)))contacts.push(blockingContact(world,h.face,'y',s));s.vy=0;}
       else if(hit){s.y=hit.y;s.vy=0;s.mode='ground';s.supportId=hit.face.supportId;support=hit;}
       else s.y=integer(s.y+s.vy);
     }

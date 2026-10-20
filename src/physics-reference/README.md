@@ -21,7 +21,10 @@ physically and report `unregisteredSupport`; they supply no navigation claim.
 Symmetric masks and enabled state govern physical participation. One-way faces
 never become blocking walls. Normals in traces are exact, unnormalized outward
 integer vectors, including the contacted side of a two-sided segment. Points
-are physical integer contact points, independent of presentation anchors.
+are floor-quantized physical face witnesses, independent of presentation anchors.
+A rational sweep can stop less than 1 su before a face; witness quantization
+adds less than 1 su in the interpolated coordinate. This declared reporting
+precision never loosens exact replay checkpoints or collision ordering.
 
 X precedes Y. Sweeps use the Minkowski expansion of a source edge by the actor
 rect, with exact rational contact ordering before conservative integer rounding.

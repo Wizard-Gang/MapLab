@@ -60,7 +60,7 @@
             ],
             "point": [
               25600,
-              25600
+              15360
             ],
             "kind": "blocking"
           },
@@ -83,6 +83,6 @@
         ]
       }
     ],
-    "traceSha256": "874172f01f10c1df27db86b9c90affebd72407eacd35a5fa05715db8e1d7c414"
+    "traceSha256": "66ee638562dd72dcce92b54f41a7173aa555891b1a5ecee71efc41f0785045eb"
   }
 }

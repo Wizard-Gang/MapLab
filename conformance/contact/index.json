@@ -10,7 +10,7 @@
     },
     {
       "path": "axis-corner.fixture.json",
-      "sha256": "b428f9aec16a4581266cb964844e5e63fa8b88ab07b2cff598942fd904ecb62c"
+      "sha256": "389be12f4ce5b9f6ff123cc598e711fe9db74f001ec4069b19bf376b07a522a0"
     },
     {
       "path": "axis-corner.map.json",
@@ -30,7 +30,7 @@
     },
     {
       "path": "ceiling-bump.fixture.json",
-      "sha256": "865805fdf728d99e9cf89ab35422c5a9ef9c6367ed76510118ff925350c560b4"
+      "sha256": "ad4c5db237a92e8527366f1ec5b7eb2239c2c580f86af4db15e8e8dbb1208230"
     },
     {
       "path": "ceiling-bump.map.json",
@@ -54,7 +54,7 @@
     },
     {
       "path": "contact-tie.fixture.json",
-      "sha256": "901b2e10d21f774cbeefe69a4c9489780be2c2bad9f6099b449ec2ebc59b6c7d"
+      "sha256": "cbf661ba1a1075de5e2be37ce6f06bbc4277523ea8c31eaac62962f5a3f6c08d"
     },
     {
       "path": "contact-tie.map.json",
@@ -106,7 +106,7 @@
     },
     {
       "path": "fractional-contact-order.fixture.json",
-      "sha256": "375114b6a86608ffe28c1b74ac78a3077b1d768f867caa66d9abf970951df352"
+      "sha256": "f091b0eaa5fb42f684a08ac6f526a66aa9282fa6a87287fcf1670d1e24508fe6"
     },
     {
       "path": "fractional-contact-order.map.json",
@@ -146,7 +146,7 @@
     },
     {
       "path": "segment-wall.fixture.json",
-      "sha256": "59dc9e9d148b0b435df3d4102f05bfb0d5097154d83a2722fdc24cf86dec6ee3"
+      "sha256": "bc9966a0e088ab97b4465b5db6d33696b356c0bd165242fe06e0589ffbb4c6a8"
     },
     {
       "path": "segment-wall.map.json",
@@ -154,7 +154,7 @@
     },
     {
       "path": "separated-slope-ceilings.fixture.json",
-      "sha256": "8cf2b35992cfa5f6237a581efece425ecea026bc48a1c2020eaf14031ef97df4"
+      "sha256": "e57c921392b005a995981348aab8071c17f87b9092f904bc3c794afe8b1cb1d0"
     },
     {
       "path": "separated-slope-ceilings.map.json",
@@ -162,7 +162,7 @@
     },
     {
       "path": "slope-40-blocking.fixture.json",
-      "sha256": "1d1b7e8f6b861f8a1c2a5ceade328d178a69f3a4338b3e4868f8b697afc3977f"
+      "sha256": "a0d3147a3cdb25c45e0ab3f14252f1105c354a25cb08927fe91ff286a97aea63"
     },
     {
       "path": "slope-40-blocking.map.json",
@@ -182,7 +182,7 @@
     },
     {
       "path": "slope-catch-limit.fixture.json",
-      "sha256": "6425ecb8f124f2481d61c4af88da1641bcd5632a472e4fa325bbaa554d7b2587"
+      "sha256": "864c2e22d2ebb07f72e3f4c95cc5cc16aa97095d1623ab8f5bb70ca0723efbd6"
     },
     {
       "path": "slope-catch-limit.map.json",
@@ -190,7 +190,7 @@
     },
     {
       "path": "slope-clearance.fixture.json",
-      "sha256": "9630737abf28e7be2f35f0cbc09531b337eaee88fc11b9c42262ffd701bd8050"
+      "sha256": "84f604fe475bffe00169e1d362916149cfd752c21fe935bfae93566bc5b5c2c3"
     },
     {
       "path": "slope-clearance.map.json",
@@ -254,7 +254,7 @@
     },
     {
       "path": "thin-wall.fixture.json",
-      "sha256": "8ba99f5599bddc4d2bd08e67cddea067db2ebf2b78a3c6b34f355cef029b5d26"
+      "sha256": "6fe5d7958d3973d0bdaf0c857bafe7c58233d6d72837e45a78dcaf9bcb55bd1b"
     },
     {
       "path": "thin-wall.map.json",

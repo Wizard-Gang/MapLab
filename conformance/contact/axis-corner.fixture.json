@@ -60,23 +60,7 @@
             ],
             "point": [
               25600,
-              23040
-            ],
-            "kind": "blocking"
-          },
-          {
-            "axis": "x",
-            "bodyId": "body.wall",
-            "shapeId": "shape.wall",
-            "edgeIndex": 3,
-            "supportId": null,
-            "normal": [
-              -25600,
-              0
-            ],
-            "point": [
-              25600,
-              23040
+              12800
             ],
             "kind": "blocking"
           },
@@ -99,6 +83,6 @@
         ]
       }
     ],
-    "traceSha256": "ac4adeaf9a37b741dd16a288021a01638edb42634171614c6f544b2c85c9cd7d"
+    "traceSha256": "e6634d5febadde7d276afddc4032ecfcc6463dd10ee8c44cec85ee81efb8e1fa"
   }
 }

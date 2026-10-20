@@ -59,30 +59,14 @@
               -16384
             ],
             "point": [
-              2996,
-              23072
-            ],
-            "kind": "blocking"
-          },
-          {
-            "axis": "x",
-            "bodyId": "body.slope",
-            "shapeId": "shape.slope",
-            "edgeIndex": 0,
-            "supportId": null,
-            "normal": [
-              -13824,
-              -16384
-            ],
-            "point": [
-              2996,
-              23072
+              6068,
+              20480
             ],
             "kind": "blocking"
           }
         ]
       }
     ],
-    "traceSha256": "652c5ef7378c7e8cd8e6da1f89ab7c5014f4f5e04b3babf451570aafc8b2d5b3"
+    "traceSha256": "3d5eb9d4e22f3700da75bbb9a832fc04e8673bdd9abc1eb4fedd2e0e92a1cdbb"
   }
 }
