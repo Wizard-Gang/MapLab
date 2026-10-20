@@ -1,0 +1,72 @@
+{
+  "id": "ceiling-bump",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "ceiling-bump.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 23040,
+    "vx": 0,
+    "vy": -8192,
+    "mode": "air",
+    "supportId": null,
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16384,
+          "y": 21504,
+          "vx": 0,
+          "vy": 96,
+          "mode": "air",
+          "supportId": null,
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.ceiling",
+            "shapeId": "shape.ceiling",
+            "edgeIndex": 2,
+            "supportId": null,
+            "normal": [
+              0,
+              65536
+            ],
+            "point": [
+              13312,
+              11264
+            ],
+            "kind": "blocking"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "9f293446723664b8a79ef95266a72a64bda80d481c97de0a783160c2aa6b7b7d"
+  }
+}

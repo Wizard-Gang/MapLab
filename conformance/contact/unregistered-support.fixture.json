@@ -1,0 +1,72 @@
+{
+  "id": "unregistered-support",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "unregistered-support.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 25600,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "unregistered:body.floor/shape.floor/0",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 16384,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "unregistered:body.floor/shape.floor/0",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "unregistered:body.floor/shape.floor/0",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              13312,
+              25600
+            ],
+            "kind": "unregisteredSupport"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "60c975acb64b12567f2c35f73ffd8f08cb021bbc4dd6399663daf2cdfcb3cad5"
+  }
+}

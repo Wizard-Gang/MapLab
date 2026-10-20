@@ -1,0 +1,552 @@
+{
+  "id": "welded-seam",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "welded-seam.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 12288,
+    "y": 25600,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.a",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    }
+  ],
+  "ticks": 16,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 12352,
+          "y": 25600,
+          "vx": 64,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.a",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.a",
+            "normal": [
+              0,
+              -16384
+            ],
+            "point": [
+              9280,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 2,
+        "state": {
+          "x": 12480,
+          "y": 25600,
+          "vx": 128,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.a",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 2
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.a",
+            "normal": [
+              0,
+              -16384
+            ],
+            "point": [
+              9408,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 3,
+        "state": {
+          "x": 12672,
+          "y": 25600,
+          "vx": 192,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.a",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 3
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.a",
+            "normal": [
+              0,
+              -16384
+            ],
+            "point": [
+              9600,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 4,
+        "state": {
+          "x": 12928,
+          "y": 25600,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.a",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 4
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.a",
+            "normal": [
+              0,
+              -16384
+            ],
+            "point": [
+              9856,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 5,
+        "state": {
+          "x": 13184,
+          "y": 25600,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.a",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 5
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.a",
+            "normal": [
+              0,
+              -16384
+            ],
+            "point": [
+              10112,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 6,
+        "state": {
+          "x": 13440,
+          "y": 25536,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 6
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              16512,
+              25536
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 7,
+        "state": {
+          "x": 13696,
+          "y": 25408,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 7
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              16768,
+              25408
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 8,
+        "state": {
+          "x": 13952,
+          "y": 25280,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 8
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              17024,
+              25280
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 9,
+        "state": {
+          "x": 14208,
+          "y": 25152,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 9
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              17280,
+              25152
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 10,
+        "state": {
+          "x": 14464,
+          "y": 25024,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 10
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              17536,
+              25024
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 11,
+        "state": {
+          "x": 14720,
+          "y": 24896,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 11
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              17792,
+              24896
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 12,
+        "state": {
+          "x": 14976,
+          "y": 24768,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 12
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              18048,
+              24768
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 13,
+        "state": {
+          "x": 15232,
+          "y": 24640,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 13
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              18304,
+              24640
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 14,
+        "state": {
+          "x": 15488,
+          "y": 24512,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 14
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              18560,
+              24512
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 15,
+        "state": {
+          "x": 15744,
+          "y": 24384,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 15
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              18816,
+              24384
+            ],
+            "kind": "support"
+          }
+        ]
+      },
+      {
+        "tick": 16,
+        "state": {
+          "x": 16000,
+          "y": 24256,
+          "vx": 256,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.b",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 16
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "",
+            "shapeId": "",
+            "edgeIndex": 0,
+            "supportId": "fh.b",
+            "normal": [
+              -8192,
+              -16384
+            ],
+            "point": [
+              19072,
+              24256
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "a28bb30b993367deab20df94beb33b8de12216fc9a2d4c8c8eba8c9a6ddbfe7c"
+  }
+}

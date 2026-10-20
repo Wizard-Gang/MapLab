@@ -1,0 +1,72 @@
+{
+  "id": "slope-40-walkable",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "slope-40-walkable.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 8192,
+    "y": 16096,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.slope",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 8192,
+          "y": 16096,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.slope",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.slope",
+            "shapeId": "shape.slope",
+            "edgeIndex": 0,
+            "supportId": "fh.slope",
+            "normal": [
+              -13824,
+              -16384
+            ],
+            "point": [
+              11264,
+              16096
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "a1fff15b8119e4c41d62be4da197c5fe24b0d5314f4a27305469a2b4b5ceb04a"
+  }
+}

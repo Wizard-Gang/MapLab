@@ -1,0 +1,72 @@
+{
+  "id": "boundary-tangent",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "boundary-tangent.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 3072,
+    "y": 25600,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 0,
+      "run": false
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "ok",
+    "checkpoints": [
+      {
+        "tick": 1,
+        "state": {
+          "x": 3072,
+          "y": 25600,
+          "vx": 0,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 1
+        },
+        "contacts": [
+          {
+            "axis": "y",
+            "bodyId": "body.floor",
+            "shapeId": "shape.floor",
+            "edgeIndex": 0,
+            "supportId": "fh.floor",
+            "normal": [
+              0,
+              -65536
+            ],
+            "point": [
+              0,
+              25600
+            ],
+            "kind": "support"
+          }
+        ]
+      }
+    ],
+    "traceSha256": "6417d227cc4cd0c4898747fc4ba9be9587f17c3c8fed65ca77af82dac0317d18"
+  }
+}

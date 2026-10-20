@@ -1,0 +1,55 @@
+{
+  "id": "contact-budget",
+  "contracts": {
+    "controller": {
+      "key": "maplab.reference-controller",
+      "version": 1
+    },
+    "collision": {
+      "key": "maplab.collision",
+      "version": 1
+    }
+  },
+  "map": "contact-budget.map.json",
+  "profile": "contact.movement.json",
+  "initial": {
+    "x": 16384,
+    "y": 25600,
+    "vx": 16384,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 0
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "moveX": 1,
+      "run": true
+    }
+  ],
+  "ticks": 1,
+  "expect": {
+    "status": "contactBudget",
+    "checkpoints": [
+      {
+        "tick": 0,
+        "state": {
+          "x": 16384,
+          "y": 25600,
+          "vx": 16384,
+          "vy": 0,
+          "mode": "ground",
+          "supportId": "fh.floor",
+          "planeId": "layer.actors",
+          "facing": 1,
+          "tick": 0
+        },
+        "contacts": []
+      }
+    ],
+    "traceSha256": "a20381a247dab9dccedb9ffe9441ff7c589c8c598764b40fb72813b5609b0083"
+  }
+}

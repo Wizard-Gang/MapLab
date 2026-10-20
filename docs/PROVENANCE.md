@@ -80,3 +80,13 @@ fixtures and ML-015 approved PNG. Tests generate final STORE archives rather
 than checking in timestamped tool output. The independent Python ZIP/inventory
 consumer and isolated ML-007 schema/reference reader use final files only.
 No engine, controller or navigation execution is claimed. No borrowed assets.
+
+## ML-017 reference contact fixtures
+
+`conformance/contact/` contains original owned CC0-1.0 tiny maps, profiles and
+run-length replay fixtures. Every file is pinned by `index.json`. Exact
+intermediate states and contacts cover flat/run/brake, slopes and finite lift,
+welds, snap, solid and segment walls, ceilings, thin-wall sweep, overlap,
+tangency, clearance, source edge mapping, masks, traction/conveyor motion,
+contact budget and rational/stable-ID tie ordering. No third-party geometry,
+assets, physics implementation or engine source was borrowed.
