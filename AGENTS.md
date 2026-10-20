@@ -10,7 +10,7 @@ This file is the only required reading. Every other doc is a reference: look up 
 
 ## Lookups
 
-- Active task, your whole scope: `sed -n '/active-queue:start/,/active-queue:end/p' implementation_plan.md`
+- Active task, your whole scope: `sed -n '/^<!-- active-queue:start/,/^<!-- active-queue:end/p' implementation_plan.md`
 - Spec sections it names: `grep -n '^##' docs/specifications/2026-10-16-maplab.md` for the heading map, then `sed -n 'START,ENDp'` per section.
 - Activating after a verified squash: copy the previous activation's shape from `git show HEAD -- implementation_plan.md docs/deliveries.json config/change.json`.
 - PR body: the sections of [the PR template](.github/pull_request_template.md).

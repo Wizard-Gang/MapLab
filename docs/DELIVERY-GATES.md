@@ -6,7 +6,7 @@ was read back before ML-002 activation. Its change record is preserved unchanged
 There is no root-commit path in current validation. Every new task uses one
 controlled branch, one scoped PR and one squash commit.
 
-`config/change.json`, the single active queue, the permanent roadmap, current
+`config/change.json`, the single active queue, the reserved future queue, current
 change record and preceding delivery chain must agree. The same validator accepts
 any reserved post-bootstrap task with a complete preceding chain; a synthetic
 ML-003 test proves it is not bound to ML-002. Offline evidence validation checks

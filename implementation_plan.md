@@ -1,6 +1,6 @@
 # Permanent implementation plan — current and future delivery queue
 
-**Authority:** this file is the only live queue. [The specification](docs/specifications/2026-10-16-maplab.md), with the owner-approved R1 revision amended into its bodies at ML-003, governs design and holds J2, the 44-ID baseline that every task block below must match. To work, read only the active block: `sed -n '/active-queue:start/,/active-queue:end/p' implementation_plan.md`.
+**Authority:** this file is the only live queue. [The specification](docs/specifications/2026-10-16-maplab.md), with the owner-approved R1 revision amended into its bodies at ML-003, governs design and holds J2, the 44-ID baseline that every task block below must match. To work, read only the active block: `sed -n '/^<!-- active-queue:start/,/^<!-- active-queue:end/p' implementation_plan.md`.
 
 **Selection and retirement:** the first open reserved ID after [the delivery chain](docs/deliveries.json) is the only executable task and sits alone in the active block. Every later ID stays in the future block once, in order. After a verified protected squash and resulting main CI, the next activation appends the predecessor's evidence to the delivery chain, retires it to one history line, promotes exactly the next ID and leaves all later tasks untouched. Never reuse, renumber, skip, implement early or silently delete IDs. An oversized task needs a separately governed queue/spec revision first.
 
