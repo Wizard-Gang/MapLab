@@ -1,0 +1,104 @@
+{
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "c78652e04b5204cbb36bb1a4f53fa05e10db649afab0c9e936af6c0e93b61bfc"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "fe2d6b29df7475235b10942b8bda2deeaf90ad527bf7b5960a3127fee937366f"
+    },
+    {
+      "path": "climber.movement.json",
+      "sha256": "458bfe37a12f0684775a6588496260a91660be2ce841f449317b4306da387b45"
+    },
+    {
+      "path": "directed.graph.json",
+      "sha256": "88de8852dc4b8703eae0506d8893f1d80495a9ef8e62b936c8bc5fd4d91d16ef"
+    },
+    {
+      "path": "directed.map.json",
+      "sha256": "bb8cf86f55ea3419adb6c313539e8c825547b43ccaf5382db91dbad492cd04e2"
+    },
+    {
+      "path": "direction-climber.graph.json",
+      "sha256": "37f143e6b08b7f33a559142ec55ea19a86f93aa1c9258a0f0dcde4ed02f22eba"
+    },
+    {
+      "path": "direction-enemy.graph.json",
+      "sha256": "5dbf1ee57d2e93b96438e553364e2e5482896d2dd0deef3625ef3c904ac1ce7a"
+    },
+    {
+      "path": "direction-player.graph.json",
+      "sha256": "043795641d423e4fa06883c19e535360bf8c5ce472e4ad0c077f120bfbdeffff"
+    },
+    {
+      "path": "direction.map.json",
+      "sha256": "d3f6ae208f3fc75bd5684b2da06bde264a60dd9b8002dd16d39ca096e30e23eb"
+    },
+    {
+      "path": "enemy.movement.json",
+      "sha256": "ce79ec30f56ad8689ce1eedf6cbb2358debaf3acf9e762dfe4057ce516c47c59"
+    },
+    {
+      "path": "flat-enemy.graph.json",
+      "sha256": "b989ca486590c23ea760da345c5ab389fabb7aef458f597462f768d10e6e0e53"
+    },
+    {
+      "path": "flat.map.json",
+      "sha256": "f4dd7d78448370d5c43284ee786a3e5a7b70ec38c71083328216a625632b76ca"
+    },
+    {
+      "path": "hazard-allow.graph.json",
+      "sha256": "b6261f90bae4bf2483dd3fd31ed6ee7ed61e7b87f8ddea13a11013c2e36182e7"
+    },
+    {
+      "path": "hazard-ban.graph.json",
+      "sha256": "30ec738dd666f383cc5d86c65f79a5f03e679c2af230ed5c68ee17f9684c1b3d"
+    },
+    {
+      "path": "hazard-ban.movement.json",
+      "sha256": "003cc299bbcf84704ca8be321faf762417e08f91ebb464877bb04e7f13a3a6e7"
+    },
+    {
+      "path": "hazard.map.json",
+      "sha256": "002ef62841a18e5e5fd1a14219a862a758a2b8e5ba55bb707475498c593720cd"
+    },
+    {
+      "path": "ladder-climber.graph.json",
+      "sha256": "758e019c008bc1864128c882fb480b50cf7cff2e70b142feb081bff55dace9a9"
+    },
+    {
+      "path": "ladder-enemy.graph.json",
+      "sha256": "9a546a9b71901ade9a9a87b6d3ea7e688dbe85133253547a0dd765bfa9e9b917"
+    },
+    {
+      "path": "ladder-player.graph.json",
+      "sha256": "8e7893d6f393a8898fc421da18b8cb8556d517b6d7ba4f181ee2b57047fcb2e6"
+    },
+    {
+      "path": "ladder.map.json",
+      "sha256": "38fc7df0b540e912534c43ccc6dae7814b3f7ca611defc13141e3fb3fe137789"
+    },
+    {
+      "path": "narrow-enemy.graph.json",
+      "sha256": "585baf6c1d01b387506052d6be6e3d255dba81bd0b93853b29f9ed57603fb7b8"
+    },
+    {
+      "path": "narrow.map.json",
+      "sha256": "6391b3a91f39f7c4d33226372eb1d896cae5d21cc2f2855d29e12238334e1973"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "1250a7c477ffedaad12a933d7a0369654bf8159b76ce0d485f826c023ebadc6c"
+    },
+    {
+      "path": "slope-enemy.graph.json",
+      "sha256": "d4fe44167dffedefc28947b196c80db7e8ac682e4f20b03e95df0cf2a61f598d"
+    },
+    {
+      "path": "slope.map.json",
+      "sha256": "14bb9ade6fe86ad5a3c3a4df602e41574e11d589b88d8cf810fbefc200cadb13"
+    }
+  ]
+}
