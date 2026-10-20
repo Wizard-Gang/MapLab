@@ -60,6 +60,16 @@
       "id": "directed",
       "map": "directed.map.json",
       "profile": "enemy.movement.json"
+    },
+    {
+      "id": "three-hazard",
+      "map": "three-hazard.map.json",
+      "profile": "hazard-ban.movement.json"
+    },
+    {
+      "id": "three-direction",
+      "map": "three-direction.map.json",
+      "profile": "enemy.movement.json"
     }
   ]
 }

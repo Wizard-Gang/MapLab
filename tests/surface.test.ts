@@ -39,7 +39,7 @@ test('cache keys bind all physical inputs, controller bytes, coefficient edits a
  const h=createHash('sha256');for(const f of readdirSync('src/physics-reference').filter(f=>f.endsWith('.ts')).sort())h.update(f+'\0').update(readFileSync('src/physics-reference/'+f));expect(h.digest('hex')).toBe(CONTROLLER_SHA256);
 });
 test('budgets, cancellation, unsupported profiles and intents never publish partial graphs',async()=>{
- const [m,p]=docs();expect(await buildSurfaceGraph(m,p,1,{maxSamples:1,maxTicks:1})).toMatchObject({status:'budget',intervals:[],edges:[]});
+ const [m,p]=docs();expect(await buildSurfaceGraph(m,p,1,{...DEFAULT_SETTINGS,maxSamples:1})).toMatchObject({status:'budget',intervals:[],edges:[]});
  let cancel=false;expect(await buildSurfaceGraph(m,p,1,DEFAULT_SETTINGS,()=>cancel,async()=>{cancel=true;})).toMatchObject({status:'cancelled',nodes:[],edges:[]});
  const advanced={...p,abilities:[{kind:'fly' as const,version:1 as const,speed:100,acceleration:10,turnAcceleration:10,hover:true}]};expect((await buildSurfaceGraph(m,advanced,1)).status).toBe('unsupported');
  const intent={...m,navigation:{...m.navigation,overrides:[{id:'nav.deny',regionId:'region.any',profileIds:[p.id],actions:['walk'],policy:'forbid' as const,penaltyTicks:0}]}};expect((await buildSurfaceGraph(intent,p,1)).status).toBe('unsupported');
@@ -70,3 +70,24 @@ test('owned package integrity and isolated final-byte independent consumer',()=>
   cpSync('tests/consumer/surface.mjs',join(dir,'consumer.mjs'));const output=JSON.parse(execFileSync(process.execPath,[join(dir,'consumer.mjs'),folder],{cwd:dir,encoding:'utf8',maxBuffer:10_000_000}));expect(output).toEqual({cases:cases.cases.length,verified:true});
  }finally{rmSync(dir,{recursive:true,force:true});}
 },60_000);
+
+test('nonadjacent welded restrictions cover every standing and replay footprint',()=>{
+ const hazard=graphs.get('three-hazard')!,direction=graphs.get('three-direction')!;
+ expect(hazard.intervals.find(i=>i.supportId==='fh.a')!.maxX).toBe(92*256);
+ expect(hazard.intervals.every(i=>i.maxX<=92*256)).toBe(true);
+ expect(direction.intervals.some(i=>i.supportId==='fh.a'&&i.direction==='bToA'&&i.maxX>92*256)).toBe(true);
+ for(const [g,isHazard] of [[hazard,true],[direction,false]] as const)for(const e of g.edges){
+  for(const s of [e.initial,...e.frames.map(f=>f.state)])if(isHazard||e.input.moveX===1)expect(s.x+12*256).toBeLessThanOrEqual(104*256);
+ }
+});
+test.each([['flat','enemy','walk'],['ladder','climber','climb']] as const)('%s tick exhaustion is explicit, empty and never warmed in LRU',async(map,profile,kind)=>{
+ const [m,original]=docs(map,profile),settings={...DEFAULT_SETTINGS,maxTicks:kind==='climb'?1000:1};
+ const p={...original,abilities:original.abilities.map(a=>kind==='climb'&&a.kind==='climb'?{...a,speed:1}:a)};
+ const g=await buildSurfaceGraph(m,p,1,settings);
+ expect(g).toMatchObject({status:'budget',diagnostics:[kind+'-tick-budget'],intervals:[],nodes:[],edges:[]});
+ const sent:Request[]=[],session=new GraphSession(r=>sent.push(r));await session.build(m,p,1,settings);
+ const request=sent.at(-1)! as Extract<Request,{kind:'build'}>;
+ expect(session.accept({kind:'result',job:request.job,revision:1,graph:g})).toBe(true);
+ await session.build(m,p,2,settings);expect(session.graph).toBe(null);expect(sent.filter(r=>r.kind==='build')).toHaveLength(2);
+ session.dispose();
+},30_000);

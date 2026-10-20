@@ -17,7 +17,7 @@ const order=(a:{id:string},b:{id:string})=>a.id<b.id?-1:a.id>b.id?1:0;
 export async function identity(map:MapDocument,p:MovementDocument,settings:Settings):Promise<Identity>{
  const sorted=<T extends {id:string}>(a:readonly T[])=>[...a].sort(order);
  const worldSha256=await digest({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sorted(map.bodies),footholds:sorted(map.footholds),materials:sorted(map.materials),traversals:sorted(map.traversals),regions:sorted(map.regions as unknown as {id:string}[]),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
- const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@1',latticeSu:1,fullBody:true,...settings});
+ const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@2',latticeSu:1,fullBody:true,...settings});
  const value={worldSha256,profileSha256,controllerSha256:CONTROLLER_SHA256,settingsSha256};return {...value,cacheKey:await digest(value)};
 }
 const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:0,dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true});
@@ -38,20 +38,33 @@ export async function buildSurfaceGraph(source:MapDocument,profile:MovementDocum
  const checkpoint=async()=>{if(++samples%1024===0)await yieldTask();if(cancelled())throw new Error('cancelled');if(samples>options.maxSamples)throw new Error('budget');};
  const forbidden=(materialId:string)=>map.materials.find(m=>m.id===materialId)?.tags.some(t=>p.forbiddenMaterialTags.includes(t));
  const safe=(x:number,y:number)=>x-w.half>=map.bounds[0]*256&&x+w.half<=(map.bounds[0]+map.bounds[2])*256&&y-w.height>=map.bounds[1]*256&&y<=(map.bounds[1]+map.bounds[3])*256&&!overlaps(w,x,y);
+ // Match the controller's reciprocal, endpoint-touching coverage, including nonadjacent pieces.
+ const coverage=new Map(w.faces.map(seed=>{
+  const found=new Set([seed]),queue=[seed];
+  for(const f of queue)for(const next of w.faces){
+   if(!next.support||found.has(next))continue;
+   const welded=f.links.includes(next.supportId!)&&next.links.includes(f.supportId!);
+   const sameBody=!f.registered&&!next.registered&&f.bodyId!==''&&f.bodyId===next.bodyId&&f.shapeId===next.shapeId;
+   const touches=(f.a[0]===next.b[0]&&f.a[1]===next.b[1])||(f.b[0]===next.a[0]&&f.b[1]===next.a[1]);
+   if(touches&&(welded||sameBody)){found.add(next);queue.push(next);}
+  }
+  return [seed.supportId,queue] as const;
+ }));
  const permitted=(s:ClimbState,dir:-1|1)=>{
-  const touched=w.faces.filter(f=>f.support&&f.a[0]<s.x+w.half&&f.b[0]>s.x-w.half&&(f.supportId===s.supportId||w.faces.find(v=>v.supportId===s.supportId)?.links.includes(f.supportId!)));
-  return touched.every(f=>!forbidden(f.materialId)&&map.footholds.find(v=>v.id===f.supportId)?.direction!==(dir===1?'bToA':'aToB'));
+  const touched=(coverage.get(s.supportId)??[]).filter(f=>f.a[0]<s.x+w.half&&f.b[0]>s.x-w.half);
+  return touched.length>0&&touched.every(f=>!forbidden(f.materialId)&&map.footholds.find(v=>v.id===f.supportId)?.direction!==(dir===1?'bToA':'aToB'));
  };
  try{
  for(const face of w.faces.filter(f=>f.support&&f.registered).sort((a,b)=>order({id:a.supportId!},{id:b.supportId!}))){
   if(forbidden(face.materialId))continue;
   const foothold=map.footholds.find(f=>f.id===face.supportId)!;
-  let start:number|null=null,last=0;
-  const append=()=>{if(start===null)return;intervals.push({key:JSON.stringify([map.id,face.supportId,start,last]),supportId:face.supportId!,materialId:face.materialId,direction:foothold.direction,minX:start,maxX:last});start=null;};
+  let start:number|null=null,last=0,direction=foothold.direction;
+  const append=()=>{if(start===null)return;intervals.push({key:JSON.stringify([map.id,face.supportId,start,last]),supportId:face.supportId!,materialId:face.materialId,direction,minX:start,maxX:last});start=null;};
   for(let x=face.a[0]-w.half;x<=face.b[0]+w.half;x++){
    await checkpoint();const stance=resolveStance(w,x,face.supportId!).find(s=>s.face.supportId===face.supportId);
    const s=stance?initial(w,x,stance.y,face.supportId!):null;
-   if(s&&safe(x,s.y)&&permitted(s,foothold.direction==='bToA'?-1:1)){if(start===null)start=x;last=x;}else append();
+   const right=s&&permitted(s,1),left=s&&permitted(s,-1);
+   if(s&&safe(x,s.y)&&(right||left)){const nextDirection=right?(left?'both':'aToB'):'bToA';if(nextDirection!==direction)append();direction=nextDirection;if(start===null)start=x;last=x;}else append();
   }append();
  }
  // Split at traversal entries, so an access position has its own exact motion state.
@@ -80,6 +93,7 @@ export async function buildSurfaceGraph(source:MapDocument,profile:MovementDocum
    let legal=true;for(let x=Math.min(s.x,next.x);x<=Math.max(s.x,next.x);x++){await checkpoint();const poses=resolveStance(w,x).filter(v=>safe(x,v.y)&&(v.face.supportId===s.supportId||v.face.supportId===next.supportId));if(!poses.some(v=>{const pose=initial(w,x,v.y,v.face.supportId!);return locate(pose)&&permitted(pose,dir);})) {legal=false;break;}}if(!legal)break;
    frames.push(f);if(here.key===to.intervalKey&&(dir===1?next.x>=to.state.x-p.ground.walkSpeed:next.x<=to.state.x+p.ground.walkSpeed)){record(from,to,'walk',input,frames);break;}
    if(next.x===s.x)break;s=next;
+   if(tick+1===options.maxTicks)throw new Error('walk-tick-budget');
   }
  }
  for(const from of nodes)for(const dir of [-1,1] as const){
@@ -92,8 +106,9 @@ export async function buildSurfaceGraph(source:MapDocument,profile:MovementDocum
     if(to&&to.key!==from.key)record(from,to,'climb',input,frames);break;
    }
    if(next.mode!=='climb'||next.y===s.y&&s.mode==='climb')break;s=next;
+   if(tick+1===options.maxTicks)throw new Error('climb-tick-budget');
   }
  }
  return result('candidate',[],intervals,nodes,edges);
- }catch(e){if(e instanceof Error&&(e.message==='budget'||e.message==='cancelled'))return result(e.message,[e.message]);throw e;}
+ }catch(e){if(e instanceof Error&&(e.message==='budget'||e.message==='cancelled'||e.message.endsWith('-tick-budget')))return result(e.message==='cancelled'?'cancelled':'budget',[e.message]);throw e;}
 }

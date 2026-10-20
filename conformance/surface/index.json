@@ -2,11 +2,11 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "c78652e04b5204cbb36bb1a4f53fa05e10db649afab0c9e936af6c0e93b61bfc"
+      "sha256": "0bf8ab9b5820a63767e3e86860e947e9e0a3034258bd5a56fb86f12f223666dc"
     },
     {
       "path": "cases.json",
-      "sha256": "fe2d6b29df7475235b10942b8bda2deeaf90ad527bf7b5960a3127fee937366f"
+      "sha256": "be1d34e9854fec594f09f21eb8486a76370fdc07121787d41050aec0d0847dee"
     },
     {
       "path": "climber.movement.json",
@@ -14,7 +14,7 @@
     },
     {
       "path": "directed.graph.json",
-      "sha256": "88de8852dc4b8703eae0506d8893f1d80495a9ef8e62b936c8bc5fd4d91d16ef"
+      "sha256": "e129a3e4b7da4d3fc5269f2c7fb54248c267b0960426c2b6fb0ecbc1db13530c"
     },
     {
       "path": "directed.map.json",
@@ -22,15 +22,15 @@
     },
     {
       "path": "direction-climber.graph.json",
-      "sha256": "37f143e6b08b7f33a559142ec55ea19a86f93aa1c9258a0f0dcde4ed02f22eba"
+      "sha256": "9886e9faac9564865f657e540dce69bfc085e8ae592cb96c204a13a1c281db39"
     },
     {
       "path": "direction-enemy.graph.json",
-      "sha256": "5dbf1ee57d2e93b96438e553364e2e5482896d2dd0deef3625ef3c904ac1ce7a"
+      "sha256": "2064ac986ebb46fb6e494bf652b1f3d692d032e6d37f17773ec9667b4486c95a"
     },
     {
       "path": "direction-player.graph.json",
-      "sha256": "043795641d423e4fa06883c19e535360bf8c5ce472e4ad0c077f120bfbdeffff"
+      "sha256": "98d75240f925227c9a56ea21e13565864db795a6e19b4718a7fcb7a0d62d8c38"
     },
     {
       "path": "direction.map.json",
@@ -42,7 +42,7 @@
     },
     {
       "path": "flat-enemy.graph.json",
-      "sha256": "b989ca486590c23ea760da345c5ab389fabb7aef458f597462f768d10e6e0e53"
+      "sha256": "04cb1536bbd36b346d50080cf3f8595edfae42d0b836c61a8946a145589b5ae2"
     },
     {
       "path": "flat.map.json",
@@ -50,11 +50,11 @@
     },
     {
       "path": "hazard-allow.graph.json",
-      "sha256": "b6261f90bae4bf2483dd3fd31ed6ee7ed61e7b87f8ddea13a11013c2e36182e7"
+      "sha256": "8be8893866b22a49e8aefb0ddb2a1aa2c18af8c6e1205b85c7e8d83287fa11ca"
     },
     {
       "path": "hazard-ban.graph.json",
-      "sha256": "30ec738dd666f383cc5d86c65f79a5f03e679c2af230ed5c68ee17f9684c1b3d"
+      "sha256": "540c6a645a1b611222895884028d2f70ea1cb10bf46df38784429041eb545f89"
     },
     {
       "path": "hazard-ban.movement.json",
@@ -66,15 +66,15 @@
     },
     {
       "path": "ladder-climber.graph.json",
-      "sha256": "758e019c008bc1864128c882fb480b50cf7cff2e70b142feb081bff55dace9a9"
+      "sha256": "540d4ccf9f24db33aa5742c7ec86fd4b53b7031545b7fa95c47ef3ec40ef063b"
     },
     {
       "path": "ladder-enemy.graph.json",
-      "sha256": "9a546a9b71901ade9a9a87b6d3ea7e688dbe85133253547a0dd765bfa9e9b917"
+      "sha256": "4a6e55c7df0779b408ad2bd7828b9ccd70c964e7cd59c1bbecfed46200c7b40f"
     },
     {
       "path": "ladder-player.graph.json",
-      "sha256": "8e7893d6f393a8898fc421da18b8cb8556d517b6d7ba4f181ee2b57047fcb2e6"
+      "sha256": "2b04945c3dedd44218da82060885a5f971144afc3cf1525050260617f3e25e91"
     },
     {
       "path": "ladder.map.json",
@@ -82,7 +82,7 @@
     },
     {
       "path": "narrow-enemy.graph.json",
-      "sha256": "585baf6c1d01b387506052d6be6e3d255dba81bd0b93853b29f9ed57603fb7b8"
+      "sha256": "f011eb39e8eac0ec63abaa02bae5598ef67a0ead6999fc8e6a86f0899e064382"
     },
     {
       "path": "narrow.map.json",
@@ -94,11 +94,27 @@
     },
     {
       "path": "slope-enemy.graph.json",
-      "sha256": "d4fe44167dffedefc28947b196c80db7e8ac682e4f20b03e95df0cf2a61f598d"
+      "sha256": "4290c8fa6acfa3fa41b69f53f278f2e3165bb832bcb49bed871db7f0020b1293"
     },
     {
       "path": "slope.map.json",
       "sha256": "14bb9ade6fe86ad5a3c3a4df602e41574e11d589b88d8cf810fbefc200cadb13"
+    },
+    {
+      "path": "three-direction.graph.json",
+      "sha256": "0146a6721ca76f36bb3aea326f6aa723e3dc17d8fcb4e22d7eb238df3d2d727d"
+    },
+    {
+      "path": "three-direction.map.json",
+      "sha256": "e1641d24ff86bf7d4b42d820237ed9bee454fefb43ce8408d3971f8940c4a111"
+    },
+    {
+      "path": "three-hazard.graph.json",
+      "sha256": "0eb0100e26de82a49e1c7c4708cc198be0cdb414195ff474d6f1ef306bd0d4a0"
+    },
+    {
+      "path": "three-hazard.map.json",
+      "sha256": "eac50408ac897a8d5629c04c0975a6dc32a57e6daa730389cc5d3d98685a1649"
     }
   ]
 }
