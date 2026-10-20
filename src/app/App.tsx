@@ -1,3 +1,4 @@
+import { TestPanel } from './TestPanel';
 import { ClimbPanel } from './ClimbPanel';
 import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
 import { ExportPanel } from './ExportPanel';
@@ -224,6 +225,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
       {entry && entry.errors > 0
         ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
         : <Viewport selection={store.selection(doc.id)} terrain={store.terrain(doc.id)} tilesets={tilesets} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
+      <TestPanel key={`test-${doc.id}`} store={store} doc={doc} />
       <ExportPanel key={`export-${doc.id}`} doc={doc} busy={busy} entry={entry} />
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
       <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />

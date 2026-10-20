@@ -1,0 +1,9 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    "forest-ladder",
+    "forest-rope",
+    "forest-drop",
+    "forest-walk-jump"
+  ]
+}

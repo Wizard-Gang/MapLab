@@ -1,3 +1,7 @@
+import { TestSession } from '../test-runtime/session';
+import type { MovementDocument } from '../contracts/movement-types';
+import { validateMovement } from '../contracts/movement';
+import type { ContactMap } from '../physics-reference';
 // The editor's library session (R1 C2, H2): open documents, their histories and the library mirror. React reads it
 // through useSyncExternalStore; large models never live in component state. Disk is the authority, so every
 // library operation re-reads the server's snapshot afterwards.
@@ -73,6 +77,19 @@ const describe = (r: Refusal): string[] => [
 export class LibraryStore {
   private view: AppView = initial;
   private sources = new Map<string, JsonValue>();
+  private readonly tests = new Map<string, TestSession>();
+  test(id: string): TestSession | undefined { return this.tests.get(id); }
+  testProfiles(): readonly MovementDocument[] {
+    return [...this.sources.values()].filter(v => validateMovement(v).ok) as unknown as MovementDocument[];
+  }
+  startTest(id: string, profileId: string): void {
+    const doc = this.doc(id), profile = this.testProfiles().find(p => p.id === profileId);
+    if (!doc || lockReason(doc) || !profile) throw new Error('Test requires an unlocked map and loaded movement profile');
+    this.cancelGestures(id);
+    const run = new TestSession(denormalize(doc.state.model) as unknown as ContactMap, profile);
+    this.tests.get(id)?.pause(); this.tests.set(id, run); this.set({});
+  }
+  stopTest(id: string): void { this.tests.get(id)?.pause(); this.tests.delete(id); this.set({}); }
   private readonly selections = new Map<string, SelectionSession>();
   clipboard = '';
   selection(id: string): SelectionSession {
@@ -131,7 +148,7 @@ export class LibraryStore {
 
   private set(patch: Partial<AppView>): void { this.view = { ...this.view, ...patch }; for (const l of this.listeners) l(); }
   private doc(id: string): OpenDoc | undefined { return this.view.docs.find((d) => d.id === id); }
-  private patchDoc(id: string, patch: Partial<OpenDoc>): void { this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
+  private patchDoc(id: string, patch: Partial<OpenDoc>): void { if (patch.state && patch.state.model !== this.doc(id)?.state.model) { this.tests.get(id)?.pause(); this.tests.delete(id); } this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
   private get libraryId(): string | null { const l = this.view.library; return l ? libraryKey(l.label, l.projectId) : null; }
   active(): OpenDoc | undefined { return this.view.activeId ? this.doc(this.view.activeId) : undefined; }
 
@@ -141,7 +158,7 @@ export class LibraryStore {
     this.set({ drafts: this.drafts ? 'available' : 'unavailable' });
     await this.load();
   }
-  dispose(): void { this.stop?.(); this.stop = null; for (const t of this.timers.values()) clearTimeout(t); }
+  dispose(): void { for (const run of this.tests.values()) run.pause(); this.tests.clear(); this.stop?.(); this.stop = null; for (const t of this.timers.values()) clearTimeout(t); }
 
   async load(): Promise<void> {
     const library = await fetchLibrary();
@@ -192,7 +209,7 @@ export class LibraryStore {
     this.set({ orphanDrafts: (await this.drafts.list(lib)).filter((d) => !indexed.has(d.documentId) && !open.has(d.documentId)) });
   }
 
-  activate(id: string): void { if (this.doc(id)) this.set({ activeId: id }); }
+  activate(id: string): void { for (const run of this.tests.values()) run.pause(); if (this.doc(id)) this.set({ activeId: id }); }
 
   async open(id: string): Promise<void> {
     if (this.doc(id)) return this.activate(id);
@@ -217,6 +234,7 @@ export class LibraryStore {
 
   /** Closes a tab after journaling its latest edits, so a dirty document's draft is offered when it is reopened. */
   async close(id: string): Promise<void> {
+    this.tests.get(id)?.pause(); this.tests.delete(id);
     if (this.doc(id)) await this.journal(id);
     this.selections.get(id)?.cancel(); this.selections.delete(id);
     this.terrains.get(id)?.cancel(); this.terrains.delete(id);

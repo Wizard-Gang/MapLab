@@ -1,0 +1,53 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "1a6c2c897f8e89fb57e4a620fca242bab191c641393df501efe87dbb27c939d5"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "c3c607b4b50f8bc23f91ef2187b02d6c3c0f52d6a573d95854e6ce251fc536b0"
+    },
+    {
+      "path": "forest-drop.expected.json",
+      "sha256": "bf82214b8bed2c0aadfe09d0b78943de1eef1772fb1f32150b02faab7099f4ce"
+    },
+    {
+      "path": "forest-drop.input.json",
+      "sha256": "44ff503f63cc69c1ba87db448e31fd4a4cdb3bbdc14527b6ae158dc13241dafb"
+    },
+    {
+      "path": "forest-ladder.expected.json",
+      "sha256": "bfc82f8678f43d7aaa5126a28e067323dc0d83f85a957c750a5f1cce1f7b94a7"
+    },
+    {
+      "path": "forest-ladder.input.json",
+      "sha256": "94103a447a3d5f42d2bfd145ee3c3bc978acd322b2f3b2ffd080c10377093559"
+    },
+    {
+      "path": "forest-rope.expected.json",
+      "sha256": "1d333792aeeb603e83f301b7efacb98794c8418be689b53d6b49b3dcea2f5a93"
+    },
+    {
+      "path": "forest-rope.input.json",
+      "sha256": "b6061a387e4d00282aa8bb6f42ba390b06bb41032415c75d0828ae3841c8d870"
+    },
+    {
+      "path": "forest-walk-jump.expected.json",
+      "sha256": "e929dabd6297c3f8998dcd9909bb502f1d5731aeac73f967fe2e8ce72d4fdc19"
+    },
+    {
+      "path": "forest-walk-jump.input.json",
+      "sha256": "e516dfe106459a28d64e43ae9acea207f7f50be5a41c09f8a8b5f7d4dc3e70f5"
+    },
+    {
+      "path": "forest.map.json",
+      "sha256": "8d134bcdea76a200f52b7b1f60e3f2e3b985ab43ce9e6f433b95da047aba2677"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "1250a7c477ffedaad12a933d7a0369654bf8159b76ce0d485f826c023ebadc6c"
+    }
+  ]
+}

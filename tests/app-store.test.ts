@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, expect, test } from 'vitest
 import { cpSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { LibraryStore, lockReason, type OpenDoc } from '../src/app/store';
-import { mapName } from '../src/editor/document';
+import { mapName, modelText } from '../src/editor/document';
 import { isDirty } from '../src/editor/history';
 import { draftKey, libraryKey, memoryDrafts } from '../src/library/drafts';
 import { libraryForm } from '../src/library/library-form';
@@ -110,4 +110,39 @@ test('closing a tab journals its last edits as a draft', async () => {
   expect((await drafts.get(key()))?.text).toContain('Closed quickly');
   await until(async () => store.getSnapshot().docs.length === 0);
   store.dispose();
+});
+
+test('ML-020 Test preserves author state/history/digest and stops on edit, undo, reload and close', async () => {
+ const store=await started();await store.open('map.forest');store.rename('Unsaved author history');
+ const before=doc(store).state,bytes=text(f,FOREST),checksum=modelText(before.model);
+ store.startTest('map.forest','movement.player');const run=store.test('map.forest')!;
+ for(let i=0;i<20;i++)run.advance({moveX:1,moveY:0,run:true,jump:i===0,drop:false});
+ run.reset();
+ expect(doc(store).state).toBe(before);expect(modelText(doc(store).state.model)).toBe(checksum);expect(text(f,FOREST)).toBe(bytes);
+ store.stopTest('map.forest');expect(doc(store).state).toBe(before);
+ store.startTest('map.forest','movement.player');const snapshot=store.test('map.forest')!;snapshot.pause(false);
+ store.rename('Explicit new author revision');expect(store.test('map.forest')).toBeUndefined();expect(snapshot.getSnapshot().paused).toBe(true);
+ expect(snapshot.source.metadata).not.toEqual((doc(store).state.model.fields.get('metadata')));
+ store.startTest('map.forest','movement.player');store.undo();expect(store.test('map.forest')).toBeUndefined();
+ store.startTest('map.forest','movement.player');store.redo();expect(store.test('map.forest')).toBeUndefined();
+ store.startTest('map.forest','movement.player');await store.reloadFromDisk('map.forest');expect(store.test('map.forest')).toBeUndefined();
+ store.startTest('map.forest','movement.player');await store.close('map.forest');expect(store.test('map.forest')).toBeUndefined();
+ store.dispose();
+});
+
+test('ML-020 refused edits keep snapshot, unsupported profile does not replace it, and locked maps cannot start Test',async()=>{
+ const store=await started();await store.open('map.forest');store.startTest('map.forest','movement.player');const run=store.test('map.forest');
+ expect(()=>store.startTest('map.forest','movement.flyer')).toThrow('unsupported');expect(store.test('map.forest')).toBe(run);
+ expect(()=>store.startTest('map.forest','movement.absent')).toThrow('loaded');expect(store.test('map.forest')).toBe(run);
+ put(f,FOREST,text(f,FOREST).replace('Forest acceptance world','Outside edit'));await store.refresh();
+ expect(lockReason(doc(store))).not.toBeNull();expect(()=>store.startTest('map.forest','movement.player')).toThrow('unlocked');store.dispose();
+});
+
+
+test('ML-020 draft digest and save metadata updates retain the same frozen Test source',async()=>{
+ const store=await started();await store.open('map.forest');store.rename('Journal while testing');
+ store.startTest('map.forest','movement.player');const run=store.test('map.forest')!,model=doc(store).state.model;
+ await until(()=>doc(store).drafted);expect(store.test('map.forest')).toBe(run);expect(doc(store).state.model).toBe(model);
+ await store.save();expect(store.test('map.forest')).toBe(run);expect(run.source.metadata).toEqual(model.fields.get('metadata'));
+ store.dispose();expect(run.getSnapshot().paused).toBe(true);
 });

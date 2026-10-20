@@ -1,7 +1,7 @@
 {
-  "id": "ML-019",
+  "id": "ML-020",
   "type": "FEATURE",
-  "title": "[ML-019] [FEATURE] Implement ladder and rope traversal",
-  "branch": "ml-019-climb",
-  "record": "docs/changes/ML-019.md"
+  "title": "[ML-020] [FEATURE] Integrate isolated Test snapshot and debug actor",
+  "branch": "ml-020-test",
+  "record": "docs/changes/ML-020.md"
 }
