@@ -29,30 +29,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-018** — squash `6b462c1`, PR #17; [record](docs/changes/ML-018.md).
 - **ML-019** — squash `6f5cf70`, PR #18; [record](docs/changes/ML-019.md).
 - **ML-020** — squash `4ca03bf`, PR #19; [record](docs/changes/ML-020.md).
+- **ML-021** — squash `cf091e7`, PR #20; [record](docs/changes/ML-021.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-021 / P0
-
-- **Source scope:** Profile-specific accessible support intervals and surface/climb graph; worker revision/cancel protocol.
-- **Non-goals:** No jump graph or advanced search.
-- **Acceptance:** Slope/clearance/material/directional intervals correct; no-jump enemy walk/climb permissions differ; stale job cannot publish.
-- **Depends on:** ML-020 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [E1](docs/specifications/2026-10-16-maplab.md#e1-representations-and-guarantees), [E2](docs/specifications/2026-10-16-maplab.md#e2-deterministic-graph-building-pipeline), [E4](docs/specifications/2026-10-16-maplab.md#e4-search-costs-and-scalability), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Generate profile-specific support intervals from clearance, one-way/material/direction restrictions and connected climb surfaces.
-  2. Implement revisioned worker message/cancel protocol and cache keys tracking world+controller+profile digests.
-  3. Create owned fixture(s): Slope support, narrow clearance, hazardous materials, no-jump ground enemy, cancelled old job.
-  4. Add executable checks: Graph snapshot validity tests and stale-result rejection.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-022 / P0
 
 - **Source scope:** Single-jump/fall/drop candidate generator and finite-body reference witnesses.
@@ -67,6 +49,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Witness determinism and invalidation/no-completeness-claim tests.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-023 / P0
 
 - **Source scope:** Augmented A*/Dijkstra, same-surface alignment, full-route replay, Navigation mode and enemy patrol proof.

@@ -1,0 +1,45 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    {
+      "id": "forest",
+      "map": "forest.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "corner",
+      "map": "corner.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "ceiling",
+      "map": "ceiling.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "narrow",
+      "map": "narrow.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "short",
+      "map": "forest.map.json",
+      "profile": "short.movement.json"
+    },
+    {
+      "id": "enemy",
+      "map": "forest.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "drop",
+      "map": "drop.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "fall",
+      "map": "fall.map.json",
+      "profile": "player.movement.json"
+    }
+  ]
+}
