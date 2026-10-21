@@ -1,0 +1,120 @@
+{
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "d855eb8eadf9b29d7b7258caf8d033878996457068e7d1468e05eadda0068817"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "be1d34e9854fec594f09f21eb8486a76370fdc07121787d41050aec0d0847dee"
+    },
+    {
+      "path": "climber.movement.json",
+      "sha256": "458bfe37a12f0684775a6588496260a91660be2ce841f449317b4306da387b45"
+    },
+    {
+      "path": "directed.graph.json",
+      "sha256": "1fa89ef13c045a817d6691addcd0763dfdcf45807cbf2caf0901316223138cc2"
+    },
+    {
+      "path": "directed.map.json",
+      "sha256": "bb8cf86f55ea3419adb6c313539e8c825547b43ccaf5382db91dbad492cd04e2"
+    },
+    {
+      "path": "direction-climber.graph.json",
+      "sha256": "644ba017fdc61f92b8ff178a0b873ddaa72131a3431f8e6223336271413fabcf"
+    },
+    {
+      "path": "direction-enemy.graph.json",
+      "sha256": "7955e0feb0b4f2737bfead9ebf38f85defa1b8ec1971aba390db75151ef16e5f"
+    },
+    {
+      "path": "direction-player.graph.json",
+      "sha256": "0b3f31570bb4446d19a81121e97f7a1392c0319e2f493fd1b5d858561326861c"
+    },
+    {
+      "path": "direction.map.json",
+      "sha256": "d3f6ae208f3fc75bd5684b2da06bde264a60dd9b8002dd16d39ca096e30e23eb"
+    },
+    {
+      "path": "enemy.movement.json",
+      "sha256": "ce79ec30f56ad8689ce1eedf6cbb2358debaf3acf9e762dfe4057ce516c47c59"
+    },
+    {
+      "path": "flat-enemy.graph.json",
+      "sha256": "45e68d2ccec305ac53376f5b6be29861f5e67920ce81150a1c6ddd95b5170d23"
+    },
+    {
+      "path": "flat.map.json",
+      "sha256": "f4dd7d78448370d5c43284ee786a3e5a7b70ec38c71083328216a625632b76ca"
+    },
+    {
+      "path": "hazard-allow.graph.json",
+      "sha256": "565385b855a33417f2d60c7bcb1d72783d17127a614f4fc85c8872721195e9b8"
+    },
+    {
+      "path": "hazard-ban.graph.json",
+      "sha256": "a0a15ff3b8d3705ef23ab609ec30d2bceee540b860a6d4c84339037052086beb"
+    },
+    {
+      "path": "hazard-ban.movement.json",
+      "sha256": "003cc299bbcf84704ca8be321faf762417e08f91ebb464877bb04e7f13a3a6e7"
+    },
+    {
+      "path": "hazard.map.json",
+      "sha256": "002ef62841a18e5e5fd1a14219a862a758a2b8e5ba55bb707475498c593720cd"
+    },
+    {
+      "path": "ladder-climber.graph.json",
+      "sha256": "4b5c1a5a7fc344e417ca63177537d93649db9f76cfa9f7884d02218f95af7f0f"
+    },
+    {
+      "path": "ladder-enemy.graph.json",
+      "sha256": "cff7c14da37b36a9f7fa6199f85237429b2b0d4756a760e86bfe365168a8e328"
+    },
+    {
+      "path": "ladder-player.graph.json",
+      "sha256": "ea531a658dc27a412faa1c4e6053783ce97a1f1d4d0e2edf93911686217ba6d5"
+    },
+    {
+      "path": "ladder.map.json",
+      "sha256": "38fc7df0b540e912534c43ccc6dae7814b3f7ca611defc13141e3fb3fe137789"
+    },
+    {
+      "path": "narrow-enemy.graph.json",
+      "sha256": "92284eb253040431c29d81a602d2a772e0925c540dcffce60209d9516029c17f"
+    },
+    {
+      "path": "narrow.map.json",
+      "sha256": "6391b3a91f39f7c4d33226372eb1d896cae5d21cc2f2855d29e12238334e1973"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "1250a7c477ffedaad12a933d7a0369654bf8159b76ce0d485f826c023ebadc6c"
+    },
+    {
+      "path": "slope-enemy.graph.json",
+      "sha256": "49dc9a6290e7236a00a2f82a7bec2ca5a9ae837bcbefbf3f7f1d8196564c479c"
+    },
+    {
+      "path": "slope.map.json",
+      "sha256": "14bb9ade6fe86ad5a3c3a4df602e41574e11d589b88d8cf810fbefc200cadb13"
+    },
+    {
+      "path": "three-direction.graph.json",
+      "sha256": "762a7346da4865d67f2902af70c1da2e85dcb49ef0a24e50b62952f9f2de2f91"
+    },
+    {
+      "path": "three-direction.map.json",
+      "sha256": "e1641d24ff86bf7d4b42d820237ed9bee454fefb43ce8408d3971f8940c4a111"
+    },
+    {
+      "path": "three-hazard.graph.json",
+      "sha256": "67c55ceabb1140fb12a5ee453d5262e9425d5bfa1ba8f7145c0f7b398b500850"
+    },
+    {
+      "path": "three-hazard.map.json",
+      "sha256": "eac50408ac897a8d5629c04c0975a6dc32a57e6daa730389cc5d3d98685a1649"
+    }
+  ]
+}

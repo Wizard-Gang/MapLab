@@ -28,30 +28,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-017** — squash `87dcda0`, PR #16; [record](docs/changes/ML-017.md).
 - **ML-018** — squash `6b462c1`, PR #17; [record](docs/changes/ML-018.md).
 - **ML-019** — squash `6f5cf70`, PR #18; [record](docs/changes/ML-019.md).
+- **ML-020** — squash `4ca03bf`, PR #19; [record](docs/changes/ML-020.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-020 / P0
-
-- **Source scope:** Integrated Test snapshot, generic debug actor, pause/step/reset/replay and movement/contact HUD.
-- **Non-goals:** No AI/combat/inventory simulation.
-- **Acceptance:** Forest walk/jump/climb/drop replay works without RigLab; author history/source unchanged; current foothold/velocity/state visible.
-- **Depends on:** ML-019 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C2](docs/specifications/2026-10-16-maplab.md#c2-modes-and-tools), [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [I1](docs/specifications/2026-10-16-maplab.md#i1-reference-controller-identity), [I4](docs/specifications/2026-10-16-maplab.md#i4-fundamental-acceptance-run), [H2](docs/specifications/2026-10-16-maplab.md#h2-state-and-history); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Create immutable integrated Test snapshot plus generic debug actor, pause/step/reset/replay and HUD contacts/state/velocity.
-  2. Use the same reference controller as navigation; isolate ephemeral Test state from source and undo history.
-  3. Create owned fixture(s): Forest walk/jump/climb/drop replay without RigLab, pause/reset, source-history checksum.
-  4. Add executable checks: Browser Test and deterministic trace tests; no AI/combat/inventory simulation.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-021 / P0
 
 - **Source scope:** Profile-specific accessible support intervals and surface/climb graph; worker revision/cancel protocol.
@@ -66,6 +48,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Graph snapshot validity tests and stale-result rejection.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-022 / P0
 
 - **Source scope:** Single-jump/fall/drop candidate generator and finite-body reference witnesses.

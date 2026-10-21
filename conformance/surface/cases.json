@@ -1,0 +1,75 @@
+{
+  "license": "CC0-1.0",
+  "cases": [
+    {
+      "id": "slope-enemy",
+      "map": "slope.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "narrow-enemy",
+      "map": "narrow.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "ladder-player",
+      "map": "ladder.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "ladder-enemy",
+      "map": "ladder.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "ladder-climber",
+      "map": "ladder.map.json",
+      "profile": "climber.movement.json"
+    },
+    {
+      "id": "direction-player",
+      "map": "direction.map.json",
+      "profile": "player.movement.json"
+    },
+    {
+      "id": "direction-enemy",
+      "map": "direction.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "direction-climber",
+      "map": "direction.map.json",
+      "profile": "climber.movement.json"
+    },
+    {
+      "id": "flat-enemy",
+      "map": "flat.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "hazard-ban",
+      "map": "hazard.map.json",
+      "profile": "hazard-ban.movement.json"
+    },
+    {
+      "id": "hazard-allow",
+      "map": "hazard.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "directed",
+      "map": "directed.map.json",
+      "profile": "enemy.movement.json"
+    },
+    {
+      "id": "three-hazard",
+      "map": "three-hazard.map.json",
+      "profile": "hazard-ban.movement.json"
+    },
+    {
+      "id": "three-direction",
+      "map": "three-direction.map.json",
+      "profile": "enemy.movement.json"
+    }
+  ]
+}
