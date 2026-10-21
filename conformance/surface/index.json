@@ -2,7 +2,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "0bf8ab9b5820a63767e3e86860e947e9e0a3034258bd5a56fb86f12f223666dc"
+      "sha256": "d855eb8eadf9b29d7b7258caf8d033878996457068e7d1468e05eadda0068817"
     },
     {
       "path": "cases.json",
@@ -14,7 +14,7 @@
     },
     {
       "path": "directed.graph.json",
-      "sha256": "e129a3e4b7da4d3fc5269f2c7fb54248c267b0960426c2b6fb0ecbc1db13530c"
+      "sha256": "1fa89ef13c045a817d6691addcd0763dfdcf45807cbf2caf0901316223138cc2"
     },
     {
       "path": "directed.map.json",
@@ -22,15 +22,15 @@
     },
     {
       "path": "direction-climber.graph.json",
-      "sha256": "9886e9faac9564865f657e540dce69bfc085e8ae592cb96c204a13a1c281db39"
+      "sha256": "644ba017fdc61f92b8ff178a0b873ddaa72131a3431f8e6223336271413fabcf"
     },
     {
       "path": "direction-enemy.graph.json",
-      "sha256": "2064ac986ebb46fb6e494bf652b1f3d692d032e6d37f17773ec9667b4486c95a"
+      "sha256": "7955e0feb0b4f2737bfead9ebf38f85defa1b8ec1971aba390db75151ef16e5f"
     },
     {
       "path": "direction-player.graph.json",
-      "sha256": "98d75240f925227c9a56ea21e13565864db795a6e19b4718a7fcb7a0d62d8c38"
+      "sha256": "0b3f31570bb4446d19a81121e97f7a1392c0319e2f493fd1b5d858561326861c"
     },
     {
       "path": "direction.map.json",
@@ -42,7 +42,7 @@
     },
     {
       "path": "flat-enemy.graph.json",
-      "sha256": "04cb1536bbd36b346d50080cf3f8595edfae42d0b836c61a8946a145589b5ae2"
+      "sha256": "45e68d2ccec305ac53376f5b6be29861f5e67920ce81150a1c6ddd95b5170d23"
     },
     {
       "path": "flat.map.json",
@@ -50,11 +50,11 @@
     },
     {
       "path": "hazard-allow.graph.json",
-      "sha256": "8be8893866b22a49e8aefb0ddb2a1aa2c18af8c6e1205b85c7e8d83287fa11ca"
+      "sha256": "565385b855a33417f2d60c7bcb1d72783d17127a614f4fc85c8872721195e9b8"
     },
     {
       "path": "hazard-ban.graph.json",
-      "sha256": "540c6a645a1b611222895884028d2f70ea1cb10bf46df38784429041eb545f89"
+      "sha256": "a0a15ff3b8d3705ef23ab609ec30d2bceee540b860a6d4c84339037052086beb"
     },
     {
       "path": "hazard-ban.movement.json",
@@ -66,15 +66,15 @@
     },
     {
       "path": "ladder-climber.graph.json",
-      "sha256": "540d4ccf9f24db33aa5742c7ec86fd4b53b7031545b7fa95c47ef3ec40ef063b"
+      "sha256": "4b5c1a5a7fc344e417ca63177537d93649db9f76cfa9f7884d02218f95af7f0f"
     },
     {
       "path": "ladder-enemy.graph.json",
-      "sha256": "4a6e55c7df0779b408ad2bd7828b9ccd70c964e7cd59c1bbecfed46200c7b40f"
+      "sha256": "cff7c14da37b36a9f7fa6199f85237429b2b0d4756a760e86bfe365168a8e328"
     },
     {
       "path": "ladder-player.graph.json",
-      "sha256": "2b04945c3dedd44218da82060885a5f971144afc3cf1525050260617f3e25e91"
+      "sha256": "ea531a658dc27a412faa1c4e6053783ce97a1f1d4d0e2edf93911686217ba6d5"
     },
     {
       "path": "ladder.map.json",
@@ -82,7 +82,7 @@
     },
     {
       "path": "narrow-enemy.graph.json",
-      "sha256": "f011eb39e8eac0ec63abaa02bae5598ef67a0ead6999fc8e6a86f0899e064382"
+      "sha256": "92284eb253040431c29d81a602d2a772e0925c540dcffce60209d9516029c17f"
     },
     {
       "path": "narrow.map.json",
@@ -94,7 +94,7 @@
     },
     {
       "path": "slope-enemy.graph.json",
-      "sha256": "4290c8fa6acfa3fa41b69f53f278f2e3165bb832bcb49bed871db7f0020b1293"
+      "sha256": "49dc9a6290e7236a00a2f82a7bec2ca5a9ae837bcbefbf3f7f1d8196564c479c"
     },
     {
       "path": "slope.map.json",
@@ -102,7 +102,7 @@
     },
     {
       "path": "three-direction.graph.json",
-      "sha256": "0146a6721ca76f36bb3aea326f6aa723e3dc17d8fcb4e22d7eb238df3d2d727d"
+      "sha256": "762a7346da4865d67f2902af70c1da2e85dcb49ef0a24e50b62952f9f2de2f91"
     },
     {
       "path": "three-direction.map.json",
@@ -110,7 +110,7 @@
     },
     {
       "path": "three-hazard.graph.json",
-      "sha256": "0eb0100e26de82a49e1c7c4708cc198be0cdb414195ff474d6f1ef306bd0d4a0"
+      "sha256": "67c55ceabb1140fb12a5ee453d5262e9425d5bfa1ba8f7145c0f7b398b500850"
     },
     {
       "path": "three-hazard.map.json",

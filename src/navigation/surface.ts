@@ -17,7 +17,7 @@ const order=(a:{id:string},b:{id:string})=>a.id<b.id?-1:a.id>b.id?1:0;
 export async function identity(map:MapDocument,p:MovementDocument,settings:Settings):Promise<Identity>{
  const sorted=<T extends {id:string}>(a:readonly T[])=>[...a].sort(order);
  const worldSha256=await digest({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sorted(map.bodies),footholds:sorted(map.footholds),materials:sorted(map.materials),traversals:sorted(map.traversals),regions:sorted(map.regions as unknown as {id:string}[]),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
- const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@2',latticeSu:1,fullBody:true,...settings});
+ const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',latticeSu:1,fullBody:true,...settings});
  const value={worldSha256,profileSha256,controllerSha256:CONTROLLER_SHA256,settingsSha256};return {...value,cacheKey:await digest(value)};
 }
 const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:0,dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true});
@@ -81,6 +81,17 @@ export async function buildSurfaceGraph(source:MapDocument,profile:MovementDocum
  // Only adjacent anchors on a support, plus reciprocal authored endpoint neighbours.
  const pairs: [Node,Node][]=[];
  for(const i of intervals){const ns=nodes.filter(n=>n.intervalKey===i.key);for(let n=1;n<ns.length;n++)pairs.push([ns[n-1]!,ns[n]!],[ns[n]!,ns[n-1]!]);}
+ // Permission changes split standing intervals, not the physical support. Replay each
+ // adjacent lattice boundary in both directions; full-footprint permissions decide admission.
+ const bySupport=new Map<string,Interval[]>();
+ for(const i of intervals){const list=bySupport.get(i.supportId)??[];list.push(i);bySupport.set(i.supportId,list);}
+ for(const list of bySupport.values())for(let i=1;i<list.length;i++){
+  const left=list[i-1]!,right=list[i]!;
+  if(left.maxX+1!==right.minX)continue;
+  const a=nodes.find(n=>n.intervalKey===left.key&&n.state.x===left.maxX)!;
+  const b=nodes.find(n=>n.intervalKey===right.key&&n.state.x===right.minX)!;
+  pairs.push([a,b],[b,a]);
+ }
  for(const from of nodes)for(const link of map.footholds.find(f=>f.id===from.state.supportId)!.connections[from.state.x<(map.footholds.find(f=>f.id===from.state.supportId)!.a[0]+map.footholds.find(f=>f.id===from.state.supportId)!.b[0])*128?'a':'b']){
   const candidates=nodes.filter(n=>n.state.supportId===link.footholdId).sort((a,b)=>Math.abs(a.state.x-from.state.x)-Math.abs(b.state.x-from.state.x));if(candidates[0])pairs.push([from,candidates[0]]);
  }

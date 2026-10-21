@@ -14,6 +14,14 @@ for(const c of cases){const g=read(c.id+'.graph.json'),p=read(c.profile),map=rea
   if(hazard&&(!g.intervals.length||g.intervals.some(i=>i.maxX>boundary)||g.intervals.find(i=>i.supportId==='fh.a')?.maxX!==boundary))throw Error('third material footprint');
   if(!hazard&&!g.intervals.some(i=>i.supportId==='fh.a'&&i.direction==='bToA'&&i.maxX>boundary))throw Error('third direction split');
   for(const i of g.intervals)if(!hazard&&i.maxX>boundary&&i.direction!=='bToA')throw Error('third direction interval');
+  if(!hazard){
+   const crossing=g.edges.filter(e=>{
+    const from=g.nodes.find(n=>n.key===e.from),to=g.nodes.find(n=>n.key===e.to);
+    return from.state.supportId==='fh.a'&&to.state.supportId==='fh.a'&&from.intervalKey!==to.intervalKey;
+   });
+   if(crossing.length!==1||crossing[0].input.moveX!==-1||crossing[0].initial.x!==boundary+1||crossing[0].frames.at(-1).state.x>boundary)throw Error('legal leftward interval transfer');
+  }
+
   for(const e of g.edges)if(hazard||e.input.moveX===1)for(const s of [e.initial,...e.frames.map(f=>f.state)])if(s.x>boundary)throw Error('third support replay permission');
  }
  if(c.id==='flat-enemy'){const i=g.intervals[0];if(i.minX!==12*256||i.maxX!==244*256||g.edges.length!==2)throw Error('flat arithmetic');}

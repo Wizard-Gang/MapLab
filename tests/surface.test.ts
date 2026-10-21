@@ -76,6 +76,14 @@ test('nonadjacent welded restrictions cover every standing and replay footprint'
  expect(hazard.intervals.find(i=>i.supportId==='fh.a')!.maxX).toBe(92*256);
  expect(hazard.intervals.every(i=>i.maxX<=92*256)).toBe(true);
  expect(direction.intervals.some(i=>i.supportId==='fh.a'&&i.direction==='bToA'&&i.maxX>92*256)).toBe(true);
+ const crossing=direction.edges.filter(e=>{
+  const from=direction.nodes.find(n=>n.key===e.from)!,to=direction.nodes.find(n=>n.key===e.to)!;
+  return from.state.supportId==='fh.a'&&to.state.supportId==='fh.a'&&from.intervalKey!==to.intervalKey;
+ });
+ expect(crossing).toHaveLength(1);expect(crossing[0]!.input.moveX).toBe(-1);
+ expect(crossing[0]!.initial.x).toBe(92*256+1);
+ expect(crossing[0]!.frames.at(-1)!.state.x).toBeLessThanOrEqual(92*256);
+
  for(const [g,isHazard] of [[hazard,true],[direction,false]] as const)for(const e of g.edges){
   for(const s of [e.initial,...e.frames.map(f=>f.state)])if(isHazard||e.input.moveX===1)expect(s.x+12*256).toBeLessThanOrEqual(104*256);
  }
