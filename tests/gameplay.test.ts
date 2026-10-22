@@ -26,6 +26,12 @@ test('all F entity kinds and gameplay collections have closed typed inspectors a
  }
  expect(()=>gameplayEdit(model,'entities',{...map.entities[0],script:'run()'} as unknown as JsonObject)).toThrow('Unknown member');
 });
+test('choosing or creating a default player start atomically preserves exactly one default and stable IDs',()=>{
+ const n=normalize(map as unknown as JsonValue);if(!n.ok)throw Error('fixture');const start=map.entities.find(e=>e.kind==='playerStart')!,second={...start,id:'start.alternate',default:false} as unknown as JsonObject;
+ const inserted=candidate(n.model,gameplayEdit(n.model,'entities',second,true)),switched=candidate(inserted,gameplayEdit(inserted,'entities',{...second,default:true}));
+ const result=denormalize(switched) as unknown as MapDocument;expect(result.entities.filter(e=>e.kind==='playerStart'&&e.default).map(e=>e.id)).toEqual(['start.alternate']);expect(validateSourceGraph([result as unknown as JsonValue,...sources.filter(s=>(s as {id:string}).id!==map.id)]).ok).toBe(true);expect((denormalize(n.model) as unknown as MapDocument).entities.find(e=>e.id===start.id)).toEqual(start);
+ const created=candidate(n.model,gameplayEdit(n.model,'entities',{...second,default:true},true));expect((denormalize(created) as unknown as MapDocument).entities.filter(e=>e.kind==='playerStart'&&e.default).map(e=>e.id)).toEqual(['start.alternate']);
+});
 test('final-byte source/event fixtures rerun deterministically and preserve source and input bytes',()=>{
  for(const c of cases){const before=canonical(c as unknown as JsonValue),r=run(c).getSnapshot();expect(r.status).toBe('ready');expect(canonical(r as unknown as JsonValue)+'\n').toBe(readFileSync(join(root,c.id+'.expected.json'),'utf8'));expect(canonical(c as unknown as JsonValue)).toBe(before);}
  const fast=run(cases[0]!).getSnapshot();expect(fast.events.map(e=>[e.event,e.time])).toEqual([['enter',0.35],['exit',0.6625]]);expect(fast.flags['flag.boss-defeated']).toBe(false);

@@ -23,7 +23,8 @@ export function seed(raw:FormSchema,depth=0):JsonValue{
 export function gameplayEdit(model:MapModel,collection:GameplayCollection,draft:JsonObject,creating=false){
  const compiled=compileSchema({$schema:mapSchema.$schema,$defs:mapSchema.$defs,$ref:'#/$defs/'+names[collection]} as unknown as JsonValue,names[collection]);
  const errors=evaluate(compiled,draft);if(errors.length)throw Error(errors.map(e=>e.jsonPath+': '+e.message).join('; '));
- if(creating)return transaction('Create gameplay '+String(draft.id),[insertOp(model,collection,[draft])]);
+ const defaults=collection==='entities'&&draft.kind==='playerStart'&&draft.default===true?[...(model.collections.get('entities')?.byId.values()??[])].filter(e=>e.id!==draft.id&&e.kind==='playerStart'&&e.default===true).map(e=>setOp(model,'entities',String(e.id),'default',false)):[];
+ if(creating)return transaction('Create gameplay '+String(draft.id),[...defaults,insertOp(model,collection,[draft])]);
  const old=model.collections.get(collection)?.byId.get(String(draft.id));if(!old)throw Error('Gameplay identity changed or missing');
- return transaction('Edit gameplay '+String(draft.id),[...new Set([...Object.keys(old),...Object.keys(draft)])].filter(k=>k!=='id').map(k=>setOp(model,collection,String(draft.id),k,draft[k])));
+ return transaction('Edit gameplay '+String(draft.id),[...defaults,...[...new Set([...Object.keys(old),...Object.keys(draft)])].filter(k=>k!=='id').map(k=>setOp(model,collection,String(draft.id),k,draft[k]))]);
 }
