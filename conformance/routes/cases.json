@@ -1,0 +1,75 @@
+[
+  {
+    "id": "walk",
+    "kind": "route",
+    "profile": "player.movement.json",
+    "goal": {
+      "supportId": "fh.west",
+      "x": 40960,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  },
+  {
+    "id": "player-gap",
+    "kind": "route",
+    "profile": "player.movement.json",
+    "goal": {
+      "supportId": "fh.east",
+      "x": 168960,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  },
+  {
+    "id": "enemy-gap",
+    "kind": "route",
+    "profile": "enemy.movement.json",
+    "goal": {
+      "supportId": "fh.east",
+      "x": 168960,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  },
+  {
+    "id": "enemy-patrol",
+    "kind": "patrol",
+    "profile": "enemy.movement.json"
+  },
+  {
+    "id": "impossible-stance",
+    "kind": "route",
+    "profile": "player.movement.json",
+    "goal": {
+      "supportId": "fh.east",
+      "x": 0,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  },
+  {
+    "id": "player-region",
+    "kind": "region",
+    "profile": "player.movement.json",
+    "regionId": "region.routes.landing",
+    "goal": {
+      "supportId": "fh.east",
+      "x": 168960,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  },
+  {
+    "id": "enemy-region",
+    "kind": "region",
+    "profile": "enemy.movement.json",
+    "regionId": "region.routes.landing",
+    "goal": {
+      "supportId": "fh.east",
+      "x": 168960,
+      "toleranceSu": 128,
+      "vx": 0
+    }
+  }
+]

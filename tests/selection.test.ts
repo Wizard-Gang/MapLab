@@ -126,6 +126,8 @@ test('picking excludes camera backgrounds, filters modes, honors hidden art, exa
   expect(t.index.pick(at, state, 'Collision').map((k) => k.id)).toContain('body.west');
   expect(t.index.pick(at, state, 'Platforms').map((k) => k.id)).toContain('fh.west');
   expect(t.index.pick(at, state, 'Objects').every((k) => k.collection === 'visuals')).toBe(true);
+  expect(t.index.pick(at,state,'Navigation')).toEqual([]);
+  expect(t.index.marquee([0,630],[480,720],state,'Navigation')).toEqual([]);
   expect(t.index.items.filter((p) => p.pass === 'Art').every((p) => { const layer=t.index.scene.art.find((a) => a.layer.id === p.layerId)?.layer; return layer?.kind !== 'background' || layer.space !== 'camera'; })).toBe(true);
   const triangle = primitive([[0, 0], [10, 0], [0, 10]], '#ffffff', '', true);
   expect(contains(triangle, [9, 9], 0.1)).toBe(false); expect(contains(triangle, [2, 2], 0.1)).toBe(true);

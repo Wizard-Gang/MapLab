@@ -1,0 +1,10 @@
+{
+  "format": "maplab.reference-route-fixtures",
+  "version": 1,
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1,
+    "sha256": "1e36b7364146fe1fc75b1540b099e57babad7aae575699f1d68184784a573b02"
+  },
+  "license": "CC0-1.0"
+}

@@ -59,7 +59,7 @@ function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: 
       Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
     </output>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
-    <p aria-label="Test diagnosis">{view.frame.status}: {view.frame.reason??'shared reference controller'} · Preview only; cannot certify navigation. Graph/route unavailable until navigation generation; no failed-link claim.</p>
+    <p aria-label="Test diagnosis">{view.frame.status}: {view.frame.reason??'shared reference controller'} · Preview only; cannot certify navigation. Use Navigation mode to generate a separate reference route from this Test state.</p>
     <label>Test replay input<textarea aria-label="Test replay input" value={text} onChange={e=>setText(e.target.value)} rows={5}/></label>
     <button onClick={() => { clear(); try { run.replay(JSON.parse(text)); setNotice('Replay complete; paused'); } catch(e) { setNotice(`Replay refused: ${e instanceof Error?e.message:String(e)}`); } }}>Replay Test</button>
     <p aria-label="Test notice">{notice}</p>
