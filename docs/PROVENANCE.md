@@ -130,3 +130,12 @@ treated as a physical route. Final proofs retain complete reference inputs/frame
 and terminal/resource states. The package index pins every byte. The standalone
 consumer independently checks flat-body integer motion, full route joins, first
 landing, patrol waits/closure, Bellman-Ford costs and rehashed semantic corruption.
+
+## ML-024 gameplay event fixtures
+
+`conformance/gameplay-events/` is original owned CC0-1.0 data derived from the owned
+placeholder Forest document set. It adds the remaining typed gameplay entity
+variants and tiny sensor/event cases. Final snapshots pin full-body event timing,
+actor/trigger order, one-shot behavior and explicit boss completion effects.
+The isolated standard-library consumer checks final bytes, continuous crossing
+math and ordered declarative actions without importing the editor or Test runtime.

@@ -1,3 +1,4 @@
+import { GameplayPanel } from './GameplayPanel';
 import { TestPanel } from './TestPanel';
 import { NavigationPanel } from './NavigationPanel';
 import { ClimbPanel } from './ClimbPanel';
@@ -226,6 +227,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
       {entry && entry.errors > 0
         ? <p className="note">Viewport unavailable while this map has validation errors; see Problems.</p>
         : <Viewport selection={store.selection(doc.id)} terrain={store.terrain(doc.id)} tilesets={tilesets} key={`viewport-${doc.id}`} model={doc.state.model} session={store.viewport(doc.id)} />}
+      <GameplayPanel key={`gameplay-${doc.id}`} store={store} doc={doc} />
       <TestPanel key={`test-${doc.id}`} store={store} doc={doc} />
       <NavigationPanel key={`navigation-${doc.id}`} store={store} doc={doc} />
       <ExportPanel key={`export-${doc.id}`} doc={doc} busy={busy} entry={entry} />

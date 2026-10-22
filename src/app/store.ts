@@ -1,3 +1,5 @@
+import { GameplaySession } from '../gameplay/runtime';
+import type {MapDocument} from '../contracts/document-types';
 import { TestSession } from '../test-runtime/session';
 import type { MovementDocument } from '../contracts/movement-types';
 import { validateMovement } from '../contracts/movement';
@@ -82,11 +84,15 @@ export class LibraryStore {
   testProfiles(): readonly MovementDocument[] {
     return [...this.sources.values()].filter(v => validateMovement(v).ok) as unknown as MovementDocument[];
   }
+  gameplaySources(): readonly JsonValue[] {
+    const sources=new Map(this.sources);for(const doc of this.view.docs)sources.set(doc.id,denormalize(doc.state.model));return [...sources.values()];
+  }
   startTest(id: string, profileId: string): void {
     const doc = this.doc(id), profile = this.testProfiles().find(p => p.id === profileId);
     if (!doc || lockReason(doc) || !profile) throw new Error('Test requires an unlocked map and loaded movement profile');
     this.cancelGestures(id);
-    const run = new TestSession(denormalize(doc.state.model) as unknown as ContactMap, profile);
+    const sources=structuredClone(this.gameplaySources());
+    const run = new TestSession(denormalize(doc.state.model) as unknown as ContactMap, profile, undefined, source=>new GameplaySession(source as unknown as MapDocument,sources));
     this.tests.get(id)?.pause(); this.tests.set(id, run); this.set({});
   }
   stopTest(id: string): void { this.tests.get(id)?.pause(); this.tests.delete(id); this.set({}); }

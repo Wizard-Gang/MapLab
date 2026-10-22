@@ -1,0 +1,65 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2a4cb5040c52b042a56d68cbbf01b77ecc90a8ee7266b84d782686781d5290fa"
+    },
+    {
+      "path": "boss-injection.expected.json",
+      "sha256": "c0396c7eab0c3eca243383df6d66354d399b57997b04d78eb857b92f68506b4d"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "10f4e4db7c30081d8406fd01d1fd283d87dc0c5c75e1b2019256bf5d0a815d78"
+    },
+    {
+      "path": "circle.expected.json",
+      "sha256": "61be29d2c0d228c72d494f8e805b7752e8800e636c9225d68d5489b3f08305ec"
+    },
+    {
+      "path": "fast-crossing.expected.json",
+      "sha256": "f2062d77dc39b266b5596b544a09853767e58052b8eeeb95e8993b63f17bb473"
+    },
+    {
+      "path": "polygon.expected.json",
+      "sha256": "7de952e8b0d9bf335db2d3655c60945de911b146eff34d1e232bfd890d1feb5c"
+    },
+    {
+      "path": "sources/catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "path": "sources/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a"
+    },
+    {
+      "path": "sources/maps/forest.map.json",
+      "sha256": "a0a58b9e431fcf203fd5363ad63c2e83285b47889d84ebc5b0892b9aa002f8d1"
+    },
+    {
+      "path": "sources/movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "path": "sources/movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "path": "sources/movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "path": "sources/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "path": "sources/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    },
+    {
+      "path": "spawn-order-once.expected.json",
+      "sha256": "82b93cdc70061eec25725793349508b0a27a3eed275115ce89f28fe77201287c"
+    }
+  ]
+}
