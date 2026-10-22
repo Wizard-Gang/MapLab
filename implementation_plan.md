@@ -37,6 +37,7 @@ Full evidence for each line lives in the delivery chain and the linked change re
 <!-- active-queue:start -->
 ### ML-022 / P0
 
+- **Delivery repair:** PR #21 squash `4baaca362c6b1804d298eb961ae17faf8ab55b7d` passed main verification but main run `39712661380` failed online security for Vitest 5.0.2. Repair the dependency gate before retiring this unfinished delivery; ML-023 remains inactive.
 - **Source scope:** Single-jump/fall/drop candidate generator and finite-body reference witnesses.
 - **Non-goals:** No completeness claim, multi-jump or moving-platform graph.
 - **Acceptance:** Forest gap witness replays; narrow/corner/ceiling failures; deterministic samples/budget/status and dependency hash tests.

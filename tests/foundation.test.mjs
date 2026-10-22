@@ -43,6 +43,16 @@ test('the foundation CLI accepts a standalone copy with no Git metadata or crede
 
 test.each([
   ['floating dependency', (p) => editJson(p, 'package.json', (v) => { v.dependencies.react = '^19.3.0'; }), 'dependency pins'],
+  ['affected Vitest rollback with matching lock root', (p) => {
+    editJson(p, 'package.json', (v) => { v.devDependencies.vitest = '5.0.2'; });
+    editJson(p, 'package-lock.json', (v) => {
+      v.packages[''].devDependencies.vitest = '5.0.2';
+      v.packages['node_modules/vitest'].version = '5.0.2';
+    });
+  }, 'dependency pins'],
+  ['affected transitive mocker rollback', (p) => editJson(p, 'package-lock.json', (v) => {
+    v.packages['node_modules/@vitest/mocker'].version = '5.0.2';
+  }), 'Lockfile security pin'],
   ['lock mismatch', (p) => editJson(p, 'package-lock.json', (v) => { v.packages['node_modules/react'].version = '19.2.0'; }), 'Lockfile pin'],
   ['missing authority', (p) => rmSync(join(p, 'SECURITY.md')), 'Missing or empty'],
   ['extra active task', (p) => {
