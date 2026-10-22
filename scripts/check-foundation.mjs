@@ -67,7 +67,7 @@ export function checkFoundation(root) {
   const pins = {
     react: '19.3.0', 'react-dom': '19.3.0', '@types/node': '26.6.5',
     '@types/react': '19.3.0', '@types/react-dom': '19.3.0',
-    typescript: '7.0.2', vite: '8.3.4', vitest: '5.0.2', '@playwright/test': '1.64.1',
+    typescript: '7.0.2', vite: '8.3.4', vitest: '5.0.5', '@playwright/test': '1.64.1',
   };
   const actual = { ...pkg.dependencies, ...pkg.devDependencies };
   demand(JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(pins).sort()),
@@ -113,6 +113,8 @@ export function checkFoundation(root) {
   for (const [name, version] of Object.entries(pins)) {
     demand(lock.packages[`node_modules/${name}`]?.version === version, `Lockfile pin disagrees: ${name}`);
   }
+  demand(lock.packages['node_modules/@vitest/mocker']?.version === '5.0.5',
+    'Lockfile security pin disagrees: @vitest/mocker');
   for (const [path, entry] of Object.entries(lock.packages)) {
     if (!path) continue;
     demand(!entry.link && /^https:\/\/registry\.npmjs\.org\//.test(entry.resolved ?? '')

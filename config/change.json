@@ -1,7 +1,7 @@
 {
   "id": "ML-022",
-  "type": "FEATURE",
-  "title": "[ML-022] [FEATURE] Generate bounded airborne action witnesses",
-  "branch": "ml-022-airborne",
+  "type": "SECURITY",
+  "title": "[ML-022] [SECURITY] Repair the Vitest dependency gate",
+  "branch": "ml-022-security",
   "record": "docs/changes/ML-022.md"
 }
