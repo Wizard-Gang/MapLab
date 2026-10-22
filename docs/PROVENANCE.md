@@ -109,3 +109,13 @@ to R1's explicitly provisional edge-centered QA sketch.
 run-length inputs, checkpoints and exact traces derived from the owned ML-018
 flat map/profile and unchanged owned forest source. The index pins every byte.
 No third-party assets, engine code, trajectory, swinging solver or art is used.
+
+## ML-022 bounded airborne action fixtures
+
+`conformance/airborne/` is original owned CC0-1.0 material derived from ML-018's
+owned tiny forest, selected-group drop and movement documents. Corner, ceiling,
+16-WU landing, short-jump and lower-floor variants are numeric authored geometry,
+not borrowed assets. Canonical action outputs retain exact finite-body frames,
+inputs, terminal resources and physical/dependency hashes; the index pins every
+final file. The independent consumer imports no MapLab implementation and checks
+forest integer equations, finite rect clearance and rehashed semantic corruption.

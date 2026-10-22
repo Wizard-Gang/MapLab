@@ -1,0 +1,81 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "250dde7120d876b961b30287219fac32b38b5573875732f500eea8aeb34d1bf6"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "91468a8ea65594bfb887b3e9f1dbe2c19460567b54e1fe5ddc893db712810d90"
+    },
+    {
+      "path": "ceiling.actions.json",
+      "sha256": "173b1d9e2ffd9106cbfaa55e83adeb9bbc786f706abc99684de5d7d9acedcc67"
+    },
+    {
+      "path": "ceiling.map.json",
+      "sha256": "0b102b9577d207f11361f1ba00c3d62c8318083c8038eabdcbc0131c79b729df"
+    },
+    {
+      "path": "corner.actions.json",
+      "sha256": "33492b226495e2d403b88325861c7e7bc2c2f29313a9f82c0149778f03a3c303"
+    },
+    {
+      "path": "corner.map.json",
+      "sha256": "9c4db672fbdeced1941558ebf5ede67068c3905206cf0ca3cd1d05befd5bd0ae"
+    },
+    {
+      "path": "drop.actions.json",
+      "sha256": "019e765bc6cf275f8b9b040e51978815237a03258f9e3c7582508520223bd3a5"
+    },
+    {
+      "path": "drop.map.json",
+      "sha256": "20f50545bc025be2ab218b60582f83d8fcee611a1e0f0c0f921cdc322157754d"
+    },
+    {
+      "path": "enemy.actions.json",
+      "sha256": "ee66280205f9bb0a33b542d91a0e7cc899e5ac0cca7ded2d0c91c22e9f1893a3"
+    },
+    {
+      "path": "enemy.movement.json",
+      "sha256": "e9d6b177c46facffb797c8e51b5cfe846cae930c9e51d84078f2c56810d0ee57"
+    },
+    {
+      "path": "fall.actions.json",
+      "sha256": "006b7dee1e6c69433f1b9e77534842978ea882a7581387cec0f2715be09f49a4"
+    },
+    {
+      "path": "fall.map.json",
+      "sha256": "946b9cce2596f32a981b5a4a83fe1bd916dfef40762ec2f503084e430807f898"
+    },
+    {
+      "path": "forest.actions.json",
+      "sha256": "da93e3246fd77f8d448d39a447faaeea13027f3859179edc52864f73e553e1ef"
+    },
+    {
+      "path": "forest.map.json",
+      "sha256": "d767e7bcd767b582b4709ff175b0eab2071754e0077c02d39305ad5de4349f8c"
+    },
+    {
+      "path": "narrow.actions.json",
+      "sha256": "ba0de6fdc0e19144ddc74cc33eafc1eef12b5d03beaa6d7a565623e7e31f7ad8"
+    },
+    {
+      "path": "narrow.map.json",
+      "sha256": "8e43c1b829861b64c21bf1eb9ffd0a4c474c6d15618b087ff835bc3095a876d4"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "99003e2322fd6a1aaef6eebe2c82e908b4d389b57ac7c82bef1b1fa44820ca07"
+    },
+    {
+      "path": "short.actions.json",
+      "sha256": "4e00ed49a19fbc995187aeeb729bbaa3ccbaa3f5f71ca5c295f6c6e8cdc0f4a5"
+    },
+    {
+      "path": "short.movement.json",
+      "sha256": "b9647aa995c0886a7deac250107611d0b4b64aaf4ae7ea1dea57a6c64e403b0d"
+    }
+  ]
+}
