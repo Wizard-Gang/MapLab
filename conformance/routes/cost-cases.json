@@ -1,0 +1,145 @@
+[
+  {
+    "from": "s",
+    "to": "g",
+    "cost": 16,
+    "graph": {
+      "nodes": [
+        {
+          "id": "s",
+          "x": 0
+        },
+        {
+          "id": "m",
+          "x": 10
+        },
+        {
+          "id": "n",
+          "x": 5
+        },
+        {
+          "id": "g",
+          "x": 20
+        }
+      ],
+      "edges": [
+        {
+          "id": "s-m",
+          "from": "s",
+          "to": "m",
+          "ticks": 10,
+          "penalty": 5
+        },
+        {
+          "id": "m-g",
+          "from": "m",
+          "to": "g",
+          "ticks": 10,
+          "penalty": 0
+        },
+        {
+          "id": "s-n",
+          "from": "s",
+          "to": "n",
+          "ticks": 5,
+          "penalty": 0
+        },
+        {
+          "id": "n-g",
+          "from": "n",
+          "to": "g",
+          "ticks": 10,
+          "penalty": 1
+        }
+      ]
+    }
+  },
+  {
+    "from": "s",
+    "to": "g",
+    "cost": 2,
+    "graph": {
+      "nodes": [
+        {
+          "id": "s",
+          "x": 0
+        },
+        {
+          "id": "a",
+          "x": 5
+        },
+        {
+          "id": "g",
+          "x": 1000
+        }
+      ],
+      "edges": [
+        {
+          "id": "direct",
+          "from": "s",
+          "to": "g",
+          "ticks": 20,
+          "penalty": 0
+        },
+        {
+          "id": "s-a",
+          "from": "s",
+          "to": "a",
+          "ticks": 2,
+          "penalty": 0
+        },
+        {
+          "id": "portal",
+          "from": "a",
+          "to": "g",
+          "ticks": 0,
+          "penalty": 0
+        }
+      ]
+    }
+  },
+  {
+    "from": "s",
+    "to": "g",
+    "cost": 15,
+    "graph": {
+      "nodes": [
+        {
+          "id": "s",
+          "x": 0
+        },
+        {
+          "id": "a",
+          "x": 9007199254740991
+        },
+        {
+          "id": "g",
+          "x": -9007199254740991
+        }
+      ],
+      "edges": [
+        {
+          "id": "direct",
+          "from": "s",
+          "to": "g",
+          "ticks": 100,
+          "penalty": 0
+        },
+        {
+          "id": "s-a",
+          "from": "s",
+          "to": "a",
+          "ticks": 5,
+          "penalty": 0
+        },
+        {
+          "id": "a-g",
+          "from": "a",
+          "to": "g",
+          "ticks": 10,
+          "penalty": 0
+        }
+      ]
+    }
+  }
+]

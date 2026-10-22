@@ -30,31 +30,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-019** — squash `6f5cf70`, PR #18; [record](docs/changes/ML-019.md).
 - **ML-020** — squash `4ca03bf`, PR #19; [record](docs/changes/ML-020.md).
 - **ML-021** — squash `cf091e7`, PR #20; [record](docs/changes/ML-021.md).
+- **ML-022** — squash `f4997bd`, PR #22 (security repair of PR #21); [record](docs/changes/ML-022.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-022 / P0
-
-- **Delivery repair:** PR #21 squash `4baaca362c6b1804d298eb961ae17faf8ab55b7d` passed main verification but main run `39712661380` failed online security for Vitest 5.0.2. Repair the dependency gate before retiring this unfinished delivery; ML-023 remains inactive.
-- **Source scope:** Single-jump/fall/drop candidate generator and finite-body reference witnesses.
-- **Non-goals:** No completeness claim, multi-jump or moving-platform graph.
-- **Acceptance:** Forest gap witness replays; narrow/corner/ceiling failures; deterministic samples/budget/status and dependency hash tests.
-- **Depends on:** ML-021 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [E2](docs/specifications/2026-10-16-maplab.md#e2-deterministic-graph-building-pipeline), [E3](docs/specifications/2026-10-16-maplab.md#e3-one-way-drops-dynamic-movement), [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Generate bounded directed jump/fall/drop candidate launch states from accessible intervals and clearance checks.
-  2. Replay every accepted candidate through finite-body reference controller, recording witness inputs, statuses and dependency hashes.
-  3. Create owned fixture(s): Forest gap, ceiling/corner impossible jump, narrow stance, budget exceeded, profile edit.
-  4. Add executable checks: Witness determinism and invalidation/no-completeness-claim tests.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-023 / P0
 
 - **Source scope:** Augmented A*/Dijkstra, same-surface alignment, full-route replay, Navigation mode and enemy patrol proof.
@@ -69,6 +50,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Whole-route replay; no fabricated feasible links.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-024 / P0
 
 - **Source scope:** Typed gameplay/region/spawn/route/encounter/trigger inspectors and declarative test-event boundary.

@@ -119,3 +119,14 @@ not borrowed assets. Canonical action outputs retain exact finite-body frames,
 inputs, terminal resources and physical/dependency hashes; the index pins every
 final file. The independent consumer imports no MapLab implementation and checks
 forest integer equations, finite rect clearance and rehashed semantic corruption.
+
+## ML-023 reference route fixtures
+
+`conformance/routes/` is original owned CC0-1.0 data derived from the tiny owned
+Forest gap, fixed integer profiles and the owned R1 core catalog. It adds explicit
+player/enemy movement identities, waypoint waits, a closed patrol and finite
+directed cost graphs, including a zero-cost abstract portal. No author link is
+treated as a physical route. Final proofs retain complete reference inputs/frames
+and terminal/resource states. The package index pins every byte. The standalone
+consumer independently checks flat-body integer motion, full route joins, first
+landing, patrol waits/closure, Bellman-Ford costs and rehashed semantic corruption.

@@ -1,7 +1,7 @@
 {
-  "id": "ML-022",
-  "type": "SECURITY",
-  "title": "[ML-022] [SECURITY] Repair the Vitest dependency gate",
-  "branch": "ml-022-security",
-  "record": "docs/changes/ML-022.md"
+  "id": "ML-023",
+  "type": "FEATURE",
+  "title": "[ML-023] [FEATURE] Verify augmented navigation routes and patrols",
+  "branch": "ml-023-routes",
+  "record": "docs/changes/ML-023.md"
 }

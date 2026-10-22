@@ -1,0 +1,65 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "1836c08dbe71dd222ac244664bde179bf294101894d2ce45f0d98b83fe5c1af8"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "f6fa84bb0d23e05c65b65634f3ceccfb4fd2aa96fbe1a9829f25168ce12f3220"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "197ac5027e31195df3e1d7bb522b145c3e95610156f592c06166ddc0df11c207"
+    },
+    {
+      "path": "core.catalog.json",
+      "sha256": "8050338d5acaeee57761b0567da9479a1536fbf796fad0978ed55ab04e84ea88"
+    },
+    {
+      "path": "cost-cases.json",
+      "sha256": "11ce7275eb30218f7582da5531659e854d1acc6f27eb48edda6ee3adc66a83a3"
+    },
+    {
+      "path": "enemy-gap.proof.json",
+      "sha256": "f9301b5616543c870ae88d85f464e1f27449a6d99c28331b7b8f25b4f64fa689"
+    },
+    {
+      "path": "enemy-patrol.proof.json",
+      "sha256": "7b066d26bed8ca2256f018fe9c3dd3c84e924493494cce51e8be98abe73e8c56"
+    },
+    {
+      "path": "enemy-region.proof.json",
+      "sha256": "c39f13797515001882500ac8953b34bd07354b0b5cf0a79487a966f1d72d4f58"
+    },
+    {
+      "path": "enemy.movement.json",
+      "sha256": "43c18fc543ad50e742a7423e55f9d6135b524fa851bef7ba3aca3ede67c07eb7"
+    },
+    {
+      "path": "forest.map.json",
+      "sha256": "f0dc2aea28914007fd34cffd1e8fcb38b18224512667a669b3210273b6f2fbc1"
+    },
+    {
+      "path": "impossible-stance.proof.json",
+      "sha256": "266724ce3290d9dcf2656f1acf295209d8f8841806ad04774a628c04e6f86dd6"
+    },
+    {
+      "path": "player-gap.proof.json",
+      "sha256": "83f4f25b256e3ab000d04cde830f9b444a8a65ef8fa89ee3268507345962ee60"
+    },
+    {
+      "path": "player-region.proof.json",
+      "sha256": "1d679f3cdf3564629d88751901a00d98ae6d37d1cf792238d3f9c9a6ea1e1db9"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "5569b60193d5e7fea51f26bde2bc209d457aea85f1a8a5ffa0feb970004be184"
+    },
+    {
+      "path": "walk.proof.json",
+      "sha256": "2716a00a111182dc9230aac9cfdc543ab05b867266a265e7fe025152b5fafc1d"
+    }
+  ]
+}
