@@ -1,3 +1,4 @@
+import {CameraFootprint,CameraViewport} from './CameraOverlay';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { NEUTRAL, MAX_TICKS } from '../test-runtime/session';
 import type { PortalTestSession } from '../test-runtime/portals';
@@ -12,7 +13,7 @@ import type { LibraryStore, OpenDoc } from './store';
 function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly stop: () => void }): ReactNode {
   const view = useSyncExternalStore(run.subscribe, run.getSnapshot, run.getSnapshot);
   const controls = useRef<Input>(NEUTRAL), keys = useRef(new Set<string>());
-  const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState(''),[portal,setPortal]=useState('');
+  const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState(''),[portal,setPortal]=useState(''),[showCamera,setShowCamera]=useState(true);
   const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,JSON.stringify(view.gameplay?.bodies??{})]);
   const clear = (): void => { keys.current.clear(); controls.current = NEUTRAL; };
   useEffect(() => {
@@ -47,6 +48,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
       <button disabled={!view.frames.length} onClick={() => { setText(JSON.stringify(run.recording(), null, 2)); setNotice('Recording copied to replay input'); }}>Use recorded input</button>
     </div>
     <p>Focus the Test stage: arrows move/climb, Shift runs, Space jumps, D drops, N steps while paused. Blur pauses and clears keys.</p>
+    <label>Show camera preview<input aria-label="Show camera preview" type="checkbox" checked={showCamera} onChange={e=>setShowCamera(e.target.checked)}/></label>
     <svg aria-label="Test stage" role="application" tabIndex={0} viewBox={run.source.bounds.join(' ')} style={{ width:'100%', maxHeight:480, background:'#16251f' }}
       onBlur={() => { clear(); run.pause(); }}
       onKeyDown={e => { if (e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); if (view.paused && !e.repeat) run.advance(controls.current); return; } if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','ShiftLeft','ShiftRight','KeyD'].includes(e.code)) { e.preventDefault(); e.stopPropagation(); update(e.code, true); } }}
@@ -56,8 +58,11 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
       {run.source.traversals.filter(t=>'points' in t).map(t=><polyline key={t.id} points={'points' in t?t.points.map(p=>p.join(',')).join(' '):''} fill="none" stroke="#ffd98b" strokeWidth={3}><title>{t.id}</title></polyline>)}
       {body.kind === 'rect' && <rect aria-label="Generic debug actor" x={state.x/256-body.width/2} y={state.y/256-body.height} width={body.width} height={body.height} fill="#86d7ff" stroke="white" />}
       <circle cx={state.x/256} cy={state.y/256} r={3} fill="#ff5b79" />
+      {showCamera&&view.camera&&<CameraFootprint view={view.camera}/>}
       {view.frame.contacts.map((c,i)=><circle key={i} cx={c.point[0]/256} cy={c.point[1]/256} r={3} fill="#fff"><title>{`${c.bodyId}/${c.shapeId}/${c.edgeIndex} ${c.kind}`}</title></circle>)}
     </svg>
+    {showCamera&&view.camera&&body.kind==='rect'&&<CameraViewport view={view.camera} scene={scene} state={state} body={body}/>}
+    {view.cameraDiagnosis&&<p aria-label="Camera preview diagnosis">{view.cameraDiagnosis} · Physics remains independent.</p>}
     <output aria-label="Test movement HUD" data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''}>
       Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
     </output>

@@ -1,0 +1,97 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "3d9e7128dd41953eb8478bf6f44617b731a1810f1a579113d70a5bec77c0b028"
+    },
+    {
+      "path": "assets/camera-silence.wav",
+      "sha256": "faf90dde7fd7a168c57cb3a4724584c233c2b297754169d85a5d7b4165ef82fd"
+    },
+    {
+      "path": "audio-fade.expected.json",
+      "sha256": "847850429a5cfcac39948be43f40727edf9364dd8ca26f5f0bd201f4ef233023"
+    },
+    {
+      "path": "boss-lock.expected.json",
+      "sha256": "b3b172408b57c47c846497425304a68cf761167b12063d65c4025f5f672f32d7"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "4efd43a97d51ac79f80b14375ab0d1685a1949f722e418a30225cfcc2c571919"
+    },
+    {
+      "path": "damping-reset.expected.json",
+      "sha256": "aea6c757f93eaa25a728f04e7464637cd12850a3bbb073f2ddf199d580df3ef5"
+    },
+    {
+      "path": "ladder.expected.json",
+      "sha256": "6cc176b8dcaad827b151611e0f52dc3b78e6f6793f41dd50a88c62f9d720e3e6"
+    },
+    {
+      "path": "long-drop.expected.json",
+      "sha256": "bbe3f0f7adf5c6cc46bfcb6834ba32fccb89718dc0dc2bf26e270f544114f365"
+    },
+    {
+      "path": "lookahead.expected.json",
+      "sha256": "a596cd0fb00d0f1f5259b61c7d91cf8dc69e747ce8aa7fa21ff5b4348c44963c"
+    },
+    {
+      "path": "shaft.map.json",
+      "sha256": "793084ddbdbfdac7fe5faf845432f068c18de4c65d1c39f99aa80ede7bc65f8f"
+    },
+    {
+      "path": "short-jump.expected.json",
+      "sha256": "f6263b4b39434cfd0855fba96a9b9a012eca7820df3f9db7da911c01254684fc"
+    },
+    {
+      "path": "small-bounds.expected.json",
+      "sha256": "94a1bc75afcf8a1b2e780633f6202bd302238344a6c9c2a20caeab7d07b50ab7"
+    },
+    {
+      "path": "sources/catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "path": "sources/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a"
+    },
+    {
+      "path": "sources/maps/forest.map.json",
+      "sha256": "625eb521c132007e8a33802038bf7fd93d5e088bcd01f5248ce4d0d0e00cb998"
+    },
+    {
+      "path": "sources/movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "path": "sources/movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "path": "sources/movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "path": "sources/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "path": "sources/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    },
+    {
+      "path": "stacked-floors.expected.json",
+      "sha256": "042e3367d2f40b7c6f7cdf0cdd2944734e7845ed6e9bad611786997027435808"
+    },
+    {
+      "path": "tall-jump-repeat.expected.json",
+      "sha256": "6de6cde23ce10b197ffb55214f88baf607304ba2074e603aff4c801fb13c9b95"
+    },
+    {
+      "path": "zone-ties.expected.json",
+      "sha256": "8199816906fff5ed2dce109a03aceca2b0ea7d7b756309c93bc882c86dabb9d0"
+    }
+  ]
+}

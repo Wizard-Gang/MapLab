@@ -33,30 +33,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-022** — squash `f4997bd`, PR #22 (security repair of PR #21); [record](docs/changes/ML-022.md).
 - **ML-023** — squash `a144833`, PR #23; [record](docs/changes/ML-023.md).
 - **ML-024** — squash `10f5a75`, PR #24; [record](docs/changes/ML-024.md).
+- **ML-025** — squash `8cae118`, PR #25; [record](docs/changes/ML-025.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-025 / P0
-
-- **Source scope:** Cross-map portal authoring, destination validation and Test map transition/reentry policy.
-- **Non-goals:** No world streaming or remote map fetch.
-- **Acceptance:** Forest→clearing works after injected clear event; bad target fails; no touch-loop; source documents stay unchanged.
-- **Depends on:** ML-024 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [F3](docs/specifications/2026-10-16-maplab.md#f3-concrete-complete-numeric-acceptance-world), [G1](docs/specifications/2026-10-16-maplab.md#g1-exact-load-sequence), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix), [I4](docs/specifications/2026-10-16-maplab.md#i4-fundamental-acceptance-run); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Add portal destination pickers, dependency checks, arrival anchors, activation/flag rules and reentry policy.
-  2. Support forest-to-clearing Test snapshot transitions without modifying source maps or fetching remote content.
-  3. Create owned fixture(s): portal.clearing/start.arrival, broken target, boss-cleared flag, touch-loop and reentry reset.
-  4. Add executable checks: Independent load plus injected clear-event portal trace.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-026 / P0
 
 - **Source scope:** Camera/environment zone authoring and reference camera/audio intent preview.
@@ -71,6 +53,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Camera numerical tests; preview never feeds physics.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-027 / P0
 
 - **Source scope:** Basic flight free-space planner/controller and mode-volume bindings for flying patrols.
