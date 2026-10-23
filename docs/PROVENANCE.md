@@ -139,3 +139,7 @@ variants and tiny sensor/event cases. Final snapshots pin full-body event timing
 actor/trigger order, one-shot behavior and explicit boss completion effects.
 The isolated standard-library consumer checks final bytes, continuous crossing
 math and ordered declarative actions without importing the editor or Test runtime.
+
+### ML-025 owned portal travel fixtures
+
+`conformance/portals/` is original CC0-1.0 primitive data copied from the owned placeholder Forest/Clearing source documents. Only the new package moves boss-entry/portal regions near the initial actor, shortens the portal delay and places the return sensor around the arrival for explicit loop/reentry checks. `journey.input.json`, `journey.expected.json` and `index.json` bind the injected event, delay and full-footprint arrival trace. No borrowed art, engine implementation or executable schema extension is included. `tests/consumer/portals.mjs` is a separate Node-only proof consumer over actual exported bundle bytes and the independent reader; its qualified corpus and limits are documented in the fixture README.

@@ -27,6 +27,7 @@ export class GameplaySession {
   if(c.kind==='not'){const result=this.condition(c.term,a,v);return result===null?null:!result;}
   const terms=c.terms.map(t=>this.condition(t,a,v));if(terms.includes(null))return null;return c.kind==='all'?terms.every(Boolean):terms.some(Boolean);
  }
+ conditions(conditions:readonly Condition[],actor:SensorActor):'passed'|'blocked'|'unsupported'{const results=conditions.map(c=>this.condition(c,actor,this.view));return results.includes(null)?'unsupported':results.every(Boolean)?'passed':'blocked';}
  private apply(call:Call,ownerId:string,tick:number,v:GameplayView):GameplayView{
   let next=v,status:ActionEvent['status']='applied',detail='Test declarative subset';
   const definition=this.entries.find(e=>e.key===call.key&&e.version===call.version&&e.kind==='action');

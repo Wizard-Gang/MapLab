@@ -1,0 +1,49 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "da091d8b81404084fb07b4c5920f8e3edaf15c203ffa81ea1621127326d3a1f6"
+    },
+    {
+      "path": "journey.expected.json",
+      "sha256": "994b7b282425c6e993605de4c21e8b318b3cca829ca8ce46141bc98484d7de06"
+    },
+    {
+      "path": "journey.input.json",
+      "sha256": "3e6955cd87b0a8abc16f4b1b5d43ee1071f40d13f4ea874d6f4af1a1daca6279"
+    },
+    {
+      "path": "sources/catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "path": "sources/maps/clearing.map.json",
+      "sha256": "d20740b6ac0c97b769fd0408cd6734f6942014198c172413eb66cd1a3f91ddf6"
+    },
+    {
+      "path": "sources/maps/forest.map.json",
+      "sha256": "4a49dd754ad324e77a33d3195f509289102456c87c690030d35a104ce4227b83"
+    },
+    {
+      "path": "sources/movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "path": "sources/movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "path": "sources/movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "path": "sources/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "path": "sources/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    }
+  ]
+}

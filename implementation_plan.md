@@ -32,30 +32,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-021** — squash `cf091e7`, PR #20; [record](docs/changes/ML-021.md).
 - **ML-022** — squash `f4997bd`, PR #22 (security repair of PR #21); [record](docs/changes/ML-022.md).
 - **ML-023** — squash `a144833`, PR #23; [record](docs/changes/ML-023.md).
+- **ML-024** — squash `10f5a75`, PR #24; [record](docs/changes/ML-024.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-024 / P0
-
-- **Source scope:** Typed gameplay/region/spawn/route/encounter/trigger inspectors and declarative test-event boundary.
-- **Non-goals:** No combat, executable scripts, arbitrary behavior graphs.
-- **Acceptance:** All F gameplay types inspect/edit before engine implementation; full-body trigger timing/once/order fixtures; boss event injection clear.
-- **Depends on:** ML-023 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C2](docs/specifications/2026-10-16-maplab.md#c2-modes-and-tools), [F2](docs/specifications/2026-10-16-maplab.md#f2-normative-typescript-contract-sketch), [F3](docs/specifications/2026-10-16-maplab.md#f3-concrete-complete-numeric-acceptance-world), [E5](docs/specifications/2026-10-16-maplab.md#e5-enemy-authoring-and-proof-boundary), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Provide typed inspectors for every spawn/region/waypoint/route/trigger/encounter/entity with closed catalog bindings.
-  2. Create declarative Test event injection and deterministic full-body trigger entry/exit, once and ordering semantics.
-  3. Create owned fixture(s): Forest enemy/boss region, high-speed enter/exit, simultaneous events, reset once, wrong handler kind.
-  4. Add executable checks: Inspector save/reopen and event-sequence tests; no combat/script executor.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-025 / P0
 
 - **Source scope:** Cross-map portal authoring, destination validation and Test map transition/reentry policy.
@@ -70,6 +52,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Independent load plus injected clear-event portal trace.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-026 / P0
 
 - **Source scope:** Camera/environment zone authoring and reference camera/audio intent preview.

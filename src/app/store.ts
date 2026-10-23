@@ -1,6 +1,5 @@
-import { GameplaySession } from '../gameplay/runtime';
 import type {MapDocument} from '../contracts/document-types';
-import { TestSession } from '../test-runtime/session';
+import { PortalTestSession } from '../test-runtime/portals';
 import type { MovementDocument } from '../contracts/movement-types';
 import { validateMovement } from '../contracts/movement';
 import type { ContactMap } from '../physics-reference';
@@ -79,8 +78,8 @@ const describe = (r: Refusal): string[] => [
 export class LibraryStore {
   private view: AppView = initial;
   private sources = new Map<string, JsonValue>();
-  private readonly tests = new Map<string, TestSession>();
-  test(id: string): TestSession | undefined { return this.tests.get(id); }
+  private readonly tests = new Map<string, PortalTestSession>();
+  test(id: string): PortalTestSession | undefined { return this.tests.get(id); }
   testProfiles(): readonly MovementDocument[] {
     return [...this.sources.values()].filter(v => validateMovement(v).ok) as unknown as MovementDocument[];
   }
@@ -92,7 +91,7 @@ export class LibraryStore {
     if (!doc || lockReason(doc) || !profile) throw new Error('Test requires an unlocked map and loaded movement profile');
     this.cancelGestures(id);
     const sources=structuredClone(this.gameplaySources());
-    const run = new TestSession(denormalize(doc.state.model) as unknown as ContactMap, profile, undefined, source=>new GameplaySession(source as unknown as MapDocument,sources));
+    const run = new PortalTestSession(denormalize(doc.state.model) as unknown as MapDocument, profile, sources);
     this.tests.get(id)?.pause(); this.tests.set(id, run); this.set({});
   }
   stopTest(id: string): void { this.tests.get(id)?.pause(); this.tests.delete(id); this.set({}); }
@@ -154,7 +153,7 @@ export class LibraryStore {
 
   private set(patch: Partial<AppView>): void { this.view = { ...this.view, ...patch }; for (const l of this.listeners) l(); }
   private doc(id: string): OpenDoc | undefined { return this.view.docs.find((d) => d.id === id); }
-  private patchDoc(id: string, patch: Partial<OpenDoc>): void { if (patch.state && patch.state.model !== this.doc(id)?.state.model) { this.tests.get(id)?.pause(); this.tests.delete(id); } this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
+  private patchDoc(id: string, patch: Partial<OpenDoc>): void { if (patch.state && patch.state.model !== this.doc(id)?.state.model) { for(const [key,run] of this.tests)if(run.captures(id)){run.pause();this.tests.delete(key);} } this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
   private get libraryId(): string | null { const l = this.view.library; return l ? libraryKey(l.label, l.projectId) : null; }
   active(): OpenDoc | undefined { return this.view.activeId ? this.doc(this.view.activeId) : undefined; }
 
