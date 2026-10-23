@@ -1,0 +1,23 @@
+{
+  "format": "maplab.catalog", "version": 1, "id": "catalog.core",
+  "entries": [
+    {"key": "enemy.slime", "version": 1, "kind": "archetype", "stage": "planned", "fields": [], "stateNames": ["idle", "patrol", "chase", "hurt", "dead"]},
+    {"key": "enemy.bat", "version": 1, "kind": "archetype", "stage": "planned", "fields": [], "stateNames": ["hover", "patrol", "dive", "dead"]},
+    {"key": "enemy.forest-guardian", "version": 1, "kind": "archetype", "stage": "planned", "fields": [], "stateNames": ["dormant", "fight", "dead"]},
+    {"key": "npc.ranger", "version": 1, "kind": "archetype", "stage": "planned", "fields": [], "stateNames": ["idle", "talk"]},
+    {"key": "chest.wooden", "version": 1, "kind": "archetype", "stage": "planned", "fields": [{"name": "lootTable", "required": true, "type": "string", "maxLength": 64}], "stateNames": ["closed", "open"]},
+    {"key": "core.patrol", "version": 1, "kind": "behavior", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.guard", "version": 1, "kind": "behavior", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.idle", "version": 1, "kind": "behavior", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.encounter.activate", "version": 1, "kind": "action", "stage": "planned", "fields": [{"name": "target", "required": true, "type": "ref", "target": "encounter"}], "stateNames": []},
+    {"key": "core.encounter.cleared", "version": 1, "kind": "event", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.flag.set", "version": 1, "kind": "action", "stage": "available", "fields": [{"name": "flag", "required": true, "type": "ref", "target": "flag"}, {"name": "value", "required": true, "type": "boolean"}], "stateNames": []},
+    {"key": "core.body.set-enabled", "version": 1, "kind": "action", "stage": "available", "fields": [{"name": "target", "required": true, "type": "ref", "target": "body"}, {"name": "enabled", "required": true, "type": "boolean"}], "stateNames": []},
+    {"key": "core.checkpoint.activate", "version": 1, "kind": "action", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.chest.open", "version": 1, "kind": "action", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.respawn-at-checkpoint", "version": 1, "kind": "effect", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.camera.shake.small", "version": 1, "kind": "effect", "stage": "planned", "fields": [], "stateNames": []},
+    {"key": "core.env.fireflies", "version": 1, "kind": "effect", "stage": "planned", "fields": [{"name": "density", "required": true, "type": "integer", "min": 0, "max": 64}], "stateNames": []},
+    {"key": "core.env.tint", "version": 1, "kind": "effect", "stage": "planned", "fields": [{"name": "color", "required": true, "type": "string", "maxLength": 9}], "stateNames": []}
+  ]
+}

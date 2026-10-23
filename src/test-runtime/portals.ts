@@ -1,3 +1,4 @@
+import {CameraPreview,type CameraView} from '../camera/preview';
 // Captured Test worlds only. No editor, storage, network or engine implementation dependency.
 import {validateSourceGraph,type MapDocument,type MovementDocument,type JsonValue,type ContractRef} from '../contracts';
 import type {Entity} from '../contracts/gameplay-types';
@@ -11,7 +12,7 @@ export type PortalCommand=({readonly kind:'interact';readonly portalId:string}|{
 export interface PortalRecording extends Recording {readonly commands?:readonly PortalCommand[]}
 export interface Travel {readonly tick:number;readonly fromMap:string;readonly portalId:string;readonly toMap:string;readonly entityId:string;readonly arrival:State}
 export interface PortalChoice {readonly id:string;readonly activation:'touch'|'interact';readonly inside:boolean;readonly condition:'passed'|'blocked'|'unsupported';readonly suppressed:boolean;readonly destination:{readonly mapId:string;readonly entityId:string}}
-export interface PortalView extends TestView {readonly mapId:string;readonly travelStatus:'ready'|'unsupported'|'budget';readonly travelDiagnosis:string;readonly portals:readonly PortalChoice[];readonly travels:readonly Travel[];readonly pending:{readonly portalId:string;readonly remainingTicks:number}|null;readonly reentry:'fresh-map-instance; touch-exit-before-reentry'}
+export interface PortalView extends TestView {readonly camera:CameraView|null;readonly cameraDiagnosis:string;readonly mapId:string;readonly travelStatus:'ready'|'unsupported'|'budget';readonly travelDiagnosis:string;readonly portals:readonly PortalChoice[];readonly travels:readonly Travel[];readonly pending:{readonly portalId:string;readonly remainingTicks:number}|null;readonly reentry:'fresh-map-instance; touch-exit-before-reentry'}
 export function parsePortalRecording(value:unknown):PortalRecording {
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Expected portal recording');
  const {commands,...base}=value as PortalRecording,r=parseRecording(base);
@@ -27,6 +28,7 @@ export class PortalTestSession {
  private run:TestSession;private view!:PortalView;private frames:Step[]=[];private input:RunInput[]=[];private events:Injection[]=[];private commands:PortalCommand[]=[];private travels:Travel[]=[];
  private suppressed=new Set<string>();private pending: {portal:Portal;remainingTicks:number}|null=null;
  private status:PortalView['travelStatus']='ready';private diagnosis='';private runInitial:State;
+ private preview:CameraPreview|null=null;private camera:CameraView|null=null;private cameraDiagnosis='';
  private readonly listeners=new Set<()=>void>();
  constructor(root:MapDocument,profile:MovementDocument,sources:readonly JsonValue[],initial?:State){
   this.sources=own([root as unknown as JsonValue,...sources.filter(s=>!(s&&typeof s==='object'&&!Array.isArray(s)&&s.id===root.id))]);
@@ -44,18 +46,20 @@ export class PortalTestSession {
   }
   this.root=this.maps.get(root.id)!;this.profile=own(profile);this.run=this.instance(this.root,initial);this.initial=own(this.run.initial);this.runInitial=this.initial;
   if(this.run.getSnapshot().gameplay?.status!=='ready')throw Error('Portal initial gameplay '+this.run.getSnapshot().gameplay?.status);
-  this.touch(this.initial,this.initial);this.publish();
+  this.resetPreview();this.touch(this.initial,this.initial);this.publish();
  }
  get source():MapDocument{return this.run.source as unknown as MapDocument;}
  captures(id:string):boolean{return this.ids.has(id);}
  readonly subscribe=(listener:()=>void):(()=>void)=>{this.listeners.add(listener);return()=>this.listeners.delete(listener);};
  readonly getSnapshot=():PortalView=>this.view;
+ private resetPreview():void {try{const c=this.profile.collider;if(c.kind!=='rect')throw Error('Camera preview requires rectangular actor');const preview=new CameraPreview(this.source,c);this.camera=preview.reset(this.run.getSnapshot().state);this.preview=preview;this.cameraDiagnosis='';}catch(e){this.preview=null;this.camera=null;this.cameraDiagnosis=String(e);}}
+ private observePreview():void {if(!this.preview)return;try{this.camera=this.preview.step(this.run.getSnapshot().state);}catch(e){this.camera=null;this.cameraDiagnosis=String(e);this.preview=null;}}
  private instance(map:MapDocument,initial?:State):TestSession {return new TestSession(map as never,this.profile,initial,source=>new GameplaySession(source as unknown as MapDocument,this.sources));}
  private spans(p:Portal,from:State,to:State){const shape=this.source.regions.find(r=>r.id===p.regionId)!.shape,c=this.profile.collider;if(c.kind!=='rect')throw Error('Portal sensors require rectangular actor');return sensorSpans(shape,from,to,c.width*256,c.height*256);}
  private inside(p:Portal,state:State):boolean{return this.spans(p,state,state).some(s=>s.lo<1&&s.hi>1);}
  private portals():Portal[]{return this.source.entities.filter((e):e is Portal=>e.kind==='portal'&&e.enabled).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);}
  private publish():void {
-  const v=this.run.getSnapshot();this.view=own({...v,paused:v.paused||this.status!=='ready',frames:this.frames,input:this.input,mapId:this.source.id,travelStatus:this.status,travelDiagnosis:this.diagnosis,
+  const v=this.run.getSnapshot();this.view=own({...v,paused:v.paused||this.status!=='ready',frames:this.frames,input:this.input,camera:this.camera,cameraDiagnosis:this.cameraDiagnosis,mapId:this.source.id,travelStatus:this.status,travelDiagnosis:this.diagnosis,
    portals:this.portals().map(p=>({id:p.id,activation:p.activation,inside:this.inside(p,v.state),condition:this.run.testConditions(p.conditions),suppressed:this.suppressed.has(p.id),destination:p.destination})),travels:this.travels,pending:this.pending?{portalId:this.pending.portal.id,remainingTicks:this.pending.remainingTicks}:null,reentry:'fresh-map-instance; touch-exit-before-reentry'});
   for(const l of this.listeners)l();
  }
@@ -71,7 +75,7 @@ export class PortalTestSession {
   if(this.travels.length>=64)throw Error('Portal transition budget');
   const next=this.destination(p),fromMap=this.source.id,wasPaused=this.run.getSnapshot().paused;const state=next.getSnapshot().state;
   this.run=next;this.pending=null;this.suppressed=new Set(this.portals().filter(p=>p.activation==='touch'&&this.inside(p,state)).map(p=>p.id));
-  this.travels.push(own({tick:state.tick,fromMap,portalId:p.id,toMap:this.source.id,entityId:p.destination.entityId,arrival:state}));this.run.pause(wasPaused);
+  this.travels.push(own({tick:state.tick,fromMap,portalId:p.id,toMap:this.source.id,entityId:p.destination.entityId,arrival:state}));this.run.pause(wasPaused);this.resetPreview();
  }
  private activate(p:Portal):void {
   this.destination(p); // Validate now, including delayed arrivals. No partial transition on failure.
@@ -88,10 +92,10 @@ export class PortalTestSession {
   candidates.sort((a,b)=>a.time-b.time||(a.portal.id<b.portal.id?-1:1));if(candidates[0])try{this.activate(candidates[0].portal);}catch(e){this.fail(e);}
  }
  pause(paused=true):void {this.run.pause(paused||this.status!=='ready'||this.frames.length>=MAX_TICKS);this.publish();}
- reset():void {this.frames=[];this.input=[];this.events=[];this.commands=[];this.travels=[];this.pending=null;this.suppressed.clear();this.status='ready';this.diagnosis='';this.runInitial=this.initial;this.run=this.instance(this.root,this.initial);this.touch(this.initial,this.initial);this.publish();}
+ reset():void {this.frames=[];this.input=[];this.events=[];this.commands=[];this.travels=[];this.pending=null;this.suppressed.clear();this.status='ready';this.diagnosis='';this.runInitial=this.initial;this.run=this.instance(this.root,this.initial);this.resetPreview();this.touch(this.initial,this.initial);this.publish();}
  advance(input:Input=NEUTRAL):Step {
   if(this.status!=='ready'||this.run.getSnapshot().frame.status!=='ok'||this.run.getSnapshot().gameplay?.status!=='ready'||this.frames.length>=MAX_TICKS){this.pause();return this.view.frame;}
-  const before=this.run.getSnapshot().state,frame=this.run.advance(input);
+  const oldPreview=this.preview,before=this.run.getSnapshot().state,frame=this.run.advance(input);
   const {fromTick:_,...last}=this.input.at(-1)??{fromTick:0};if(!this.input.length||replayBytes(last)!==replayBytes(input))this.input.push(own({...input,fromTick:before.tick}));
   this.frames.push(frame);
   if(frame.status==='ok'&&this.run.getSnapshot().gameplay?.status!=='ready')this.fail(Error('Portal gameplay '+this.run.getSnapshot().gameplay?.status));
@@ -99,6 +103,7 @@ export class PortalTestSession {
    if(this.pending){this.pending.remainingTicks--;if(this.pending.remainingTicks===0)try{this.commit(this.pending.portal);}catch(e){this.fail(e);}}
    else this.touch(before,frame.state);
   }
+  if(frame.status==='ok'&&this.preview===oldPreview)this.observePreview();
   if(this.frames.length>=MAX_TICKS||this.status!=='ready')this.run.pause();this.publish();return this.view.frame;
  }
  interact(portalId:string):void {
@@ -116,6 +121,6 @@ export class PortalTestSession {
   const r=parsePortalRecording(value),next=new PortalTestSession(this.root,this.profile,this.sources,r.initial);let input=0,command=0;const commands:readonly PortalCommand[]=r.commands??r.events?.map(e=>({...e,kind:'inject' as const}))??[];
   const boundary=()=>{while(commands[command]?.afterTicks===next.frames.length){const c=commands[command++]!;if(c.kind==='inject')next.injectEvent(c.event,c.encounterId);else next.interact(c.portalId);}};boundary();
   for(let i=0;i<r.ticks;i++){while(r.input[input+1]&&r.input[input+1]!.fromTick<=next.view.state.tick)input++;const {fromTick:_,...controls}=r.input[input]!;if(next.advance(controls).status!=='ok'||next.status!=='ready'||next.frames.length!==i+1)throw Error('Portal replay refused: '+next.view.travelDiagnosis+' '+next.view.frame.reason);boundary();}
-  this.run=next.run;this.frames=next.frames;this.input=next.input;this.events=next.events;this.commands=next.commands;this.travels=next.travels;this.suppressed=next.suppressed;this.pending=next.pending;this.status=next.status;this.diagnosis=next.diagnosis;this.runInitial=own(r.initial);this.run.pause();this.publish();
+  this.preview=next.preview;this.camera=next.camera;this.cameraDiagnosis=next.cameraDiagnosis;this.run=next.run;this.frames=next.frames;this.input=next.input;this.events=next.events;this.commands=next.commands;this.travels=next.travels;this.suppressed=next.suppressed;this.pending=next.pending;this.status=next.status;this.diagnosis=next.diagnosis;this.runInitial=own(r.initial);this.run.pause();this.publish();
  }
 }
