@@ -1,7 +1,7 @@
 {
-  "id": "ML-024",
+  "id": "ML-025",
   "type": "FEATURE",
-  "title": "[ML-024] [FEATURE] Author gameplay and verify declarative Test events",
-  "branch": "ml-024-gameplay",
-  "record": "docs/changes/ML-024.md"
+  "title": "[ML-025] [FEATURE] Author portals and verify Test map transitions",
+  "branch": "ml-025-portals",
+  "record": "docs/changes/ML-025.md"
 }

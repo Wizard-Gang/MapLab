@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { NEUTRAL, MAX_TICKS, type TestSession } from '../test-runtime/session';
+import { NEUTRAL, MAX_TICKS } from '../test-runtime/session';
+import type { PortalTestSession } from '../test-runtime/portals';
 import type { Input } from '../physics-reference';
 import type { Entity } from '../contracts/gameplay-types';
 import { records } from '../render/scene';
@@ -8,11 +9,11 @@ import { normalize } from '../domain/model';
 import type { JsonValue } from '../contracts';
 import type { LibraryStore, OpenDoc } from './store';
 
-function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: () => void }): ReactNode {
+function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly stop: () => void }): ReactNode {
   const view = useSyncExternalStore(run.subscribe, run.getSnapshot, run.getSnapshot);
   const controls = useRef<Input>(NEUTRAL), keys = useRef(new Set<string>());
-  const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState('');
-  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,JSON.stringify(view.gameplay?.bodies??{})]);
+  const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState(''),[portal,setPortal]=useState('');
+  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,JSON.stringify(view.gameplay?.bodies??{})]);
   const clear = (): void => { keys.current.clear(); controls.current = NEUTRAL; };
   useEffect(() => {
     // Wall time only schedules whole controller ticks. It never enters controller arithmetic.
@@ -25,6 +26,7 @@ function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: 
     return () => { clearInterval(timer); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); };
   }, [run, view.paused]);
   useEffect(() => () => { clear(); run.pause(); }, [run]);
+  useEffect(()=>{clear();setEncounter('');setPortal('');},[view.mapId]);
   const state = view.state, body = run.profile.collider;
   const update = (code: string, down: boolean): void => {
     if (down) keys.current.add(code); else keys.current.delete(code);
@@ -34,6 +36,7 @@ function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: 
       run: k.has('ShiftLeft') || k.has('ShiftRight'), jump: k.has('Space'), drop: k.has('KeyD') };
   };
   return <div>
+    <output aria-label="Test current map">{view.mapId}</output>
     <p>Generic debug actor · {run.profile.id} · {view.paused ? 'Paused' : 'Running'} · 60 Hz · {MAX_TICKS} tick recording limit</p>
     <div role="toolbar" aria-label="Test controls">
       <button onClick={() => run.pause(false)}>Run Test</button>
@@ -59,10 +62,14 @@ function RunningTest({ run, stop }: { readonly run: TestSession; readonly stop: 
       Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
     </output>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
-    {view.gameplay&&<section aria-label="Test gameplay boundary"><h4>Declarative Test events</h4><p>Explicit fixture injection only. No combat victory, AI, wave executor or portal traversal is simulated.</p>
+    {view.gameplay&&<section aria-label="Test gameplay boundary"><h4>Declarative Test events</h4><p>Explicit fixture injection only. No combat victory, AI or wave executor is simulated.</p>
     <label>Test encounter<select aria-label="Test encounter" value={encounter} onChange={e=>setEncounter(e.target.value)}><option value="">Choose active encounter</option>{Object.entries(view.gameplay.encounters).map(([id,status])=><option key={id} value={id}>{id} · {status}</option>)}</select></label>
     <button disabled={!encounter||view.gameplay.encounters[encounter]!=='active'} onClick={()=>{const e=(run.source as unknown as {encounters:{id:string;completionEvent:{key:string;version:number}}[]}).encounters.find(e=>e.id===encounter);if(e)try{clear();run.injectEvent(e.completionEvent,e.id);setNotice('Explicit fixture event injected: '+e.completionEvent.key);}catch(e){setNotice(String(e));}}}>Inject declared completion event</button>
     <pre aria-label="Test gameplay state">{JSON.stringify(view.gameplay,null,2)}</pre></section>}
+    <section aria-label="Test portal travel"><h4>Portal travel</h4><p>Captured dependency maps only. Actor velocity, contacts and resources reset on arrival. Every entry creates fresh map flags, encounters and one-shot state. Arrival touch portals stay locked until the full body exits.</p>
+    <label>Test portal<select aria-label="Test portal" value={portal} onChange={e=>setPortal(e.target.value)}><option value="">Choose portal</option>{view.portals.map(p=><option key={p.id} value={p.id}>{p.id} · {p.activation} · {p.condition} · {p.inside?'inside':'outside'}{p.suppressed?' · reentry locked':''}</option>)}</select></label>
+    <button disabled={!!view.pending||view.travelStatus!=='ready'||!view.portals.some(p=>p.id===portal&&p.activation==='interact'&&p.inside&&p.condition==='passed')} onClick={()=>{try{clear();run.interact(portal);setNotice('Portal interaction recorded');}catch(e){setNotice(String(e));}}}>Interact with portal</button>
+    <output aria-label="Test portal status">{view.travelStatus}: {view.travelDiagnosis||'ready'}{view.pending?' · '+view.pending.portalId+' · '+view.pending.remainingTicks+' ticks remaining':''}</output><pre aria-label="Test portal trace">{JSON.stringify(view.travels,null,2)}</pre></section>
     <p aria-label="Test diagnosis">{view.frame.status}: {view.frame.reason??'shared reference controller'} · Preview only; cannot certify navigation. Use Navigation mode to generate a separate reference route from this Test state.</p>
     <label>Test replay input<textarea aria-label="Test replay input" value={text} onChange={e=>setText(e.target.value)} rows={5}/></label>
     <button onClick={() => { clear(); try { run.replay(JSON.parse(text)); setNotice('Replay complete; paused'); } catch(e) { setNotice(`Replay refused: ${e instanceof Error?e.message:String(e)}`); } }}>Replay Test</button>
@@ -77,7 +84,7 @@ export function TestPanel({ store, doc }: { readonly store: LibraryStore; readon
   const run = store.test(doc.id);
   return <section aria-label="Integrated Test">
     <h3>Test</h3>
-    <p>Test freezes this map and movement profile. Edits stop Test; start again to take an explicit new snapshot. Engine gameplay is configured, not simulated; the labeled declarative event subset has a separate runtime snapshot.</p>
+    <p>Test freezes the loaded dependency closure and movement profile. Edits stop Test; start again to take an explicit new snapshot. Engine gameplay is configured, not simulated; the labeled declarative event subset has a separate runtime snapshot.</p>
     <label>Test movement profile<select aria-label="Test movement profile" value={profileId} onChange={e=>{ store.stopTest(doc.id); setProfileId(e.target.value); setNotice('Profile changed; start a new snapshot'); }}>
       {profiles.map(p=><option key={p.id} value={p.id}>{p.id}</option>)}
     </select></label>

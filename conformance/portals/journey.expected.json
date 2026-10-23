@@ -1,0 +1,75 @@
+{
+  "mapId": "map.clearing",
+  "state": {
+    "x": 40960,
+    "y": 147456,
+    "vx": 0,
+    "vy": 0,
+    "mode": "ground",
+    "supportId": "fh.floor",
+    "planeId": "layer.actors",
+    "facing": 1,
+    "tick": 3,
+    "jumpHeldPrev": false,
+    "jumpReleased": false,
+    "ticksSinceJump": 0,
+    "dropSuppression": null,
+    "resources": {
+      "airJumps": 0,
+      "dashCharges": 0,
+      "cooldowns": {}
+    },
+    "traversalId": null,
+    "climbReady": true
+  },
+  "travels": [
+    {
+      "tick": 2,
+      "fromMap": "map.forest",
+      "portalId": "portal.clearing",
+      "toMap": "map.clearing",
+      "entityId": "start.arrival",
+      "arrival": {
+        "x": 40960,
+        "y": 147456,
+        "vx": 0,
+        "vy": 0,
+        "mode": "ground",
+        "supportId": "fh.floor",
+        "planeId": "layer.actors",
+        "facing": 1,
+        "tick": 2,
+        "jumpHeldPrev": false,
+        "jumpReleased": false,
+        "ticksSinceJump": 0,
+        "dropSuppression": null,
+        "resources": {
+          "airJumps": 0,
+          "dashCharges": 0,
+          "cooldowns": {}
+        },
+        "traversalId": null,
+        "climbReady": true
+      }
+    }
+  ],
+  "gameplay": {
+    "tick": 3,
+    "status": "ready",
+    "diagnostics": [],
+    "flags": {},
+    "bodies": {
+      "body.floor": true,
+      "body.edges": true
+    },
+    "entities": {
+      "start.arrival": true,
+      "portal.forest": true
+    },
+    "encounters": {},
+    "once": [],
+    "overlaps": [],
+    "events": [],
+    "actions": []
+  }
+}

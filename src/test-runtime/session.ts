@@ -1,6 +1,6 @@
 // ML-020: ephemeral Test state. This module has no authoring, storage, rendering or engine dependency.
 import type { GameplaySession, GameplayView, SensorActor } from '../gameplay/runtime';
-import type { ContractRef } from '../contracts';
+import type { Condition, ContractRef } from '../contracts';
 import { createWorld, step, resolveStance, replayBytes, type ContactMap, type Input, type State, type Step, type World, type RunInput } from '../physics-reference';
 import type { MovementDocument } from '../contracts/movement-types';
 import { floorDiv, integer } from '../physics-reference/integer';
@@ -21,11 +21,12 @@ export interface TestView {
 }
 
 /** Spawn from an authored playerStart. Surface spawns use the same full-body stance as navigation/controller. */
-export function spawn(world: World): State {
+export function spawn(world: World, entityId?: string): State {
   const starts = (world.source.entities as unknown as Entity[]).filter(e => e.enabled && e.kind === 'playerStart');
-  const start = starts.find(e => e.kind === 'playerStart' && e.default) ?? starts[0];
-  if (!start) throw new Error('No enabled playerStart; author one before starting Test');
-  const a = start.anchor;
+  const start = entityId ? (world.source.entities as unknown as Entity[]).find(e=>e.id===entityId&&e.enabled) : starts.find(e => e.kind === 'playerStart' && e.default) ?? starts[0];
+  if (!start) throw new Error(entityId?'Missing or disabled arrival entity: '+entityId:'No enabled playerStart; author one before starting Test');
+  let a = start.anchor; let ox=0,oy=0;const seen=new Set<string>();
+  while(a.kind==='entity'){if(seen.has(a.entityId)||seen.size>=64)throw Error('Arrival entity anchor cycle/budget');seen.add(a.entityId);const parentId=a.entityId;const parent=(world.source.entities as unknown as Entity[]).find(e=>e.id===parentId&&e.enabled);if(!parent)throw Error('Missing or disabled arrival anchor entity');ox+=a.point[0]*256;oy+=a.point[1]*256;a=parent.anchor;}
   let x: number, y: number;
   if (a.kind === 'world') [x, y] = a.point.map(n => n * 256) as [number, number];
   else if (a.kind === 'body') {
@@ -41,6 +42,7 @@ export function spawn(world: World): State {
     if (!stance) throw new Error('PlayerStart has no full-footprint support');
     y = stance.y;
   } else throw new Error('Unsupported playerStart entity anchor');
+  x=integer(x+ox);y=integer(y+oy);
   const stance = resolveStance(world, x, a.kind === 'surface' ? a.footholdId : undefined).find(v => v.y === y);
   return { x, y, vx: 0, vy: 0, mode: stance ? 'ground' : 'air', supportId: stance?.face.supportId ?? null,
     planeId: stance?.face.planeId ?? world.defaultPlane, facing: start.facing === 'left' ? -1 : 1, tick: 0,
@@ -93,6 +95,7 @@ export class TestSession {
     if (probe.status !== 'ok') throw new Error(`${probe.status}: ${probe.reason ?? 'initial state'}`);
   }
   private actor(from:State,to:State):SensorActor {const c=this.profile.collider;if(c.kind!=='rect')throw Error('Test sensors require rectangular collider');return {id:'test.player.1',category:'player',from,to,width:c.width*256,height:c.height*256,abilities:this.profile.abilityTags.filter(tag=>{if(tag==='climb.ladder'||tag==='climb.rope')return this.profile.abilities.some(a=>a.kind==='climb'&&(tag==='climb.ladder'?a.ladder:a.rope));const kind=tag.startsWith('locomotion.')?tag.slice(11):tag;return !['jump','climb','dash','wall','ledge','swim','fly','grapple','teleport','launch','modifier','registered'].includes(kind)||this.profile.abilities.some(a=>a.kind===kind);})};}
+  testConditions(conditions:readonly Condition[]):'passed'|'blocked'|'unsupported' {return this.gameplay?.conditions(conditions,this.actor(this.view.state,this.view.state))??(conditions.length?'unsupported':'passed');}
   private resetGameplay(initial:State):void {this.gameplay=this.gameplayFactory?.(this.source)??null;this.gameplay?.sense(initial.tick,[this.actor(initial,initial)],true);}
   private empty(state: State): TestView { return owned({ paused: true, state, frame: { status: 'ok', state, contacts: [] }, frames: [], input: [], gameplay:this.gameplay?.getSnapshot()??null }); }
   injectEvent(event:ContractRef,encounterId:string):void {if(!this.gameplay)throw Error('No gameplay snapshot');if(this.eventSchedule.length>=1000)throw Error('Test injection schedule budget');this.pause();this.gameplay.inject(event,encounterId);this.eventSchedule.push(owned({afterTicks:this.view.frames.length,encounterId,event}));this.set({...this.view,gameplay:this.gameplay.getSnapshot()});}

@@ -294,5 +294,18 @@
       "conclusion": "success",
       "url": "https://github.com/Wizard-Gang/MapLab/actions/runs/39857013166"
     }
+  },
+  {
+    "id": "ML-024",
+    "commit": "10f5a75937fc324cc7eb5375c43ee1c250970967",
+    "pr": 24,
+    "testedHeads": [
+      "2354753312e642a555275020f7696f2ad639448a"
+    ],
+    "mainCi": {
+      "head": "10f5a75937fc324cc7eb5375c43ee1c250970967",
+      "conclusion": "success",
+      "url": "https://github.com/Wizard-Gang/MapLab/actions/runs/39895213998"
+    }
   }
 ]

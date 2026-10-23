@@ -1,0 +1,15 @@
+{
+  "format": "maplab.prefab", "version": 1, "id": "prefab.tree", "name": "Placeholder tree",
+  "pivot": [0, 0],
+  "dependencies": [],
+  "layerSlots": ["scenery"],
+  "content": {
+    "assets": [], "presentations": [], "flags": [],
+    "visuals": [
+      {"id": "trunk", "name": "Tree trunk", "layerId": "scenery", "parentId": null, "order": 0, "transform": {"position": [0, 0], "rotation": 0, "scale": [1, 1], "mirrorX": false, "mirrorY": false}, "source": {"kind": "shape", "shape": {"kind": "rect", "rect": [-8, 0, 16, 64]}, "fill": "#3b2c1e"}, "bodyId": null},
+      {"id": "canopy", "name": "Tree canopy", "layerId": "scenery", "parentId": null, "order": 1, "transform": {"position": [0, 0], "rotation": 0, "scale": [1, 1], "mirrorX": false, "mirrorY": false}, "source": {"kind": "shape", "shape": {"kind": "circle", "center": [0, -8], "radius": 40}, "fill": "#2f6b3f"}, "bodyId": null}
+    ],
+    "materials": [], "bodies": [], "footholds": [], "traversals": [], "regions": [], "entities": [],
+    "waypoints": [], "routes": [], "triggers": [], "encounters": []
+  }
+}

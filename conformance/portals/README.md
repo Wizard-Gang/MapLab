@@ -1,0 +1,11 @@
+# Owned portal conformance (ML-025)
+
+CC0-1.0 original primitive Forest/Clearing inputs copied from the owned placeholder library. Only this package moves the boss/portal regions to the initial actor and uses a two-tick portal delay. Existing conformance and placeholders remain golden.
+
+The injected, declared encounter completion sets the Forest flag and opens the gate. An overlapping interact portal latches its two-tick delay; the actor enters Clearing at start.arrival via full-body stance. The selected player profile is retained; velocity, contacts, climb and resources reset. Absolute controller ticks and the bounded input/ordered command schedule span maps.
+
+Every entry creates a fresh map instance: flags, enabled bodies/spawns, encounters, trigger one-shots and overlaps reset. Touch portals intersecting an arrival body are suppressed until that body fully exits their strict interior. High-speed crossing uses the same resolved-foot sweep as gameplay sensors; simultaneous candidates order by TOI then stable portal ID. Delayed travel latches the destination, validates it before scheduling and again before commit, and continues physics ticks while waiting. Failed arrival leaves the source map active and pauses with a diagnosis. No leftover within-tick movement is carried across maps.
+
+No network, streaming, combat, AI, waves, engine save or cross-engine parity. Portal Test is bounded to 64 maps, 256 captured documents, 64 portals/map, 100000 sensor-work units/map, 64 transitions, 1000 commands and 3600 physics ticks. Unsupported engine entity-state conditions do not activate portals.
+
+The standalone consumer loads a real exported bundle through the independent reader (complete byte inventory, schema/closure/reference checks), then independently interprets this owned corpus: it constructs floor collision and rectangular trigger sensors, applies encounter/flag/body actions, resolves arrivals with full-footprint support, checks delay and the final semantic trace. It imports no MapLab runtime/editor and uses no network. The oracle is qualified to the owned rectangular trigger/flat-arrival corpus, not a general engine. A rehashed forged arrival trace and a rehashed dangling target are rejected.

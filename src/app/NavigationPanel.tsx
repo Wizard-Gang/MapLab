@@ -24,6 +24,7 @@ function Proof({proof,doc}:{readonly proof:RouteProof;readonly doc:OpenDoc}):Rea
   <details><summary>Reference input and terminal state</summary><pre aria-label="Route recording">{JSON.stringify({identity:proof.identity,querySha256:proof.querySha256,settings:proof.settings,goals:proof.goals,targetRegionId:proof.targetRegionId,initial:proof.initial,input:proof.input,terminal:proof.terminal,durationTicks:proof.durationTicks,assumptions:proof.assumptions},null,2)}</pre></details>
  </div>;
 }
+const noTestSubscribe=()=>()=>{},noTestSnapshot=()=>null;
 function Controls({runtime,store,doc}:{readonly runtime:ReturnType<typeof createRoutingWorker>;readonly store:LibraryStore;readonly doc:OpenDoc}):ReactNode{
  const view=useSyncExternalStore(runtime.session.subscribe,runtime.session.getSnapshot,runtime.session.getSnapshot),map=useMemo(()=>denormalize(doc.state.model) as unknown as MapDocument,[doc.state.model]);
  const profiles=store.testProfiles(),sources=map.entities.filter(e=>e.enabled&&['playerStart','enemySpawn','npc'].includes(e.kind));
@@ -36,7 +37,7 @@ function Controls({runtime,store,doc}:{readonly runtime:ReturnType<typeof create
  const current=submitted.current?.map===map&&submitted.current.profile===profile;
  const reset=()=>{revision.current++;submitted.current=null;runtime.session.invalidate();setNotice('');};
  useEffect(()=>{revision.current++;submitted.current=null;runtime.session.invalidate();setActual(null);},[map,profile,runtime]);
- const run=store.test(doc.id),canUseTest=!!run&&JSON.stringify(run.profile)===JSON.stringify(profile);
+ const run=store.test(doc.id),testView=useSyncExternalStore(run?.subscribe??noTestSubscribe,run?.getSnapshot??noTestSnapshot,run?.getSnapshot??noTestSnapshot),canUseTest=!!run&&testView?.mapId===doc.id&&JSON.stringify(run.profile)===JSON.stringify(profile);
  const solve=(patrol=false):void=>{
   if(!profile||!source)return;
   try{
@@ -57,7 +58,7 @@ function Controls({runtime,store,doc}:{readonly runtime:ReturnType<typeof create
   <fieldset disabled={lockReason(doc)!==null}><legend>Reference navigation query</legend>
    <label>Movement profile<select aria-label="Navigation profile" value={profile?.id??''} onChange={e=>{reset();setActual(null);setProfile(e.target.value);}}>{profiles.map(p=><option key={p.id}>{p.id}</option>)}</select></label>
    <label>Source actor<select aria-label="Navigation source" value={source?.id??''} onChange={e=>{reset();setActual(null);setSource(e.target.value);const next=sources.find(s=>s.id===e.target.value);if(next&&'movementId' in next)setProfile(next.movementId);}}>{sources.map(s=><option key={s.id}>{s.id}</option>)}</select></label>
-   <button type="button" disabled={!canUseTest} onClick={()=>{reset();run!.pause();setActual(structuredClone(run!.getSnapshot().state) as ClimbState);}}>Use current Test state</button>
+   <button type="button" disabled={!canUseTest} onClick={()=>{reset();if(run!.getSnapshot().mapId!==doc.id)return;run!.pause();setActual(structuredClone(run!.getSnapshot().state) as ClimbState);}}>Use current Test state</button>
    <p>{actual?`Actual Test source at tick ${actual.tick}, velocity (${actual.vx},${actual.vy})`:'Source is the named actor anchor with zero velocity and explicit initial resources.'}</p>
    <label>Target<select aria-label="Navigation target" value={target} onChange={e=>{reset();setTarget(e.target.value);}}><option value="manual">Supported foot position</option>{map.waypoints.map(p=><option key={p.id}>{p.id}</option>)}{map.regions.map(r=><option key={r.id} value={'region:'+r.id}>Region {r.name||r.id}</option>)}</select></label>
    {target==='manual'&&<><label>Target support<select aria-label="Navigation target support" value={support?.id??''} onChange={e=>{reset();setSupport(e.target.value);const f=map.footholds.find(f=>f.id===e.target.value);if(f)setX((f.a[0]+f.b[0])/2);}}>{map.footholds.filter(f=>f.enabled).map(f=><option key={f.id}>{f.id}</option>)}</select></label>
