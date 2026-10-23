@@ -1,7 +1,7 @@
 {
-  "id": "ML-023",
+  "id": "ML-024",
   "type": "FEATURE",
-  "title": "[ML-023] [FEATURE] Verify augmented navigation routes and patrols",
-  "branch": "ml-023-routes",
-  "record": "docs/changes/ML-023.md"
+  "title": "[ML-024] [FEATURE] Author gameplay and verify declarative Test events",
+  "branch": "ml-024-gameplay",
+  "record": "docs/changes/ML-024.md"
 }
