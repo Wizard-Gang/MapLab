@@ -10,8 +10,15 @@ export const defs=mapSchema.$defs as unknown as Readonly<Record<string,FormSchem
 const names:Record<GameplayCollection,string>={entities:'entity',regions:'region',waypoints:'waypoint',routes:'route',triggers:'trigger',encounters:'encounter',flags:'flag'};
 export const formSchema=(collection:GameplayCollection)=>defs[names[collection]]!;
 export function resolve(s:FormSchema):FormSchema{return s.$ref?resolve(defs[s.$ref.slice(8)]!):s;}
+function matches(raw:FormSchema,v:JsonValue):boolean{
+ const s=resolve(raw);if(s.oneOf)return s.oneOf.some(branch=>matches(branch,v));
+ if(s.const!==undefined)return s.const===v;if(s.enum)return s.enum.includes(v);
+ if(s.type==='null')return v===null;if(v===null)return false;
+ if(s.type==='object'||s.properties){if(typeof v!=='object'||Array.isArray(v))return false;const kind=s.properties?.kind;return !kind||matches(kind,(v as JsonObject).kind??null);}
+ if(s.type==='array')return Array.isArray(v);if(s.type==='integer')return typeof v==='number'&&Number.isInteger(v);return s.type===typeof v;
+}
 export function choice(s:FormSchema,v:JsonValue):number{
- return Math.max(0,(s.oneOf??[]).findIndex(raw=>{const n=resolve(raw);if(n.type==='null')return v===null;if(v===null)return false;if(n.properties&&typeof v==='object'&&!Array.isArray(v)){const kind=n.properties.kind;if(kind){const k=(v as JsonObject).kind;return kind.const!==undefined?kind.const===k:(k!==undefined&&kind.enum?.includes(k))??false;}return true;}return n.type===typeof v;}));
+ return Math.max(0,(resolve(s).oneOf??[]).findIndex(branch=>matches(branch,v)));
 }
 export function seed(raw:FormSchema,depth=0):JsonValue{
  if(depth>12)throw Error('Inspector nesting budget');const s=resolve(raw);

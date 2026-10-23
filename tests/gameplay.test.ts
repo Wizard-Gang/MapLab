@@ -5,7 +5,7 @@ import {createElement} from 'react';import {renderToStaticMarkup} from 'react-do
 import {GameplaySession,type SensorActor} from '../src/gameplay/runtime';import {sensorSpans} from '../src/gameplay/sensors';
 import {TestSession,NEUTRAL} from '../src/test-runtime/session';import {canonical,validateSourceGraph,type JsonValue,type MapDocument,type MovementDocument,type CatalogDocument} from '../src/contracts';
 import {normalize,denormalize,type JsonObject} from '../src/domain/model';import {candidate} from '../src/editor/editing';
-import {GAMEPLAY_COLLECTIONS,gameplayEdit,formSchema} from '../src/gameplay/inspector';import {Node} from '../src/app/GameplayPanel';
+import {GAMEPLAY_COLLECTIONS,gameplayEdit,formSchema,choice,defs} from '../src/gameplay/inspector';import {Node} from '../src/app/GameplayPanel';
 const root=join(process.cwd(),'conformance/gameplay-events'),read=<T>(p:string):T=>JSON.parse(readFileSync(join(root,p),'utf8'));
 const walk=(p:string):string[]=>readdirSync(p,{withFileTypes:true}).flatMap(f=>f.isDirectory()?walk(join(p,f.name)):[join(p,f.name)]);
 const sources=walk(join(root,'sources')).map(p=>JSON.parse(readFileSync(p,'utf8')) as JsonValue),map=read<MapDocument>('sources/maps/forest.map.json'),profile=read<MovementDocument>('sources/movement/player.movement.json');
@@ -25,6 +25,15 @@ test('all F entity kinds and gameplay collections have closed typed inspectors a
   expect(markup).not.toContain('<textarea');expect(markup).toContain('Gameplay');if('name' in r)expect(before).not.toBe(canonical(denormalize(model)));
  }
  expect(()=>gameplayEdit(model,'entities',{...map.entities[0],script:'run()'} as unknown as JsonObject)).toThrow('Unknown member');
+});
+test('nullable nested anchor alternatives retain non-null values and discriminate each anchor kind',()=>{
+ const guard=defs.ai!.properties!.guard!,anchor=defs.anchor!;
+ expect(choice(guard,null)).toBe(0);
+ for(const [i,value] of [{kind:'world',point:[24,48]},{kind:'surface',footholdId:'fh.boss',u:0.5,normalOffset:0},{kind:'body',bodyId:'body.gate',point:[0,0]},{kind:'entity',entityId:'spawn.boss',point:[0,0]}].entries()){
+  expect(choice(guard,value as JsonValue)).toBe(1);expect(choice(anchor,value as JsonValue)).toBe(i);
+ }
+ expect(choice({oneOf:[{type:'null'},{type:'integer'}]},3)).toBe(1);
+ expect(choice({oneOf:[{type:'null'},{type:'array'}]},[])).toBe(1);
 });
 test('choosing or creating a default player start atomically preserves exactly one default and stable IDs',()=>{
  const n=normalize(map as unknown as JsonValue);if(!n.ok)throw Error('fixture');const start=map.entities.find(e=>e.kind==='playerStart')!,second={...start,id:'start.alternate',default:false} as unknown as JsonObject;
