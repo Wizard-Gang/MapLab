@@ -3,7 +3,7 @@ import {validateSourceGraph,type MapDocument,type MovementDocument,type JsonValu
 import type {Entity} from '../contracts/gameplay-types';
 import {GameplaySession} from '../gameplay/runtime';
 import {sensorSpans} from '../gameplay/sensors';
-import {createWorld,replayBytes,type State,type Input,type Step,type RunInput} from '../physics-reference';
+import {createWorld,step,replayBytes,type State,type Input,type Step,type RunInput} from '../physics-reference';
 import {TestSession,spawn,parseRecording,NEUTRAL,MAX_TICKS,type TestView,type Recording,type Injection} from './session';
 type Portal=Extract<Entity,{kind:'portal'}>;
 function own<T>(v:T):T {const copy=structuredClone(v);const freeze=(n:unknown):void=>{if(n&&typeof n==='object'){Object.values(n).forEach(freeze);Object.freeze(n);}};freeze(copy);return copy;}
@@ -64,7 +64,8 @@ export class PortalTestSession {
   const map=this.maps.get(p.destination.mapId);if(!map)throw Error('Portal destination outside captured map closure');
   const world=createWorld(map as never,this.profile),state={...spawn(world,p.destination.entityId),tick:this.run.getSnapshot().state.tick};
   // Constructor probes collision/support before any world is committed.
-  const run=this.instance(map,state);if(run.getSnapshot().gameplay?.status!=='ready')throw Error('Portal arrival gameplay '+run.getSnapshot().gameplay?.status);return run;
+  const run=this.instance(map,state);if(run.getSnapshot().gameplay?.status!=='ready')throw Error('Portal arrival gameplay '+run.getSnapshot().gameplay?.status);
+  const probe=step(createWorld(run.runtimeSource(),this.profile),state,NEUTRAL);if(probe.status!=='ok')throw Error('Unsafe portal arrival after initial events: '+probe.status+' '+probe.reason);return run;
  }
  private commit(p:Portal):void {
   if(this.travels.length>=64)throw Error('Portal transition budget');
