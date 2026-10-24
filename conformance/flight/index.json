@@ -1,0 +1,213 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "daa7c89026136e0865ab0193bd812cba13d64becbc6f377d001e1acb80ccf730"
+    },
+    {
+      "path": "braking-blocked.expected.json",
+      "sha256": "86957a858ffa646d148d193a478c7ede4b0d735b51850fca2c303be121d69ba5"
+    },
+    {
+      "path": "cases/braking-blocked.map.json",
+      "sha256": "ef9366d053c89f68c8ecfff26fd263eb9f684d073f05e7ada328ced551f0dbff"
+    },
+    {
+      "path": "cases/braking-blocked.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/forest-patrol.map.json",
+      "sha256": "8d134bcdea76a200f52b7b1f60e3f2e3b985ab43ce9e6f433b95da047aba2677"
+    },
+    {
+      "path": "cases/forest-patrol.movement.json",
+      "sha256": "531fcaa08d90920929d59c2e750796200e8f16ee97a961acd3861a1e84e8370d"
+    },
+    {
+      "path": "cases/loop-patrol.map.json",
+      "sha256": "b21e9664cae0ffa6b30083d60322d971a08879b2916ce3902603b0e6eafb006a"
+    },
+    {
+      "path": "cases/loop-patrol.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/masked-obstacle.map.json",
+      "sha256": "87246d0131c2bf5be296c94ae1d7cba84227b5dce298534abf78e5ec79476a63"
+    },
+    {
+      "path": "cases/masked-obstacle.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/narrow-blocked.map.json",
+      "sha256": "aa774e9d46861342ec3efc03d5bb54e8f16b7ec409804e206e2325bd6e36e249"
+    },
+    {
+      "path": "cases/narrow-blocked.movement.json",
+      "sha256": "62514e18cf7a52faed4d4308255429c54d948a47d2906481e59224f7a0b2f769"
+    },
+    {
+      "path": "cases/narrow-fit.map.json",
+      "sha256": "aa774e9d46861342ec3efc03d5bb54e8f16b7ec409804e206e2325bd6e36e249"
+    },
+    {
+      "path": "cases/narrow-fit.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/obstacle-detour.map.json",
+      "sha256": "0e92c57e3e225b5024ca10821faf23f0c8a59afde90b657d08d5fd0b6696a25d"
+    },
+    {
+      "path": "cases/obstacle-detour.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/outside-body.map.json",
+      "sha256": "e717992fafa3acbca607e9fcde81dcac79a3522ca6ea577d482ed994ca513de7"
+    },
+    {
+      "path": "cases/outside-body.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/thin-wall.map.json",
+      "sha256": "a419ae15897cece2a844005333ecb5feabe1c0a1e4dc9c61573abb8a8189def3"
+    },
+    {
+      "path": "cases/thin-wall.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/union-gap.map.json",
+      "sha256": "ceb8812277d17575fcda02dae1cb8bfe30f913c46d0c06dd974388c99c0a5a2d"
+    },
+    {
+      "path": "cases/union-gap.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/union-seam.map.json",
+      "sha256": "3cc7c749631e369348b043626c2078639767e1ecc17401a5445be0a84b8f7842"
+    },
+    {
+      "path": "cases/union-seam.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases/unmatched-world-bounds.map.json",
+      "sha256": "aac0f1f6ed8f25abc3ac36635535f5f989118944ac5e6d4e39407aa77010c3ae"
+    },
+    {
+      "path": "cases/unmatched-world-bounds.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "353352c4faff4175180f40b9cfe772cbffbcdc6c568257371569b6901a713f8b"
+    },
+    {
+      "path": "controller-identity.json",
+      "sha256": "c09bc9abb3fa6e64e6aa5ba70cf627440a65120e74d7b96a2ef7d5c570ef8c73"
+    },
+    {
+      "path": "forest-patrol.expected.json",
+      "sha256": "74eae34cd84abc12b99f8be6a6f6d77650d38e5562a36c48eeb407175df6ea33"
+    },
+    {
+      "path": "loop-patrol.expected.json",
+      "sha256": "13d2a7c1fb48c5930b7053546dbb857e7cc5f1ed1a1303353c8ddf23a56e20a3"
+    },
+    {
+      "path": "masked-obstacle.expected.json",
+      "sha256": "cd58e8824ce6f9668432b57611808e3dfc4900b8c50de72a85a287e1931d5c1b"
+    },
+    {
+      "path": "motor.map.json",
+      "sha256": "866c0ea09c57464958e4efd52e7f71dac532ad628c24ac77b55f3a35eaa4f6b4"
+    },
+    {
+      "path": "motor.movement.json",
+      "sha256": "e73ed413b7d690d24935a8f775ab12eff0a689d4a93d2d85dd070d4a7254244f"
+    },
+    {
+      "path": "narrow-blocked.expected.json",
+      "sha256": "607345ead87171e145092e878d447093138ab224077f50fa578c80227a4206a0"
+    },
+    {
+      "path": "narrow-fit.expected.json",
+      "sha256": "b466b053998316e181e2701542bd9ab869ed9e5fcd1070ad0740e59ef5075487"
+    },
+    {
+      "path": "obstacle-detour.expected.json",
+      "sha256": "ac4752ac6527653132cf7ad1e9179f9c7dc107d49f587ebc6a39712836de2214"
+    },
+    {
+      "path": "outside-body.expected.json",
+      "sha256": "4c1ab23e2fcf618cef38f0aedf2264b2a345d846a3c56da9aa07f43ffa3d098b"
+    },
+    {
+      "path": "sources/catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "path": "sources/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a"
+    },
+    {
+      "path": "sources/maps/forest.map.json",
+      "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b"
+    },
+    {
+      "path": "sources/movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "path": "sources/movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "path": "sources/movement/other-flyer.movement.json",
+      "sha256": "e0fecc1a4114c643db28dcc4d035512b6785afe0b6ae884a34840e1eabf62f7f"
+    },
+    {
+      "path": "sources/movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "path": "sources/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "path": "sources/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    },
+    {
+      "path": "thin-wall.expected.json",
+      "sha256": "7187269407c9ec2d8fb62e43c3a0721a4e2d45a158eea0e31174555e740797b6"
+    },
+    {
+      "path": "turn.expected.json",
+      "sha256": "c7ca62fadf1e94a62c392f1794a317c7843b91a48e6c936fbf7cfa7fde46806c"
+    },
+    {
+      "path": "turn.input.json",
+      "sha256": "71a8d80be100376da83e9fc90b685bbbed5b3c8a2fecf86c3dc324aa28f94988"
+    },
+    {
+      "path": "union-gap.expected.json",
+      "sha256": "0e321dbba6ca7ac48fec971654a35b2e42be23474cb894aec600567a9e4b0601"
+    },
+    {
+      "path": "union-seam.expected.json",
+      "sha256": "3ecd920cfcedb8826c006a76f089afef1ab37fd5181b3182502f0caa73a61bf4"
+    },
+    {
+      "path": "unmatched-world-bounds.expected.json",
+      "sha256": "7cd61f80cd65d035c02a9b49d065f330c78218484c5702ea14f5d98a712bb174"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import {FlightPanel} from './FlightPanel';
 import {useEffect,useMemo,useRef,useState,useSyncExternalStore,type ReactNode} from 'react';
 import type {LibraryStore,OpenDoc} from './store';
 import {lockReason} from './store';
@@ -55,7 +56,7 @@ function Controls({runtime,store,doc}:{readonly runtime:ReturnType<typeof create
   }catch(e){setNotice(String(e));}
  };
  return <div>
-  <fieldset disabled={lockReason(doc)!==null}><legend>Reference navigation query</legend>
+  <fieldset disabled={lockReason(doc)!==null}><legend>Ground/climb reference navigation query</legend>
    <label>Movement profile<select aria-label="Navigation profile" value={profile?.id??''} onChange={e=>{reset();setActual(null);setProfile(e.target.value);}}>{profiles.map(p=><option key={p.id}>{p.id}</option>)}</select></label>
    <label>Source actor<select aria-label="Navigation source" value={source?.id??''} onChange={e=>{reset();setActual(null);setSource(e.target.value);const next=sources.find(s=>s.id===e.target.value);if(next&&'movementId' in next)setProfile(next.movementId);}}>{sources.map(s=><option key={s.id}>{s.id}</option>)}</select></label>
    <button type="button" disabled={!canUseTest} onClick={()=>{reset();if(run!.getSnapshot().mapId!==doc.id)return;run!.pause();setActual(structuredClone(run!.getSnapshot().state) as ClimbState);}}>Use current Test state</button>
@@ -84,6 +85,6 @@ export function NavigationPanel({store,doc}:{readonly store:LibraryStore;readonl
  const selection=store.selection(doc.id),state=useSyncExternalStore(selection.subscribe,selection.getSnapshot,selection.getSnapshot),active=state.mode==='Navigation';
  return <section className="selection-panel" aria-label="Navigation"><h3>Navigation</h3>
   <button type="button" onClick={()=>selection.mode(active?'All':'Navigation')}>{active?'Exit Navigation':'Navigation mode'}</button>
-  {active&&<Active key={doc.id} store={store} doc={doc}/>}
+  {active&&<><Active key={doc.id} store={store} doc={doc}/><FlightPanel key={'flight:'+doc.id} store={store} doc={doc}/></>}
  </section>;
 }
