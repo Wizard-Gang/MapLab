@@ -1,7 +1,7 @@
 {
-  "id": "ML-026",
+  "id": "ML-027",
   "type": "FEATURE",
-  "title": "[ML-026] [FEATURE] Author camera zones and preview camera and audio intent",
-  "branch": "ml-026-camera",
-  "record": "docs/changes/ML-026.md"
+  "title": "[ML-027] [FEATURE] Plan and replay constrained free-space flight patrols",
+  "branch": "ml-027-flight",
+  "record": "docs/changes/ML-027.md"
 }

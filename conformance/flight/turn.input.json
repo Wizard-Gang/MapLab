@@ -1,0 +1,23 @@
+{
+  "initial": {
+    "x": 10240,
+    "y": 10240,
+    "vx": 512,
+    "vy": 0,
+    "tick": 0,
+    "mode": "fly"
+  },
+  "input": [
+    {
+      "fromTick": 0,
+      "targetVx": 0,
+      "targetVy": 512
+    },
+    {
+      "fromTick": 24,
+      "targetVx": 0,
+      "targetVy": 0
+    }
+  ],
+  "ticks": 48
+}

@@ -1,0 +1,68 @@
+{
+  "format": "maplab.movement",
+  "version": 1,
+  "id": "movement.flyer",
+  "name": "Hovering enemy",
+  "controller": {
+    "key": "maplab.reference-controller",
+    "version": 1
+  },
+  "units": {
+    "subunitsPerWU": 256,
+    "ticksPerSecond": 60
+  },
+  "collider": {
+    "kind": "rect",
+    "width": 8,
+    "height": 16
+  },
+  "support": "fullFootprint",
+  "grabHeight": 0,
+  "category": "actor",
+  "mask": [
+    "world"
+  ],
+  "ground": {
+    "walkSpeed": 0,
+    "runSpeed": 0,
+    "acceleration": 0,
+    "braking": 32,
+    "maxSlope": {
+      "rise": 0,
+      "run": 1
+    },
+    "uphill": {
+      "num": 1,
+      "den": 1
+    },
+    "downhill": {
+      "num": 1,
+      "den": 1
+    },
+    "snapDistance": 0
+  },
+  "air": {
+    "gravity": 0,
+    "maxFall": 0,
+    "acceleration": 32,
+    "maxSpeed": 512
+  },
+  "drop": {
+    "canDrop": false,
+    "timeoutTicks": 0
+  },
+  "abilities": [
+    {
+      "kind": "fly",
+      "version": 1,
+      "speed": 512,
+      "acceleration": 64,
+      "turnAcceleration": 16,
+      "hover": true
+    }
+  ],
+  "abilityTags": [
+    "locomotion.fly"
+  ],
+  "forbiddenMaterialTags": []
+}

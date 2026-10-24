@@ -1,0 +1,2 @@
+import {FlightSession,type FlightReply} from './protocol';
+export function createFlightWorker(){const worker=new Worker(new URL('./worker.ts',import.meta.url),{type:'module'}),session=new FlightSession(request=>worker.postMessage(request));worker.onmessage=(e:MessageEvent<FlightReply>)=>{session.accept(e.data);};worker.onerror=()=>session.invalidate();return {session,dispose:()=>{session.dispose();worker.terminate();}};}

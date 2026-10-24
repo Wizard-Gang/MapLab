@@ -1,0 +1,232 @@
+[
+  {
+    "id": "forest-patrol",
+    "map": "cases/forest-patrol.map.json",
+    "profile": "cases/forest-patrol.movement.json",
+    "query": {
+      "kind": "patrol",
+      "entityId": "spawn.flyer",
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "obstacle-detour",
+    "map": "cases/obstacle-detour.map.json",
+    "profile": "cases/obstacle-detour.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 5120,
+        "y": 16384,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        35840,
+        16384
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "narrow-fit",
+    "map": "cases/narrow-fit.map.json",
+    "profile": "cases/narrow-fit.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "narrow-blocked",
+    "map": "cases/narrow-blocked.map.json",
+    "profile": "cases/narrow-blocked.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "thin-wall",
+    "map": "cases/thin-wall.map.json",
+    "profile": "cases/thin-wall.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "union-seam",
+    "map": "cases/union-seam.map.json",
+    "profile": "cases/union-seam.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "union-gap",
+    "map": "cases/union-gap.map.json",
+    "profile": "cases/union-gap.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "outside-body",
+    "map": "cases/outside-body.map.json",
+    "profile": "cases/outside-body.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 512,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "unmatched-world-bounds",
+    "map": "cases/unmatched-world-bounds.map.json",
+    "profile": "cases/unmatched-world-bounds.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "masked-obstacle",
+    "map": "cases/masked-obstacle.map.json",
+    "profile": "cases/masked-obstacle.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 3072,
+        "y": 8192,
+        "vx": 0,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        21504,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "braking-blocked",
+    "map": "cases/braking-blocked.map.json",
+    "profile": "cases/braking-blocked.movement.json",
+    "query": {
+      "kind": "route",
+      "initial": {
+        "x": 7168,
+        "y": 8192,
+        "vx": 512,
+        "vy": 0,
+        "tick": 0,
+        "mode": "fly"
+      },
+      "goal": [
+        5120,
+        8192
+      ],
+      "algorithm": "astar"
+    }
+  },
+  {
+    "id": "loop-patrol",
+    "map": "cases/loop-patrol.map.json",
+    "profile": "cases/loop-patrol.movement.json",
+    "query": {
+      "kind": "patrol",
+      "entityId": "spawn.flyer",
+      "algorithm": "astar"
+    }
+  }
+]

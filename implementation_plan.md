@@ -34,30 +34,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-023** — squash `a144833`, PR #23; [record](docs/changes/ML-023.md).
 - **ML-024** — squash `10f5a75`, PR #24; [record](docs/changes/ML-024.md).
 - **ML-025** — squash `8cae118`, PR #25; [record](docs/changes/ML-025.md).
+- **ML-026** — squash `db24c46`, PR #26; [record](docs/changes/ML-026.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-026 / P0
-
-- **Source scope:** Camera/environment zone authoring and reference camera/audio intent preview.
-- **Non-goals:** No engine camera parity or advanced audio mixer.
-- **Acceptance:** Tall jump/drop/ladder/stacked-floor/small-bounds fixtures; locked center/zone precedence deterministic; no physics feedback.
-- **Depends on:** ML-025 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C4](docs/specifications/2026-10-16-maplab.md#c4-camera-and-environment-behavior), [F2](docs/specifications/2026-10-16-maplab.md#f2-normative-typescript-contract-sketch), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Author camera default/zones and environment audio/visual intent with deterministic region priority.
-  2. Preview viewport footprint, grounded hysteresis, locked-center confinement and transitions as read-only Test overlays.
-  3. Create owned fixture(s): Tall jump, stacked floors, long drop, ladder, small bounds and boss zone.
-  4. Add executable checks: Camera numerical tests; preview never feeds physics.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-027 / P0
 
 - **Source scope:** Basic flight free-space planner/controller and mode-volume bindings for flying patrols.
@@ -72,6 +54,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Full-body fly witness and ground-graph separation tests.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-028 / P0 milestone
 
 - **Source scope:** Fundamental forest acceptance integration and independent consumer construction test.
