@@ -11,7 +11,7 @@
     },
     {
       "path": "ceiling.actions.json",
-      "sha256": "173b1d9e2ffd9106cbfaa55e83adeb9bbc786f706abc99684de5d7d9acedcc67"
+      "sha256": "bbb6e8cd2d2c101df5c70e02c4683efa31f3331bca7818a78b364909eee28212"
     },
     {
       "path": "ceiling.map.json",
@@ -19,7 +19,7 @@
     },
     {
       "path": "corner.actions.json",
-      "sha256": "33492b226495e2d403b88325861c7e7bc2c2f29313a9f82c0149778f03a3c303"
+      "sha256": "1693af38c1674fabda7269ca96a8d64c0935d66ecfd46683567daa465d751ee8"
     },
     {
       "path": "corner.map.json",
@@ -27,7 +27,7 @@
     },
     {
       "path": "drop.actions.json",
-      "sha256": "019e765bc6cf275f8b9b040e51978815237a03258f9e3c7582508520223bd3a5"
+      "sha256": "0bc11ac2bc832b006fa8e98de23ab8ff59ad33b1a4286fe1844d032b48e82ad9"
     },
     {
       "path": "drop.map.json",
@@ -35,7 +35,7 @@
     },
     {
       "path": "enemy.actions.json",
-      "sha256": "ee66280205f9bb0a33b542d91a0e7cc899e5ac0cca7ded2d0c91c22e9f1893a3"
+      "sha256": "f1185b9ef9d61aef59d80bc7a18c1ca3e266ecade494543b012c1d75fbd547d2"
     },
     {
       "path": "enemy.movement.json",
@@ -43,7 +43,7 @@
     },
     {
       "path": "fall.actions.json",
-      "sha256": "006b7dee1e6c69433f1b9e77534842978ea882a7581387cec0f2715be09f49a4"
+      "sha256": "f8ab00fe902934898733fc9cbab380ed93a6d7f155424f277e106b25b4dd8494"
     },
     {
       "path": "fall.map.json",
@@ -51,7 +51,7 @@
     },
     {
       "path": "forest.actions.json",
-      "sha256": "da93e3246fd77f8d448d39a447faaeea13027f3859179edc52864f73e553e1ef"
+      "sha256": "bcf2f4849e44a52f674ed9c3f6174a464329be9d1337a4a3f8ead0c5491e2566"
     },
     {
       "path": "forest.map.json",
@@ -59,7 +59,7 @@
     },
     {
       "path": "narrow.actions.json",
-      "sha256": "ba0de6fdc0e19144ddc74cc33eafc1eef12b5d03beaa6d7a565623e7e31f7ad8"
+      "sha256": "81fd55a1c402038a6f03dba6b4d588c0193fa2140fd05f340a83c12e2b90a197"
     },
     {
       "path": "narrow.map.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "short.actions.json",
-      "sha256": "4e00ed49a19fbc995187aeeb729bbaa3ccbaa3f5f71ca5c295f6c6e8cdc0f4a5"
+      "sha256": "5df413fa89d6e1bd7894569088d3a2dd2d2696295a21fc71bddbf71fbd3531bc"
     },
     {
       "path": "short.movement.json",

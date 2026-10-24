@@ -18,7 +18,7 @@ for(const c of read('cases.json')){
  const profile={...p,mask:[...p.mask].sort(),abilityTags:[...p.abilityTags].sort(),forbiddenMaterialTags:[...p.forbiddenMaterialTags].sort(),abilities:[...p.abilities].sort((a,b)=>a.kind<b.kind?-1:1)};
  const world=sha({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sort(map.bodies),footholds:sort(map.footholds),materials:sort(map.materials),traversals:sort(map.traversals),regions:sort(map.regions),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
  const surface=sha({solver:'surface-climb@3',latticeSu:1,fullBody:true,maxSamples:proof.settings.air.maxClearanceSamples,maxTicks:3600}),airSurface=sha({solver:'surface-climb@3',latticeSu:1,fullBody:true,maxSamples:2000000,maxTicks:3600});
- const airborne=sha({solver:'single-airborne@1',surfaceSolver:airSurface,...proof.settings.air});
+ const airborne=sha({solver:'single-airborne@2',surfaceSolver:airSurface,...proof.settings.air});
  const settings=sha({solver:'augmented-reference-routes@1',surfaceSolver:surface,airborneSolver:airborne,settings:proof.settings,routeIntent:{waypoints:sort(map.waypoints),routes:sort(map.routes),entities:sort(map.entities).map(({id,enabled,anchor,facing,...e})=>({id,enabled,anchor,facing,...('movementId' in e?{movementId:e.movementId}:{}),...('ai' in e?{ai:e.ai}:{})}))}});
  const identity={worldSha256:world,profileSha256:sha(profile),controllerSha256:contracts.controller.sha256,settingsSha256:settings};assert(canonical(proof.identity)===canonical({...identity,cacheKey:sha(identity)}),'final source/profile/controller/solver binding');
  if(c.kind!=='patrol')assert(canonical(proof.goals)===canonical([c.goal]),'declared goal identity');

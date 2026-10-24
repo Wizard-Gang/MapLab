@@ -1,7 +1,7 @@
 {
-  "id": "ML-027",
-  "type": "FEATURE",
-  "title": "[ML-027] [FEATURE] Plan and replay constrained free-space flight patrols",
-  "branch": "ml-027-flight",
-  "record": "docs/changes/ML-027.md"
+  "id": "ML-028",
+  "type": "TEST",
+  "title": "[ML-028] [TEST] Verify the exported forest acceptance scenario",
+  "branch": "ml-028-acceptance",
+  "record": "docs/changes/ML-028.md"
 }

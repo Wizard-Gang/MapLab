@@ -4,7 +4,8 @@ import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
 import { createWorld, resolveStance, overlaps, step, digest } from '../physics-reference';
 import { movementProfileDigest } from '../contracts/movement';
-import { CONTROLLER_SHA256 } from './identity';
+import { CONTROLLER_SHA256, INTENT_SHA256 } from './identity';
+import {groundIntentSupported} from './intent';
 export interface Settings { readonly maxSamples:number; readonly maxTicks:number }
 export const DEFAULT_SETTINGS:Settings={maxSamples:2_000_000,maxTicks:3600};
 export interface Interval {readonly key:string;readonly supportId:string;readonly materialId:string;readonly direction:'both'|'aToB'|'bToA';readonly minX:number;readonly maxX:number}
@@ -17,7 +18,7 @@ const order=(a:{id:string},b:{id:string})=>a.id<b.id?-1:a.id>b.id?1:0;
 export async function identity(map:MapDocument,p:MovementDocument,settings:Settings):Promise<Identity>{
  const sorted=<T extends {id:string}>(a:readonly T[])=>[...a].sort(order);
  const worldSha256=await digest({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sorted(map.bodies),footholds:sorted(map.footholds),materials:sorted(map.materials),traversals:sorted(map.traversals),regions:sorted(map.regions as unknown as {id:string}[]),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
- const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',latticeSu:1,fullBody:true,...settings});
+ const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',...(map.navigation.modeVolumes.length||map.navigation.overrides.length?{intentSha256:INTENT_SHA256}:{}),latticeSu:1,fullBody:true,...settings});
  const value={worldSha256,profileSha256,controllerSha256:CONTROLLER_SHA256,settingsSha256};return {...value,cacheKey:await digest(value)};
 }
 const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:0,dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true});
@@ -32,7 +33,7 @@ export async function buildSurfaceGraph(source:MapDocument,profile:MovementDocum
  const result=(status:Graph['status'],diagnostics:string[],intervals:Interval[]=[],nodes:Node[]=[],edges:Edge[]=[]):Graph=>({format:'maplab.surface-graph',version:1,status,canCertify:false,revision,identity:id,assumptions,diagnostics,intervals,nodes,edges});
  if(cancelled())return result('cancelled',['cancelled']);
  let w:World;try{w=createWorld(map as unknown as ContactMap,p);}catch(e){return result('unsupported',[String(e)]);}
- if(p.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:a.kind!=='climb')||map.navigation.overrides.length||map.navigation.links.length||map.navigation.modeVolumes.length)return result('unsupported',['unsupported capability or navigation intent; no inferred permissions']);
+ if(p.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:a.kind!=='climb')||!groundIntentSupported(map,p))return result('unsupported',['unsupported capability or navigation intent; no inferred permissions']);
  const intervals:Interval[]=[],nodes:Node[]=[],edges:Edge[]=[];
  let samples=0;
  const checkpoint=async()=>{if(++samples%1024===0)await yieldTask();if(cancelled())throw new Error('cancelled');if(samples>options.maxSamples)throw new Error('budget');};

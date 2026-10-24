@@ -1,3 +1,4 @@
+import {groundIntentSupported,groundMotionAllowed} from './intent';
 // Bounded single-action solver. These exact action states are not a route graph.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -27,7 +28,7 @@ export interface AirResult {
 }
 export async function airborneIdentity(map:MapDocument,p:MovementDocument,settings:AirSettings):Promise<Identity>{
  const base=await surfaceIdentity(map,p,DEFAULT_SETTINGS);
- const settingsSha256=await digest({solver:'single-airborne@1',surfaceSolver:base.settingsSha256,...settings});
+ const settingsSha256=await digest({solver:'single-airborne@2',surfaceSolver:base.settingsSha256,...settings});
  const value={...base,settingsSha256};return {...value,cacheKey:await digest({worldSha256:value.worldSha256,profileSha256:value.profileSha256,controllerSha256:value.controllerSha256,settingsSha256})};
 }
 const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
@@ -47,8 +48,8 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
  const assumptions=['Static initial transforms; no runtime blockers or conditions.','Single ground jump, edge fall or selected-group drop only; no multi-jump, moving-platform, route or completeness claim.','Exact launch velocity/resources are preconditions; landing states are not interchangeable with surface anchors.','No route means only no witness in the declared deterministic sampling budget; physical edits require a full rebuild.'];
  const result=(status:AirResult['status'],diagnostics:readonly string[],intervals:readonly Interval[]=[],edges:readonly Witness[]=[]):AirResult=>({format:'maplab.airborne-actions',version:1,revision,status,canCertify:false,complete:false,identity:id,settings:options,assumptions,diagnostics,samples,replayTicks,rejected,intervals,edges});
  if(cancelled())return result('cancelled',['cancelled']);
- // Do not silently ignore intent, including intent for other profiles. Match ML-021's boundary.
- if(p.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:a.kind!=='climb')||map.navigation.links.length||map.navigation.overrides.length||map.navigation.modeVolumes.length)return result('unsupported',['unsupported capability or navigation intent']);
+ // Keep applicable intent explicit; unrelated flyer volumes cannot disable ground patrols.
+ if(p.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:a.kind!=='climb')||!groundIntentSupported(map,p))return result('unsupported',['unsupported capability or navigation intent']);
  let w:World;try{w=createWorld(map as unknown as ContactMap,p);}catch(e){return result('unsupported',[String(e)]);}
  const surface=await buildSurfaceGraph(map,p,revision,{maxSamples:options.maxClearanceSamples,maxTicks:3600},cancelled,yieldTask);
  if(surface.status!=='candidate')return result(surface.status,surface.diagnostics);
@@ -94,12 +95,14 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
      if(f.status!=='ok'){reject(f.status);break;}
      minX=Math.min(minX,next.x-w.half);maxX=Math.max(maxX,next.x+w.half);minY=Math.min(minY,next.y-w.height);maxY=Math.max(maxY,next.y);
      if(!safe(next)){reject('body-clearance-or-bounds');break;}
+     if(!groundMotionAllowed(map,p,kind,s,next)){reject('authored-forbid-region');break;}
      if(f.contacts.some(c=>c.kind==='blocking'&&!(kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===initial.supportId&&next.y===initial.y))){reject('wall-or-ceiling');break;}
      if(next.mode==='climb'){reject('unsupported-mode-transition');break;}
      // A coast schedule stopped over a partial launch floor cannot finish an edge fall.
      if(kind==='fall'&&next.x===s.x&&next.y===s.y&&next.vx===0){reject('no-departure');break;}
      if(next.mode==='air')air=true;
      if(next.mode==='ground'){
+      if(kind==='fall'&&!air&&next.supportId!==initial.supportId){reject('connected-ground-transition');break;}
       const here=locate(next);
       if(!here||!allowed(here,next.vx)||!allowed(here,command.moveX)){reject('inaccessible-support');break;}
       if(air){

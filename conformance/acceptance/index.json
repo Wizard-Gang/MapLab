@@ -1,0 +1,73 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "77d14b59fba78d8f631bbaaa61733a7fa74b38564029c69f4ca04996d0a12f8d"
+    },
+    {
+      "path": "connected.map.json",
+      "sha256": "c9197eeaf3f59cda32d5b96f20820213ea918cb4032db67bfa96233e277fe4a4"
+    },
+    {
+      "path": "construction.expected.json",
+      "sha256": "da8dcd4ac99377e81e93a8b6f9dfb3e992198af4d7731fe520fb9849af1cebd7"
+    },
+    {
+      "path": "export.expected.json",
+      "sha256": "0f1a5e411ae5b0fc2dfaa34abe602d975c6f5d13f63d16c9fa26499b5ef45ee1"
+    },
+    {
+      "path": "journey.expected.json",
+      "sha256": "067914b52dd548b2b21e6795b31eb2f3e40569008072a5f6e30a69d42fe4e8bd"
+    },
+    {
+      "path": "journey.input.json",
+      "sha256": "169420f7dcb3333132cf7a461a16560e327d3399da05d2c7899c0a83a0e55ee5"
+    },
+    {
+      "path": "movement.expected.json",
+      "sha256": "2da58215d76e255ffbe24deb978339a96420680cf6eb9c752aa5e4e72671f999"
+    },
+    {
+      "path": "movement.input.json",
+      "sha256": "fba7dfd067b96f60d2ef93590dc3a0a98b8064678299a13bbb16a408ada819df"
+    },
+    {
+      "path": "patrols.expected.json",
+      "sha256": "fe71e7ccb4ce1045992e53d3da49144c9cb97228ae8573ae4aab4094b3613814"
+    },
+    {
+      "path": "sources/catalogs/core.catalog.json",
+      "sha256": "14ed5f759547252c2d15818bdd964b13f7e661af9ccb3181d32420b62b470ada"
+    },
+    {
+      "path": "sources/maps/clearing.map.json",
+      "sha256": "8bae05fa65ad90b14c634f3bdea9fb65e547ca0c1715fad15c76dc9717adc98a"
+    },
+    {
+      "path": "sources/maps/forest.map.json",
+      "sha256": "753ada288567e26f83a8c73c1aa31bf0a34ac041ed232a678838d6cde2a68d0b"
+    },
+    {
+      "path": "sources/movement/flyer.movement.json",
+      "sha256": "481b726490c9fc141f4a6fd48b736c49767b74bab869226e69502d085914df72"
+    },
+    {
+      "path": "sources/movement/ground.movement.json",
+      "sha256": "4622e22667059fc034863fb0228400f7c11f4e0e8377d7ae07bfd5fa7c6f9735"
+    },
+    {
+      "path": "sources/movement/player.movement.json",
+      "sha256": "982cd3eb44af871b0231ed8089a66abd910f6183f98d76a10d75b026c04f491a"
+    },
+    {
+      "path": "sources/prefabs/tree.prefab.json",
+      "sha256": "09d79e1dd388f1c7cb0864523cd90d9a1a01b6069601ece7ef88c8a0052503ed"
+    },
+    {
+      "path": "sources/tilesets/forest.tileset.json",
+      "sha256": "c4b3aad547aef4b9324bffc6add8f646951843706a734943b1909b4150e133ba"
+    }
+  ]
+}
