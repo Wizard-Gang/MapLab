@@ -1,7 +1,7 @@
 import {test,expect,vi} from 'vitest';
 import {readFileSync,readdirSync,mkdtempSync,cpSync,writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';import {tmpdir} from 'node:os';import {execFileSync} from 'node:child_process';import {createHash} from 'node:crypto';
-import {CameraPreview} from '../src/camera/preview';import {presentationEdit} from '../src/camera/authoring';
+import {CameraPreview} from '../src/camera/preview';import {presentationEdit,PresentationIds} from '../src/camera/authoring';
 import {PortalTestSession,type PortalRecording} from '../src/test-runtime/portals';import {TestSession,NEUTRAL} from '../src/test-runtime/session';
 import {canonical,validateSourceGraph,type JsonValue,type MapDocument,type MovementDocument} from '../src/contracts';
 import {normalize,denormalize} from '../src/domain/model';import {candidate} from '../src/editor/editing';import type {State} from '../src/physics-reference';
@@ -70,4 +70,19 @@ test('camera regions reuse strict circle/polygon full-body geometry and expose e
 });
 test('input ownership and sample budget cannot leave partial preview state; reset recovers',()=>{
  const c=structuredClone(cases.find(c=>c.id==='small-bounds')!),m=source(c),collider={...c.collider},s=c.observations[0]!.state,r=new CameraPreview(m,collider);collider.width=1000;(m as any).camera.defaults.bounds[0]=999;expect(r.source.camera.defaults.bounds[0]).toBe(100);expect(Object.isFrozen(r.source.camera.defaults)).toBe(true);r.reset(s);for(let tick=1;tick<=3600;tick++)r.step({...s,tick});const last=r.getSnapshot();expect(()=>r.step({...s,tick:3601})).toThrow('budget');expect(r.getSnapshot()).toBe(last);expect(r.reset({...s,tick:3601}).center).toEqual([140,230]);expect(r.step({...s,tick:3602}).tick).toBe(3602);
+});
+
+test('document-session zone ID reservations survive discarded drafts, deletion, undo branches and pruned history',()=>{
+ const n=normalize(map as unknown as JsonValue);if(!n.ok)throw Error('fixture');const ids=new PresentationIds();
+ for(const field of ['camera','environment'] as const){
+  const first=ids.reserve(n.model,field);expect(first).toBe('new.'+field+'.zone.1');
+  // Returning to the same pre-edit model (delete, undo or pruned history) cannot release an issued identity.
+  expect(ids.reserve(n.model,field)).toBe('new.'+field+'.zone.2');
+  expect(ids.reserve(n.model,field)).toBe('new.'+field+'.zone.3');
+  ids.observe(['new.'+field+'.zone.12']);expect(ids.reserve(n.model,field)).toBe('new.'+field+'.zone.13');
+ }
+ const occupied=normalize({...map,camera:{...map.camera,zones:[{...map.camera.zones[0],id:'new.environment.zone.20'}]}} as unknown as JsonValue);if(!occupied.ok)throw Error('fixture');
+ ids.observeModel(occupied.model);expect(ids.reserve(n.model,'environment')).toBe('new.environment.zone.21');
+ expect(ids.reserve(n.model,'camera',['new.camera.zone.40'])).toBe('new.camera.zone.41');
+ expect(canonical(denormalize(n.model))).toBe(canonical(map as unknown as JsonValue));
 });

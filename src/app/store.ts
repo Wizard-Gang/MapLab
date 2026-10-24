@@ -1,3 +1,4 @@
+import {PresentationIds,type PresentationField} from '../camera/authoring';
 import type {MapDocument} from '../contracts/document-types';
 import { PortalTestSession } from '../test-runtime/portals';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -79,6 +80,12 @@ export class LibraryStore {
   private view: AppView = initial;
   private sources = new Map<string, JsonValue>();
   private readonly tests = new Map<string, PortalTestSession>();
+  private readonly presentationIds = new Map<string, PresentationIds>();
+  private zoneIds(id:string):PresentationIds {let ids=this.presentationIds.get(id);if(!ids){ids=new PresentationIds();this.presentationIds.set(id,ids);}return ids;}
+  reservePresentationId(id:string,field:PresentationField,drafts:Iterable<string>=[]):string {
+    const doc=this.doc(id);if(!doc||lockReason(doc))throw Error('Presentation authoring requires an unlocked map');
+    return this.zoneIds(id).reserve(doc.state.model,field,drafts);
+  }
   test(id: string): PortalTestSession | undefined { return this.tests.get(id); }
   testProfiles(): readonly MovementDocument[] {
     return [...this.sources.values()].filter(v => validateMovement(v).ok) as unknown as MovementDocument[];
@@ -153,7 +160,7 @@ export class LibraryStore {
 
   private set(patch: Partial<AppView>): void { this.view = { ...this.view, ...patch }; for (const l of this.listeners) l(); }
   private doc(id: string): OpenDoc | undefined { return this.view.docs.find((d) => d.id === id); }
-  private patchDoc(id: string, patch: Partial<OpenDoc>): void { if (patch.state && patch.state.model !== this.doc(id)?.state.model) { for(const [key,run] of this.tests)if(run.captures(id)){run.pause();this.tests.delete(key);} } this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
+  private patchDoc(id: string, patch: Partial<OpenDoc>): void { if (patch.state && patch.state.model !== this.doc(id)?.state.model) { const ids=this.zoneIds(id),old=this.doc(id);if(old)ids.observeModel(old.state.model);ids.observeModel(patch.state.model);for(const [key,run] of this.tests)if(run.captures(id)){run.pause();this.tests.delete(key);} } this.set({ docs: this.view.docs.map((d) => (d.id === id ? { ...d, ...patch } : d)) }); }
   private get libraryId(): string | null { const l = this.view.library; return l ? libraryKey(l.label, l.projectId) : null; }
   active(): OpenDoc | undefined { return this.view.activeId ? this.doc(this.view.activeId) : undefined; }
 

@@ -19,3 +19,14 @@ test('all owned camera samples are identical in browser and Node numerical outpu
 test('read-only library locks camera and environment source edits',async({page})=>{
  await openEditor(page,placeholderUrl);await openMap(page,'map.forest');const p=page.getByRole('region',{name:'Camera and environment editor',exact:true});await expect(p.getByLabel('Gameplay camera.defaults.zoom',{exact:true})).toBeDisabled();await expect(p.getByRole('button',{name:'New camera zone',exact:true})).toBeDisabled();await expect(p.getByRole('button',{name:'Apply environment changes',exact:true})).toBeDisabled();
 });
+
+for(const family of ['camera','environment'] as const)test(family+' zone identities survive applied deletion, undo branching and panel remount',async({page})=>{
+ fixture();await openEditor(page);await openMap(page,'map.forest');const p=page.getByRole('region',{name:'Camera and environment editor',exact:true}),label='Gameplay '+family+'.zone.id',apply=p.getByRole('button',{name:'Apply '+family+' changes',exact:true});
+ const create=()=>p.getByRole('button',{name:'New '+family+' zone',exact:true}).click();
+ await create();const first=await p.getByLabel(label,{exact:true}).inputValue();await apply.click();
+ await p.getByRole('button',{name:'Delete '+family+' zone',exact:true}).click();await apply.click();await create();
+ const second=await p.getByLabel(label,{exact:true}).inputValue();expect(second).not.toBe(first);await apply.click();
+ await command(page,'Undo').click();await create();const third=await p.getByLabel(label,{exact:true}).inputValue();expect([first,second]).not.toContain(third);await apply.click();
+ await openMap(page,'map.clearing');await openMap(page,'map.forest');await create();const fourth=await p.getByLabel(label,{exact:true}).inputValue();expect([first,second,third]).not.toContain(fourth);
+ await p.getByRole('button',{name:'Discard camera/environment drafts',exact:true}).click();await create();expect([first,second,third,fourth]).not.toContain(await p.getByLabel(label,{exact:true}).inputValue());
+});
