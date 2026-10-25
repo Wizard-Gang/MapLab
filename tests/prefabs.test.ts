@@ -136,3 +136,28 @@ test('typed layer-slot refs resolve separately from same-named content IDs; expl
   const docs = all(m, p) as any[], catalog = docs.find(d => d.id === 'catalog.core'); catalog.entries.push({ key: 'fixture.layer', version: 1, kind: 'action', stage: 'planned', fields: [{ name: 'target', type: 'ref', target: 'layer', required: true }], stateNames: [] });
   const result = validateSourceGraph(docs); expect(result.diagnostics.filter(d => d.severity === 'error')).toEqual([]);
 });
+test('scalar mapId parameters cannot hide typed reference remapping or capture closure', () => {
+  const p = prefab() as any; p.content.triggers[0].conditions = []; p.content.routes[0].conditions = []; p.content.encounters[0].onComplete = [];
+  p.content.triggers[0].actions[0].params.mapId = 'literal-string';
+  const m = add(add(model(), 0, p), 1, p), docs = all(m, p) as any[];
+  docs.find(d => d.id === 'catalog.core').entries.find((e: any) => e.key === 'core.flag.set').fields.push({ name: 'mapId', type: 'string', maxLength: 96, required: false });
+  expect(validateSourceGraph(docs).diagnostics.filter(d => d.severity === 'error')).toEqual([]);
+  for (const id of ['pp.a', 'pp.b']) { const params = record(m, 'triggers', `${id}:trigger`).actions[0].params; expect(params.mapId).toBe('literal-string'); expect(params.flag.ref.id).toBe(`${id}:visited`); }
+  const captured = createPrefab(m, [{ collection: 'triggers', id: 'pp.a:trigger' }], 'prefab.scalar', 'Scalar capture', [64, 320], docs);
+  expect(captured.content.flags.map(f => f.id)).toEqual(['pp.a:visited']);
+  expect(validateSourceGraph([...docs, captured as unknown as JsonValue]).ok).toBe(true);
+});
+test('capture resolves movement and catalogs through transitive map roots without importing map cycles', () => {
+  const source = read('two-placements.expected.map.json'), bridge = read('base.map.json'); bridge.id = 'map.bridge';
+  source.dependencies = [{ id: bridge.id, kind: 'map', path: 'maps/bridge.map.json', required: true }];
+  bridge.dependencies.push({ id: 'movement.ground', kind: 'movement', path: 'movement/ground.movement.json', required: true }, { id: source.id, kind: 'map', path: 'maps/two-placements.map.json', required: true });
+  const m = model(source), docs = [source, bridge, ...all(model()).filter((d: any) => !['map.two-placements', 'prefab.tree-marker'].includes(d.id))];
+  expect(validateSourceGraph(docs).ok).toBe(true);
+  const captured = createPrefab(m, [{ collection: 'triggers', id: 'pp.a:trigger' }], 'prefab.transitive', 'Transitive', [64, 320], docs);
+  expect(captured.dependencies.map(d => d.id).sort()).toEqual(['catalog.core', 'movement.ground']);
+  const placed = candidate(m, applyPrefab(m, captured, { ...placements()[0]!, id: 'pp.transitive', position: [400, 320], prefabPath: 'prefabs/transitive.prefab.json', layerBindings: captured.layerSlots.map(slot => ({ slot, layerId: slot })) }));
+  expect(validateSourceGraph([denormalize(placed), ...docs.slice(1), captured as unknown as JsonValue]).diagnostics.filter(d => d.severity === 'error')).toEqual([]);
+  // A pure caller without the source graph conservatively retains non-template roots.
+  const fallback = createPrefab(m, [{ collection: 'triggers', id: 'pp.a:trigger' }], 'prefab.rooted', 'Rooted', [64, 320]);
+  expect(fallback.dependencies.map(d => d.id)).toContain('map.bridge'); expect(validateSourceGraph([...docs, fallback as unknown as JsonValue]).ok).toBe(true);
+});

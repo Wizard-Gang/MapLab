@@ -20,7 +20,7 @@ export function PrefabPanel({ store, doc }: { readonly store: LibraryStore; read
     <label>Prefab name<input aria-label="Prefab name" value={name} onChange={e => setName(e.target.value)} /></label>
     <button type="button" disabled={!selection.keys.length} onClick={() => void run(async () => {
       if (view.library?.documents.some(d => d.id === newId)) throw Error('Choose an unused prefab ID');
-      const created = createPrefab(model, selection.keys, newId, name, point());
+      const created = createPrefab(model, selection.keys, newId, name, point(), store.gameplaySources());
       if (await store.savePrefab(created, null)) { setSource(created.id); setBindings({}); setNotice(`Created ${created.id} from selection and its reference closure`); }
     })}>Create prefab from selection</button>
     <label>Prefab template<select aria-label="Prefab template" value={prefab?.id ?? ''} onChange={e => { setSource(e.target.value); setBindings({}); setDraft(null); }}>{templates.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>

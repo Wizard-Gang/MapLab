@@ -3,7 +3,7 @@ import { isId, validateDocumentSchema, validatePrefab, validateMapGeometry, type
 import type { PrefabDocument, PrefabContent } from '../contracts/document-types';
 import { denormalize, isObject, recordIds, type JsonObject, type MapModel } from '../domain/model';
 import { insertOp, setOp, transaction } from '../domain/commands';
-import { rewriteRefs } from '../domain/remap';
+import { OBJECT_REF_MEMBERS } from '../domain/remap';
 import { applyTransaction, type Transaction } from '../domain/transaction';
 import { transformContent } from './prefab-transform';
 import type { ObjectKey } from './editing';
@@ -16,17 +16,26 @@ function checked(prefab: PrefabDocument): void {
 }
 /** Catalog parameter strings are literals even when their names resemble reference members. */
 function prefabRefs(value: JsonValue, mapId: string, rewrite: (id: string, path: string) => string | undefined): JsonValue {
-  const literals = new Set<string>();
-  const visit = (v: JsonValue, at: string): void => {
-    if (Array.isArray(v)) v.forEach((x, i) => visit(x, `${at}[${i}]`));
-    else if (isObject(v)) for (const [k, x] of Object.entries(v)) {
+  const one = (id: string, path: string): string => rewrite(id, path) ?? id;
+  const visit = (v: JsonValue, at: string, params = false): JsonValue => {
+    if (Array.isArray(v)) return v.map((x, i) => visit(x, `${at}[${i}]`));
+    if (!isObject(v)) return v;
+    const typed = typeof v.kind === 'string' && typeof v.id === 'string' && Object.keys(v).every(k => ['kind', 'id', 'mapId'].includes(k));
+    const destination = typeof v.entityId === 'string' && Object.keys(v).every(k => ['mapId', 'entityId'].includes(k));
+    if (!params && (typed || destination) && typeof v.mapId === 'string' && v.mapId !== mapId) return v;
+    const ref = typed && v.kind !== 'movement' || v.kind === 'flag' && typeof v.id === 'string' && Object.hasOwn(v, 'equals');
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => {
       const path = `${at}.${k}`;
-      if (k === 'params' && isObject(x)) for (const [name, param] of Object.entries(x)) if (typeof param === 'string') literals.add(`${path}.${name}`);
-      visit(x, path);
-    }
+      // A params object contains scalar literals or {ref: ObjectRef} values. Its keys
+      // never confer reference semantics, including id, mapId, bodyId or groupId.
+      if (params) return [k, isObject(x) ? visit(x, path) : x];
+      if (k === 'id') return [k, ref && typeof x === 'string' ? one(x, path) : x];
+      if (OBJECT_REF_MEMBERS.has(k) && typeof x === 'string') return [k, one(x, path)];
+      if (OBJECT_REF_MEMBERS.has(k) && Array.isArray(x) && x.every(y => typeof y === 'string')) return [k, x.map((y, i) => one(y as string, `${path}[${i}]`))];
+      return [k, visit(x, path, k === 'params')];
+    }));
   };
-  visit(value, '$');
-  return rewriteRefs(value, mapId, (id, path) => literals.has(path) ? undefined : rewrite(id, path));
+  return visit(value, '$');
 }
 function mapIds(v: JsonValue, from: string, to: string, params = false): JsonValue {
   if (Array.isArray(v)) return v.map(x => mapIds(x, from, to));
@@ -35,7 +44,7 @@ function mapIds(v: JsonValue, from: string, to: string, params = false): JsonVal
   return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, scoped && k === 'mapId' && x === from ? to : mapIds(x, from, to, k === 'params')]));
 }
 /** Capture selection plus its internal reference closure, using source layer IDs as explicit slot names. */
-export function createPrefab(model: MapModel, keys: readonly ObjectKey[], id: string, name: string, pivot: Vec2): PrefabDocument {
+export function createPrefab(model: MapModel, keys: readonly ObjectKey[], id: string, name: string, pivot: Vec2, sources: readonly JsonValue[] = []): PrefabDocument {
   if (!isId(id) || !name.trim() || !keys.length) throw Error('Choose content and a valid prefab ID and name');
   const selected = new Map<string, { collection: typeof PREFAB_COLLECTIONS[number]; record: JsonObject }>();
   const records = PREFAB_COLLECTIONS.flatMap(collection => [...(model.collections.get(collection)?.byId.values() ?? [])].map(record => ({ collection, record })));
@@ -71,7 +80,22 @@ export function createPrefab(model: MapModel, keys: readonly ObjectKey[], id: st
     }
   };
   documents(content as unknown as JsonValue);
-  const dependencies = [...(model.collections.get('dependencies')?.byId.values() ?? [])].filter(d => d.kind === 'catalog' || d.kind !== 'prefab' && needed.has(d.id as string)) as unknown as Dependency[];
+  const roots = [...(model.collections.get('dependencies')?.byId.values() ?? [])] as unknown as Dependency[];
+  const byDocument = new Map(sources.filter(isObject).filter(v => typeof v.id === 'string').map(v => [v.id as string, v]));
+  const reachable = new Map<string, Dependency>(), pending = [...roots];
+  while (pending.length) {
+    const dep = pending.pop()!; if (reachable.has(dep.id)) continue;
+    reachable.set(dep.id, dep);
+    const target = byDocument.get(dep.id);
+    if (target && Array.isArray(target.dependencies)) pending.push(...target.dependencies as unknown as Dependency[]);
+  }
+  // Resolve used documents to direct entries when the loaded graph is available. This
+  // preserves transitive access without retaining unrelated map roots that could form
+  // a mixed map/template cycle once the template is placed back into its source map.
+  const dependencies = sources.length
+    ? [...reachable.values()].filter(d => d.kind === 'catalog' || d.kind !== 'prefab' && needed.has(d.id))
+    : roots.filter(d => d.kind !== 'prefab');
+  if (sources.length) for (const neededId of needed) if (!dependencies.some(d => d.id === neededId)) throw Error(`Prefab needs a resolving dependency for ${neededId}`);
   const prefab: PrefabDocument = { format: 'maplab.prefab', version: 1, id, name: name.trim(), pivot, dependencies, layerSlots: [...slots].sort(), content };
   checked(prefab); return prefab;
 }

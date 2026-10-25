@@ -52,3 +52,19 @@ test('stale prefab source draft cannot overwrite a newer saved template', async 
   await page.getByRole('button', { name: 'Save prefab source', exact: true }).click(); await expect(notice(page)).toContainText('changed on disk');
   expect(JSON.parse(libraryFile('prefabs/tree-marker.prefab.json').toString()).name).toBe('Newer external template'); await expect(command(page, 'Undo')).toBeDisabled();
 });
+test('capture preserves transitive document access and remaps typed refs beside literal mapId parameters', async ({ page }) => {
+  const source = JSON.parse(fixture('two-placements.expected.map.json').toString()), bridge = JSON.parse(fixture('base.map.json').toString()); bridge.id = 'map.bridge';
+  source.dependencies = [{ id: bridge.id, kind: 'map', path: 'maps/bridge.map.json', required: true }];
+  bridge.dependencies.push({ id: 'movement.ground', kind: 'movement', path: 'movement/ground.movement.json', required: true }, { id: source.id, kind: 'map', path: 'maps/two-placements.map.json', required: true });
+  for (const t of source.triggers) t.actions[0].params.mapId = 'literal-string';
+  saveElsewhere('maps/two-placements.map.json', JSON.stringify(source));
+  const catalog = JSON.parse(libraryFile('catalogs/core.catalog.json').toString()); catalog.entries.find((e: any) => e.key === 'core.flag.set').fields.push({ name: 'mapId', type: 'string', maxLength: 96, required: false }); saveElsewhere('catalogs/core.catalog.json', JSON.stringify(catalog));
+  const bytes = JSON.stringify(bridge); writeLibraryFile('maps/bridge.map.json', bytes); const ix = index() as any; ix.documents.push({ id: bridge.id, kind: 'map', path: 'maps/bridge.map.json', sha256: sha256(bytes) }); writeLibraryFile('maplab.project.json', JSON.stringify(ix));
+  await ready(page); await choose(page, 'pp.a:trigger'); await page.getByLabel('New prefab ID', { exact: true }).fill('prefab.transitive');
+  await page.getByRole('button', { name: 'Create prefab from selection', exact: true }).click(); await expect(notice(page)).toContainText('Created prefab.transitive');
+  const captured = JSON.parse(libraryFile('prefabs/transitive.prefab.json').toString()); expect(captured.dependencies.map((d: any) => d.id).sort()).toEqual(['catalog.core', 'movement.ground']);
+  for (const layer of ['layer.world', 'layer.actors']) await page.getByLabel(`Bind prefab slot ${layer}`, { exact: true }).selectOption(layer);
+  await page.getByLabel('Prefab X', { exact: true }).fill('400');
+  await place(page); await command(page, 'Save').click(); await expect(page.locator('p.status')).toContainText('Saved');
+  const params = saved().triggers.find((t: any) => t.id === 'pp.prefab:pp.a:trigger').actions[0].params; expect(params.mapId).toBe('literal-string'); expect(params.flag.ref.id).toBe('pp.prefab:pp.a:visited');
+});
