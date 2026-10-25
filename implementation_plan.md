@@ -37,30 +37,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-026** — squash `db24c46`, PR #26; [record](docs/changes/ML-026.md).
 - **ML-027** — squash `faa1255`, PR #27; [record](docs/changes/ML-027.md).
 - **ML-028** — squash `30ad4ac`, PR #28; [record](docs/changes/ML-028.md).
+- **ML-029** — squash `bf239b8`, PR #29; [record](docs/changes/ML-029.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-029 / P1
-
-- **Source scope:** Prefab create/place/expand/edit provenance, including assets/flags/presentations/internal refs.
-- **Non-goals:** No recursive prefabs/live override propagation.
-- **Acceptance:** IDs remapped; layer slots bound; two placements independent; dependency closure and undo correct.
-- **Depends on:** ML-028 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [C3](docs/specifications/2026-10-16-maplab.md#c3-visual-layers-and-reusable-content), [F4](docs/specifications/2026-10-16-maplab.md#f4-tileset-prefab-and-export-examples), [H2](docs/specifications/2026-10-16-maplab.md#h2-state-and-history), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement prefab creation/placement/expansion with explicit slot binding and provenance tracking.
-  2. Remap every nested stable ID/reference/flag/presentation and dependency on each independent placement; preserve inverses.
-  3. Create owned fixture(s): prefabs/tree-marker.prefab.json and two placements with overlapping local IDs.
-  4. Add executable checks: Placement, export closure and undo golden tests; no recursive/live overrides.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-030 / P1
 
 - **Source scope:** Optional RigLab bundle verification, baked presentation and explicit anchor/art/action bindings.
@@ -75,6 +57,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Import rejection and unchanged controller traces with/without art.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-031 / P1
 
 - **Source scope:** Runtime blocker overlay and regional navigation invalidation/replan preview.
