@@ -158,3 +158,7 @@ not certify an external engine or foreign RigLab importer.
 
 
 ML-030 adds `conformance/riglab/`, a new CC0-1.0 MapLab-owned seven-bone rig, animation keys and armor primitive. `source-model.json` is the source; `provenance.json` pins the producing RigLab commit and exporter file hashes. No foreign artwork or solver code is bundled into MapLab. The STORE ZIP and original inner files are byte-pinned by the corpus index. Missing-art/unbaked variants and malicious-reference edits remain inert fixture data. CI compares full mirrored matrices and controller traces; `tests/consumer/riglab-consumer.mjs` reconstructs the matrix proof from final exported bytes using only Node and the separate reader.
+
+## ML-031 runtime blocker fixtures
+
+`conformance/blockers/` contains owned CC0 numeric gap geometry, movement settings and a verified 45-tick witness carried from the existing airborne conformance corpus. The new cases place a runtime wall in previously empty gap space, remove it, add a distant obstacle, change physical source, retain art-only cache warmth and cancel stale work. No borrowed assets or solver code. An indexed SHA-256 inventory pins all inputs; CI constructs incremental and clean reports and runs a separate Node-only final-byte consumer over their exact bytes.

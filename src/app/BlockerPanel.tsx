@@ -40,7 +40,7 @@ function Controls({runtime,store,doc}:{readonly runtime:ReturnType<typeof create
     {report.result.edges.slice(0,64).map(e=><polyline key={e.key} points={[e.initial,...e.frames.map(f=>f.state)].map(s=>`${s.x/256},${s.y/256}`).join(' ')} fill="none" stroke="#86d7ff" strokeWidth={1}/>)}
     {items.map(b=><rect key={b.id} x={b.boundsSu[0]/256} y={b.boundsSu[1]/256} width={(b.boundsSu[2]-b.boundsSu[0])/256} height={(b.boundsSu[3]-b.boundsSu[1])/256} fill="#ed9a45" opacity={0.8}/>)}
    </svg><p>Showing up to 64 action trajectories. Source remains immutable. No route found is only a bounded sampling result.</p>
-   <details><summary>Blocker revisions and assumptions</summary><pre aria-label="Blocker dependency report">{JSON.stringify({revision:report.revision,sourceKey:report.sourceKey,identity:report.result.identity,dirtyBoundsSu:report.dirtyBoundsSu,regenerationBoundsSu:report.regenerationBoundsSu,regionRevisions:report.regionRevisions,disabledKeys:report.disabledKeys,assumptions:report.assumptions},null,2)}</pre></details>
+   <details><summary>Blocker revisions and assumptions</summary><pre aria-label="Blocker dependency report">{JSON.stringify({revision:report.revision,sourceKey:report.sourceKey,identity:report.result.identity,affectedGeometry:report.affectedGeometry,dirtyBoundsSu:report.dirtyBoundsSu,regenerationBoundsSu:report.regenerationBoundsSu,regionRevisions:report.regionRevisions,disabledKeys:report.disabledKeys,assumptions:report.assumptions},null,2)}</pre></details>
   </>}
  </section>;
 }

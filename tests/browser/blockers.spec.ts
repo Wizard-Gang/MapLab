@@ -1,0 +1,15 @@
+import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+import {resetLibrary,index,writeLibraryFile,libraryFile,sha256,openEditor,openMap,command} from './support';
+const read=(p:string)=>JSON.parse(readFileSync('conformance/blockers/'+p,'utf8'));
+test('runtime empty-space blocker invalidates, deletion reopens, warm preview and cancellation preserve authored bytes',async({page})=>{
+ test.setTimeout(180000);resetLibrary();const m=read('source.map.json'),p=read('player.movement.json'),ix=index() as any;m.dependencies.push({id:p.id,kind:'movement',path:'movement/blocker-player.movement.json',required:true});
+ for(const f of [{id:p.id,kind:'movement',path:'movement/blocker-player.movement.json',doc:p},{id:m.id,kind:'map',path:'maps/blocker-proof.map.json',doc:m}]){const bytes=Buffer.from(JSON.stringify(f.doc));writeLibraryFile(f.path,bytes);ix.documents.push({id:f.id,kind:f.kind,path:f.path,sha256:sha256(bytes)});}writeLibraryFile('maplab.project.json',JSON.stringify(ix));const before=libraryFile('maps/blocker-proof.map.json');
+ await openEditor(page);await openMap(page,m.id);await page.getByRole('button',{name:'Navigation mode',exact:true}).click();const panel=page.getByRole('region',{name:'Runtime blocker preview',exact:true});await panel.getByLabel('Blocker movement profile',{exact:true}).selectOption(p.id);await panel.getByRole('button',{name:'Build blocker preview',exact:true}).click();
+ await expect(panel.getByLabel('Blocker preview status',{exact:true})).toHaveText('candidate',{timeout:90000});await expect(panel.getByLabel('Runtime blocker action overlay',{exact:true})).toBeVisible();
+ await panel.getByLabel('Blocker X',{exact:true}).fill('560');await panel.getByLabel('Blocker Y',{exact:true}).fill('0');await panel.getByLabel('Blocker width',{exact:true}).fill('32');await panel.getByLabel('Blocker height',{exact:true}).fill('512');await panel.getByRole('button',{name:'Insert runtime blocker',exact:true}).click();
+ await expect(panel.getByLabel('Blocker preview status',{exact:true})).toHaveText('no route found within declared search/sampling budget',{timeout:90000});await expect(panel.getByLabel('Blocker cache status',{exact:true})).toContainText('10 swept witnesses invalidated');
+ await panel.getByRole('button',{name:'Remove runtime.preview-1',exact:true}).click();await expect(panel.getByLabel('Blocker preview status',{exact:true})).toHaveText('candidate',{timeout:90000});await panel.getByRole('button',{name:'Build blocker preview',exact:true}).click();await expect(panel.getByLabel('Blocker cache status',{exact:true})).toContainText('Physical cache warm',{timeout:90000});
+ await panel.getByRole('button',{name:'Insert runtime blocker',exact:true}).click();await panel.getByRole('button',{name:'Cancel blocker preview',exact:true}).click();await expect(panel.getByLabel('Blocker preview status',{exact:true})).toHaveText('Idle');await expect(panel.getByLabel('Runtime blocker action overlay',{exact:true})).toHaveCount(0);
+ expect(libraryFile('maps/blocker-proof.map.json')).toEqual(before);await expect(command(page,'Save')).toBeDisabled();
+});

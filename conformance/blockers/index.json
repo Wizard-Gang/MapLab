@@ -1,0 +1,25 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "a1b11f9417ef48cf7978feb197768bfdb9d8595925aa9e0a4002e9e0da8d925d"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "82b662339e32b709f52fd6351e7cf144cdc84424a31bd8c0cbc2c29a60f9f290"
+    },
+    {
+      "path": "empty-corridor.witness.json",
+      "sha256": "0f476888c0ee374daa41cc119445e9fb508ceacee211e3ee2a71e72e451ac496"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "170b5bbeb9acdd92cb80f0c8105459903398f1e4be94f7aeddbd8dc0791c1e75"
+    },
+    {
+      "path": "source.map.json",
+      "sha256": "b9f9eaffa9229a234a59db64aa5e80168fae4b6a7ea7a3b6c774db05b45b248f"
+    }
+  ]
+}

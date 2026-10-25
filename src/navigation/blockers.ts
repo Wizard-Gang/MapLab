@@ -46,21 +46,36 @@ export function capabilityRegion(m:MapDocument,p:MovementDocument,s:AirSettings,
  const reach=Number(fastest*BigInt(s.maxTicks))+s.spacingSu+width;
  if(!Number.isSafeInteger(reach))throw Error('Runtime capability envelope overflow');const b=mapBounds(m);return [dirty[0]-reach,b[1],dirty[2]+reach,b[3]];
 }
+export interface GeometryRegion {readonly key:string;readonly sha256:string;readonly boundsSu:Bounds}
+async function sourceRegions(m:MapDocument,cancelled:()=>boolean,yieldTask:()=>Promise<void>):Promise<readonly GeometryRegion[]>{
+ const entries:GeometryRegion[]=[],byBody=new Map(m.bodies.map(b=>[b.id,b]));let work=0;
+ const add=async(key:string,value:unknown,points:readonly(readonly[number,number])[])=>{if(++work%64===0)await yieldTask();if(cancelled())throw Error('cancelled');if(!points.length)return;const bounds=points.reduce<Bounds>((a,p)=>[Math.min(a[0],p[0]*256),Math.min(a[1],p[1]*256),Math.max(a[2],p[0]*256),Math.max(a[3],p[1]*256)],[Infinity,Infinity,-Infinity,-Infinity]);entries.push({key,sha256:await digest(value),boundsSu:bounds});};
+ for(const b of m.bodies){const points=b.shapes.flatMap(s=>s.kind==='rect'?[[s.rect[0],s.rect[1]],[s.rect[0]+s.rect[2],s.rect[1]+s.rect[3]]] as const:s.kind==='polygon'?s.points:[s.a,s.b]);await add('body:'+b.id,b,points.map(p=>[p[0]+b.position[0],p[1]+b.position[1]]));}
+ for(const f of m.footholds){const position=byBody.get(f.ownerBodyId??'')?.position??[0,0];await add('foothold:'+f.id,{f,position},[f.a,f.b].map(p=>[p[0]+position[0]!,p[1]+position[1]!]));}
+ for(const t of m.traversals)await add('traversal:'+t.id,t,'points' in t?t.points:[]);
+ return entries;
+}
+function geometryDirty(a:readonly GeometryRegion[],b:readonly GeometryRegion[]):Bounds|null{
+ let dirty:Bounds|null=null;for(const [from,to]of [[a,b],[b,a]]){const byKey=new Map(to!.map(e=>[e.key,e]));for(const e of from!){const other=byKey.get(e.key);if(!other||other.sha256!==e.sha256)dirty=dirty?union(dirty,e.boundsSu):e.boundsSu;}}return dirty;
+}
 export interface BlockerReport {
  readonly format:'maplab.runtime-blocker-preview';readonly version:1;readonly revision:number;readonly sourceKey:string;
+ readonly globalKey:string;readonly geometry:readonly GeometryRegion[];readonly affectedGeometry:readonly string[];
  readonly blockers:readonly Blocker[];readonly result:AirResult;readonly dirtyBoundsSu:Bounds|null;readonly regenerationBoundsSu:Bounds|null;
  readonly regionRevisions:Readonly<Record<string,number>>;readonly disabledKeys:readonly string[];
  readonly reusedEdges:number;readonly regeneratedSamples:number;readonly cacheWarm:boolean;readonly assumptions:readonly string[];
 }
 export async function regenerate(map:MapDocument,p:MovementDocument,revision:number,value:readonly Blocker[],settings:AirSettings=AIR_DEFAULTS,previous:BlockerReport|null=null,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0))):Promise<BlockerReport>{
  if(!Number.isSafeInteger(revision)||revision<0)throw Error('Invalid runtime revision');const bs=blockers(value),source=structuredClone(map),profile=structuredClone(p),options={...settings};
- const base=await airborneIdentity(source,profile,options),compatible=previous?.sourceKey===base.cacheKey;
+ const base=await airborneIdentity(source,profile,options),globalKey=await digest({mapId:source.id,version:source.version,bounds:source.bounds,collision:source.collisionContract,materials:[...source.materials].sort((a,b)=>a.id<b.id?-1:1),navigation:source.navigation,regions:source.regions,planes:source.layers.filter(l=>l.kind==='actors').map(l=>l.id),profile:base.profileSha256,controller:base.controllerSha256,settings:base.settingsSha256}),geometry=await sourceRegions(source,cancelled,yieldTask),compatible=previous?.globalKey===globalKey;
  const usable=compatible&&['candidate','no route found within declared search/sampling budget'].includes(previous!.result.status);
- const dirty=usable?dirtyBounds(previous!.blockers,bs):mapBounds(source),warm=!!compatible&&!dirty&&['candidate','no route found within declared search/sampling budget'].includes(previous!.result.status);
+ const runtimeDirty=usable?dirtyBounds(previous!.blockers,bs):null,sourceDirty=usable?geometryDirty(previous!.geometry,geometry):null;
+ const dirty=usable?(runtimeDirty&&sourceDirty?union(runtimeDirty,sourceDirty):runtimeDirty??sourceDirty):mapBounds(source),warm=!!usable&&!dirty;
+ const affectedGeometry=dirty?[...new Set([...geometry,...(previous?.geometry??[])].filter(e=>intersects(e.boundsSu,dirty)).map(e=>e.key))].sort():[];
  const revisions={...(compatible?previous!.regionRevisions:{})};if(dirty)for(const key of regionKeys(dirty))revisions[key]=revision;
  const assumptions=['Temporary blocker snapshot only; engine AI and future door/platform state are unsupported.','Regional single-action candidates retain exact launch preconditions; no complete route or engine-parity claim.','Surface clearance is rebuilt conservatively; only affected airborne launch candidates are regenerated.'];
  const disabledKeys=previous&&dirty?new WitnessIndex(previous.result.edges).query(dirty):[];
- if(warm&&!cancelled())return {...structuredClone(previous!),revision,result:{...structuredClone(previous!.result),revision},dirtyBoundsSu:null,regenerationBoundsSu:null,disabledKeys:[],cacheWarm:true,reusedEdges:previous!.result.edges.length,regeneratedSamples:0};
+ if(warm&&!cancelled())return {...structuredClone(previous!),revision,result:{...structuredClone(previous!.result),revision},dirtyBoundsSu:null,regenerationBoundsSu:null,disabledKeys:[],cacheWarm:true,reusedEdges:previous!.result.edges.length,regeneratedSamples:0,affectedGeometry:[],sourceKey:base.cacheKey,globalKey,geometry};
  const overlaid=overlayMap(source,profile,bs),region=usable&&dirty?capabilityRegion(source,profile,options,dirty):null;
  const partial=await buildAirborneActions(overlaid,profile,revision,options,cancelled,yieldTask,region??undefined);
  const retained:Witness[]=[];
@@ -72,6 +87,7 @@ export async function regenerate(map:MapDocument,p:MovementDocument,revision:num
   }
  }
  const edges=[...retained,...partial.edges].sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0);
- const result=cancelled()?{...partial,status:'cancelled' as const,edges:[],intervals:[]}:retained.length?{...partial,status:'candidate' as const,edges}:partial;
- return {format:'maplab.runtime-blocker-preview',version:1,revision,sourceKey:base.cacheKey,blockers:bs,result,dirtyBoundsSu:dirty,regenerationBoundsSu:region,regionRevisions:revisions,disabledKeys,reusedEdges:retained.length,regeneratedSamples:partial.samples,cacheWarm:false,assumptions};
+ const merged=cancelled()?{...partial,status:'cancelled' as const,edges:[],intervals:[]}:edges.length>options.maxCandidates?{...partial,status:'budget' as const,diagnostics:['retained-edge-budget'],edges:[],intervals:[]}:retained.length?{...partial,status:'candidate' as const,edges}:partial;
+ const result={...merged,assumptions};
+ return {format:'maplab.runtime-blocker-preview',version:1,revision,sourceKey:base.cacheKey,globalKey,geometry,affectedGeometry,blockers:bs,result,dirtyBoundsSu:dirty,regenerationBoundsSu:region,regionRevisions:revisions,disabledKeys,reusedEdges:retained.length,regeneratedSamples:partial.samples,cacheWarm:false,assumptions};
 }
