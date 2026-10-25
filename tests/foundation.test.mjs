@@ -107,7 +107,7 @@ test.each([
   ['a feature gate that skips the build', (p) => workflow(p, 'gate', (s) => s.replace('      - name: Build\n        run: npm run build\n', '')), 'non-test checks'],
   ['a feature gate on a floating action', (p) => workflow(p, 'gate', (s) => s.replace('actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803', 'actions/checkout@v6')), 'immutable commit SHAs'],
   ['a feature gate that tests the merge revision', (p) => workflow(p, 'gate', (s) => s.replace('          ref: ${{ github.event.pull_request.head.sha || github.sha }}\n', '')), 'least privilege'],
-  ['an extra job beside the feature gate', (p) => workflow(p, 'gate', (s) => s + '  lint:\n    name: lint\n    runs-on: ubuntu-24.04\n    steps:\n      - run: npm run typecheck\n')), 'CI jobs disagree'],
+  ['an extra job beside the feature gate', (p) => workflow(p, 'gate', (s) => s + '  lint:\n    name: lint\n    runs-on: ubuntu-24.04\n    steps:\n      - run: npm run typecheck\n'), 'CI jobs disagree'],
   ['missing placeholder library', (p) => rmSync(join(p, 'placeholder-library/maplab.project.json')), 'Missing or empty'],
   ['disabled security job', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
