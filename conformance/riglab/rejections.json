@@ -1,0 +1,30 @@
+[
+  {
+    "id": "unsupported-rig-version",
+    "file": "owned-armor.rig.json",
+    "pointer": [
+      "version"
+    ],
+    "value": 2
+  },
+  {
+    "id": "malicious-reference",
+    "file": "baked/unarmed-idle.baked.json",
+    "pointer": [
+      "bones",
+      0
+    ],
+    "value": "untrusted-bone"
+  },
+  {
+    "id": "excessive-transform",
+    "file": "baked/unarmed-idle.baked.json",
+    "pointer": [
+      "frames",
+      0,
+      0,
+      0
+    ],
+    "value": 1000000000000.0
+  }
+]

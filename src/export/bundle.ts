@@ -1,3 +1,4 @@
+import {verifyForeign} from '../riglab/foreign';
 // Deterministic format/inventory core over explicit bytes and source values. No library or editor I/O.
 import { createHash } from 'node:crypto';
 import { canonical, movementProfileJcs, parseJson, validateDocumentSchema, validateSourceGraph, type ContractRef, type ExportManifest, type JsonValue, type SourceDocument, type MovementDocument } from '../contracts';
@@ -38,7 +39,7 @@ export function exportValue(value: JsonValue): JsonValue {
 }
 /** Collect actual versioned bindings, including engine catalog handlers, without treating
  * catalog definitions themselves as calls. Exact support remains the consumer's decision. */
-export function requiredContracts(values: readonly SourceDocument[]): readonly ContractRef[] {
+export function requiredContracts(values: readonly SourceDocument[], foreignContracts:readonly ContractRef[] = []): readonly ContractRef[] {
   const refs = new Map<string, ContractRef>();
   const add = (c: ContractRef): void => { refs.set(`${c.key}@${c.version}`, c); };
   const walk = (v: unknown): void => {
@@ -48,6 +49,7 @@ export function requiredContracts(values: readonly SourceDocument[]): readonly C
       for (const [k, x] of Object.entries(v)) if (k !== 'entries' && k !== 'params') walk(x);
     }
   };
+  foreignContracts.forEach(add);
   for (const value of values) { add({ key: value.format, version: value.version }); walk(value); }
   return [...refs].sort(([a], [b]) => compare(a, b)).map(([, c]) => c);
 }
@@ -89,7 +91,7 @@ export function verifyFiles(files: ReadonlyMap<string, Uint8Array>, schemas: Rea
   const graph = validateSourceGraph(docs); if (!graph.ok) refuse('inventory.closure', graph.diagnostics.map((d) => d.message).join('; '));
   const usedAssets = new Set<string>();
   for (const value of graph.documents) {
-    if ('presentations' in value && value.presentations.length) refuse('inventory.presentation', 'Foreign presentations are not yet validated');
+
     if ('assets' in value) for (const a of value.assets) {
       const data = files.get(a.path);
       if (!data || m.files.find((f) => f.path === a.path)?.role !== 'asset') refuse('inventory.asset', `Missing asset: ${a.id}`);
@@ -98,7 +100,9 @@ export function verifyFiles(files: ReadonlyMap<string, Uint8Array>, schemas: Rea
       usedAssets.add(a.path);
     }
   }
-  if (m.files.some((f) => f.role === 'asset' && !usedAssets.has(f.path) || f.role === 'derived' || f.role === 'foreign')) refuse('inventory.role', 'Unreferenced assets or unsupported runtime artifacts');
+  const foreign=verifyForeign(graph.documents,files);
+  for(const p of foreign.used)if(m.files.find(f=>f.path===p)?.role!=='foreign')refuse('inventory.foreign','Foreign role differs');
+  if (m.files.some((f) => f.role === 'asset' && !usedAssets.has(f.path) || f.role === 'derived' || f.role === 'foreign' && !foreign.used.has(f.path))) refuse('inventory.role', 'Unreferenced assets or unsupported runtime artifacts');
   const entries = new Map(m.documents.map((d) => [d.id, d]));
   const reached = new Set<string>(), pending = [m.entryMapId];
   while (pending.length) {
@@ -106,13 +110,13 @@ export function verifyFiles(files: ReadonlyMap<string, Uint8Array>, schemas: Rea
     const value = graph.documents.find((d) => d.id === id)!;
     if ('dependencies' in value) for (const dep of value.dependencies) {
       const target = entries.get(dep.id);
-      if (!target) { if (dep.required) refuse('inventory.closure', `Missing dependency ${dep.id}`); continue; }
+      if (!target) { if (dep.kind==='riglab' && foreign.used.has(dep.path)) continue; if (dep.required) refuse('inventory.closure', `Missing dependency ${dep.id}`); continue; }
       if (target.path !== dep.path || target.format !== `maplab.${dep.kind}`) refuse('inventory.closure', `Dependency identity differs: ${dep.id}`);
       pending.push(dep.id);
     }
   }
   if (reached.size !== entries.size) refuse('inventory.closure', 'Unreachable document in bundle');
-  if (canonical(requiredContracts(graph.documents) as unknown as JsonValue) !== canonical(m.requiredContracts as unknown as JsonValue)) refuse('inventory.contracts', 'Required contract inventory differs from source bindings');
+  if (canonical(requiredContracts(graph.documents,foreign.contracts) as unknown as JsonValue) !== canonical(m.requiredContracts as unknown as JsonValue)) refuse('inventory.contracts', 'Required contract inventory differs from source bindings');
   const expectedSchemas = new Set(['maplab.export', ...m.documents.map((d) => d.format)].map((format) => `schemas/${format}.v1.schema.json`));
   if (m.files.some((f) => f.role === 'schema' && !expectedSchemas.has(f.path))) refuse('inventory.schema', 'Unexpected schema file');
   for (const format of new Set(['maplab.export', ...m.documents.map((d) => d.format)])) {

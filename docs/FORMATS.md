@@ -57,7 +57,7 @@ letterbox warning; equal-priority overlapping zone bounds warn with stable ID
 precedence. Region shapes and resolved navigation anchors obey world limits.
 Environment audio references audio assets; all four zone kinds remain data only.
 RigLab presentation bindings validate local assets/semantic fallback graphs and
-name foreign dependencies; foreign manifests/animations need their later validator.
+name foreign dependencies. ML-030 separately validates foreign bytes and baked animation through `src/riglab/`; the source-graph validator alone still establishes no foreign-byte claim.
 
 `validateDocumentSchema` validates syntax for every published format. For project,
 export and derived-navigation documents it does **not** establish library-save
@@ -101,3 +101,9 @@ declaration. An unknown member fails closed. The reader checks that catalog entr
 exist. It does not check handler kinds, parameter semantics or the F3 semantic
 rules, which remain `src/contracts` validation. It constructs no world, renderer,
 engine or navigation, and its report says so.
+
+## RigLab foreign boundary
+
+Supported exact versions are riglab.export v1, riglab.rig v1, riglab.anim v3, optional riglab.weapon v1 and riglab.baked v1. Source paths remain relative to the inner manifest beneath their own immutable prefix; no authored path is extracted into a general library location. File hashes establish consistency, not publisher identity. Unknown fields, unsafe/aliased paths, broken references, nonfinite transforms and unsupported versions refuse before preview/export. A valid unbaked bundle remains storable and referenceable, with an inert placeholder.
+
+Limits: 16 MiB per foreign bundle/ZIP, 8 MiB per JSON file, 128 files and bones, 64 animations, 32 weapon definitions, 64 bodies per weapon, 250,000 bone transforms per baked clip, and absolute numeric transform components at most 1,000,000. Bindings admit 256 art slots and 128 semantic actions. Baked frame count must exactly match the clip's 60 Hz loop/one-shot timing; no arbitrary frame-rate resampling or simulation evaluation occurs. Missing approved art uses a placeholder. Existing source schemas remain v1, unchanged.

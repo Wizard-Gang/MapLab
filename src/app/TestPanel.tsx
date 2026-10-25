@@ -1,3 +1,4 @@
+import {TestRig} from './TestRig';
 import {CameraFootprint,CameraViewport} from './CameraOverlay';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { NEUTRAL, MAX_TICKS } from '../test-runtime/session';
@@ -66,6 +67,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
     <output aria-label="Test movement HUD" data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''}>
       Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
     </output>
+    <TestRig source={run.runtimeSource()} state={state}/>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
     {view.gameplay&&<section aria-label="Test gameplay boundary"><h4>Declarative Test events</h4><p>Explicit fixture injection only. No combat victory, AI or wave executor is simulated.</p>
     <label>Test encounter<select aria-label="Test encounter" value={encounter} onChange={e=>setEncounter(e.target.value)}><option value="">Choose active encounter</option>{Object.entries(view.gameplay.encounters).map(([id,status])=><option key={id} value={id}>{id} · {status}</option>)}</select></label>

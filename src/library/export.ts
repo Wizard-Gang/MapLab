@@ -1,3 +1,6 @@
+import {readRig} from './riglab';
+import {validateBinding} from '../riglab/presentation';
+import {verifyForeign} from '../riglab/foreign';
 // Node-only saved-library export adapter. The format/inventory/ZIP core has no library imports.
 import { readFileSync } from 'node:fs';
 import { parseJson, validateDocumentSchema, validateSourceGraph, type ExportManifest, type JsonValue, type SourceDocument } from '../contracts';
@@ -63,7 +66,7 @@ export async function exportLibrary(folder: LibraryFolder, entryMapId: string, b
       };
       typedRefs(value);
       if ('dependencies' in value) for (const dep of value.dependencies) {
-        if (dep.required || dep.kind !== 'prefab' && dep.kind !== 'catalog' && needed.has(dep.id)) {
+        if (dep.kind !== 'riglab' && (dep.required || dep.kind !== 'prefab' && dep.kind !== 'catalog' && needed.has(dep.id))) {
           const target = documents.find((x) => x.id === dep.id);
           if (!target || target.path !== dep.path || target.kind !== dep.kind) refuse('export.dependency', `Missing or mismatched dependency ${dep.id}`);
           pending.push(dep.id);
@@ -74,7 +77,7 @@ export async function exportLibrary(folder: LibraryFolder, entryMapId: string, b
     // Expand all optional dependency edges to a fixed point after each document pass.
     const bindings = new Set(requiredContracts([...selected.values()].map((d) => d.value)).map((c) => `${c.key}@${c.version}`));
     for (const { value } of selected.values()) if ('dependencies' in value) for (const dep of value.dependencies) {
-      if (dep.required || selected.has(dep.id)) continue;
+      if (dep.kind==='riglab' || dep.required || selected.has(dep.id)) continue;
       if (dep.kind !== 'catalog') {
         if (dep.kind !== 'prefab' && needed.has(dep.id)) {
           const target = documents.find((d) => d.id === dep.id);
@@ -103,7 +106,13 @@ export async function exportLibrary(folder: LibraryFolder, entryMapId: string, b
   };
   for (const { path, value } of selected.values()) {
     add(path, exportBytes(exportValue(value as unknown as JsonValue)), 'authored');
-    if ('presentations' in value && value.presentations.length) refuse('export.presentation', 'Foreign presentation validation belongs to its importer; unvalidated bundles cannot export');
+    if ('presentations' in value) for (const binding of value.presentations) {
+      const dep=value.dependencies.find(d=>d.id===binding.bundleDependencyId&&d.kind==='riglab');
+      if(!dep) refuse('export.presentation','Missing RigLab dependency');
+      const bundle=readRig(folder,dep!.path);validateBinding(bundle,binding,value.assets);
+      const prefix=dep!.path.slice(0,-'manifest.json'.length);
+      for(const [p,b]of bundle.files)add(prefix+p,b,'foreign');
+    }
     if ('assets' in value) for (const a of value.assets) {
       const result = readAsset(folder, { path: a.path });
       if (result.asset.mediaType !== a.mediaType || result.asset.size[0] !== a.size[0] || result.asset.size[1] !== a.size[1]) refuse('export.asset', `Asset metadata differs from approved bytes: ${a.id}`);
@@ -118,7 +127,7 @@ export async function exportLibrary(folder: LibraryFolder, entryMapId: string, b
   const manifest: ExportManifest = { format: 'maplab.export', version: 1, generator: { name: 'MapLab', version: pkg.version }, entryMapId,
     documents: [...selected].sort(([a], [b]) => compare(a, b)).map(([id, d]) => ({ id, format: d.value.format, version: 1, path: d.path })),
     files: [...files].sort(([a], [b]) => compare(a, b)).map(([path, b]) => ({ path, bytes: b.length, sha256: sha256(b), role: roles.get(path)! })),
-    requiredContracts: requiredContracts([...selected.values()].map((d) => d.value)), externalMaps: [] };
+    requiredContracts: requiredContracts([...selected.values()].map((d) => d.value),verifyForeign(graph.documents,files).contracts), externalMaps: [] };
   add('manifest.json', exportBytes(manifest), 'authored');
   verifyFiles(files, pinnedSchemas);
   const zip = storeZip(files); verifyFiles(readStoreZip(zip), pinnedSchemas);

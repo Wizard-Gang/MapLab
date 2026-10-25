@@ -48,3 +48,9 @@ Specification C–I and K, as amended in place by the
 [R1 revision](specifications/2026-10-17-maplab-r1/README.md), remain the detailed
 product/data/controller/validation authority. The [permanent implementation plan](../implementation_plan.md) exclusively controls current/future delivery order.
 No performance target or conformance fixture is claimed to pass before its task.
+
+## Optional RigLab presentation (ML-030)
+
+`src/riglab/` independently reads version-pinned foreign bytes and produces read-only draw parts from validated baked frames. It imports no RigLab/Hexframe runtime or solver. `src/library/riglab.ts` stores an approved ZIP inventory atomically under `presentations/<manifest-sha256>/`; read and export revalidate the exact inner bytes. The outer inventory marks each preserved foreign file explicitly, and requiredContracts includes the foreign formats actually used. The separate consumer reader validates foreign envelopes before claiming support.
+
+RigLab presentation controls import a ZIP and bind approved image asset IDs, pivots, ground anchor, scale, native facing and semantic actions in one undoable source transaction. The preview and Test artwork consume actor values only. At 60 Hz they select baked frames from semantic entry ticks, reflect complete matrices and use facing-specific depth sides. Missing art, absent actions and valid unbaked bundles draw a generic placeholder. Root offsets remain visible art motion and never update actor position, contacts, collider, resources or gameplay. No IK, skeleton/weapon editor or root-motion extraction is added.

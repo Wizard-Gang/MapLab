@@ -46,3 +46,6 @@ export function onLibraryEvents(events: LibraryEvents): () => void {
 export interface AssetReply { readonly ok: true; readonly asset: import('../contracts/common-types').Asset; readonly base64: string }
 export const importImage = (mediaType: string, base64: string): Promise<AssetReply | Refusal> => post<AssetReply>(ROUTES.assetImport, { mediaType, base64 });
 export const readImage = (path: string, signal?: AbortSignal): Promise<AssetReply | Refusal> => post<AssetReply>(ROUTES.assetRead, { path }, signal);
+
+export const importRigZip = (base64:string):Promise<import('./riglab').RigReply|Refusal> => post(ROUTES.rigImport,{base64});
+export const readRigBundle = (path:string):Promise<import('./riglab').RigReply|Refusal> => post(ROUTES.rigRead,{path});
