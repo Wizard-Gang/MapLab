@@ -1,3 +1,5 @@
+import {RigError} from '../riglab/data';
+import { importRig, readRigReply, RIG_REQUEST_LIMIT } from './riglab';
 import { exportLibrary } from './export';
 import { BundleError } from '../export/zip';
 // Node only: the dev-server plugin that serves and writes the library folder (adopted H4, R1 H4/H8, the RigLab
@@ -124,6 +126,8 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
           response.end(bundle.zip); return;
         }
         if (url === ROUTES.identity) return send(response, 200, { app: 'maplab', pid: process.pid, root: realpathSync(server.config.root), library: f.label } satisfies Identity);
+        if (url === ROUTES.rigImport) return send(response, 200, importRig(f, body));
+        if (url === ROUTES.rigRead) return send(response, 200, readRigReply(f, body));
         if (url === ROUTES.assetImport) return send(response, 200, importAsset(f, body));
         if (url === ROUTES.assetRead) return send(response, 200, readAsset(f, body));
         if (url === ROUTES.library) return send(response, 200, await snapshot(await readLibrary(f)));
@@ -161,14 +165,14 @@ export function maplabLibrary(options: LibraryPluginOptions): Plugin {
         if (!folder) { request.resume(); return send(response, 503, no('library.unavailable', unavailable)); }
         const url = (request.url ?? '').split('?')[0] as string;
         void (async () => {
-          const text = await readBody(request, url === ROUTES.save ? SAVE_LIMIT : url === ROUTES.assetImport ? ASSET_REQUEST_LIMIT : REQUEST_LIMIT);
+          const text = await readBody(request, url === ROUTES.rigImport ? RIG_REQUEST_LIMIT : url === ROUTES.save ? SAVE_LIMIT : url === ROUTES.assetImport ? ASSET_REQUEST_LIMIT : REQUEST_LIMIT);
           if (text === null) return send(response, 413, no('request.too-large', 'The request body is too large'));
           let body: unknown;
           try { body = JSON.parse(text); } catch { return send(response, 400, no('request.json', 'The request body is not JSON')); }
           if (typeof body !== 'object' || body === null || Array.isArray(body)) return send(response, 400, no('request.json', 'The request body must be a JSON object'));
           await serial(() => route(url, body, response));
         })().catch((e: unknown) => {
-          const known = e instanceof LibraryError || e instanceof BundleError;
+          const known = e instanceof LibraryError || e instanceof BundleError || e instanceof RigError;
           if (!known) server.config.logger.error(`MapLab library request failed: ${e instanceof Error ? e.stack : String(e)}`);
           if (!response.headersSent) send(response, known ? (e.code === 'request.encoding' ? 400 : 409) : 500, no(known ? e.code : 'library.failed', e instanceof Error ? e.message : String(e)));
         });
