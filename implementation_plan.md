@@ -38,30 +38,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-027** — squash `faa1255`, PR #27; [record](docs/changes/ML-027.md).
 - **ML-028** — squash `30ad4ac`, PR #28; [record](docs/changes/ML-028.md).
 - **ML-029** — squash `bf239b8`, PR #29; [record](docs/changes/ML-029.md).
+- **ML-030** — squash `9e79034`, PR #30; [record](docs/changes/ML-030.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-030 / P1
-
-- **Source scope:** Optional RigLab bundle verification, baked presentation and explicit anchor/art/action bindings.
-- **Non-goals:** No IK/skeleton/weapon editor or physics root motion.
-- **Acceptance:** Supported format versions/hash fixtures; unbaked/missing-art placeholder; mirrored matrices; rig animation cannot change actor traces.
-- **Depends on:** ML-029 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [B2](docs/specifications/2026-10-16-maplab.md#b2-actual-export-and-coordinate-contracts), [G2](docs/specifications/2026-10-16-maplab.md#g2-actor-composition-and-riglab-import), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Validate optional RigLab bundle version/digest, bounded baked presentation, scale/coordinate and action/anchor bindings.
-  2. Draw inert placeholders for unsupported/unbaked art; mirror presentation matrices without root-motion or collider authority.
-  3. Create owned fixture(s): Pinned RigLab sample, missing-art, unbaked, mirrored armor frames and malicious reference.
-  4. Add executable checks: Import rejection and unchanged controller traces with/without art.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-031 / P1
 
 - **Source scope:** Runtime blocker overlay and regional navigation invalidation/replan preview.
@@ -76,6 +58,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Incremental-vs-clean rebuild comparison and cancellation budget tests.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-032 / P1
 
 - **Source scope:** Rigid translation moving-platform/elevator authoring and reference carry/departure/crush semantics.
