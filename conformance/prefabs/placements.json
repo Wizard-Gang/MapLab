@@ -1,0 +1,40 @@
+[
+  {
+    "id": "pp.a",
+    "position": [
+      64,
+      320
+    ],
+    "mirrorX": false,
+    "layerBindings": [
+      {
+        "slot": "scenery",
+        "layerId": "layer.world"
+      },
+      {
+        "slot": "actors",
+        "layerId": "layer.actors"
+      }
+    ],
+    "prefabPath": "prefabs/tree-marker.prefab.json"
+  },
+  {
+    "id": "pp.b",
+    "position": [
+      256,
+      320
+    ],
+    "mirrorX": true,
+    "layerBindings": [
+      {
+        "slot": "scenery",
+        "layerId": "layer.world"
+      },
+      {
+        "slot": "actors",
+        "layerId": "layer.actors"
+      }
+    ],
+    "prefabPath": "prefabs/tree-marker.prefab.json"
+  }
+]

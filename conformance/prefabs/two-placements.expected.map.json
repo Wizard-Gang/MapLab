@@ -1,0 +1,1348 @@
+{
+  "format": "maplab.map",
+  "version": 1,
+  "id": "map.two-placements",
+  "metadata": {
+    "name": "Independent tree markers",
+    "description": "Portal arrival map with a return portal.",
+    "authors": [
+      "MapLab R1 specification"
+    ],
+    "license": "CC0-1.0",
+    "tags": [
+      "acceptance",
+      "r1"
+    ]
+  },
+  "requiredFeatures": [
+    {
+      "key": "maplab.collision",
+      "version": 1
+    },
+    {
+      "key": "maplab.camera",
+      "version": 1
+    }
+  ],
+  "coordinates": {
+    "units": "WU",
+    "x": "right",
+    "y": "down",
+    "rotation": "clockwiseDegrees",
+    "quantum": 0.0625,
+    "ticksPerSecond": 60
+  },
+  "bounds": [
+    0,
+    0,
+    640,
+    640
+  ],
+  "collisionContract": {
+    "key": "maplab.collision",
+    "version": 1
+  },
+  "camera": {
+    "model": {
+      "key": "maplab.camera",
+      "version": 1
+    },
+    "defaults": {
+      "viewWU": [
+        640,
+        360
+      ],
+      "zoom": 1,
+      "bounds": [
+        0,
+        0,
+        640,
+        640
+      ],
+      "followX": true,
+      "followY": true,
+      "deadZone": [
+        0.375,
+        0.25,
+        0.25,
+        0.5
+      ],
+      "dampingTicks": [
+        8,
+        12
+      ],
+      "lookaheadWU": [
+        80,
+        64
+      ],
+      "verticalPolicy": "platformSnap",
+      "climbFollow": true,
+      "transitionTicks": 15,
+      "transition": "smoothstep"
+    },
+    "zones": [],
+    "shakeEffects": []
+  },
+  "environment": {
+    "ambientColor": "#ffffff",
+    "effects": [],
+    "zones": []
+  },
+  "navigation": {
+    "modeVolumes": [],
+    "links": [],
+    "overrides": []
+  },
+  "dependencies": [
+    {
+      "id": "movement.player",
+      "kind": "movement",
+      "path": "movement/player.movement.json",
+      "required": true
+    },
+    {
+      "id": "catalog.core",
+      "kind": "catalog",
+      "path": "catalogs/core.catalog.json",
+      "required": true
+    },
+    {
+      "id": "movement.ground",
+      "kind": "movement",
+      "path": "movement/ground.movement.json",
+      "required": true
+    },
+    {
+      "id": "prefab.tree-marker",
+      "kind": "prefab",
+      "path": "prefabs/tree-marker.prefab.json",
+      "required": false
+    }
+  ],
+  "assets": [
+    {
+      "id": "pp.a:image",
+      "path": "assets/22347f62eb64/22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1.svg",
+      "mediaType": "image/svg+xml",
+      "wuPerAssetUnit": 1,
+      "size": [
+        16,
+        16
+      ]
+    },
+    {
+      "id": "pp.b:image",
+      "path": "assets/22347f62eb64/22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1.svg",
+      "mediaType": "image/svg+xml",
+      "wuPerAssetUnit": 1,
+      "size": [
+        16,
+        16
+      ]
+    }
+  ],
+  "presentations": [],
+  "layers": [
+    {
+      "id": "layer.sky",
+      "name": "Sky",
+      "parentId": null,
+      "order": 0,
+      "visible": true,
+      "opacity": 1,
+      "kind": "background",
+      "space": "camera",
+      "parallax": [
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "repeat": "none",
+      "repeatSize": [
+        0,
+        0
+      ],
+      "scrollWUPerTick": [
+        0,
+        0
+      ],
+      "phase": [
+        0,
+        0
+      ],
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.world",
+      "name": "Ground art",
+      "parentId": null,
+      "order": 1,
+      "visible": true,
+      "opacity": 1,
+      "kind": "sprite",
+      "occlusionFade": null
+    },
+    {
+      "id": "layer.actors",
+      "name": "Actors",
+      "parentId": null,
+      "order": 2,
+      "visible": true,
+      "opacity": 1,
+      "kind": "actors"
+    }
+  ],
+  "visuals": [
+    {
+      "id": "visual.sky",
+      "name": "Sky",
+      "layerId": "layer.sky",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          0
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            640,
+            360
+          ]
+        },
+        "fill": "#cfe6da"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "visual.floor",
+      "name": "Clearing ground art",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          0,
+          576
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            0,
+            0,
+            640,
+            64
+          ]
+        },
+        "fill": "#5b7a3c"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "pp.a:trunk",
+      "name": "Tree trunk",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          64,
+          320
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "asset",
+        "assetId": "pp.a:image",
+        "pivot": [
+          8,
+          16
+        ]
+      },
+      "bodyId": null
+    },
+    {
+      "id": "pp.a:canopy",
+      "name": "Tree canopy",
+      "layerId": "layer.world",
+      "parentId": "pp.a:trunk",
+      "order": 1,
+      "transform": {
+        "position": [
+          0,
+          -64
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "circle",
+          "center": [
+            0,
+            -8
+          ],
+          "radius": 40
+        },
+        "fill": "#2f6b3f"
+      },
+      "bodyId": null
+    },
+    {
+      "id": "pp.b:trunk",
+      "name": "Tree trunk",
+      "layerId": "layer.world",
+      "parentId": null,
+      "order": 0,
+      "transform": {
+        "position": [
+          256,
+          320
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": true,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "asset",
+        "assetId": "pp.b:image",
+        "pivot": [
+          8,
+          16
+        ]
+      },
+      "bodyId": null
+    },
+    {
+      "id": "pp.b:canopy",
+      "name": "Tree canopy",
+      "layerId": "layer.world",
+      "parentId": "pp.b:trunk",
+      "order": 1,
+      "transform": {
+        "position": [
+          0,
+          -64
+        ],
+        "rotation": 0,
+        "scale": [
+          1,
+          1
+        ],
+        "mirrorX": false,
+        "mirrorY": false
+      },
+      "source": {
+        "kind": "shape",
+        "shape": {
+          "kind": "circle",
+          "center": [
+            0,
+            -8
+          ],
+          "radius": 40
+        },
+        "fill": "#2f6b3f"
+      },
+      "bodyId": null
+    }
+  ],
+  "materials": [
+    {
+      "id": "material.earth",
+      "name": "Earth",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "ground"
+      ]
+    },
+    {
+      "id": "pp.a:earth",
+      "name": "Earth",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "ground"
+      ]
+    },
+    {
+      "id": "pp.b:earth",
+      "name": "Earth",
+      "traction": 256,
+      "conveyorSu": 0,
+      "effect": null,
+      "tags": [
+        "ground"
+      ]
+    }
+  ],
+  "bodies": [
+    {
+      "id": "body.floor",
+      "name": "Clearing ground",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.floor",
+          "kind": "rect",
+          "rect": [
+            0,
+            576,
+            640,
+            64
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "body.edges",
+      "name": "World edges",
+      "position": [
+        0,
+        0
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "material.earth",
+      "shapes": [
+        {
+          "id": "shape.edge.left",
+          "kind": "segment",
+          "a": [
+            0,
+            0
+          ],
+          "b": [
+            0,
+            576
+          ]
+        },
+        {
+          "id": "shape.edge.right",
+          "kind": "segment",
+          "a": [
+            640,
+            0
+          ],
+          "b": [
+            640,
+            576
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "pp.a:body",
+      "name": "Marker base",
+      "position": [
+        64,
+        320
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "pp.a:earth",
+      "shapes": [
+        {
+          "id": "pp.a:shape",
+          "kind": "rect",
+          "rect": [
+            -16,
+            0,
+            32,
+            16
+          ]
+        }
+      ],
+      "motion": null
+    },
+    {
+      "id": "pp.b:body",
+      "name": "Marker base",
+      "position": [
+        256,
+        320
+      ],
+      "enabled": true,
+      "mobility": "static",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "materialId": "pp.b:earth",
+      "shapes": [
+        {
+          "id": "pp.b:shape",
+          "kind": "rect",
+          "rect": [
+            -16,
+            0,
+            32,
+            16
+          ]
+        }
+      ],
+      "motion": null
+    }
+  ],
+  "footholds": [
+    {
+      "id": "fh.floor",
+      "name": "Clearing floor",
+      "ownerBodyId": "body.floor",
+      "a": [
+        0,
+        576
+      ],
+      "b": [
+        640,
+        576
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "body.floor",
+        "shapeId": "shape.floor",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "material.earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": null
+    },
+    {
+      "id": "pp.a:top",
+      "name": "West floor",
+      "ownerBodyId": "pp.a:body",
+      "a": [
+        -16,
+        0
+      ],
+      "b": [
+        16,
+        0
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "pp.a:body",
+        "shapeId": "pp.a:shape",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "pp.a:earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": "layer.actors"
+    },
+    {
+      "id": "pp.b:top",
+      "name": "West floor",
+      "ownerBodyId": "pp.b:body",
+      "a": [
+        -16,
+        0
+      ],
+      "b": [
+        16,
+        0
+      ],
+      "normal": "up",
+      "mode": "solid",
+      "solidEdge": {
+        "bodyId": "pp.b:body",
+        "shapeId": "pp.b:shape",
+        "edgeIndex": 0
+      },
+      "dropAllowed": false,
+      "dropGroupId": null,
+      "materialId": "pp.b:earth",
+      "direction": "both",
+      "category": "world",
+      "mask": [
+        "actor"
+      ],
+      "enabled": true,
+      "connections": {
+        "a": [],
+        "b": []
+      },
+      "planeId": "layer.actors"
+    }
+  ],
+  "traversals": [
+    {
+      "id": "pp.a:ladder",
+      "kind": "ladder",
+      "points": [
+        [
+          64,
+          256
+        ],
+        [
+          64,
+          320
+        ]
+      ],
+      "grabRadius": 12,
+      "direction": "both",
+      "access": [
+        {
+          "id": "pp.a:access.top",
+          "pathU": 0,
+          "anchor": {
+            "kind": "world",
+            "point": [
+              64,
+              256
+            ]
+          },
+          "entry": "airborne",
+          "exit": "airborne",
+          "conditions": []
+        },
+        {
+          "id": "pp.a:access.bottom",
+          "pathU": 1,
+          "anchor": {
+            "kind": "surface",
+            "footholdId": "pp.a:top",
+            "u": 0.5,
+            "normalOffset": 0
+          },
+          "entry": "grounded",
+          "exit": "grounded",
+          "conditions": []
+        }
+      ],
+      "requiredAbilities": [
+        "climb"
+      ],
+      "visualId": null,
+      "planeId": "layer.actors"
+    },
+    {
+      "id": "pp.b:ladder",
+      "kind": "ladder",
+      "points": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          320
+        ]
+      ],
+      "grabRadius": 12,
+      "direction": "both",
+      "access": [
+        {
+          "id": "pp.b:access.top",
+          "pathU": 0,
+          "anchor": {
+            "kind": "world",
+            "point": [
+              256,
+              256
+            ]
+          },
+          "entry": "airborne",
+          "exit": "airborne",
+          "conditions": []
+        },
+        {
+          "id": "pp.b:access.bottom",
+          "pathU": 1,
+          "anchor": {
+            "kind": "surface",
+            "footholdId": "pp.b:top",
+            "u": 0.5,
+            "normalOffset": 0
+          },
+          "entry": "grounded",
+          "exit": "grounded",
+          "conditions": []
+        }
+      ],
+      "requiredAbilities": [
+        "climb"
+      ],
+      "visualId": null,
+      "planeId": "layer.actors"
+    }
+  ],
+  "regions": [
+    {
+      "id": "region.back",
+      "name": "Return portal",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          32,
+          512,
+          32,
+          64
+        ]
+      },
+      "role": "trigger"
+    },
+    {
+      "id": "pp.a:area",
+      "name": "Marker area",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          40,
+          240,
+          48,
+          96
+        ]
+      },
+      "role": "encounter"
+    },
+    {
+      "id": "pp.b:area",
+      "name": "Marker area",
+      "shape": {
+        "kind": "rect",
+        "rect": [
+          232,
+          240,
+          48,
+          96
+        ]
+      },
+      "role": "encounter"
+    }
+  ],
+  "entities": [
+    {
+      "id": "start.arrival",
+      "name": "Forest arrival",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "fh.floor",
+        "u": 0.25,
+        "normalOffset": 0
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "playerStart",
+      "movementId": "movement.player",
+      "default": true
+    },
+    {
+      "id": "pp.a:guardian",
+      "name": "Forest guardian",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "pp.a:top",
+        "u": 0.25,
+        "normalOffset": 0
+      },
+      "enabled": false,
+      "facing": "left",
+      "visualId": "pp.a:trunk",
+      "presentationId": null,
+      "kind": "enemySpawn",
+      "archetype": {
+        "key": "enemy.forest-guardian",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.ground",
+      "ai": {
+        "behavior": {
+          "key": "core.guard",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": "pp.a:route",
+        "guard": {
+          "kind": "entity",
+          "entityId": "pp.a:guardian",
+          "point": [
+            4,
+            0
+          ]
+        },
+        "patrolRegionId": "pp.a:area",
+        "pursuitRegionId": "pp.a:area",
+        "home": {
+          "kind": "body",
+          "bodyId": "pp.a:body",
+          "point": [
+            0,
+            0
+          ]
+        },
+        "leashRegionId": "pp.a:area",
+        "aggroRegionId": "pp.a:area",
+        "invalidRoute": "safeStop",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "never",
+        "delayTicks": 0,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": "pp.a:guardians"
+    },
+    {
+      "id": "pp.a:chest",
+      "name": "High chest",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          72,
+          304
+        ]
+      },
+      "enabled": true,
+      "facing": "left",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "chest",
+      "archetype": {
+        "key": "chest.wooden",
+        "version": 1,
+        "params": {
+          "lootTable": "body"
+        }
+      },
+      "bodyIds": [],
+      "interaction": {
+        "key": "core.chest.open",
+        "version": 1,
+        "params": {}
+      }
+    },
+    {
+      "id": "pp.b:guardian",
+      "name": "Forest guardian",
+      "anchor": {
+        "kind": "surface",
+        "footholdId": "pp.b:top",
+        "u": 0.75,
+        "normalOffset": 0
+      },
+      "enabled": false,
+      "facing": "right",
+      "visualId": "pp.b:trunk",
+      "presentationId": null,
+      "kind": "enemySpawn",
+      "archetype": {
+        "key": "enemy.forest-guardian",
+        "version": 1,
+        "params": {}
+      },
+      "movementId": "movement.ground",
+      "ai": {
+        "behavior": {
+          "key": "core.guard",
+          "version": 1,
+          "params": {}
+        },
+        "routeId": "pp.b:route",
+        "guard": {
+          "kind": "entity",
+          "entityId": "pp.b:guardian",
+          "point": [
+            -4,
+            0
+          ]
+        },
+        "patrolRegionId": "pp.b:area",
+        "pursuitRegionId": "pp.b:area",
+        "home": {
+          "kind": "body",
+          "bodyId": "pp.b:body",
+          "point": [
+            0,
+            0
+          ]
+        },
+        "leashRegionId": "pp.b:area",
+        "aggroRegionId": "pp.b:area",
+        "invalidRoute": "safeStop",
+        "fallback": null
+      },
+      "respawn": {
+        "mode": "never",
+        "delayTicks": 0,
+        "maxAlive": 1,
+        "event": null
+      },
+      "groupId": "pp.b:guardians"
+    },
+    {
+      "id": "pp.b:chest",
+      "name": "High chest",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          248,
+          304
+        ]
+      },
+      "enabled": true,
+      "facing": "right",
+      "visualId": null,
+      "presentationId": null,
+      "kind": "chest",
+      "archetype": {
+        "key": "chest.wooden",
+        "version": 1,
+        "params": {
+          "lootTable": "body"
+        }
+      },
+      "bodyIds": [],
+      "interaction": {
+        "key": "core.chest.open",
+        "version": 1,
+        "params": {}
+      }
+    }
+  ],
+  "waypoints": [
+    {
+      "id": "pp.a:wp.a",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          56,
+          320
+        ]
+      },
+      "waitTicks": 0
+    },
+    {
+      "id": "pp.a:wp.b",
+      "anchor": {
+        "kind": "entity",
+        "entityId": "pp.a:guardian",
+        "point": [
+          8,
+          0
+        ]
+      },
+      "waitTicks": 6
+    },
+    {
+      "id": "pp.b:wp.a",
+      "anchor": {
+        "kind": "world",
+        "point": [
+          264,
+          320
+        ]
+      },
+      "waitTicks": 0
+    },
+    {
+      "id": "pp.b:wp.b",
+      "anchor": {
+        "kind": "entity",
+        "entityId": "pp.b:guardian",
+        "point": [
+          -8,
+          0
+        ]
+      },
+      "waitTicks": 6
+    }
+  ],
+  "routes": [
+    {
+      "id": "pp.a:route",
+      "waypointIds": [
+        "pp.a:wp.a",
+        "pp.a:wp.b"
+      ],
+      "mode": "pingPong",
+      "requiredAbilities": [],
+      "conditions": [
+        {
+          "kind": "not",
+          "term": {
+            "kind": "flag",
+            "id": "pp.a:visited",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "pp.b:route",
+      "waypointIds": [
+        "pp.b:wp.a",
+        "pp.b:wp.b"
+      ],
+      "mode": "pingPong",
+      "requiredAbilities": [],
+      "conditions": [
+        {
+          "kind": "not",
+          "term": {
+            "kind": "flag",
+            "id": "pp.b:visited",
+            "equals": true
+          }
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "pp.a:trigger",
+      "regionId": "pp.a:area",
+      "event": "enter",
+      "actorCategories": [
+        "player"
+      ],
+      "once": true,
+      "conditions": [
+        {
+          "kind": "flag",
+          "id": "pp.a:visited",
+          "equals": false
+        }
+      ],
+      "actions": [
+        {
+          "key": "core.flag.set",
+          "version": 1,
+          "params": {
+            "flag": {
+              "ref": {
+                "kind": "flag",
+                "id": "pp.a:visited"
+              }
+            },
+            "value": true
+          }
+        },
+        {
+          "key": "core.encounter.activate",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "encounter",
+                "id": "pp.a:encounter"
+              }
+            }
+          }
+        },
+        {
+          "key": "core.body.set-enabled",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "body",
+                "id": "pp.a:body"
+              }
+            },
+            "enabled": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "pp.b:trigger",
+      "regionId": "pp.b:area",
+      "event": "enter",
+      "actorCategories": [
+        "player"
+      ],
+      "once": true,
+      "conditions": [
+        {
+          "kind": "flag",
+          "id": "pp.b:visited",
+          "equals": false
+        }
+      ],
+      "actions": [
+        {
+          "key": "core.flag.set",
+          "version": 1,
+          "params": {
+            "flag": {
+              "ref": {
+                "kind": "flag",
+                "id": "pp.b:visited"
+              }
+            },
+            "value": true
+          }
+        },
+        {
+          "key": "core.encounter.activate",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "encounter",
+                "id": "pp.b:encounter"
+              }
+            }
+          }
+        },
+        {
+          "key": "core.body.set-enabled",
+          "version": 1,
+          "params": {
+            "target": {
+              "ref": {
+                "kind": "body",
+                "id": "pp.b:body"
+              }
+            },
+            "enabled": false
+          }
+        }
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "id": "pp.a:encounter",
+      "regionId": "pp.a:area",
+      "groupId": "pp.a:guardians",
+      "spawnIds": [
+        "pp.a:guardian"
+      ],
+      "waves": [],
+      "completionEvent": {
+        "key": "core.encounter.cleared",
+        "version": 1
+      },
+      "onComplete": [
+        {
+          "key": "core.flag.set",
+          "version": 1,
+          "params": {
+            "flag": {
+              "ref": {
+                "kind": "flag",
+                "id": "pp.a:visited"
+              }
+            },
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "pp.b:encounter",
+      "regionId": "pp.b:area",
+      "groupId": "pp.b:guardians",
+      "spawnIds": [
+        "pp.b:guardian"
+      ],
+      "waves": [],
+      "completionEvent": {
+        "key": "core.encounter.cleared",
+        "version": 1
+      },
+      "onComplete": [
+        {
+          "key": "core.flag.set",
+          "version": 1,
+          "params": {
+            "flag": {
+              "ref": {
+                "kind": "flag",
+                "id": "pp.b:visited"
+              }
+            },
+            "value": true
+          }
+        }
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "id": "pp.a:visited",
+      "initial": false
+    },
+    {
+      "id": "pp.b:visited",
+      "initial": false
+    }
+  ],
+  "prefabPlacements": [
+    {
+      "id": "pp.a",
+      "prefabId": "prefab.tree-marker",
+      "position": [
+        64,
+        320
+      ],
+      "mirrorX": false,
+      "layerBindings": [
+        {
+          "slot": "scenery",
+          "layerId": "layer.world"
+        },
+        {
+          "slot": "actors",
+          "layerId": "layer.actors"
+        }
+      ],
+      "expandedIds": [
+        "pp.a:image",
+        "pp.a:visited",
+        "pp.a:trunk",
+        "pp.a:canopy",
+        "pp.a:earth",
+        "pp.a:body",
+        "pp.a:shape",
+        "pp.a:top",
+        "pp.a:ladder",
+        "pp.a:access.top",
+        "pp.a:access.bottom",
+        "pp.a:area",
+        "pp.a:guardian",
+        "pp.a:chest",
+        "pp.a:wp.a",
+        "pp.a:wp.b",
+        "pp.a:route",
+        "pp.a:trigger",
+        "pp.a:encounter"
+      ]
+    },
+    {
+      "id": "pp.b",
+      "prefabId": "prefab.tree-marker",
+      "position": [
+        256,
+        320
+      ],
+      "mirrorX": true,
+      "layerBindings": [
+        {
+          "slot": "scenery",
+          "layerId": "layer.world"
+        },
+        {
+          "slot": "actors",
+          "layerId": "layer.actors"
+        }
+      ],
+      "expandedIds": [
+        "pp.b:image",
+        "pp.b:visited",
+        "pp.b:trunk",
+        "pp.b:canopy",
+        "pp.b:earth",
+        "pp.b:body",
+        "pp.b:shape",
+        "pp.b:top",
+        "pp.b:ladder",
+        "pp.b:access.top",
+        "pp.b:access.bottom",
+        "pp.b:area",
+        "pp.b:guardian",
+        "pp.b:chest",
+        "pp.b:wp.a",
+        "pp.b:wp.b",
+        "pp.b:route",
+        "pp.b:trigger",
+        "pp.b:encounter"
+      ]
+    }
+  ],
+  "terrain": []
+}

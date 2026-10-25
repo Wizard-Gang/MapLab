@@ -114,16 +114,16 @@ test.each(['group', 'actors', 'tile'])('visuals cannot paint into a %s layer', (
   expect(result.ok ? [] : result.diagnostics.map((d) => [d.code, d.jsonPath])).toEqual([['visual.reference', '$.visuals[0].layerId']]);
 });
 
-test('prefab provenance preserves expanded object kinds', () => {
+test('prefab provenance permits independent kind edits after expansion', () => {
   const world = JSON.parse(read(r1 + 'maps/forest.map.json'));
   const id = world.visuals.find((v: { id: string }) => v.id === 'pp.tree1:trunk').id;
   world.visuals = world.visuals.filter((v: { id: string }) => v.id !== id);
   world.materials.push({ ...world.materials[0], id });
   const result = validateMapGeometry(world, context);
-  expect(result.ok ? [] : result.diagnostics.map((d) => d.code)).toEqual(['prefab-placement.kind']);
+  expect(result.ok).toBe(true);
 });
 
-test('prefab foothold and climb plane slots bind to their expanded actor planes', () => {
+test('saved prefab provenance permits independent plane edits', () => {
   const world = JSON.parse(read(r1 + 'maps/clearing.map.json'));
   const template = JSON.parse(read(r1 + 'prefabs/tree.prefab.json'));
   template.id = 'prefab.platform'; template.layerSlots = ['plane']; template.content.visuals = [];
@@ -147,10 +147,10 @@ test('prefab foothold and climb plane slots bind to their expanded actor planes'
   expect(validateMapGeometry(world, options).ok).toBe(true);
   world.footholds.at(-1).planeId = null;
   const foothold = validateMapGeometry(world, options);
-  expect(foothold.ok ? [] : foothold.diagnostics.map((d) => d.code)).toEqual(['prefab-placement.plane-binding']);
+  expect(foothold.ok).toBe(true);
   world.footholds.at(-1).planeId = 'layer.actors'; world.traversals[0].planeId = null;
   const climb = validateMapGeometry(world, options);
-  expect(climb.ok ? [] : climb.diagnostics.map((d) => d.code)).toEqual(['prefab-placement.plane-binding']);
+  expect(climb.ok).toBe(true);
 });
 
 test('entity anchor chains resolve access positions and reject cycles and missing target anchors', () => {

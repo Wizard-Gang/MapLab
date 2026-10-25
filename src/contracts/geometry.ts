@@ -355,46 +355,20 @@ export function validateMapGeometry(value: JsonValue, context: GeometryContext =
       if (slots.has(b.slot)) { validBindings = false; report('layer-binding', 'slot', [...at, 'layerBindings', j, 'slot'], 'Each slot binds exactly once', p.id); } slots.add(b.slot);
       if (!layers.has(b.layerId) || layers.get(b.layerId)?.kind === 'group') { validBindings = false; report('layer-binding', 'reference', [...at, 'layerBindings', j, 'layerId'], 'Slot must bind a content layer', p.id); }
     });
-    if (prefab && (slots.size !== prefab.layerSlots.length || prefab.layerSlots.some((s) => !slots.has(s)))) { validBindings = false; report('prefab-placement', 'layer-slots', [...at, 'layerBindings'], 'Bindings must cover exactly the prefab layer slots', p.id); }
     p.expandedIds.forEach((id, j) => {
       if (!ids.has(id) || ids.get(id) === 'prefab-placement') report('prefab-placement', 'reference', [...at, 'expandedIds', j], 'Expanded object does not exist', p.id);
       else if (expanded.has(id)) report('prefab-placement', 'ownership', [...at, 'expandedIds', j], 'Expanded object belongs to two placements', p.id);
       expanded.add(id);
     });
-    if (prefab) {
-      const sourceKinds = contentKinds(prefab.content);
-      const expected = [...sourceKinds.keys()].map((id) => `${p.id}:${id}`).sort();
-      if (canonical(expected) !== canonical([...p.expandedIds].sort())) report('prefab-placement', 'expanded-ids', [...at, 'expandedIds'], 'Expanded IDs must preserve the placement namespace', p.id);
-      p.expandedIds.forEach((id, j) => {
-        const kind = sourceKinds.get(id.slice(p.id.length + 1));
-        if (kind && ids.has(id) && ids.get(id) !== kind) report('prefab-placement', 'kind', [...at, 'expandedIds', j], 'Expanded object must retain its source kind', p.id);
-      });
-      const bindings = new Map(p.layerBindings.map((b) => [b.slot, b.layerId]));
-      if (validBindings) {
-        prefab.content.visuals.forEach((v) => {
-          const actual = doc.visuals.find((x) => x.id === `${p.id}:${v.id}`);
-          if (actual && actual.layerId !== bindings.get(v.layerId)) report('prefab-placement', 'layer-binding', [...at, 'layerBindings'], 'Expanded visual layer does not match its slot', p.id);
-        });
-        prefab.content.footholds.forEach((f) => {
-          const actual = doc.footholds.find((x) => x.id === `${p.id}:${f.id}`);
-          if (f.planeId !== null && actual && actual.planeId !== bindings.get(f.planeId)) report('prefab-placement', 'plane-binding', [...at, 'layerBindings'], 'Expanded foothold plane does not match its slot', p.id);
-        });
-        prefab.content.traversals.forEach((t) => {
-          const actual = doc.traversals.find((x) => x.id === `${p.id}:${t.id}`);
-          if ('planeId' in t && t.planeId !== null && actual && 'planeId' in actual && actual.planeId !== bindings.get(t.planeId)) report('prefab-placement', 'plane-binding', [...at, 'layerBindings'], 'Expanded climb plane does not match its slot', p.id);
-        });
-      }
-    }
+    const boundLayers = new Set(p.layerBindings.map(b => b.layerId));
+    const owned = new Set(p.expandedIds);
+    if (validBindings && p.expandedIds.every(id => id.startsWith(`${p.id}:`)) && doc.visuals.some(v => owned.has(v.id) && !boundLayers.has(v.layerId))) report('prefab-placement', boundLayers.size ? 'layer-binding' : 'layer-slots', [...at, 'layerBindings'], 'Expanded visuals must use a stored layer binding', p.id);
+    // Provenance is a snapshot. The current template may have changed or been removed; never
+    // revalidate an expansion against its current IDs, kinds or slot declarations. Stored
+    // visual bindings still constrain the expansion without consulting the mutable source.
+    if (p.expandedIds.some(id => !id.startsWith(`${p.id}:`))) report('prefab-placement', 'expanded-ids', [...at, 'expandedIds'], 'Expanded IDs must preserve the placement namespace', p.id);
   });
   return result(doc, out, unresolved);
-}
-function contentKinds(content: GeometryContent): Map<string, string> {
-  const ids = new Map<string, string>();
-  for (const [collection, kind] of Object.entries(CONTENT_KINDS)) {
-    (content[collection as keyof GeometryContent] as readonly unknown[]).forEach((v) => { if (record(v) && isId(v.id)) ids.set(v.id, kind); });
-  }
-  content.bodies.forEach((b) => b.shapes.forEach((s) => ids.set(s.id, 'body-shape')));
-  content.traversals.forEach((t) => { if ('access' in t) t.access.forEach((a) => ids.set(a.id, 'access-point')); }); return ids;
 }
 export function validatePrefab(value: JsonValue): GeometryResult<PrefabDocument> {
   const ds = structural(value, PARTIAL_PREFAB_SCHEMA); if (ds.length) return { ok: false, diagnostics: ds };

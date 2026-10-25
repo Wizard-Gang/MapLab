@@ -1,3 +1,4 @@
+import { PrefabPanel } from './PrefabPanel';
 import {CameraPanel} from './CameraPanel';
 import { GameplayPanel } from './GameplayPanel';
 import { TestPanel } from './TestPanel';
@@ -236,6 +237,7 @@ function Document({ doc, busy, entry, tilesets }: { readonly doc: OpenDoc; reado
       <SelectionPanel model={doc.state.model} session={store.selection(doc.id)} locked={locked} clipboard={() => store.clipboard} setClipboard={(text) => { store.clipboard = text; }} />
       <TerrainPanel key={`terrain-${doc.id}`} model={doc.state.model} session={store.terrain(doc.id)} selection={store.selection(doc.id)} locked={locked} />
       {(!entry || entry.errors === 0) && <VisualPanel key={`visual-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />}
+      <PrefabPanel key={`prefab-${doc.id}`} store={store} doc={doc} />
       <ClimbPanel key={`climb-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <GeometryPanel key={`geometry-${doc.id}`} model={doc.state.model} session={store.selection(doc.id)} locked={locked} />
       <Hierarchy ids={ids} model={doc.state.model} session={store.selection(doc.id)} />

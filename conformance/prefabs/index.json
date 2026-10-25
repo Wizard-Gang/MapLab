@@ -1,0 +1,39 @@
+{
+  "license": "CC0-1.0",
+  "owner": "MapLab authors",
+  "purpose": "ML-029 independent prefab expansions; no borrowed art",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "5385acfdbcb9f97e9d4046b0b2f1604b08a01459010b7afaf233d2e58a4c22d7"
+    },
+    {
+      "path": "assets/22347f62eb64/22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1.svg",
+      "sha256": "22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1"
+    },
+    {
+      "path": "base.map.json",
+      "sha256": "5f73ff954191269f06a7b8fa502ddb05a4e679fbcc64518ba1c3af2b6ba870b2"
+    },
+    {
+      "path": "consumer.expected.json",
+      "sha256": "e1b05eb7a18dae8387d3f0db041fd65a460e2d90c947db973c00fa06f0665f9d"
+    },
+    {
+      "path": "export.expected.json",
+      "sha256": "0694dff6c2683707edde87204a294dcf3639fe4f57f95b9db8ec870977ec1872"
+    },
+    {
+      "path": "placements.json",
+      "sha256": "1b78aa97afb2999593dcb94928f84571afdff17aca505100256b5d57526eb7e0"
+    },
+    {
+      "path": "prefabs/tree-marker.prefab.json",
+      "sha256": "e73a5fece1bfaf6345878aa411c9c30717172f7b566c3ce2014792024e366fd4"
+    },
+    {
+      "path": "two-placements.expected.map.json",
+      "sha256": "23acc6d0983979ed8e739d518afa618414eaaff927f2bdef759d155f1f9d0503"
+    }
+  ]
+}

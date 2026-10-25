@@ -1,0 +1,50 @@
+{
+  "verified": true,
+  "placements": [
+    {
+      "id": "pp.a",
+      "floor": [
+        48,
+        320,
+        80,
+        320
+      ],
+      "ladder": [
+        [
+          64,
+          256
+        ],
+        [
+          64,
+          320
+        ]
+      ],
+      "flag": "pp.a:visited",
+      "expanded": 19
+    },
+    {
+      "id": "pp.b",
+      "floor": [
+        240,
+        320,
+        272,
+        320
+      ],
+      "ladder": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          320
+        ]
+      ],
+      "flag": "pp.b:visited",
+      "expanded": 19
+    }
+  ],
+  "assetFiles": [
+    "assets/22347f62eb64/22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1.svg"
+  ]
+}

@@ -1,0 +1,482 @@
+{
+  "format": "maplab.prefab",
+  "version": 1,
+  "id": "prefab.tree-marker",
+  "name": "Owned tree marker",
+  "pivot": [
+    0,
+    0
+  ],
+  "dependencies": [
+    {
+      "id": "catalog.core",
+      "kind": "catalog",
+      "path": "catalogs/core.catalog.json",
+      "required": true
+    },
+    {
+      "id": "movement.ground",
+      "kind": "movement",
+      "path": "movement/ground.movement.json",
+      "required": true
+    }
+  ],
+  "layerSlots": [
+    "scenery",
+    "actors"
+  ],
+  "content": {
+    "assets": [
+      {
+        "id": "image",
+        "path": "assets/22347f62eb64/22347f62eb6490be9371fe3d9f92a98684bbdef8e2b2f0bba1d096580419d3a1.svg",
+        "mediaType": "image/svg+xml",
+        "wuPerAssetUnit": 1,
+        "size": [
+          16,
+          16
+        ]
+      }
+    ],
+    "presentations": [],
+    "flags": [
+      {
+        "id": "visited",
+        "initial": false
+      }
+    ],
+    "visuals": [
+      {
+        "id": "trunk",
+        "name": "Tree trunk",
+        "layerId": "scenery",
+        "parentId": null,
+        "order": 0,
+        "transform": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ],
+          "mirrorX": false,
+          "mirrorY": false
+        },
+        "source": {
+          "kind": "asset",
+          "assetId": "image",
+          "pivot": [
+            8,
+            16
+          ]
+        },
+        "bodyId": null
+      },
+      {
+        "id": "canopy",
+        "name": "Tree canopy",
+        "layerId": "scenery",
+        "parentId": "trunk",
+        "order": 1,
+        "transform": {
+          "position": [
+            0,
+            -64
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ],
+          "mirrorX": false,
+          "mirrorY": false
+        },
+        "source": {
+          "kind": "shape",
+          "shape": {
+            "kind": "circle",
+            "center": [
+              0,
+              -8
+            ],
+            "radius": 40
+          },
+          "fill": "#2f6b3f"
+        },
+        "bodyId": null
+      }
+    ],
+    "materials": [
+      {
+        "id": "earth",
+        "name": "Earth",
+        "traction": 256,
+        "conveyorSu": 0,
+        "effect": null,
+        "tags": [
+          "ground"
+        ]
+      }
+    ],
+    "bodies": [
+      {
+        "id": "body",
+        "name": "Marker base",
+        "position": [
+          0,
+          0
+        ],
+        "enabled": true,
+        "mobility": "static",
+        "category": "world",
+        "mask": [
+          "actor"
+        ],
+        "materialId": "earth",
+        "shapes": [
+          {
+            "id": "shape",
+            "kind": "rect",
+            "rect": [
+              -16,
+              0,
+              32,
+              16
+            ]
+          }
+        ],
+        "motion": null
+      }
+    ],
+    "footholds": [
+      {
+        "id": "top",
+        "name": "West floor",
+        "ownerBodyId": "body",
+        "a": [
+          -16,
+          0
+        ],
+        "b": [
+          16,
+          0
+        ],
+        "normal": "up",
+        "mode": "solid",
+        "solidEdge": {
+          "bodyId": "body",
+          "shapeId": "shape",
+          "edgeIndex": 0
+        },
+        "dropAllowed": false,
+        "dropGroupId": null,
+        "materialId": "earth",
+        "direction": "both",
+        "category": "world",
+        "mask": [
+          "actor"
+        ],
+        "enabled": true,
+        "connections": {
+          "a": [],
+          "b": []
+        },
+        "planeId": "actors"
+      }
+    ],
+    "traversals": [
+      {
+        "id": "ladder",
+        "kind": "ladder",
+        "points": [
+          [
+            0,
+            -64
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "grabRadius": 12,
+        "direction": "both",
+        "access": [
+          {
+            "id": "access.top",
+            "pathU": 0,
+            "anchor": {
+              "kind": "world",
+              "point": [
+                0,
+                -64
+              ]
+            },
+            "entry": "airborne",
+            "exit": "airborne",
+            "conditions": []
+          },
+          {
+            "id": "access.bottom",
+            "pathU": 1,
+            "anchor": {
+              "kind": "surface",
+              "footholdId": "top",
+              "u": 0.5,
+              "normalOffset": 0
+            },
+            "entry": "grounded",
+            "exit": "grounded",
+            "conditions": []
+          }
+        ],
+        "requiredAbilities": [
+          "climb"
+        ],
+        "visualId": null,
+        "planeId": "actors"
+      }
+    ],
+    "regions": [
+      {
+        "id": "area",
+        "name": "Marker area",
+        "shape": {
+          "kind": "rect",
+          "rect": [
+            -24,
+            -80,
+            48,
+            96
+          ]
+        },
+        "role": "encounter"
+      }
+    ],
+    "entities": [
+      {
+        "id": "guardian",
+        "name": "Forest guardian",
+        "anchor": {
+          "kind": "surface",
+          "footholdId": "top",
+          "u": 0.25,
+          "normalOffset": 0
+        },
+        "enabled": false,
+        "facing": "left",
+        "visualId": "trunk",
+        "presentationId": null,
+        "kind": "enemySpawn",
+        "archetype": {
+          "key": "enemy.forest-guardian",
+          "version": 1,
+          "params": {}
+        },
+        "movementId": "movement.ground",
+        "ai": {
+          "behavior": {
+            "key": "core.guard",
+            "version": 1,
+            "params": {}
+          },
+          "routeId": "route",
+          "guard": {
+            "kind": "entity",
+            "entityId": "guardian",
+            "point": [
+              4,
+              0
+            ]
+          },
+          "patrolRegionId": "area",
+          "pursuitRegionId": "area",
+          "home": {
+            "kind": "body",
+            "bodyId": "body",
+            "point": [
+              0,
+              0
+            ]
+          },
+          "leashRegionId": "area",
+          "aggroRegionId": "area",
+          "invalidRoute": "safeStop",
+          "fallback": null
+        },
+        "respawn": {
+          "mode": "never",
+          "delayTicks": 0,
+          "maxAlive": 1,
+          "event": null
+        },
+        "groupId": "guardians"
+      },
+      {
+        "id": "chest",
+        "name": "High chest",
+        "anchor": {
+          "kind": "world",
+          "point": [
+            8,
+            -16
+          ]
+        },
+        "enabled": true,
+        "facing": "left",
+        "visualId": null,
+        "presentationId": null,
+        "kind": "chest",
+        "archetype": {
+          "key": "chest.wooden",
+          "version": 1,
+          "params": {
+            "lootTable": "body"
+          }
+        },
+        "bodyIds": [],
+        "interaction": {
+          "key": "core.chest.open",
+          "version": 1,
+          "params": {}
+        }
+      }
+    ],
+    "waypoints": [
+      {
+        "id": "wp.a",
+        "anchor": {
+          "kind": "world",
+          "point": [
+            -8,
+            0
+          ]
+        },
+        "waitTicks": 0
+      },
+      {
+        "id": "wp.b",
+        "anchor": {
+          "kind": "entity",
+          "entityId": "guardian",
+          "point": [
+            8,
+            0
+          ]
+        },
+        "waitTicks": 6
+      }
+    ],
+    "routes": [
+      {
+        "id": "route",
+        "waypointIds": [
+          "wp.a",
+          "wp.b"
+        ],
+        "mode": "pingPong",
+        "requiredAbilities": [],
+        "conditions": [
+          {
+            "kind": "not",
+            "term": {
+              "kind": "flag",
+              "id": "visited",
+              "equals": true
+            }
+          }
+        ]
+      }
+    ],
+    "triggers": [
+      {
+        "id": "trigger",
+        "regionId": "area",
+        "event": "enter",
+        "actorCategories": [
+          "player"
+        ],
+        "once": true,
+        "conditions": [
+          {
+            "kind": "flag",
+            "id": "visited",
+            "equals": false
+          }
+        ],
+        "actions": [
+          {
+            "key": "core.flag.set",
+            "version": 1,
+            "params": {
+              "flag": {
+                "ref": {
+                  "kind": "flag",
+                  "id": "visited"
+                }
+              },
+              "value": true
+            }
+          },
+          {
+            "key": "core.encounter.activate",
+            "version": 1,
+            "params": {
+              "target": {
+                "ref": {
+                  "kind": "encounter",
+                  "id": "encounter"
+                }
+              }
+            }
+          },
+          {
+            "key": "core.body.set-enabled",
+            "version": 1,
+            "params": {
+              "target": {
+                "ref": {
+                  "kind": "body",
+                  "id": "body"
+                }
+              },
+              "enabled": false
+            }
+          }
+        ]
+      }
+    ],
+    "encounters": [
+      {
+        "id": "encounter",
+        "regionId": "area",
+        "groupId": "guardians",
+        "spawnIds": [
+          "guardian"
+        ],
+        "waves": [],
+        "completionEvent": {
+          "key": "core.encounter.cleared",
+          "version": 1
+        },
+        "onComplete": [
+          {
+            "key": "core.flag.set",
+            "version": 1,
+            "params": {
+              "flag": {
+                "ref": {
+                  "kind": "flag",
+                  "id": "visited"
+                }
+              },
+              "value": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

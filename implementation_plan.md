@@ -36,30 +36,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-025** — squash `8cae118`, PR #25; [record](docs/changes/ML-025.md).
 - **ML-026** — squash `db24c46`, PR #26; [record](docs/changes/ML-026.md).
 - **ML-027** — squash `faa1255`, PR #27; [record](docs/changes/ML-027.md).
+- **ML-028** — squash `30ad4ac`, PR #28; [record](docs/changes/ML-028.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-028 / P0 milestone
-
-- **Source scope:** Fundamental forest acceptance integration and independent consumer construction test.
-- **Non-goals:** No new feature family or actual boss combat.
-- **Acceptance:** All baseline I4 steps pass from exported bytes, with repeat digest and independent world construction; fix only scenario integration defects.
-- **Depends on:** ML-027 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [F3](docs/specifications/2026-10-16-maplab.md#f3-concrete-complete-numeric-acceptance-world), [F4](docs/specifications/2026-10-16-maplab.md#f4-tileset-prefab-and-export-examples), [G1](docs/specifications/2026-10-16-maplab.md#g1-exact-load-sequence), [I4](docs/specifications/2026-10-16-maplab.md#i4-fundamental-acceptance-run), [I3](docs/specifications/2026-10-16-maplab.md#i3-validation-layers-and-release-gates); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Execute end-to-end I4 forest+clearing scenario using exported bytes, generic actors, overlays and declared events.
-  2. Have a separate consumer reconstruct geometry, spawns, patrol, camera intent and portal transition with repeatable hashes.
-  3. Create owned fixture(s): Owned forest numerical integration: gap/slope/ladder/rope/boss event/portal; no-jump ground enemy and flyer.
-  4. Add executable checks: I4 checklist and reproducible digest; integration defects only, no new feature family.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-029 / P1
 
 - **Source scope:** Prefab create/place/expand/edit provenance, including assets/flags/presentations/internal refs.
@@ -74,6 +56,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Placement, export closure and undo golden tests; no recursive/live overrides.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-030 / P1
 
 - **Source scope:** Optional RigLab bundle verification, baked presentation and explicit anchor/art/action bindings.
