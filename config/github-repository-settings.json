@@ -6,7 +6,7 @@
   "merge": {
     "allowSquashMerge": true,
     "allowMergeCommit": false,
-    "allowRebaseMerge": false,
+    "allowRebaseMerge": true,
     "deleteBranchOnMerge": true
   },
   "main": {
@@ -22,7 +22,24 @@
     "allowDeletion": false,
     "allowNonFastForward": false,
     "requiredApprovingReviewCount": 0,
-    "checksAppId": 15368
+    "checksAppId": 15368,
+    "allowedMergeMethods": [
+      "rebase"
+    ]
+  },
+  "release": {
+    "pattern": "refs/heads/release/*",
+    "requirePullRequest": true,
+    "requiredChecks": [
+      "gate",
+      "change-id"
+    ],
+    "allowedMergeMethods": [
+      "squash"
+    ],
+    "bypassActors": [],
+    "allowDeletion": true,
+    "allowNonFastForward": false
   },
   "tags": {
     "pattern": "v*",

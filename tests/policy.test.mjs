@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { checkPolicyConfig, desiredRules, requireMatch } from '../scripts/repository-policy.mjs';
-import { checkHeadChecks, requiredContexts } from '../scripts/verify-pr.mjs';
+import { checkHeadChecks, requiredChecksFor, requiredContexts } from '../scripts/verify-pr.mjs';
 
 const policy = JSON.parse(readFileSync(new URL('../config/github-repository-settings.json', import.meta.url)));
 test('policy requires strict app-bound checks and immutable version updates, while allowing initial tag creation', () => {
@@ -10,6 +10,20 @@ test('policy requires strict app-bound checks and immutable version updates, whi
   expect(main.rules.find((r) => r.type === 'required_status_checks').parameters.strict_required_status_checks_policy).toBe(true);
   expect(tags.rules.map((r) => r.type)).toEqual(['update', 'deletion']);
   expect(tags.bypass_actors).toEqual([]);
+});
+test('main takes only rebased release PRs; release branches take squashed task PRs on the fast gate', () => {
+  const [main, , release] = desiredRules(policy);
+  const methods = (r) => r.rules.find((x) => x.type === 'pull_request').parameters.allowed_merge_methods;
+  const checks = (r) => r.rules.find((x) => x.type === 'required_status_checks').parameters;
+  expect(methods(main)).toEqual(['rebase']);
+  expect(methods(release)).toEqual(['squash']);
+  expect(release.conditions.ref_name.include).toEqual(['refs/heads/release/*']);
+  expect(checks(release).required_status_checks.map((c) => [c.context, c.integration_id])).toEqual([['gate', 15368], ['change-id', 15368]]);
+  expect(checks(release).strict_required_status_checks_policy).toBe(true);
+  // A release branch is cut from main by a plain ref push and auto-deletes after its release merges.
+  expect(checks(release).do_not_enforce_on_create).toBe(true);
+  expect(release.rules.map((r) => r.type).sort()).toEqual(['non_fast_forward', 'pull_request', 'required_status_checks']);
+  expect(release.bypass_actors).toEqual([]);
 });
 test('tag read-back matches the form GitHub stores, without branch-only update parameters', () => {
   const tags = desiredRules(policy)[1];
@@ -24,6 +38,12 @@ test.each([
   ['wrong app', (p) => { p.main.checksAppId = 1; }],
   ['private', (p) => { p.visibility = 'private'; }],
   ['mutable releases', (p) => { p.releases.immutable = false; }],
+  ['squash into main', (p) => { p.main.allowedMergeMethods = ['squash']; }],
+  ['rebase disabled', (p) => { p.merge.allowRebaseMerge = false; }],
+  ['release bypass', (p) => { p.release.bypassActors.push(1); }],
+  ['release without the gate', (p) => { p.release.requiredChecks = ['change-id']; }],
+  ['rebase into a release', (p) => { p.release.allowedMergeMethods = ['squash', 'rebase']; }],
+  ['force-push to a release', (p) => { p.release.allowNonFastForward = true; }],
 ])('weakened desired policy rejects %s', (_name, corrupt) => {
   const p = structuredClone(policy); corrupt(p); expect(() => checkPolicyConfig(p)).toThrow();
 });
@@ -69,10 +89,21 @@ test('all effective and legacy required checks are collected; skipped inherited 
   const observed = { effectiveMain: [...desiredRules(policy)[0].rules,
     { type: 'required_status_checks', parameters: { required_status_checks: [{ context: 'independent-review', integration_id: 42 }] } }],
   branchProtection: { required_status_checks: { contexts: ['legacy-security'], checks: [] } } };
-  const required = requiredContexts(observed);
+  const required = requiredContexts(observed.effectiveMain, observed.branchProtection);
   expect(required).toHaveLength(5);
   const c = [...checks(), { name: 'independent-review', app: { id: 42 }, head_sha: head, status: 'completed', conclusion: 'skipped' }];
   expect(() => checkHeadChecks(c, head, 15368, required, [{ context: 'legacy-security', state: 'success' }])).toThrow();
   c[3].conclusion = 'success';
   expect(checkHeadChecks(c, head, 15368, required, [{ context: 'legacy-security', state: 'success' }])).toHaveLength(5);
+});
+
+test('delivery chooses required checks by base', () => {
+  expect(requiredChecksFor('main')).toEqual(['verify', 'change-id', 'security']);
+  expect(requiredChecksFor('release/r001')).toEqual(['gate', 'change-id']);
+  expect(() => requiredChecksFor('ml-031-runtime-blockers')).toThrow();
+  const gate = requiredContexts(desiredRules(policy)[2].rules);
+  const fast = ['gate', 'change-id'].map((name) => ({ ...checks()[0], name }));
+  expect(checkHeadChecks(fast, head, 15368, gate)).toHaveLength(2);
+  expect(() => checkHeadChecks(fast.slice(1), head, 15368, gate)).toThrow();
+  expect(() => checkHeadChecks(checks(), head, 15368, gate)).toThrow();
 });

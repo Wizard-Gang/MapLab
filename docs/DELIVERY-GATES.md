@@ -19,14 +19,24 @@ and offline after installation: foundation/change/policy contracts, typechecking
 tests, production build and final-asset smoke. Tests invoke real checker CLIs on
 malformed isolated copies, and exercise event, policy and stale-check failures.
 
-CI runs `verify`, `change-id` and `security` on main pushes and PRs.
-Version-tag creation and completed feature-branch deletion do not trigger delivery
-CI; they cannot replace exact-head delivery evidence. Each checkout
-explicitly selects the event's actual head SHA and asserts it before testing.
-PR metadata changes rerun checks. The dedicated change-ID gate compares the PR
-title, branch, main base, exact checkout, commit subjects, changed queue and record.
-Branch push history is compared with the last delivered predecessor; main pushes
-are compared with their preceding main commit. No synthetic merge revision or
+Since ML-031 three workflows split the gates by base, and none runs on push:
+
+- `verify.yml` ("Delivery gates"): PRs into `main` and `workflow_dispatch`. A `check`
+  job (`npm run check`) runs beside a `browser` matrix of Chromium and WebKit in two
+  shards each. The required `verify` aggregate runs `if: always()` and fails unless
+  `check` and every shard succeed. `security` runs alongside. Dispatching it on a
+  task branch is the on-demand full run; it satisfies no merge rule by itself.
+- `gate.yml` ("Feature gate"): PRs into `release/**`. One `gate` job runs `npm ci`,
+  `check:foundation`, `typecheck`, `build` and `smoke`, with no tests.
+- `change.yml` ("Change identity"): PRs into both. One `change-id` job.
+
+Main's tree equals the release PR's tested tree, because that PR is strict-current
+and rebase-merged, so main needs no push run. Version-tag creation and completed
+branch deletion trigger no delivery CI. Each checkout explicitly selects the
+event's actual head SHA and asserts it before testing. PR metadata changes rerun
+checks. The change-ID gate compares the PR title, branch, base, exact checkout,
+commit subjects, changed queue, release and record against
+[change management](CHANGE-MANAGEMENT.md). No synthetic merge revision or
 zero-parent exception qualifies as current evidence.
 
 The separate **online** `npm run security` runs the pinned npm 12.1.0 vulnerability
@@ -42,7 +52,7 @@ are read as data from the event JSON rather than interpolated into shell command
 
 ## Live policy
 
-`npm run policy:apply` is restricted to ML-002 and requires authenticated `gh`
+`npm run policy:apply` is restricted to ML-002 and the ML-031 cut-over below, and requires authenticated `gh`
 administration access. It preserves the configured public visibility (without changing visibility), applies squash-only and
 automatic branch deletion, enables release immutability, and manages two active
 no-bypass rulesets. Main requires PRs, linear history, resolved review threads and
@@ -71,6 +81,13 @@ immutable releases were applied and read back earlier, but do not protect main/t
 On 17 October 2026 the owner's admin `gh` applied both rulesets, `MapLab main`
 (25315600) and `MapLab immutable versions` (25315601), and `npm run policy:check`
 read them back active with no bypass before ML-002's protected squash delivery.
+ML-031 carries the owner-approved release cut-over, so `policy:apply` also runs for
+ML-031. It allows rebase merges at repository level, limits main to `rebase`, and
+adds a third ruleset, `MapLab release`, on `refs/heads/release/*`. That ruleset
+requires a PR, allows only `squash`, denies non-fast-forward updates and requires
+strict `gate`/`change-id` from app 15368. It enforces those checks from the first
+PR, not on branch creation, and has no deletion rule, so a merged release
+branch auto-deletes.
 
 ## Merge and records
 
@@ -82,21 +99,25 @@ npm run delivery:verify -- --pr NUMBER --head EXACT_HEAD_SHA
 ```
 
 This checks live policy, current PR identity, all effective and legacy required successful checks/statuses
-on that exact SHA, app identity, current-with-main ancestry and GitHub's merge/review
-state; it re-reads head/main at the end. Skipped, neutral, stale and pending checks
+on that exact SHA, app identity, current-with-base ancestry and GitHub's merge/review
+state; it re-reads head and base at the end. The base chooses the checks: a task PR
+into `release/*` needs `gate` and `change-id`, and the release PR into main needs
+`verify`, `change-id` and `security`. It prints the merge method to use. Skipped, neutral, stale and pending checks
 fail even if GitHub would otherwise accept them. Capture this output externally.
 Any edit or rebase requires fresh evidence. Merge through the normal provider
-squash operation with the captured head as a compare-and-merge SHA guard. Never
+operation, squash for a task PR and rebase for a release PR, with the captured head
+as a compare-and-merge SHA guard. Never
 use an admin bypass. Provider review requirements and unresolved findings must
 be satisfied before merge.
 
-Verify all three resulting-main CI checks on the squash SHA. GitHub's authorized
-automatic branch deletion occurs at merge; remove the local completed branch
-after successful main CI. Record final SHA, PR, checks and independent review in
+No CI runs on the merged result; the exact-head PR run is the evidence. GitHub's
+authorized automatic branch deletion occurs at merge; remove the local completed
+branch afterwards. Record final SHA, PR, checks and independent review in
 the external resumable ledger. On the next controlled activation, append that
 completed evidence to `docs/deliveries.json` and synchronize the permanent implementation plan's completed/current/future blocks. A commit
-cannot include its own final squash hash. Stop sequential activation on any
-failed predecessor, main CI, access or protection gate; preserve work and evidence.
+cannot include its own final squash hash. The next release's first task appends the merged release to `docs/releases.json`.
+Stop sequential activation on any failed predecessor, gate, access or protection
+check; preserve work and evidence.
 
 ## Permanent plan and J2 traceability
 

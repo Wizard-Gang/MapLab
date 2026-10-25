@@ -5,12 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { afterEach, expect, test } from 'vitest';
 import { requiredFiles } from '../scripts/check-foundation.mjs';
-import { checkEvent, sections } from '../scripts/check-change.mjs';
+import { checkEvent, checkReleaseTrees, lastMainCiDelivery, sections } from '../scripts/check-change.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const temporary = [];
 const change = JSON.parse(readFileSync(join(root, 'config/change.json')));
 const history = JSON.parse(readFileSync(join(root, 'docs/deliveries.json')));
+const release = JSON.parse(readFileSync(join(root, 'config/release.json')));
 const currentNumber = Number(change.id.slice(3));
 const otherId = currentNumber < 44 ? `ML-${String(currentNumber + 1).padStart(3, '0')}` : 'ML-043';
 afterEach(() => temporary.splice(0).forEach((p) => rmSync(p, { recursive: true, force: true })));
@@ -51,8 +52,11 @@ test('real CLI accepts another reserved task without a fixed current identity', 
   });
   json(p, 'docs/deliveries.json', (v) => {
     if (currentNumber === 44) v.pop();
-    else v.push({ id: change.id, pr: 1, commit: 'a'.repeat(40), testedHeads: ['b'.repeat(40)], mainCi: { head: 'a'.repeat(40), conclusion: 'success', url: 'https://github.com/Wizard-Gang/MapLab/actions/runs/1' } });
+    else v.push({ id: change.id, pr: 1, commit: 'a'.repeat(40), testedHeads: ['b'.repeat(40)], ...currentNumber > lastMainCiDelivery
+      ? { gate: { head: 'b'.repeat(40), conclusion: 'success', url: 'https://github.com/Wizard-Gang/MapLab/actions/runs/1' } }
+      : { mainCi: { head: 'a'.repeat(40), conclusion: 'success', url: 'https://github.com/Wizard-Gang/MapLab/actions/runs/1' } } });
   });
+  json(p, 'config/release.json', (v) => { v.tasks.push(otherId); });
   const result = run(p); expect(result.status, result.stderr).toBe(0);
 });
 test.each([
@@ -68,29 +72,76 @@ test.each([
   ['missing predecessor', (p) => writeFileSync(join(p, 'docs/deliveries.json'), '[]\n'), 'Predecessor delivery chain'],
   ['failed predecessor CI', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.conclusion = 'failure'; }), 'main CI evidence'],
   ['different predecessor SHA', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.head = 'f'.repeat(40); }), 'main CI evidence'],
+  ['release gate evidence before the cut-over', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].gate = { ...v[0].mainCi }; }), 'main CI evidence'],
+  ['a release branch that disagrees with its ID', (p) => json(p, 'config/release.json', (v) => { v.branch = 'release/r999'; }), 'Release identity'],
+  ['an extra release field', (p) => json(p, 'config/release.json', (v) => { v.base = 'main'; }), 'Release identity'],
+  ['a release without the current task', (p) => json(p, 'config/release.json', (v) => { v.tasks.pop(); }), 'Release task chain'],
+  ['a release that skips a task', (p) => json(p, 'config/release.json', (v) => { v.tasks.unshift('ML-029'); }), 'Release task chain'],
+  ['a skipped release record', (p) => json(p, 'config/release.json', (v) => { v.id = 'r009'; v.branch = 'release/r009'; }), 'Release chain is incomplete'],
+  ['a failed release run', (p) => {
+    json(p, 'config/release.json', (v) => { v.id = `r${String(Number(v.id.slice(1)) + 1).padStart(3, '0')}`; v.branch = `release/${v.id}`; });
+    json(p, 'docs/releases.json', (v) => { v.push({ id: `r${String(v.length + 1).padStart(3, '0')}`, pr: 1, testedHead: 'b'.repeat(40), mainHead: 'c'.repeat(40), tasks: ['ML-030'], ci: { conclusion: 'failure', url: 'https://github.com/Wizard-Gang/MapLab/actions/runs/1' } }); });
+  }, 'Release evidence'],
 ])('real CLI rejects %s', (_name, corrupt, message) => {
   const p = fixture(); corrupt(p); const result = run(p);
   expect(result.status).toBe(1); expect(result.stderr).toContain(message);
 });
 
+const body = sections.map((s) => `## ${s}\n\nFixture prose.\n`).join('\n');
 function eventFixture() {
-  return { eventName: 'pull_request', actualHead: 'b'.repeat(40), actualBranch: change.branch,
-    commitTitles: [change.title], changedFiles: ['config/change.json', change.record, 'implementation_plan.md'],
+  return { eventName: 'pull_request', actualHead: 'b'.repeat(40), release, taskTitles: release.tasks.map(() => change.title),
+    commitTitles: [change.title], changedFiles: ['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'],
     event: { repository: { full_name: 'Wizard-Gang/MapLab' }, pull_request: {
-      title: change.title, body: sections.map((s) => `## ${s}\n\nFixture prose.\n`).join('\n'),
+      title: change.title, body,
       head: { sha: 'b'.repeat(40), ref: change.branch },
-      base: { ref: 'main', sha: 'a'.repeat(40), repo: { full_name: 'Wizard-Gang/MapLab' } },
+      base: { ref: release.branch, sha: 'a'.repeat(40), repo: { full_name: 'Wizard-Gang/MapLab' } },
     } },
   };
 }
-test('event validation accepts a current PR', () => expect(() => checkEvent(change, eventFixture())).not.toThrow());
+// The release PR into main: one squash commit per listed task, oldest first, titled as each task's record.
+function releaseFixture() {
+  const v = eventFixture();
+  const titles = release.tasks.map((id) => `[${id}] [FEATURE] Fixture task ${id}`);
+  const range = release.tasks.length === 1 ? release.tasks[0] : `${release.tasks[0]}..${release.tasks.at(-1)}`;
+  Object.assign(v, { taskTitles: titles, commitTitles: titles.map((t, i) => `${t} (#${100 + i})`).reverse(), changedFiles: [] });
+  Object.assign(v.event.pull_request, { title: `[RELEASE] ${release.id}: ${range}`, head: { sha: 'b'.repeat(40), ref: release.branch } });
+  v.event.pull_request.base.ref = 'main';
+  return v;
+}
+test('event validation accepts a current task PR into the open release', () => expect(() => checkEvent(change, eventFixture())).not.toThrow());
+test('event validation accepts the release PR into main', () => expect(() => checkEvent(change, releaseFixture())).not.toThrow());
 test.each([
   ['checkout merge revision', (v) => { v.actualHead = 'c'.repeat(40); }],
   ['wrong PR title', (v) => { v.event.pull_request.title = `[${change.id}] [${change.type}] Wrong task`; }],
   ['wrong PR base', (v) => { v.event.pull_request.base.ref = 'dev'; }],
+  ['task PR straight into main', (v) => { v.event.pull_request.base.ref = 'main'; }],
   ['wrong PR branch', (v) => { v.event.pull_request.head.ref = 'main'; }],
   ['unscoped commit', (v) => { v.commitTitles.push('Unrelated cleanup'); }],
   ['historical change edited', (v) => { v.changedFiles.push('docs/changes/ML-001.md'); }],
+  ['release membership not recorded', (v) => { v.changedFiles = v.changedFiles.filter((f) => f !== 'config/release.json'); }],
+  ['a push event', (v) => { v.eventName = 'push'; }],
 ])('event validation rejects %s', (_name, corrupt) => {
   const v = eventFixture(); corrupt(v); expect(() => checkEvent(change, v)).toThrow();
 });
+test.each([
+  ['a release PR into another release', (v) => { v.event.pull_request.base.ref = 'release/r999'; }],
+  ['an unnamed release PR', (v) => { v.event.pull_request.title = change.title; }],
+  ['an unsquashed commit', (v) => { v.commitTitles.unshift(change.title); }],
+  ['a missing task commit', (v) => { v.commitTitles.pop(); }],
+  ['a commit retitled away from its record', (v) => { v.taskTitles[0] = `[${release.tasks[0]}] [FIX] Another title`; }],
+])('release event validation rejects %s', (_name, corrupt) => {
+  const v = releaseFixture(); corrupt(v); expect(() => checkEvent(change, v)).toThrow();
+});
+
+const entry = { id: 'r001', pr: 40, testedHead: 'b'.repeat(40), mainHead: 'c'.repeat(40) };
+const fakeGit = (trees, fetched = entry.testedHead) => (...args) => {
+  if (args[0] === 'rev-parse') return args[1] === 'FETCH_HEAD' ? fetched : trees[args[1]];
+  return '';
+};
+test('release evidence accepts a main tree equal to the tested tree', () => {
+  expect(() => checkReleaseTrees([entry], fakeGit({ [`${'b'.repeat(40)}^{tree}`]: 't1', [`${'c'.repeat(40)}^{tree}`]: 't1' }))).not.toThrow();
+});
+test.each([
+  ['a main tree that differs', fakeGit({ [`${'b'.repeat(40)}^{tree}`]: 't1', [`${'c'.repeat(40)}^{tree}`]: 't2' })],
+  ['a PR head that is not the tested head', fakeGit({ [`${'b'.repeat(40)}^{tree}`]: 't1', [`${'c'.repeat(40)}^{tree}`]: 't1' }, 'd'.repeat(40))],
+])('release evidence rejects %s', (_name, git) => expect(() => checkReleaseTrees([entry], git)).toThrow());
