@@ -37,7 +37,7 @@ export function storeZip(files: ReadonlyMap<string, Uint8Array>): Buffer {
   end.writeUInt32LE(directory.length, 12); end.writeUInt32LE(offset, 16);
   return Buffer.concat([...locals, directory, end]);
 }
-export function readStoreZip(input: Uint8Array): Map<string, Uint8Array> {
+export function readStoreZip(input: Uint8Array, options: { readonly allowUnsorted?: boolean } = {}): Map<string, Uint8Array> {
   if (input.length < 22 || input.length >= ZIP_LIMITS.bytes) refuse('zip.limit', 'Archive length is outside v1 limits');
   const b = Buffer.from(input.buffer, input.byteOffset, input.byteLength), e = b.length - 22;
   if (b.readUInt32LE(e) !== 0x06054b50 || b.readUInt16LE(e + 4) || b.readUInt16LE(e + 6) || b.readUInt16LE(e + 20)) refuse('zip.end', 'Invalid ZIP end record');
@@ -55,7 +55,7 @@ export function readStoreZip(input: Uint8Array): Map<string, Uint8Array> {
     const name = b.subarray(c + 46, c + 46 + n), path = name.toString('utf8');
     if (!Buffer.from(path).equals(name)) refuse('zip.path', 'Invalid UTF-8 path');
     paths.push(path);
-    if (i && compare(paths[i - 1]!, path) >= 0) refuse('zip.duplicate', 'Entry paths must be unique and lexical');
+    if (!options.allowUnsorted && i && compare(paths[i - 1]!, path) >= 0) refuse('zip.duplicate', 'Entry paths must be unique and lexical');
     if (b.readUInt32LE(local) !== 0x04034b50 || b.readUInt16LE(local + 4) !== 20 || b.readUInt16LE(local + 6) !== 0x800 || b.readUInt16LE(local + 8) || b.readUInt16LE(local + 10) || b.readUInt16LE(local + 12) !== 33 || b.readUInt32LE(local + 14) !== crc || b.readUInt32LE(local + 18) !== length || b.readUInt32LE(local + 22) !== length || b.readUInt16LE(local + 26) !== n || b.readUInt16LE(local + 28)) refuse('zip.local', 'Local and central records disagree');
     range(local + 30, n + length, start);
     if (!b.subarray(local + 30, local + 30 + n).equals(name)) refuse('zip.local', 'Local filename differs');

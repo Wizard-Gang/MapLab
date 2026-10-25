@@ -29,7 +29,7 @@ const run = (bundle, extra = []) => {
 
 test('the reader source imports only Node built-ins and its own folder: no src/, editor, React or network', () => {
   const files = readdirSync(join(root, 'tests/consumer/reader')).sort();
-  expect(files).toEqual(['bundle.mjs', 'json.mjs', 'read-bundle.mjs', 'references.mjs', 'resolve.mjs', 'schema.mjs']);
+  expect(files).toEqual(['bundle.mjs', 'json.mjs', 'read-bundle.mjs', 'references.mjs', 'resolve.mjs', 'riglab.mjs', 'schema.mjs']);
   for (const file of files) {
     const source = readFileSync(join(root, 'tests/consumer/reader', file), 'utf8');
     const specifiers = [...source.matchAll(/^import\b[^;]*?\bfrom\s+'([^']+)'/gm)].map((m) => m[1]);

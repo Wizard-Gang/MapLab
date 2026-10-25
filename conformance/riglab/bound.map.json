@@ -3,7 +3,7 @@
   "version": 1,
   "id": "map.riglab-proof",
   "metadata": {
-    "name": "Independent tree markers",
+    "name": "Owned RigLab proof",
     "description": "Portal arrival map with a return portal.",
     "authors": [
       "MapLab R1 specification"
@@ -514,6 +514,5 @@
     "overrides": []
   },
   "flags": [],
-  "prefabPlacements": [],
-  "name": "Owned RigLab proof"
+  "prefabPlacements": []
 }

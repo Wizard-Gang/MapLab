@@ -24,7 +24,7 @@ export function importRig(folder:LibraryFolder,body:unknown):RigReply {
  if(folder.placeholder)fail('The placeholder library refuses imports');const text=(body as {base64?:unknown})?.base64;
  if(typeof text!=='string'||text.length>RIG_REQUEST_LIMIT||text.length%4!==0||!/^[A-Za-z0-9+/]*={0,2}$/.test(text))fail('Invalid or oversized ZIP base64');
  const bytes=Buffer.from(text,'base64');if(bytes.length<22||bytes.readUInt16LE(bytes.length-12)>RIG_LIMITS.files||bytes.toString('base64')!==text||bytes.length>RIG_LIMITS.bytes)fail('Foreign ZIP byte limit');
- const bundle=verifyRigBundle(readStoreZip(bytes)),prefix=`presentations/${bundle.digest}`,path=`${prefix}/manifest.json`;
+ const bundle=verifyRigBundle(readStoreZip(bytes,{allowUnsorted:true})),prefix=`presentations/${bundle.digest}`,path=`${prefix}/manifest.json`;
  checkPaths([...bundle.files.keys()].map(p=>prefix+'/'+p));
  if(existsSync(insidePath(folder,prefix)))return reply(path,readRig(folder,path));
  const staging=`presentations/import-${randomUUID()}`,dir=insidePath(folder,staging);mkdirSync(dir,{recursive:true});

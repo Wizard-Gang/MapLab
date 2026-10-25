@@ -4,6 +4,7 @@ import {join} from 'node:path';
 import {verifyRigBundle,digest,RIG_LIMITS} from '../src/riglab/bundle';
 import {validateBinding,samplePresentation} from '../src/riglab/presentation';
 import {readRig,importRig} from '../src/library/riglab';
+import {readStoreZip,storeZip} from '../src/export/zip';
 import {applyAffine} from '../src/render/transform';
 import {rigFixture,jsonFixture,rigFiles,binding,armor,libraryFixture} from './riglab-fixtures';
 function rewrite(files:Map<string,Uint8Array>,path:string,edit:(v:any)=>void):void {
@@ -51,6 +52,12 @@ test('depth painting traverses parents before descendants for child-first source
  for(const entry of m.baked)rewrite(files,entry.file,b=>{const parent=b.bones.indexOf('arm-near');b.bones.unshift('forearm');for(const frame of b.frames)frame.unshift([...frame[parent]]);});
  const bundle=verifyRigBundle(files),base=binding(),b={...base,artSlots:[...base.artSlots,{slot:'armor_forearm',assetId:armor().id,pivot:[4,0] as const}]};
  for(const facing of ['left','right'] as const){const sample=samplePresentation(bundle,b,[armor()],{tick:0,stateEnterTick:0,semantic:'locomotion.idle',foot:[0,0],facing}),slots=sample.parts.map(p=>p.slot);expect(sample.status).toBe('baked');expect(slots.indexOf('armor_forearm')).toBe(slots.indexOf('armor_arm_near')+1);expect(new Set(slots).size).toBe(8);}
+});
+test('foreign ZIP accepts producer insertion order while canonical exports and alias checks stay strict',()=>{
+ const zip=rigFixture('owned-rig.zip');expect(()=>readStoreZip(zip)).toThrow('lexical');expect(verifyRigBundle(readStoreZip(zip,{allowUnsorted:true})).digest).toBe(jsonFixture<any>('provenance.json').manifestSha256);
+ const duplicate=storeZip(new Map([['a.json',Buffer.from('{}')],['b.json',Buffer.from('{}')]]));
+ for(let at=duplicate.indexOf('b.json');at>=0;at=duplicate.indexOf('b.json',at+6))duplicate.write('a.json',at);
+ expect(()=>readStoreZip(duplicate,{allowUnsorted:true})).toThrow('Duplicate or aliased');
 });
 test('immutable library import/read preserves exact bytes and refuses tampering and symlinks',()=>{
  const folder=libraryFixture();try{const imported=importRig(folder,{base64:rigFixture('owned-rig.zip').toString('base64')}),b=readRig(folder,imported.path);expect(b.digest).toBe(imported.bundle.digest);for(const [p,bytes]of b.files)expect(Buffer.from(bytes)).toEqual(rigFixture('bundle/'+p));expect(()=>importRig({...folder,placeholder:true},{base64:''})).toThrow('placeholder');expect(()=>importRig(folder,{base64:'!!!='})).toThrow();}finally{rmSync(folder.dir,{recursive:true,force:true});}
