@@ -1,4 +1,4 @@
-import {readFileSync,cpSync,mkdtempSync,mkdirSync,writeFileSync} from 'node:fs';
+import {readFileSync,realpathSync,cpSync,mkdtempSync,mkdirSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,dirname} from 'node:path';
 import {importRig} from '../src/library/riglab';
@@ -15,7 +15,7 @@ export const binding=():RigPresentationBinding=>jsonFixture('binding.json');
 export const armor=():Asset=>jsonFixture('asset.json');
 export const boundMap=():MapDocument=>jsonFixture('bound.map.json');
 export function libraryFixture():{dir:string;label:string;placeholder:false} {
- const dir=mkdtempSync(join(tmpdir(),'maplab-riglab-'));cpSync(join(import.meta.dirname,'../placeholder-library'),dir,{recursive:true});
+ const dir=mkdtempSync(join(realpathSync(tmpdir()),'maplab-riglab-'));cpSync(join(import.meta.dirname,'../placeholder-library'),dir,{recursive:true});
  const folder={dir,label:'Owned RigLab proof',placeholder:false as const};importRig(folder,{base64:rigFixture('owned-rig.zip').toString('base64')});
  const map=boundMap(),bytes=rigFixture('bound.map.json'),path='maps/riglab-proof.map.json';writeFileSync(join(dir,path),bytes);
  const indexPath=join(dir,'maplab.project.json'),index=JSON.parse(readFileSync(indexPath,'utf8'));index.documents.push({id:map.id,kind:'map',path,sha256:digest(bytes)});writeFileSync(indexPath,JSON.stringify(index));

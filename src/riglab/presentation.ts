@@ -19,7 +19,8 @@ export function validateBinding(bundle:RigView,b:RigPresentationBinding,assets:r
 function order(bundle:RigView,clip:Clip,facing:'left'|'right'):readonly string[]|null {
  const r=bundle.rig,d=r.depthProfiles;if(!d)return r.bones.map(b=>b.name);
  const p=d.profiles[d.byClip[clip.name]??d.byClip[clip.class]??d.default]!,s=d.sides[facing==='left'?'facingLeft':'facingRight'];
- const descendants=(root:string):string[]=>r.bones.filter(b=>{let at:typeof b|undefined=b;while(at){if(at.name===root)return true;const parent:string|null=at.parent;at=r.bones.find(b=>b.name===parent);}return false;}).map(b=>b.name);
+ const hierarchy:typeof r.bones[number][]=[];const visit=(name:string):void=>{const bone=r.bones.find(b=>b.name===name)!;hierarchy.push(bone);for(const child of r.bones.filter(b=>b.parent===name))visit(child.name);};visit(r.root);
+ const descendants=(root:string):string[]=>hierarchy.filter(b=>{let at:typeof b|undefined=b;while(at){if(at.name===root)return true;const parent:string|null=at.parent;at=r.bones.find(b=>b.name===parent);}return false;}).map(b=>b.name);
  const names=[...(p.underLowerBody?descendants(s.arms[p.underLowerBody]):[]),...descendants(s.legs.far),...descendants(s.legs.near),'pelvis',...(p.behindTorso?descendants(s.arms[p.behindTorso]):[]),'torso',...(p.head==='below-arms'?descendants('head'):[]),...p.foreground.flatMap(side=>descendants(s.arms[side])),...(p.head==='above-arms'?descendants('head'):[])];
  return names.length===r.bones.length&&new Set(names).size===r.bones.length&&names.every(n=>r.bones.some(b=>b.name===n))?names:null;
 }
@@ -39,5 +40,5 @@ export function samplePresentation(bundle:RigView|null,b:RigPresentationBinding,
  const add=(slot:string,t:readonly[number,number,number]):void=>{const art=b.artSlots.find(a=>a.slot===slot),asset=assets.find(a=>a.id===art?.assetId);if(!art||!asset){missing=true;return;}const part=visualMatrix({position:[t[0],t[1]],rotation:t[2],scale:[asset.wuPerAssetUnit,asset.wuPerAssetUnit],mirrorX:false,mirrorY:false},art.pivot);const matrix=multiply(actor,part);if(matrix.some(v=>!Number.isFinite(v)||Math.abs(v)>1e9)){missing=true;return;}parts.push({slot,asset,matrix});};
  for(const name of names){const bone=bundle.rig.bones.find(b=>b.name===name)!;add(bone.slot,pose[baked.bones.indexOf(name)]!);}
  const held=baked.weapons?.[frame];if(held){const weapon=bundle.weapons.find(w=>w.name===held.name)!;for(const body of weapon.bodies)add(body.slot,held.bodies[body.name]!);}
- return missing?placeholder('Missing approved art; generic actor'):{status:'baked',reason:'Validated baked presentation; actor physics unchanged',frame,parts};
+ return missing?placeholder('Missing approved art; generic actor'):{status:'baked',reason:action?.semantic!==input.semantic?`Missing clip for ${input.semantic}; fallback ${action!.semantic} (${clip.name}); actor physics unchanged`:'Validated baked presentation; actor physics unchanged',frame,parts};
 }

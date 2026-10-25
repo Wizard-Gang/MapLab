@@ -39,9 +39,18 @@ test('60 Hz frame selection, full mirrored matrices, depth sides, support-line a
  const right=sample(15),left=sample(15,'left');expect(right.parts.find(p=>p.slot==='armor_pelvis')!.matrix.map(n=>n||0)).toEqual([2,0,0,2,100,148]);expect(left.parts.find(p=>p.slot==='armor_pelvis')!.matrix.map(n=>n||0)).toEqual([-2,0,0,2,100,148]);
  expect(right.parts.map(p=>p.slot)).not.toEqual(left.parts.map(p=>p.slot));expect(sample(75).parts).toEqual(right.parts);expect(sample(100,'right','locomotion.jump.rise').frame).toBe(36);
  const support=samplePresentation(bundle,b,[armor()],{tick:15,stateEnterTick:0,semantic:'locomotion.idle',foot:[100,200],supportY:210,facing:'right',rotation:90});const anchored=applyAffine(support.parts.find(p=>p.slot==='armor_pelvis')!.matrix,[4,0]);expect(anchored[0]).toBeCloseTo(152,8);expect(anchored[1]).toBeCloseTo(218,8);
+ const fallback=sample(15,'right','locomotion.fall'),jump=sample(15,'right','locomotion.jump.rise');expect(fallback.status).toBe('baked');expect(fallback.parts).toEqual(jump.parts);expect(fallback.reason).toContain('Missing clip for locomotion.fall; fallback locomotion.jump.rise');
  expect(sample(0,'right','climb.ladder').status).toBe('placeholder');
  const missing=jsonFixture<ReturnType<typeof binding>>('missing-art.binding.json');expect(samplePresentation(bundle,missing,[armor()],{tick:0,stateEnterTick:0,semantic:'locomotion.idle',foot:[0,0],facing:'right'}).status).toBe('placeholder');
  const files=rigFiles(),m=JSON.parse(new TextDecoder().decode(files.get('manifest.json')));for(const e of m.baked)files.delete(e.file);delete m.baked;files.set('manifest.json',rigFixture('unbaked.manifest.json'));expect(samplePresentation(verifyRigBundle(files),b,[armor()],{tick:0,stateEnterTick:0,semantic:'locomotion.idle',foot:[0,0],facing:'left'}).status).toBe('placeholder');
+});
+test('depth painting traverses parents before descendants for child-first source arrays in both facings',()=>{
+ const files=rigFiles();rewrite(files,'owned-armor.rig.json',r=>r.bones.unshift({...r.bones.find((b:any)=>b.name==='arm-near'),name:'forearm',parent:'arm-near',slot:'armor_forearm'}));
+ const m=JSON.parse(new TextDecoder().decode(files.get('manifest.json')));
+ for(const entry of m.animations)rewrite(files,entry.file,a=>{for(const key of a.keys)key.pose.forearm={rotation:0};});
+ for(const entry of m.baked)rewrite(files,entry.file,b=>{const parent=b.bones.indexOf('arm-near');b.bones.unshift('forearm');for(const frame of b.frames)frame.unshift([...frame[parent]]);});
+ const bundle=verifyRigBundle(files),base=binding(),b={...base,artSlots:[...base.artSlots,{slot:'armor_forearm',assetId:armor().id,pivot:[4,0] as const}]};
+ for(const facing of ['left','right'] as const){const sample=samplePresentation(bundle,b,[armor()],{tick:0,stateEnterTick:0,semantic:'locomotion.idle',foot:[0,0],facing}),slots=sample.parts.map(p=>p.slot);expect(sample.status).toBe('baked');expect(slots.indexOf('armor_forearm')).toBe(slots.indexOf('armor_arm_near')+1);expect(new Set(slots).size).toBe(8);}
 });
 test('immutable library import/read preserves exact bytes and refuses tampering and symlinks',()=>{
  const folder=libraryFixture();try{const imported=importRig(folder,{base64:rigFixture('owned-rig.zip').toString('base64')}),b=readRig(folder,imported.path);expect(b.digest).toBe(imported.bundle.digest);for(const [p,bytes]of b.files)expect(Buffer.from(bytes)).toEqual(rigFixture('bundle/'+p));expect(()=>importRig({...folder,placeholder:true},{base64:''})).toThrow('placeholder');expect(()=>importRig(folder,{base64:'!!!='})).toThrow();}finally{rmSync(folder.dir,{recursive:true,force:true});}
