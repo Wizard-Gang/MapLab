@@ -6,6 +6,10 @@
       "sha256": "a1b11f9417ef48cf7978feb197768bfdb9d8595925aa9e0a4002e9e0da8d925d"
     },
     {
+      "path": "art-only.map.json",
+      "sha256": "02b31b4163556955cd2b41f6c0211c0de37dc3f169047be08d9eb363cbc0d874"
+    },
+    {
       "path": "cases.json",
       "sha256": "82b662339e32b709f52fd6351e7cf144cdc84424a31bd8c0cbc2c29a60f9f290"
     },

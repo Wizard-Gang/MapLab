@@ -25,7 +25,7 @@ test('empty-space insertion disables witnesses, deletion regenerates the expande
  }finally{rmSync(scratch,{recursive:true,force:true});}
 },120000);
 test('art-only changes stay warm, far edits retain exact edges and physical region revisions stay local',async()=>{
- const m=map(),p=profile(),warm=await regenerate({...m,visuals:[],metadata:{...m.metadata,name:'Only sprite/name'}},p,4,[],cases.settings,restored,undefined,yieldNow);
+ const m=map(),p=profile(),warm=await regenerate(read<MapDocument>('art-only.map.json'),p,4,[],cases.settings,restored,undefined,yieldNow);
  expect(warm.cacheWarm).toBe(true);expect(warm.regeneratedSamples).toBe(0);expect(warm.result.edges).toEqual(restored.result.edges);
  const far=await regenerate(m,p,5,[cases.farBlocker],cases.settings,warm,undefined,yieldNow);expect(far.disabledKeys).toEqual([]);expect(far.reusedEdges).toBe(baseline.result.edges.length);expect(far.regeneratedSamples).toBe(0);
  const clean=await buildAirborneActions(overlayMap(m,p,[cases.farBlocker]),p,5,cases.settings,undefined,yieldNow);expect(far.result.edges).toEqual(clean.edges);expect(far.result.intervals).toEqual(clean.intervals);expect(Object.keys(far.regionRevisions).filter(k=>far.regionRevisions[k]===5)).toEqual(regionKeys(cases.farBlocker.boundsSu));
