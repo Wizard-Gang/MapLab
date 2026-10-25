@@ -18,10 +18,11 @@ env:
   MAPLAB_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  verify:
-    name: verify
+  # The canonical check and the browser shards run side by side; serial they outgrew a 20-minute job.
+  check:
+    name: check
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Check out exact head
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -41,10 +42,47 @@ jobs:
         run: npm ci
       - name: Verify canonical contracts and build
         run: npm run check
-      - name: Install Chromium and WebKit outside npm lifecycle scripts
-        run: npx playwright install --with-deps chromium webkit
-      - name: Run WebKit and Chromium browser tests
-        run: npm run test:browser
+  # Each shard has its own runner, dev servers and scratch library, so the suite's one-worker isolation holds.
+  browser:
+    name: browser (${{ matrix.project }} ${{ matrix.shard }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, webkit]
+        shard: [1/2, 2/2]
+    steps:
+      - name: Check out exact head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Assert tested revision
+        run: test "$(git rev-parse HEAD)" = "$MAPLAB_EXPECTED_HEAD"
+      - name: Set up pinned Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Install pinned npm
+        run: npm install --global npm@12.1.0 --ignore-scripts --no-audit --no-fund
+      - name: Clean install without dependency lifecycle scripts
+        run: npm ci
+      - name: Install the browser outside npm lifecycle scripts
+        run: npx playwright install --with-deps ${{ matrix.project }}
+      - name: Run the browser test shard
+        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}
+  # The required check: it runs even when a gate fails, so a skipped job can never read as a pass.
+  verify:
+    name: verify
+    needs: [check, browser]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require the check job and every browser shard to pass
+        run: test "${{ needs.check.result }}" = success && test "${{ needs.browser.result }}" = success
   change-id:
     name: change-id
     runs-on: ubuntu-24.04

@@ -125,12 +125,14 @@ export function checkFoundation(root) {
   checkPolicyConfig(json('config/github-repository-settings.json'));
   const workflow = read('.github/workflows/verify.yml');
   const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
-  demand(uses.length === 6 && uses.every((action) => [
+  demand(uses.length === 8 && uses.every((action) => [
     'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803',
     'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38',
   ].includes(action)),
     'CI Actions must use immutable commit SHAs');
-  demand(workflow.includes('contents: read') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(workflow)
+  // The required verify job is the one place a condition may appear: it must run after a failed gate to report it.
+  const aggregate = '    name: verify\n    needs: [check, browser]\n    if: ${{ always() }}\n';
+  demand(workflow.includes('contents: read') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(workflow.replace(aggregate, ''))
     && workflow.includes('persist-credentials: false')
     && workflow.includes('run: npm ci') && workflow.includes('run: npm run check')
     && workflow.includes('run: npm run check:change') && workflow.includes('run: npm run security')
@@ -138,14 +140,21 @@ export function checkFoundation(root) {
     'CI must run exact-head credential-free canonical and separate online gates with least privilege');
   demand(/  push:\n    branches: \[main\]/.test(workflow), 'CI pushes must be restricted to main; tag/branch cleanup is not delivery CI');
   const jobs = Object.fromEntries([...workflow.matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:|$(?![\s\S]))/gm)].map((m) => [m[1], m[2]]));
-  for (const [job, command] of Object.entries({ verify: 'npm run check', 'change-id': 'npm run check:change', security: 'npm run security' })) {
+  for (const [job, command] of Object.entries({ check: 'npm run check', 'change-id': 'npm run check:change', security: 'npm run security' })) {
     demand(jobs[job]?.includes(`    name: ${job}\n`) && jobs[job].split('\n').some((line) => line.trim() === `run: ${command}`), `Required CI job/command missing: ${job}`);
   }
-  const verifySteps = (jobs.verify ?? '').split('\n').map((line) => line.trim());
-  const at = (command) => verifySteps.indexOf(`run: ${command}`);
-  demand(at('npm run check') >= 0 && at('npx playwright install --with-deps chromium webkit') > at('npm run check')
-    && at('npm run test:browser') > at('npx playwright install --with-deps chromium webkit'),
-  'CI verify must install Chromium and WebKit outside npm, then run the browser tests');
+  demand(jobs.verify === `${aggregate}    runs-on: ubuntu-24.04\n    timeout-minutes: 5\n    steps:\n`
+    + '      - name: Require the check job and every browser shard to pass\n'
+    + '        run: test "${{ needs.check.result }}" = success && test "${{ needs.browser.result }}" = success\n',
+  'CI verify must require the check job and every browser shard to pass');
+  const browser = jobs.browser ?? '';
+  const browserSteps = browser.split('\n').map((line) => line.trim());
+  const at = (command) => browserSteps.indexOf(`run: ${command}`);
+  const install = 'npx playwright install --with-deps ${{ matrix.project }}';
+  demand(browser.includes('        project: [chromium, webkit]\n') && browser.includes('        shard: [1/2, 2/2]\n')
+    && at('npm ci') >= 0 && at(install) > at('npm ci')
+    && at('npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}') > at(install),
+  'CI must install Chromium and WebKit outside npm, then run every shard of the browser tests');
   for (const file of [...requiredFiles.filter((p) => p.endsWith('.md')), change.record]) {
     for (const [, target] of read(file).matchAll(/\]\(([^\s)]+)\)/g)) {
       if (/^(?:https?:|#|mailto:)/.test(target)) continue;

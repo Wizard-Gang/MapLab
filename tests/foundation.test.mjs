@@ -75,11 +75,19 @@ test.each([
   ]),
   ['skipped browser tests', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
-    writeFileSync(f, readFileSync(f, 'utf8').replace('        run: npm run test:browser\n', '        run: echo skipped\n'));
+    writeFileSync(f, readFileSync(f, 'utf8').replace('        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n', '        run: echo skipped\n'));
   }, 'browser tests'],
+  ['a dropped WebKit project', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace('        project: [chromium, webkit]\n', '        project: [chromium]\n'));
+  }, 'browser tests'],
+  ['a verify job that ignores failed browser shards', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace(' && test "${{ needs.browser.result }}" = success', ''));
+  }, 'every browser shard'],
   ['browsers installed after the browser tests', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
-    const text = readFileSync(f, 'utf8').replace('        run: npx playwright install --with-deps chromium webkit\n', '').replace('        run: npm run test:browser\n', '        run: npm run test:browser\n      - name: Late install\n        run: npx playwright install --with-deps chromium webkit\n');
+    const text = readFileSync(f, 'utf8').replace('        run: npx playwright install --with-deps ${{ matrix.project }}\n', '').replace('        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n', '        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n      - name: Late install\n        run: npx playwright install --with-deps ${{ matrix.project }}\n');
     writeFileSync(f, text);
   }, 'browser tests'],
   ['missing placeholder library', (p) => rmSync(join(p, 'placeholder-library/maplab.project.json')), 'Missing or empty'],
