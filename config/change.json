@@ -1,7 +1,7 @@
 {
-  "id": "ML-028",
-  "type": "TEST",
-  "title": "[ML-028] [TEST] Verify the exported forest acceptance scenario",
-  "branch": "ml-028-acceptance",
-  "record": "docs/changes/ML-028.md"
+  "id": "ML-029",
+  "type": "FEATURE",
+  "title": "[ML-029] [FEATURE] Create and place independent prefab expansions",
+  "branch": "ml-029-prefabs",
+  "record": "docs/changes/ML-029.md"
 }

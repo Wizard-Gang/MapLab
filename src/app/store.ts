@@ -1,3 +1,4 @@
+import { libraryForm } from '../library/library-form';
 import {PresentationIds,type PresentationField} from '../camera/authoring';
 import type {MapDocument} from '../contracts/document-types';
 import { PortalTestSession } from '../test-runtime/portals';
@@ -87,6 +88,21 @@ export class LibraryStore {
     return this.zoneIds(id).reserve(doc.state.model,field,drafts);
   }
   test(id: string): PortalTestSession | undefined { return this.tests.get(id); }
+  prefabSources(): readonly import('../contracts/document-types').PrefabDocument[] {
+    return [...this.sources.values()].filter(v => v !== null && typeof v === 'object' && !Array.isArray(v) && v.format === 'maplab.prefab') as unknown as import('../contracts/document-types').PrefabDocument[];
+  }
+  async savePrefab(value: import('../contracts/document-types').PrefabDocument, baseDigest: string | null): Promise<boolean> {
+    if (this.view.busy || !this.view.library || this.view.library.readOnly) throw Error('Prefab authoring needs a writable library');
+    if (value.dependencies?.some(d => d.kind === 'prefab')) throw Error('Nested prefab dependencies are not supported');
+    const graph = validateSourceGraph([...this.gameplaySources().filter(v => !(v !== null && typeof v === 'object' && !Array.isArray(v) && v.id === value.id)), value as unknown as JsonValue]);
+    if (!graph.ok) throw Error(graph.diagnostics.filter(d => d.severity === 'error').map(d => d.message).join('; '));
+    this.set({ busy: true });
+    try {
+      const result = await saveDocuments({ documents: [{ id: value.id, kind: 'prefab', text: libraryForm(value as unknown as JsonValue), baseDigest }] });
+      if (!result.ok) throw Error([result.message, ...describe(result)].join('; '));
+      await this.load(); this.set({ status: `Saved prefab ${value.id}; existing placements remain independent` }); return true;
+    } finally { this.set({ busy: false }); }
+  }
   testProfiles(): readonly MovementDocument[] {
     return [...this.sources.values()].filter(v => validateMovement(v).ok) as unknown as MovementDocument[];
   }

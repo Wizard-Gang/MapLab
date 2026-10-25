@@ -162,9 +162,10 @@ export function validateSourceGraph(values: readonly JsonValue[]): SourceGraphRe
     const ref = (id: string | null, kind: ObjectKind, at: readonly PathSegment[], mapId?: string): boolean => {
       if (id === null) return true;
       const targetId = mapId ?? doc.id;
-      const target = mapId === undefined ? ids : scope.has(mapId) && maps.has(mapId) ? indexes.get(mapId) : undefined;
-      const targetScope = mapId === undefined ? scope : target ? scopes.get(mapId) : undefined;
-      const found = kind === 'movement' ? targetScope?.has(id) && byId.get(id)?.format === 'maplab.movement' : target?.get(id) === kind || kind === 'layer' && target?.get(id) === 'group';
+      const target = mapId === undefined || mapId === doc.id ? ids : scope.has(mapId) && maps.has(mapId) ? indexes.get(mapId) : undefined;
+      const targetScope = mapId === undefined || mapId === doc.id ? scope : target ? scopes.get(mapId) : undefined;
+      const slot = kind === 'layer' && doc.format === 'maplab.prefab' && (mapId === undefined || mapId === doc.id) && doc.layerSlots.includes(id);
+      const found = slot || (kind === 'movement' ? targetScope?.has(id) && byId.get(id)?.format === 'maplab.movement' : target?.get(id) === kind || kind === 'layer' && target?.get(id) === 'group');
       if (!found) report(doc, 'reference.kind', at, `Expected ${kind} ${id} in ${targetId}`, id);
       return !!found;
     };
@@ -239,7 +240,7 @@ export function validateSourceGraph(values: readonly JsonValue[]): SourceGraphRe
     };
     const destination = (d: { mapId: string; entityId: string } | null, at: readonly PathSegment[]): void => {
       if (d !== null) {
-        if (!maps.has(d.mapId) || !scope.has(d.mapId)) report(doc, 'portal.map', [...at, 'mapId'], 'Portal map must exist in the declared dependency closure');
+        if (d.mapId !== doc.id && (!maps.has(d.mapId) || !scope.has(d.mapId))) report(doc, 'portal.map', [...at, 'mapId'], 'Portal map must exist in the declared dependency closure');
         else ref(d.entityId, 'entity', [...at, 'entityId'], d.mapId);
       }
     };

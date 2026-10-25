@@ -127,12 +127,18 @@ function checkSemantics(doc: MapHeader): Diagnostic[] {
     checkPath(dependency.path, ['dependencies', i, 'path'], dependency.id);
   });
   const assets = new Set<string>();
+  const assetFiles = new Map<string, Asset>();
   doc.assets.forEach((asset, i) => {
     if (assets.has(asset.id)) report('id.duplicate', ['assets', i, 'id'], `ID ${asset.id} is used twice`, asset.id);
     assets.add(asset.id);
     const extension = ASSET_EXTENSIONS[asset.mediaType];
     if (!asset.path.endsWith(extension)) report('asset.extension', ['assets', i, 'path'], `A ${asset.mediaType} asset path must end with ${extension}`, asset.id);
-    checkPath(asset.path, ['assets', i, 'path'], asset.id);
+    // Distinct placement-local asset IDs may share one immutable content file. Case/path
+    // aliases still reject; decoded type and size must agree for that exact file.
+    const prior = assetFiles.get(asset.path);
+    if (!prior) checkPath(asset.path, ['assets', i, 'path'], asset.id);
+    else if (prior.mediaType !== asset.mediaType || prior.size[0] !== asset.size[0] || prior.size[1] !== asset.size[1]) report('asset.metadata', ['assets', i, 'path'], 'Shared asset file metadata must agree', asset.id);
+    assetFiles.set(asset.path, asset);
     const problem = assetSizeProblem(asset);
     if (problem) report('asset.size', ['assets', i, 'size'], problem, asset.id);
   });
