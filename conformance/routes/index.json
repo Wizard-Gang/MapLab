@@ -23,15 +23,15 @@
     },
     {
       "path": "enemy-gap.proof.json",
-      "sha256": "f9301b5616543c870ae88d85f464e1f27449a6d99c28331b7b8f25b4f64fa689"
+      "sha256": "926e6ce8e44f74d27af6e88b6701e5740bff371e4b097040db0d3ddc406d0005"
     },
     {
       "path": "enemy-patrol.proof.json",
-      "sha256": "7b066d26bed8ca2256f018fe9c3dd3c84e924493494cce51e8be98abe73e8c56"
+      "sha256": "f51f870a77e989bb134a01b541cf6f90a6effe6c8a755c488e97aec9c43ccd79"
     },
     {
       "path": "enemy-region.proof.json",
-      "sha256": "c39f13797515001882500ac8953b34bd07354b0b5cf0a79487a966f1d72d4f58"
+      "sha256": "3d76e6f3a49834f69ac903bc7f5fabaea1f2e8aaa8c92bf83d9a2e2e798a18e8"
     },
     {
       "path": "enemy.movement.json",
@@ -43,15 +43,15 @@
     },
     {
       "path": "impossible-stance.proof.json",
-      "sha256": "266724ce3290d9dcf2656f1acf295209d8f8841806ad04774a628c04e6f86dd6"
+      "sha256": "9eb00cd1f27844d1503fb653826eeb38a8e88880b6ca07565c6c92c0e14ff676"
     },
     {
       "path": "player-gap.proof.json",
-      "sha256": "83f4f25b256e3ab000d04cde830f9b444a8a65ef8fa89ee3268507345962ee60"
+      "sha256": "78b7d3652e36e19decbfaa4c23fe445a0076eac4eb396605a846e1fc0a3cec51"
     },
     {
       "path": "player-region.proof.json",
-      "sha256": "1d679f3cdf3564629d88751901a00d98ae6d37d1cf792238d3f9c9a6ea1e1db9"
+      "sha256": "8ae985c910b960b1f7dbf11b939dd5c5a1dd86cd2039a5a84280f83d45690aca"
     },
     {
       "path": "player.movement.json",
@@ -59,7 +59,7 @@
     },
     {
       "path": "walk.proof.json",
-      "sha256": "2716a00a111182dc9230aac9cfdc543ab05b867266a265e7fe025152b5fafc1d"
+      "sha256": "d0bd34519618d80ee3836f3956dd47fc2fb238e2c110251d25b614a36246188b"
     }
   ]
 }

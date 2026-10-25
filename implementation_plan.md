@@ -35,30 +35,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-024** — squash `10f5a75`, PR #24; [record](docs/changes/ML-024.md).
 - **ML-025** — squash `8cae118`, PR #25; [record](docs/changes/ML-025.md).
 - **ML-026** — squash `db24c46`, PR #26; [record](docs/changes/ML-026.md).
+- **ML-027** — squash `faa1255`, PR #27; [record](docs/changes/ML-027.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-027 / P0
-
-- **Source scope:** Basic flight free-space planner/controller and mode-volume bindings for flying patrols.
-- **Non-goals:** No swim/grapple or generalized kinodynamic optimizer.
-- **Acceptance:** Full-body flight route inside fixture volume; obstacle/narrow-clearance/turn cases; ground graph not reused.
-- **Depends on:** ML-026 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [E1](docs/specifications/2026-10-16-maplab.md#e1-representations-and-guarantees), [E2](docs/specifications/2026-10-16-maplab.md#e2-deterministic-graph-building-pipeline), [E5](docs/specifications/2026-10-16-maplab.md#e5-enemy-authoring-and-proof-boundary), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix), [I4](docs/specifications/2026-10-16-maplab.md#i4-fundamental-acceptance-run); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Implement separate obstacle-aware 2D free-space flight search and acceleration/turn-limited reference movement.
-  2. Bind mode volumes and profile/mask constraints to authored flying patrol and fallback reports.
-  3. Create owned fixture(s): region.flight/route.flyer, narrow clearance, obstacle, turn radius, outside volume.
-  4. Add executable checks: Full-body fly witness and ground-graph separation tests.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-028 / P0 milestone
 
 - **Source scope:** Fundamental forest acceptance integration and independent consumer construction test.
@@ -73,6 +55,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: I4 checklist and reproducible digest; integration defects only, no new feature family.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-029 / P1
 
 - **Source scope:** Prefab create/place/expand/edit provenance, including assets/flags/presentations/internal refs.

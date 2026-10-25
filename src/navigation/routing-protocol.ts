@@ -1,7 +1,7 @@
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
 import { digest, type ClimbState } from '../physics-reference';
-import { Navigation, ROUTE_DEFAULTS, routingIdentity, type Goal, type RouteProof, type RouteSettings } from './routes';
+import { Navigation, defaultRouteSettings, routingIdentity, type Goal, type RouteProof, type RouteSettings } from './routes';
 export type RouteQuery={readonly kind:'route';readonly sourceId:string;readonly initial:ClimbState|null;readonly goal:Goal;readonly algorithm:'astar'|'dijkstra'}|{readonly kind:'region';readonly sourceId:string;readonly initial:ClimbState|null;readonly regionId:string;readonly algorithm:'astar'|'dijkstra'}|{readonly kind:'patrol';readonly entityId:string;readonly algorithm:'astar'|'dijkstra'};
 export type RoutingRequest={readonly kind:'cancel';readonly job:number}|{readonly kind:'solve';readonly job:number;readonly revision:number;readonly map:MapDocument;readonly profile:MovementDocument;readonly settings:RouteSettings;readonly query:RouteQuery};
 export type RoutingReply={readonly kind:'proof';readonly job:number;readonly requestSha256:string;readonly proof:RouteProof}|{readonly kind:'error';readonly job:number;readonly reason:string};
@@ -28,7 +28,7 @@ export class RoutingSession {
  private set(view:RoutingView){this.view=view;for(const f of this.listeners)f();}
  invalidate(){this.serial++;if(this.pending)this.send({kind:'cancel',job:this.pending.job});this.pending=null;this.set({phase:'idle',proof:null,error:''});}
  dispose(){this.invalidate();this.disposed=true;this.cache.clear();this.listeners.clear();}
- async solve(map:MapDocument,profile:MovementDocument,revision:number,query:RouteQuery,settings:RouteSettings=ROUTE_DEFAULTS):Promise<void>{
+ async solve(map:MapDocument,profile:MovementDocument,revision:number,query:RouteQuery,settings:RouteSettings=defaultRouteSettings(profile)):Promise<void>{
   if(this.disposed)throw Error('disposed routing session');this.invalidate();const job=this.serial,source=structuredClone(map),p=structuredClone(profile),s=structuredClone(settings),q=structuredClone(query);this.set({phase:'building',proof:null,error:''});
   try{
    const [identity,requestSha256]=await Promise.all([routingIdentity(source,p,s),digest(q)]);if(this.disposed||job!==this.serial)return;

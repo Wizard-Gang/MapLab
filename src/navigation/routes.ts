@@ -1,3 +1,4 @@
+import {groundMotionAllowed} from './intent';
 // Static reference-route proofs. Authored links never become physical exemptions.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -11,6 +12,8 @@ function frozen<T>(value:T):T{if(value&&typeof value==='object'&&!Object.isFroze
 
 export interface RouteSettings {readonly maxExpanded:number;readonly maxReplayTicks:number;readonly maxActionTicks:number;readonly maxRouteTicks:number;readonly maxDepth:number;readonly maxTargets:number;readonly toleranceSu:number;readonly penaltyTicks:number;readonly air:AirSettings}
 export const ROUTE_DEFAULTS:RouteSettings=frozen({maxExpanded:512,maxReplayTicks:200000,maxActionTicks:240,maxRouteTicks:3600,maxDepth:16,maxTargets:16,toleranceSu:128,penaltyTicks:0,air:{...AIR_DEFAULTS}});
+/** The owned slow ground-only patrol needs 360 movement ticks for one authored leg. */
+export function defaultRouteSettings(profile:MovementDocument):RouteSettings {return profile.abilities.length===0&&profile.ground.walkSpeed>0&&profile.ground.walkSpeed<=256?frozen({...ROUTE_DEFAULTS,maxActionTicks:512}):ROUTE_DEFAULTS;}
 export interface Goal {readonly supportId:string;readonly x:number;readonly toleranceSu:number;readonly vx:number}
 export type RouteStatus='verified reachable with replay witness'|'no route found within declared search/sampling budget'|'proven unreachable'|'budget'|'unsupported'|'cancelled';
 export interface RouteAction {readonly key:string;readonly kind:string;readonly initial:ClimbState;readonly terminal:ClimbState;readonly input:readonly RunInput[];readonly frames:readonly Step[];readonly durationTicks:number;readonly penaltyTicks:number;readonly refinedFrom:string|null}
@@ -77,7 +80,7 @@ export function replayRouteActions(w:World,initial:ClimbState,actions:readonly R
   for(let n=0;n<action.frames.length;n++){
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
-   const {fromTick:_,...control}=c,f=step(w,s,control);if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!))return null;
+   const {fromTick:_,...control}=c,f=step(w,s,control);if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
   }
   if(replayBytes(s)!==replayBytes(action.terminal))return null;
@@ -88,7 +91,7 @@ function compress(input:readonly RunInput[]):RunInput[]{const out:RunInput[]=[];
 
 export class Navigation {
  private constructor(private readonly map:MapDocument,private readonly profile:MovementDocument,private readonly world:World,readonly identity:Identity,readonly revision:number,readonly settings:RouteSettings,readonly status:'candidate'|'budget'|'unsupported'|'cancelled',readonly diagnostics:readonly string[],private readonly intervals:readonly Interval[],private readonly templates:readonly Template[]){frozen(map);frozen(profile);frozen(world);frozen(identity);frozen(settings);frozen(diagnostics);frozen(intervals);frozen(templates);}
- static async build(source:MapDocument,profile:MovementDocument,revision:number,settings:RouteSettings=ROUTE_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0))):Promise<Navigation>{
+ static async build(source:MapDocument,profile:MovementDocument,revision:number,settings:RouteSettings=defaultRouteSettings(profile),cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0))):Promise<Navigation>{
   validateSettings(settings);const map=structuredClone(source),p=structuredClone(profile),options=structuredClone(settings);
   const surface=await buildSurfaceGraph(map,p,revision,{maxSamples:options.air.maxClearanceSamples,maxTicks:3600},cancelled,yieldTask);
   const id=await routingIdentity(map,p,options);
