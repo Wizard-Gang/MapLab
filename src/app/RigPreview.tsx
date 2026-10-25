@@ -6,8 +6,8 @@ import type {RigView} from '../riglab/model';
 import {samplePresentation,type PresentationInput,type RigSample} from '../riglab/presentation';
 import {DecodedImages} from '../render/assets';
 export function useRigBundle(path:string|undefined):{bundle:RigView|null;notice:string} {
- const [state,setState]=useState<{bundle:RigView|null;notice:string}>({bundle:null,notice:'No bundle selected'});
- useEffect(()=>{let active=true;setState({bundle:null,notice:'Loading optional presentation'});if(path)void readRigBundle(path).then(r=>{if(active)setState(r.ok?{bundle:r.bundle,notice:'Verified RigLab bundle'}:{bundle:null,notice:r.message});});else setState({bundle:null,notice:'Generic actor; no bundle'});return()=>{active=false;};},[path]);return state;
+ const [state,setState]=useState<{path:string|undefined;bundle:RigView|null;notice:string}>({path:undefined,bundle:null,notice:'No bundle selected'});
+ useEffect(()=>{let active=true;setState({path,bundle:null,notice:'Loading optional presentation'});if(path)void readRigBundle(path).then(r=>{if(active)setState(r.ok?{path,bundle:r.bundle,notice:'Verified RigLab bundle'}:{path,bundle:null,notice:r.message});});else setState({path,bundle:null,notice:'Generic actor; no bundle'});return()=>{active=false;};},[path]);return state.path===path?state:{bundle:null,notice:'Loading optional presentation'};
 }
 export function RigPreview({bundle,binding,assets,input}:{readonly bundle:RigView|null;readonly binding:RigPresentationBinding;readonly assets:readonly Asset[];readonly input:PresentationInput}):ReactNode {
  const canvas=useRef<HTMLCanvasElement>(null),images=useRef<DecodedImages|null>(null);const [epoch,setEpoch]=useState(0),[notice,setNotice]=useState('');
