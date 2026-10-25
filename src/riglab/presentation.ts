@@ -8,6 +8,7 @@ export interface RigSample {readonly status:'baked'|'placeholder';readonly reaso
 const refuse=(reason:string):never=>{throw Error(`Presentation: ${reason}`);};
 export function validateBinding(bundle:RigView,b:RigPresentationBinding,assets:readonly Asset[]):void {
  if(b.kind!=='riglab'||b.expectedExportVersion!==1||b.rootMotion!=='visualOnly'||!['left','right'].includes(b.nativeFacing)||!['supportLine','footReference'].includes(b.groundContact))refuse('unsupported binding');
+ if(!Array.isArray(b.artSlots)||b.artSlots.length>256||!Array.isArray(b.actions)||b.actions.length>128)refuse('binding resource limits');
  const {num,den}=b.worldUnitsPerRigUnit;if(![num,den].every(v=>Number.isSafeInteger(v)&&v>0)||!Number.isFinite(num/den))refuse('invalid scale');
  if(b.rigGroundAnchor.length!==2||!b.rigGroundAnchor.every(Number.isFinite))refuse('invalid ground anchor');
  const slots=[...bundle.rig.bones.map(b=>b.slot),...bundle.weapons.flatMap(w=>w.bodies.map(b=>b.slot))],used=new Set<string>();
@@ -26,7 +27,7 @@ export interface PresentationInput {readonly tick:number;readonly stateEnterTick
 export function samplePresentation(bundle:RigView|null,b:RigPresentationBinding,assets:readonly Asset[],input:PresentationInput):RigSample {
  const placeholder=(reason:string):RigSample=>({status:'placeholder',reason,frame:null,parts:[]});if(!bundle)return placeholder('Bundle unavailable; generic actor');
  validateBinding(bundle,b,assets);
- if(!Number.isSafeInteger(input.tick)||!Number.isSafeInteger(input.stateEnterTick)||input.tick<input.stateEnterTick||input.foot.some(v=>!Number.isFinite(v))||input.supportY!==undefined&&!Number.isFinite(input.supportY)||!Number.isFinite(input.rotation??0))return placeholder('Invalid presentation sample');
+ if(input.tick<0||input.stateEnterTick<0||!Number.isSafeInteger(input.tick)||!Number.isSafeInteger(input.stateEnterTick)||input.tick<input.stateEnterTick||input.foot.some(v=>!Number.isFinite(v))||input.supportY!==undefined&&!Number.isFinite(input.supportY)||!Number.isFinite(input.rotation??0))return placeholder('Invalid presentation sample');
  let action=b.actions.find(a=>a.semantic===input.semantic);while(action&&!action.animation&&action.fallbackSemantic)action=b.actions.find(a=>a.semantic===action!.fallbackSemantic);
  const clip=bundle.clips.find(c=>c.name===action?.animation),baked=bundle.baked.find(c=>c.animation===clip?.name);if(!clip||!baked)return placeholder('Missing action or unbaked animation; generic actor');
  const names=order(bundle,clip,input.facing);if(!names)return placeholder('Unsupported depth profile; generic actor');

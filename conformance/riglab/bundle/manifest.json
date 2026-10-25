@@ -1,0 +1,44 @@
+{
+  "format": "riglab.export",
+  "version": 1,
+  "generator": "RigLab@6ef2271de90c85de931de77fa30c82a068875e2c/MapLab-owned-ML-030",
+  "rig": {
+    "name": "owned-armor",
+    "file": "owned-armor.rig.json",
+    "sha256": "00982916ae4200b8a1c9d2bf999285d6ac3cb517610815590f6bf8e93b85e5bd"
+  },
+  "animations": [
+    {
+      "name": "unarmed-idle",
+      "file": "animations/unarmed-idle.anim.json",
+      "sha256": "41078b65d4d2b7d33ebfecf2a4f71fc2da4ccccf14b4fd8f21952c433265fd92"
+    },
+    {
+      "name": "unarmed-walk",
+      "file": "animations/unarmed-walk.anim.json",
+      "sha256": "21ba6252afdb182ab9dda70260c5d5d89de0287f95cb778d95ebbd886cebb80f"
+    },
+    {
+      "name": "unarmed-jump",
+      "file": "animations/unarmed-jump.anim.json",
+      "sha256": "003467c0f9b352f04d63cc3eaafbfe10c4337ca208776530b631c24be29684a3"
+    }
+  ],
+  "baked": [
+    {
+      "animation": "unarmed-idle",
+      "file": "baked/unarmed-idle.baked.json",
+      "sha256": "9a4b7171fad6e671b7e7c9210633e3aef46becbf0afb135417faa88fda46aadb"
+    },
+    {
+      "animation": "unarmed-walk",
+      "file": "baked/unarmed-walk.baked.json",
+      "sha256": "bf0f4ea72045ccdc976bbc148137916a87d74f09df6a507ad3e5bce695ae2394"
+    },
+    {
+      "animation": "unarmed-jump",
+      "file": "baked/unarmed-jump.baked.json",
+      "sha256": "2c0c54edc216192902f881d3a2693f1c584d61d25ffba9393fc7b45f8eb5cb06"
+    }
+  ]
+}

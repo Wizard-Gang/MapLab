@@ -1,0 +1,86 @@
+{
+  "license": "CC0-1.0",
+  "owner": "MapLab authors",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "6f9490b11d8405900bf2ed410b2c4acaf8c91bf38e41c47e1b776b6212efc7ed"
+    },
+    {
+      "path": "armor.svg",
+      "sha256": "431591125b4d5162e68576f1e443c111b2b8cdf122abe2053129fb78024a5406"
+    },
+    {
+      "path": "asset.json",
+      "sha256": "c9ed319dcb0c16a65d11cce1e07ec9de97d2de46dad4eca98dc60cf766039e52"
+    },
+    {
+      "path": "binding.json",
+      "sha256": "dcd8d81356c9a8028e9709f5b32a13a140079fb7e58f4091b397fa31b5eab451"
+    },
+    {
+      "path": "bound.map.json",
+      "sha256": "e10e10b4fedbc84c4854edfb25c595103396b8f081d871e534ecf99c3ade0006"
+    },
+    {
+      "path": "bundle/animations/unarmed-idle.anim.json",
+      "sha256": "41078b65d4d2b7d33ebfecf2a4f71fc2da4ccccf14b4fd8f21952c433265fd92"
+    },
+    {
+      "path": "bundle/animations/unarmed-jump.anim.json",
+      "sha256": "003467c0f9b352f04d63cc3eaafbfe10c4337ca208776530b631c24be29684a3"
+    },
+    {
+      "path": "bundle/animations/unarmed-walk.anim.json",
+      "sha256": "21ba6252afdb182ab9dda70260c5d5d89de0287f95cb778d95ebbd886cebb80f"
+    },
+    {
+      "path": "bundle/baked/unarmed-idle.baked.json",
+      "sha256": "9a4b7171fad6e671b7e7c9210633e3aef46becbf0afb135417faa88fda46aadb"
+    },
+    {
+      "path": "bundle/baked/unarmed-jump.baked.json",
+      "sha256": "2c0c54edc216192902f881d3a2693f1c584d61d25ffba9393fc7b45f8eb5cb06"
+    },
+    {
+      "path": "bundle/baked/unarmed-walk.baked.json",
+      "sha256": "bf0f4ea72045ccdc976bbc148137916a87d74f09df6a507ad3e5bce695ae2394"
+    },
+    {
+      "path": "bundle/manifest.json",
+      "sha256": "0125db4619785e88fd61c49cf585414501f0463151d501b252ad5fbc1cb55520"
+    },
+    {
+      "path": "bundle/owned-armor.rig.json",
+      "sha256": "00982916ae4200b8a1c9d2bf999285d6ac3cb517610815590f6bf8e93b85e5bd"
+    },
+    {
+      "path": "matrix.expected.json",
+      "sha256": "30c05867aa06563b11eb491e89ef20080f2219d05795fbbb88f405b9f2f434f2"
+    },
+    {
+      "path": "missing-art.binding.json",
+      "sha256": "0fd16f1057d7155f0f410cc5b759ab2f0e7c13d183b65be54b3a4e49523f5d50"
+    },
+    {
+      "path": "owned-rig.zip",
+      "sha256": "72f703daf133902203acc23beecc391d809c653d816571d92afd756d5c56fe95"
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "5a8949cc3cf8431f4bb8fb05a07cc938df23833c3dcde694ce6a464a50c32ec1"
+    },
+    {
+      "path": "rejections.json",
+      "sha256": "5bf2b3951f0af60718395472182ed57f964d779877f1093d9c958f4cbb8fe424"
+    },
+    {
+      "path": "source-model.json",
+      "sha256": "3f88e51f1b00e1000397ec9168cd563ee9280fa7ceae4eac21c435b08e89aae5"
+    },
+    {
+      "path": "unbaked.manifest.json",
+      "sha256": "e7df06dd3155a4a04b260172751c4d679295fe30eba73a71f50b0b54d4bba3d9"
+    }
+  ]
+}

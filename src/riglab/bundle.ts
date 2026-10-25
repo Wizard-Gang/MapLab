@@ -26,5 +26,5 @@ export function verifyRigBundle(input:ReadonlyMap<string,Uint8Array>,expectedDig
  const weapons=(m.weapons??[]).map((e:Data)=>{const w=validateWeapon(values.get(e.file),chains);if(w.name!==e.name)fail('weapon entry identity differs');return w;});
  const clips=m.animations.map((e:Data)=>{const c=validateClip(values.get(e.file),rig,weapons,chains);if(c.name!==e.name)fail('animation entry identity differs');return c;});
  const baked=(m.baked??[]).map((e:Data)=>{const c=clips.find((c:any)=>c.name===e.animation);if(!c)fail('unknown baked animation');return validateBaked(values.get(e.file),rig,c,weapons);});
- const view=freeze({digest:hash,rig,clips,baked,weapons});return {...view,files:new Map([...input].map(([p,b])=>[p,b.slice()]))};
+ const view=freeze({digest:hash,rig,clips,baked,weapons});return Object.freeze({...view,files:new Map([...input].map(([p,b])=>[p,b.slice()]))});
 }

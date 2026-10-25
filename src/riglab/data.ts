@@ -9,7 +9,7 @@ export function obj(v:unknown,required:readonly string[]=[],optional:readonly st
 }
 export function record(v:unknown):Data {if(v===null||typeof v!=='object'||Array.isArray(v))return fail('expected named records');return v as Data;}
 export function list(v:unknown,max=256,min=0):any[] {if(!Array.isArray(v)||v.length<min||v.length>max)return fail('array resource limit');return v;}
-export function name(v:unknown):string {if(typeof v!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,95}$/.test(v))return fail('invalid name');return v;}
+export function name(v:unknown):string {if(typeof v!=='string'||!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(v))return fail('invalid name');return v;}
 export function number(v:unknown,max=1_000_000):number {if(typeof v!=='number'||!Number.isFinite(v)||Math.abs(v)>max)return fail('nonfinite or excessive transform');return v;}
 export function integer(v:unknown,max:number,min=0):number {const n=number(v,max);if(!Number.isSafeInteger(n)||n<min)return fail('integer resource limit');return n;}
 export function point(v:unknown,n=2):number[] {const a=list(v,n,n);a.forEach(x=>number(x));return a;}

@@ -1,0 +1,24 @@
+{
+  "license": "CC0-1.0",
+  "owner": "MapLab authors",
+  "sample": "New owned rig/animation/armor; no borrowed artwork or solver code",
+  "generator": {
+    "repository": "Wizard-Gang/RigLab",
+    "commit": "6ef2271de90c85de931de77fa30c82a068875e2c",
+    "files": [
+      {
+        "path": "src/export/bundle.ts",
+        "sha256": "a481d729f73d1e64b1eb7b8c5b857e250faa417cec564d38bfbb20b2561c2f04"
+      },
+      {
+        "path": "src/export/bake.ts",
+        "sha256": "7d730b8ee14523de551b64015fc306ca802ebb00714ed676261633eab15a866a"
+      },
+      {
+        "path": "src/export/zip.ts",
+        "sha256": "e3deccccc51e64b865e77d6eb0c963ea60347b1eb6e84c96b849e50a40d03715"
+      }
+    ]
+  },
+  "manifestSha256": "0125db4619785e88fd61c49cf585414501f0463151d501b252ad5fbc1cb55520"
+}

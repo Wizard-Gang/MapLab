@@ -1,0 +1,129 @@
+{
+  "format": "riglab.anim",
+  "version": 3,
+  "name": "unarmed-idle",
+  "rig": "owned-armor",
+  "class": "unarmed",
+  "kind": "idle",
+  "fps": 60,
+  "length": 60,
+  "loop": true,
+  "keys": [
+    {
+      "frame": 0,
+      "interpolation": "smoothstep",
+      "pose": {
+        "pelvis": {
+          "x": 0,
+          "y": 0,
+          "rotation": 0
+        },
+        "leg-far": {
+          "rotation": 0
+        },
+        "leg-near": {
+          "rotation": 0
+        },
+        "torso": {
+          "rotation": 0
+        },
+        "arm-far": {
+          "rotation": 0
+        },
+        "arm-near": {
+          "rotation": 0
+        },
+        "head": {
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "frame": 15,
+      "interpolation": "smoothstep",
+      "pose": {
+        "pelvis": {
+          "x": 4,
+          "y": -2,
+          "rotation": 0
+        },
+        "leg-far": {
+          "rotation": 0
+        },
+        "leg-near": {
+          "rotation": 0
+        },
+        "torso": {
+          "rotation": 0
+        },
+        "arm-far": {
+          "rotation": 0
+        },
+        "arm-near": {
+          "rotation": 5
+        },
+        "head": {
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "frame": 30,
+      "interpolation": "smoothstep",
+      "pose": {
+        "pelvis": {
+          "x": 0,
+          "y": 0,
+          "rotation": 0
+        },
+        "leg-far": {
+          "rotation": 0
+        },
+        "leg-near": {
+          "rotation": 0
+        },
+        "torso": {
+          "rotation": 0
+        },
+        "arm-far": {
+          "rotation": 0
+        },
+        "arm-near": {
+          "rotation": 10
+        },
+        "head": {
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "frame": 45,
+      "interpolation": "smoothstep",
+      "pose": {
+        "pelvis": {
+          "x": 0,
+          "y": 0,
+          "rotation": 0
+        },
+        "leg-far": {
+          "rotation": 0
+        },
+        "leg-near": {
+          "rotation": 0
+        },
+        "torso": {
+          "rotation": 0
+        },
+        "arm-far": {
+          "rotation": 0
+        },
+        "arm-near": {
+          "rotation": 15
+        },
+        "head": {
+          "rotation": 0
+        }
+      }
+    }
+  ]
+}

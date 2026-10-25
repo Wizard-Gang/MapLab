@@ -1,0 +1,45 @@
+{
+  "id": "presentation.armor",
+  "kind": "riglab",
+  "bundleDependencyId": "rig.owned-armor",
+  "expectedExportVersion": 1,
+  "rigGroundAnchor": [
+    0,
+    0
+  ],
+  "worldUnitsPerRigUnit": {
+    "num": 2,
+    "den": 1
+  },
+  "nativeFacing": "right",
+  "rootMotion": "visualOnly",
+  "groundContact": "supportLine",
+  "artSlots": [],
+  "actions": [
+    {
+      "semantic": "locomotion.idle",
+      "animation": "unarmed-idle",
+      "fallbackSemantic": null
+    },
+    {
+      "semantic": "locomotion.walk",
+      "animation": "unarmed-walk",
+      "fallbackSemantic": "locomotion.idle"
+    },
+    {
+      "semantic": "locomotion.jump.rise",
+      "animation": "unarmed-jump",
+      "fallbackSemantic": null
+    },
+    {
+      "semantic": "locomotion.fall",
+      "animation": null,
+      "fallbackSemantic": "locomotion.jump.rise"
+    },
+    {
+      "semantic": "climb.ladder",
+      "animation": null,
+      "fallbackSemantic": null
+    }
+  ]
+}

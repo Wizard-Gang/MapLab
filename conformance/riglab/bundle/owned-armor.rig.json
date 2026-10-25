@@ -1,0 +1,164 @@
+{
+  "format": "riglab.rig",
+  "version": 1,
+  "name": "owned-armor",
+  "space": {
+    "units": "svg",
+    "x": "right",
+    "y": "down",
+    "rotation": "clockwise-positive",
+    "height": 40,
+    "viewBox": [
+      -20,
+      -50,
+      40,
+      55
+    ]
+  },
+  "root": "pelvis",
+  "bones": [
+    {
+      "name": "pelvis",
+      "parent": null,
+      "offset": [
+        0,
+        -24
+      ],
+      "tip": null,
+      "slot": "armor_pelvis",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "leg-far",
+      "parent": "pelvis",
+      "offset": [
+        -3,
+        0
+      ],
+      "tip": [
+        0,
+        24
+      ],
+      "slot": "armor_leg_far",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "leg-near",
+      "parent": "pelvis",
+      "offset": [
+        3,
+        0
+      ],
+      "tip": [
+        0,
+        24
+      ],
+      "slot": "armor_leg_near",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "torso",
+      "parent": "pelvis",
+      "offset": [
+        0,
+        -2
+      ],
+      "tip": null,
+      "slot": "armor_torso",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "arm-far",
+      "parent": "torso",
+      "offset": [
+        -5,
+        -10
+      ],
+      "tip": [
+        0,
+        12
+      ],
+      "slot": "armor_arm_far",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "arm-near",
+      "parent": "torso",
+      "offset": [
+        5,
+        -10
+      ],
+      "tip": [
+        0,
+        12
+      ],
+      "slot": "armor_arm_near",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    },
+    {
+      "name": "head",
+      "parent": "torso",
+      "offset": [
+        0,
+        -12
+      ],
+      "tip": [
+        0,
+        -8
+      ],
+      "slot": "armor_head",
+      "artHeight": 8,
+      "hand": null,
+      "limits": null
+    }
+  ],
+  "chains": [],
+  "depthProfiles": {
+    "profiles": {
+      "armor": {
+        "underLowerBody": null,
+        "behindTorso": "far",
+        "foreground": [
+          "near"
+        ],
+        "head": "above-arms"
+      }
+    },
+    "sides": {
+      "facingRight": {
+        "arms": {
+          "far": "arm-far",
+          "near": "arm-near"
+        },
+        "legs": {
+          "far": "leg-far",
+          "near": "leg-near"
+        }
+      },
+      "facingLeft": {
+        "arms": {
+          "far": "arm-near",
+          "near": "arm-far"
+        },
+        "legs": {
+          "far": "leg-near",
+          "near": "leg-far"
+        }
+      }
+    },
+    "byClip": {},
+    "default": "armor"
+  }
+}

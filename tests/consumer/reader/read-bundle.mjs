@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {foreignPresentations} from './riglab.mjs';
 // Independent MapLab bundle reader (ML-007). Usage:
 //   node tests/consumer/reader/read-bundle.mjs --schemas SCHEMA_DIR [--expect-digest SHA256] BUNDLE_DIR
 // Reads final bytes from disk and the pinned published schemas only; imports Node built-ins and
@@ -54,6 +55,7 @@ export function readBundle(bundleDir, schemaDir, expectDigest = null) {
   const docs = loadDocuments(manifest, files, schemas, report.diagnostics);
   if (report.diagnostics.length) return report;
   report.claims.schemasValidated = true;
+  try { const checked=foreignPresentations(manifest,files,docs);if(checked.size){report.foreignBundles=[...checked];report.skippedFiles=report.skippedFiles.filter(f=>![...checked].some(p=>f.path.startsWith(p)));}} catch(e){return fatal(e);}
   report.stage = 'closure';
   checkClosure(manifest, docs, report.diagnostics);
   if (report.diagnostics.length) return report;

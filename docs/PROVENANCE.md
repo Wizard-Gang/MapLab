@@ -155,3 +155,6 @@ schema extension was borrowed. `tests/consumer/prefab-consumer.mjs` reads only
 exported bytes through the separate reader and independently checks coordinates,
 slots, nested IDs, asset/flag/gameplay references and dependency closure. It does
 not certify an external engine or foreign RigLab importer.
+
+
+ML-030 adds `conformance/riglab/`, a new CC0-1.0 MapLab-owned seven-bone rig, animation keys and armor primitive. `source-model.json` is the source; `provenance.json` pins the producing RigLab commit and exporter file hashes. No foreign artwork or solver code is bundled into MapLab. The STORE ZIP and original inner files are byte-pinned by the corpus index. Missing-art/unbaked variants and malicious-reference edits remain inert fixture data. CI compares full mirrored matrices and controller traces; `tests/consumer/riglab-consumer.mjs` reconstructs the matrix proof from final exported bytes using only Node and the separate reader.
