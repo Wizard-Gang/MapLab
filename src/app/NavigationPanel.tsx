@@ -1,3 +1,4 @@
+import {BlockerPanel} from './BlockerPanel';
 import {FlightPanel} from './FlightPanel';
 import {useEffect,useMemo,useRef,useState,useSyncExternalStore,type ReactNode} from 'react';
 import type {LibraryStore,OpenDoc} from './store';
@@ -85,6 +86,6 @@ export function NavigationPanel({store,doc}:{readonly store:LibraryStore;readonl
  const selection=store.selection(doc.id),state=useSyncExternalStore(selection.subscribe,selection.getSnapshot,selection.getSnapshot),active=state.mode==='Navigation';
  return <section className="selection-panel" aria-label="Navigation"><h3>Navigation</h3>
   <button type="button" onClick={()=>selection.mode(active?'All':'Navigation')}>{active?'Exit Navigation':'Navigation mode'}</button>
-  {active&&<><Active key={doc.id} store={store} doc={doc}/><FlightPanel key={'flight:'+doc.id} store={store} doc={doc}/></>}
+  {active&&<><Active key={doc.id} store={store} doc={doc}/><FlightPanel key={'flight:'+doc.id} store={store} doc={doc}/><BlockerPanel key={'blocker:'+doc.id} store={store} doc={doc}/></>}
  </section>;
 }
