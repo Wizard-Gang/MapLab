@@ -30,11 +30,11 @@ export const requiredFiles = [
   'docs/RELEASE-MANAGEMENT.md',
   'docs/PROVENANCE.md', 'docs/specifications/2026-10-16-maplab.md',
   'config/github-repository-settings.json', 'config/lifecycle-scripts.json',
-  'config/change.json', 'package.json', 'package-lock.json', '.node-version',
+  'config/change.json', 'config/release.json', 'docs/releases.json', 'package.json', 'package-lock.json', '.node-version',
   '.npmrc', '.gitignore', 'index.html', 'tsconfig.json', 'vite.config.ts',
   'vitest.config.ts', 'src/app/App.tsx', 'src/app/main.tsx', 'src/app/styles.css',
   'tests/app.test.tsx', 'tests/foundation.test.mjs', 'scripts/check-foundation.mjs',
-  'scripts/check-build.mjs', '.github/workflows/verify.yml',
+  'scripts/check-build.mjs', '.github/workflows/verify.yml', '.github/workflows/gate.yml', '.github/workflows/change.yml',
   '.github/pull_request_template.md', 'docs/deliveries.json',
   'scripts/check-change.mjs', 'scripts/check-queue.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
   'tests/change.test.mjs', 'tests/policy.test.mjs', 'docs/DELIVERY-GATES.md',
@@ -45,6 +45,81 @@ export const requiredFiles = [
 
 function demand(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+// Every checkout step and its assert step, in each job that tests a revision.
+const setup = [
+  'test "$(git rev-parse HEAD)" = "$MAPLAB_EXPECTED_HEAD"',
+  'npm install --global npm@12.1.0 --ignore-scripts --no-audit --no-fund',
+];
+const prTypes = '    types: [opened, synchronize, reopened, edited, ready_for_review]';
+const aggregateRun = 'test "${{ needs.check.result }}" = success && test "${{ needs.browser.result }}" = success';
+const browserInstall = 'npx playwright install --with-deps ${{ matrix.project }}';
+const browserRun = 'npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}';
+// Release protocol (ML-031): the full suite runs on release -> main PRs and on dispatch, the fast gate
+// on task PRs into release/**, and change identity on both. No workflow runs on push.
+export const workflowPins = {
+  verify: {
+    on: ['  pull_request:', '    branches: [main]', prTypes, '  workflow_dispatch:'], uses: 6,
+    jobs: {
+      check: [[...setup, 'npm ci', 'npm run check'], 'Required CI job/command missing: check'],
+      browser: [[...setup, 'npm ci', browserInstall, browserRun],
+        'CI must install Chromium and WebKit outside npm, then run every shard of the browser tests'],
+      verify: [[aggregateRun], 'CI verify must require the check job and every browser shard to pass'],
+      security: [[...setup, 'npm ci', 'npm run security'], 'Required CI job/command missing: security'],
+    },
+  },
+  gate: {
+    on: ['  pull_request:', "    branches: ['release/**']", prTypes], uses: 2,
+    jobs: { gate: [[...setup, 'npm ci', 'npm run check:foundation', 'npm run typecheck', 'npm run build', 'npm run smoke'],
+      'Feature gate must run exactly the non-test checks: gate'] },
+  },
+  change: {
+    on: ['  pull_request:', "    branches: [main, 'release/**']", prTypes], uses: 2,
+    jobs: { 'change-id': [[...setup, 'npm run check:change'], 'Required CI job/command missing: change-id'] },
+  },
+};
+
+function checkWorkflows(read) {
+  for (const [file, pin] of Object.entries(workflowPins)) {
+    const workflow = read(`.github/workflows/${file}.yml`);
+    const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    demand(uses.length === pin.uses && uses.every((action) => [
+      'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803',
+      'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38',
+    ].includes(action)),
+      'CI Actions must use immutable commit SHAs');
+    // The required verify job is the one place a condition may appear: it must run after a failed gate to report it.
+    const aggregate = '    name: verify\n    needs: [check, browser]\n    if: ${{ always() }}\n';
+    const checkouts = uses.filter((action) => action.startsWith('actions/checkout@')).length;
+    const count = (text) => workflow.split(text).length - 1;
+    demand(workflow.includes('\npermissions:\n  contents: read\n') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(file === 'verify' ? workflow.replace(aggregate, '') : workflow)
+      && count('persist-credentials: false') === checkouts
+      && count('ref: ${{ github.event.pull_request.head.sha || github.sha }}') === checkouts
+      && workflow.includes('  MAPLAB_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}\n'),
+      'CI must run exact-head credential-free canonical and separate online gates with least privilege');
+    const on = workflow.match(/^on:\n((?: .*\n|\n)*?)(?=\S)/m)?.[1].replace(/\n+$/, '').split('\n');
+    demand(JSON.stringify(on) === JSON.stringify(pin.on),
+      `CI triggers disagree with the release protocol: ${file}.yml`);
+    const body = workflow.slice(workflow.indexOf('\njobs:\n') + 7);
+    const jobs = Object.fromEntries([...body.matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:|$(?![\s\S]))/gm)].map((m) => [m[1], m[2]]));
+    demand(workflow.includes('\njobs:\n') && JSON.stringify(Object.keys(jobs)) === JSON.stringify(Object.keys(pin.jobs)),
+      `CI jobs disagree with the release protocol: ${file}.yml`);
+    for (const [job, [commands, message]] of Object.entries(pin.jobs)) {
+      const runs = jobs[job].split('\n').map((line) => line.trim()).filter((line) => line.startsWith('run: ')).map((line) => line.slice(5));
+      const header = { verify: aggregate, browser: '    name: browser (${{ matrix.project }} ${{ matrix.shard }})\n' }[job] ?? `    name: ${job}\n`;
+      demand(jobs[job].startsWith(header)
+        && JSON.stringify(runs) === JSON.stringify(commands), message);
+    }
+    if (file === 'verify') {
+      demand(jobs.browser.includes('        project: [chromium, webkit]\n') && jobs.browser.includes('        shard: [1/2, 2/2]\n'),
+        'CI must install Chromium and WebKit outside npm, then run every shard of the browser tests');
+      demand(jobs.verify === `${aggregate}    runs-on: ubuntu-24.04\n    timeout-minutes: 5\n    steps:\n`
+        + '      - name: Require the check job and every browser shard to pass\n'
+        + `        run: ${aggregateRun}\n`,
+      'CI verify must require the check job and every browser shard to pass');
+    }
+  }
 }
 
 export function checkFoundation(root) {
@@ -123,29 +198,7 @@ export function checkFoundation(root) {
   }
   const change = checkChange(root);
   checkPolicyConfig(json('config/github-repository-settings.json'));
-  const workflow = read('.github/workflows/verify.yml');
-  const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
-  demand(uses.length === 6 && uses.every((action) => [
-    'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803',
-    'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38',
-  ].includes(action)),
-    'CI Actions must use immutable commit SHAs');
-  demand(workflow.includes('contents: read') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(workflow)
-    && workflow.includes('persist-credentials: false')
-    && workflow.includes('run: npm ci') && workflow.includes('run: npm run check')
-    && workflow.includes('run: npm run check:change') && workflow.includes('run: npm run security')
-    && workflow.includes('github.event.pull_request.head.sha || github.sha'),
-    'CI must run exact-head credential-free canonical and separate online gates with least privilege');
-  demand(/  push:\n    branches: \[main\]/.test(workflow), 'CI pushes must be restricted to main; tag/branch cleanup is not delivery CI');
-  const jobs = Object.fromEntries([...workflow.matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:|$(?![\s\S]))/gm)].map((m) => [m[1], m[2]]));
-  for (const [job, command] of Object.entries({ verify: 'npm run check', 'change-id': 'npm run check:change', security: 'npm run security' })) {
-    demand(jobs[job]?.includes(`    name: ${job}\n`) && jobs[job].split('\n').some((line) => line.trim() === `run: ${command}`), `Required CI job/command missing: ${job}`);
-  }
-  const verifySteps = (jobs.verify ?? '').split('\n').map((line) => line.trim());
-  const at = (command) => verifySteps.indexOf(`run: ${command}`);
-  demand(at('npm run check') >= 0 && at('npx playwright install --with-deps chromium webkit') > at('npm run check')
-    && at('npm run test:browser') > at('npx playwright install --with-deps chromium webkit'),
-  'CI verify must install Chromium and WebKit outside npm, then run the browser tests');
+  checkWorkflows(read);
   for (const file of [...requiredFiles.filter((p) => p.endsWith('.md')), change.record]) {
     for (const [, target] of read(file).matchAll(/\]\(([^\s)]+)\)/g)) {
       if (/^(?:https?:|#|mailto:)/.test(target)) continue;

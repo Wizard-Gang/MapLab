@@ -38,7 +38,7 @@ const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
 /** Physical identity includes empty space and all sources, so insertion/deletion anywhere
  * invalidates these witnesses. Swept bounds additionally identify the local dependency area.
  * Launch velocities are explicit preconditions, never a claim of reachable run-up/reset. */
-export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirSettings=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0))):Promise<AirResult>{
+export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirSettings=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number]):Promise<AirResult>{
  const limits:AirSettings={spacingSu:1_000_000,maxCandidates:100_000,maxTicks:3600,maxReplayTicks:2_000_000,maxClearanceSamples:2_000_000};
  for(const k of Object.keys(limits) as (keyof AirSettings)[])if(!Number.isSafeInteger(settings[k])||settings[k]<1||settings[k]>limits[k])throw Error('invalid airborne settings');
  if(!Number.isSafeInteger(revision)||revision<0)throw Error('invalid airborne revision');
@@ -68,6 +68,7 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
   // Target and obstacle critical X positions supplement the declared lattice, including narrow gaps.
   for(const x of [...intervals.flatMap(t=>[t.minX,t.maxX]),...w.faces.flatMap(f=>[f.a[0]-w.half,f.a[0]+w.half,f.b[0]-w.half,f.b[0]+w.half])])for(const refined of [x-Math.floor(options.spacingSu/2),x,x+Math.floor(options.spacingSu/2)])if(refined>=i.minX&&refined<=i.maxX)positions.add(refined);
   for(const x of [...positions].sort((a,b)=>a-b))for(const vx of speeds){
+   if(launchRegionSu&&(x<launchRegionSu[0]||x>launchRegionSu[2]))continue;
    if(!allowed(i,vx))continue;
    const initial=stateAt(w,i,x,vx);if(!initial||!safe(initial))continue;
    // Conservative horizontal capability envelope, including ground conveyor run-out.

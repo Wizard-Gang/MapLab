@@ -8,6 +8,14 @@ export const sections = ['Change', 'Reason', 'Impact', 'Risk', 'Controls', 'Vali
 export const demand = (ok, message) => { if (!ok) throw new Error(message); };
 export const readJson = (root, file) => JSON.parse(readFileSync(resolve(root, file), 'utf8'));
 export const sha = /^[a-f0-9]{40}$/;
+// Release protocol cut-over: deliveries up to ML-030 carry main CI evidence. Later tasks squash into an open
+// release/rNNN branch on the fast gate, so they carry that PR's exact-head `gate` run instead.
+export const lastMainCiDelivery = 30;
+const runUrl = /^https:\/\/github\.com\/Wizard-Gang\/MapLab\/actions\/runs\/\d+$/;
+const taskId = (n) => `ML-${String(n).padStart(3, '0')}`;
+const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)\] [A-Z][^\r\n]+) \(#\d+\)$/;
+export const releaseTitle = (release) => `[RELEASE] ${release.id}: ${release.tasks.length === 1
+  ? release.tasks[0] : `${release.tasks[0]}..${release.tasks.at(-1)}`}`;
 export function checkSections(text) {
   const headings = [...text.matchAll(/^## (.+)\r?$/gm)];
   demand(JSON.stringify(headings.map((m) => m[1])) === JSON.stringify(sections), 'Change record sections disagree');
@@ -32,34 +40,73 @@ export function checkChange(root) {
   demand(Array.isArray(deliveries) && deliveries.length === number - 1, 'Predecessor delivery chain is incomplete');
   for (const [i, entry] of deliveries.entries()) {
     demand(entry.id === `ML-${String(i + 1).padStart(3, '0')}` && sha.test(entry.commit), 'Predecessor ID/commit disagrees');
-    demand(entry.mainCi?.conclusion === 'success' && entry.mainCi.head === entry.commit
-      && /^https:\/\/github\.com\/Wizard-Gang\/MapLab\/actions\/runs\/\d+$/.test(entry.mainCi.url), 'Predecessor main CI evidence disagrees');
+    if (i < lastMainCiDelivery) demand(entry.gate === undefined && entry.mainCi?.conclusion === 'success'
+      && entry.mainCi.head === entry.commit && runUrl.test(entry.mainCi.url), 'Predecessor main CI evidence disagrees');
+    else demand(entry.mainCi === undefined && entry.gate?.conclusion === 'success'
+      && entry.gate.head === entry.testedHeads?.at(-1) && runUrl.test(entry.gate.url), 'Predecessor release gate evidence disagrees');
     demand(existsSync(resolve(root, `docs/changes/${entry.id}.md`)), 'Predecessor change record is missing');
     if (i === 0) demand(entry.commit === 'b0b1ff57859371be5aef7071394cb50c405d4794' && entry.pr === null, 'Historical bootstrap evidence disagrees');
     else demand(Number.isSafeInteger(entry.pr) && entry.pr > 0 && entry.testedHeads?.length > 0
       && entry.testedHeads.every((h) => sha.test(h)), 'Predecessor PR/head evidence is missing');
   }
+  checkRelease(root, change);
   return change;
 }
 
-export function checkEvent(change, context) {
-  const { eventName, event, actualHead, actualBranch, commitTitles, changedFiles } = context;
-  demand(sha.test(actualHead), 'Actual checkout SHA is invalid');
-  if (eventName === 'pull_request') {
-    const pr = event.pull_request;
-    demand(event.repository?.full_name === 'Wizard-Gang/MapLab' && pr?.base?.repo?.full_name === 'Wizard-Gang/MapLab', 'PR repository disagrees');
-    demand(pr.base.ref === 'main' && sha.test(pr.base.sha) && pr.head.sha === actualHead, 'PR base/head differs from tested checkout');
-    demand(pr.head.ref === change.branch && pr.title === change.title, 'PR controlled branch/title disagrees');
-    checkSections(pr.body ?? '');
-  } else {
-    demand(eventName === 'push' && event.repository?.full_name === 'Wizard-Gang/MapLab'
-      && event.after === actualHead && event.deleted === false, 'Push event differs from tested checkout');
-    demand(event.ref === `refs/heads/${actualBranch}` && [change.branch, 'main'].includes(actualBranch), 'Push controlled branch disagrees');
+// config/release.json names the open release branch and its tasks; docs/releases.json records each one
+// rebase-merged into main. Together their tasks run consecutively from the cut-over to the current task.
+export function checkRelease(root, change) {
+  const release = readJson(root, 'config/release.json');
+  const releases = readJson(root, 'docs/releases.json');
+  demand(JSON.stringify(Object.keys(release).sort()) === '["branch","id","tasks"]' && /^r\d{3}$/.test(release.id)
+    && release.branch === `release/${release.id}`, 'Release identity disagrees');
+  demand(Array.isArray(releases) && Number(release.id.slice(1)) === releases.length + 1, 'Release chain is incomplete');
+  for (const [i, entry] of releases.entries()) {
+    demand(JSON.stringify(Object.keys(entry).sort()) === '["ci","id","mainHead","pr","tasks","testedHead"]'
+      && entry.id === `r${String(i + 1).padStart(3, '0')}` && Number.isSafeInteger(entry.pr) && entry.pr > 0
+      && sha.test(entry.testedHead) && sha.test(entry.mainHead)
+      && entry.ci?.conclusion === 'success' && runUrl.test(entry.ci.url), 'Release evidence disagrees');
   }
-  demand(commitTitles.length > 0 && commitTitles.every((title) => title === change.title
-    || (actualBranch === 'main' && title.startsWith(`${change.title} (#`) && / \(#\d+\)$/.test(title))), 'Commit title differs from controlled task');
-  demand(changedFiles.includes('config/change.json') && changedFiles.includes(change.record)
-    && changedFiles.includes('implementation_plan.md'), 'Delivery must update controlled queue and change record');
+  const chain = [...releases.map((entry) => entry.tasks), release.tasks];
+  demand(chain.every((tasks) => Array.isArray(tasks) && tasks.length > 0) && chain.flat().at(-1) === change.id
+    && chain.flat().every((id, i) => id === taskId(lastMainCiDelivery + 1 + i)), 'Release task chain disagrees');
+  for (const id of release.tasks) demand(existsSync(resolve(root, `docs/changes/${id}.md`)), 'Release task record is missing');
+  return { release, releases };
+}
+
+// A rebase rewrites SHAs, so a release's evidence is that main's tree equals the tree its full run tested.
+export function checkReleaseTrees(releases, git) {
+  for (const entry of releases) {
+    git('fetch', '--no-tags', '--quiet', 'origin', `refs/pull/${entry.pr}/head`);
+    demand(git('rev-parse', 'FETCH_HEAD') === entry.testedHead
+      && git('rev-parse', `${entry.mainHead}^{tree}`) === git('rev-parse', `${entry.testedHead}^{tree}`),
+    `Release ${entry.id} main tree differs from its tested head`);
+    git('merge-base', '--is-ancestor', entry.mainHead, 'HEAD');
+  }
+}
+
+export function checkEvent(change, context) {
+  const { eventName, event, actualHead, commitTitles, changedFiles, release, taskTitles } = context;
+  demand(sha.test(actualHead), 'Actual checkout SHA is invalid');
+  demand(eventName === 'pull_request', 'Change identity runs only on pull requests');
+  const pr = event.pull_request;
+  demand(event.repository?.full_name === 'Wizard-Gang/MapLab' && pr?.base?.repo?.full_name === 'Wizard-Gang/MapLab', 'PR repository disagrees');
+  demand(sha.test(pr.base.sha) && pr.head.sha === actualHead, 'PR base/head differs from tested checkout');
+  checkSections(pr.body ?? '');
+  demand(commitTitles.length > 0, 'Commit title differs from controlled task');
+  if (pr.head.ref === release.branch) {
+    // The release PR carries one squash commit per listed task, oldest first, each titled as its record.
+    demand(pr.base.ref === 'main' && pr.title === releaseTitle(release), 'Release PR base/title disagrees');
+    const titles = [...commitTitles].reverse().map((title) => title.match(squashTitle));
+    demand(titles.length === release.tasks.length && titles.every((m, i) => m?.[2] === release.tasks[i]
+      && m[1] === taskTitles[i]), 'Release commits must be one squash commit per listed task');
+    return;
+  }
+  demand(pr.base.ref === release.branch, 'Task PR base must be the open release branch');
+  demand(pr.head.ref === change.branch && pr.title === change.title, 'PR controlled branch/title disagrees');
+  demand(commitTitles.every((title) => title === change.title), 'Commit title differs from controlled task');
+  demand(['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'].every((f) => changedFiles.includes(f)),
+    'Delivery must update controlled queue, release and change record');
   demand(!changedFiles.some((f) => /^docs\/changes\/ML-\d{3}\.md$/.test(f) && f !== change.record), 'Delivery modifies another task record');
 }
 
@@ -73,14 +120,14 @@ if (process.argv[1] && resolve(process.argv[1]) === self) {
     if (process.env.GITHUB_EVENT_PATH) {
       const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
       const git = (...a) => execFileSync('git', a, { cwd: root, encoding: 'utf8' }).trim();
-      const eventName = process.env.GITHUB_EVENT_NAME;
-      const base = eventName === 'pull_request' ? event.pull_request?.base?.sha
-        : event.ref === 'refs/heads/main' ? event.before : readJson(root, 'docs/deliveries.json').at(-1).commit;
+      const { release, releases } = checkRelease(root, change);
+      const base = event.pull_request?.base?.sha;
       demand(sha.test(base ?? '') && !/^0+$/.test(base), 'Missing post-bootstrap base revision');
       git('merge-base', '--is-ancestor', base, 'HEAD');
+      checkReleaseTrees(releases, git);
       checkEvent(change, {
-        eventName, event, actualHead: git('rev-parse', 'HEAD'),
-        actualBranch: eventName === 'pull_request' ? event.pull_request.head.ref : process.env.GITHUB_REF_NAME,
+        eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release,
+        taskTitles: release.tasks.map((id) => readFileSync(resolve(root, `docs/changes/${id}.md`), 'utf8').split('\n')[0].slice(2)),
         commitTitles: git('log', '--format=%s', `${base}..HEAD`).split('\n'),
         changedFiles: git('diff', '--name-only', base, 'HEAD').split('\n'),
       });

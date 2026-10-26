@@ -22,6 +22,14 @@ function fixture() {
   return path;
 }
 
+function workflow(path, name, change) {
+  const target = join(path, `.github/workflows/${name}.yml`);
+  const before = readFileSync(target, 'utf8');
+  const after = change(before);
+  expect(after).not.toBe(before);
+  writeFileSync(target, after);
+}
+
 function run(path) {
   return spawnSync(process.execPath, [resolve(root, 'scripts/check-foundation.mjs'), '--root', path], {
     encoding: 'utf8', env: { ...process.env, GITHUB_EVENT_PATH: '' },
@@ -75,13 +83,31 @@ test.each([
   ]),
   ['skipped browser tests', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
-    writeFileSync(f, readFileSync(f, 'utf8').replace('        run: npm run test:browser\n', '        run: echo skipped\n'));
+    writeFileSync(f, readFileSync(f, 'utf8').replace('        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n', '        run: echo skipped\n'));
   }, 'browser tests'],
+  ['a dropped WebKit project', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace('        project: [chromium, webkit]\n', '        project: [chromium]\n'));
+  }, 'browser tests'],
+  ['a verify job that ignores failed browser shards', (p) => {
+    const f = join(p, '.github/workflows/verify.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace(' && test "${{ needs.browser.result }}" = success', ''));
+  }, 'every browser shard'],
   ['browsers installed after the browser tests', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
-    const text = readFileSync(f, 'utf8').replace('        run: npx playwright install --with-deps chromium webkit\n', '').replace('        run: npm run test:browser\n', '        run: npm run test:browser\n      - name: Late install\n        run: npx playwright install --with-deps chromium webkit\n');
+    const text = readFileSync(f, 'utf8').replace('        run: npx playwright install --with-deps ${{ matrix.project }}\n', '').replace('        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n', '        run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}\n      - name: Late install\n        run: npx playwright install --with-deps ${{ matrix.project }}\n');
     writeFileSync(f, text);
   }, 'browser tests'],
+  // Release protocol: the full suite never runs on push, the gate stays test-free, change identity covers both bases.
+  ['a push trigger on the full suite', (p) => workflow(p, 'verify', (s) => s.replace('  workflow_dispatch:\n', '  workflow_dispatch:\n  push:\n    branches: [main]\n')), 'CI triggers disagree'],
+  ['a full suite that release PRs cannot reach', (p) => workflow(p, 'verify', (s) => s.replace('    branches: [main]\n', "    branches: ['release/**']\n")), 'CI triggers disagree'],
+  ['a change gate that ignores release branches', (p) => workflow(p, 'change', (s) => s.replace("    branches: [main, 'release/**']\n", '    branches: [main]\n')), 'CI triggers disagree'],
+  ['a missing change identity workflow', (p) => rmSync(join(p, '.github/workflows/change.yml')), 'Missing or empty'],
+  ['a feature gate that runs the tests', (p) => workflow(p, 'gate', (s) => s.replace('        run: npm run smoke\n', '        run: npm run smoke\n      - name: Tests\n        run: npm test\n')), 'non-test checks'],
+  ['a feature gate that skips the build', (p) => workflow(p, 'gate', (s) => s.replace('      - name: Build\n        run: npm run build\n', '')), 'non-test checks'],
+  ['a feature gate on a floating action', (p) => workflow(p, 'gate', (s) => s.replace('actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803', 'actions/checkout@v6')), 'immutable commit SHAs'],
+  ['a feature gate that tests the merge revision', (p) => workflow(p, 'gate', (s) => s.replace('          ref: ${{ github.event.pull_request.head.sha || github.sha }}\n', '')), 'least privilege'],
+  ['an extra job beside the feature gate', (p) => workflow(p, 'gate', (s) => s + '  lint:\n    name: lint\n    runs-on: ubuntu-24.04\n    steps:\n      - run: npm run typecheck\n'), 'CI jobs disagree'],
   ['missing placeholder library', (p) => rmSync(join(p, 'placeholder-library/maplab.project.json')), 'Missing or empty'],
   ['disabled security job', (p) => {
     const f = join(p, '.github/workflows/verify.yml');
