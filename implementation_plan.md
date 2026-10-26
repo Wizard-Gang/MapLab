@@ -40,30 +40,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-029** — squash `bf239b8`, PR #29; [record](docs/changes/ML-029.md).
 - **ML-030** — squash `9e79034`, PR #30; [record](docs/changes/ML-030.md).
 - **ML-031** — squash `2a229ff`, PR #31; [record](docs/changes/ML-031.md).
+- **ML-032** — squash `f697149`, PR #32; [record](docs/changes/ML-032.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-032 / P1
-
-- **Source scope:** Rigid translation moving-platform/elevator authoring and reference carry/departure/crush semantics.
-- **Non-goals:** No rotating platforms, timed navigation or swing.
-- **Acceptance:** Carry/jump-off/initial phase/disable/crush fixtures; navigation labels unsupported timed links.
-- **Depends on:** ML-031 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [E3](docs/specifications/2026-10-16-maplab.md#e3-one-way-drops-dynamic-movement), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Author rigid translating body motion phase and finite contact/carry/depart/disable/crush states.
-  2. Show moving links as unsupported until the later timed navigator; never certify static rendezvous.
-  3. Create owned fixture(s): Elevator carry, jump-off, initial phase, disable, crush/pinch.
-  4. Add executable checks: Deterministic controller trace and explicit unsupported nav states.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-033 / P1
 
 - **Source scope:** Additional airborne jumps and bounded stateful navigation primitive search.
@@ -78,6 +60,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Controller and entire-route chained witness fixture.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-034 / P1
 
 - **Source scope:** Ground/air dash controller and stateful dash-edge witnesses.
