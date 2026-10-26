@@ -72,7 +72,7 @@ test('physical insertion/deletion, coefficient edits and all sampling parameters
 });
 test('advanced movement, dynamic bodies and navigation intent cannot be inferred as physical witnesses',async()=>{
  const [m,p]=docs();
- const advanced={...p,abilities:p.abilities.map(a=>a.kind==='jump'?{...a,airJumps:1}:a)};
+ const advanced={...p,abilities:p.abilities.map(a=>a.kind==='jump'?{...a,airJumps:17}:a)};
  expect(await buildAirborneActions(m,advanced,1)).toMatchObject({status:'unsupported',edges:[]});
  expect(await buildAirborneActions({...m,bodies:m.bodies.map(b=>({...b,mobility:'kinematic' as const}))},p,1)).toMatchObject({status:'unsupported',edges:[]});
  const intent={...m,navigation:{...m.navigation,overrides:[{id:'nav.deny',regionId:'region.any',profileIds:[p.id],actions:['jump'],policy:'forbid' as const,penaltyTicks:0}]}};

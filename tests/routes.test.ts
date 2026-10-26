@@ -75,7 +75,7 @@ test('opposing directional permissions cannot turn an existing geometric stance 
 },120000);
 test('author links, dynamic bodies, advanced abilities and unknown patrol conditions cannot fabricate a feasible route',async()=>{
  const link={id:'nav.fake',from:{kind:'world' as const,point:[64,300] as const},to:{kind:'world' as const,point:[660,300] as const},action:{key:'core.teleport',version:1,params:{}},requiredAbilities:[],conditions:[],bidirectional:true,extraCostTicks:0};
- for(const [m,profile] of [[{...map,navigation:{...map.navigation,links:[link]}},player],[{...map,bodies:map.bodies.map(b=>({...b,mobility:'kinematic' as const}))},player],[map,{...player,abilities:player.abilities.map(a=>a.kind==='jump'?{...a,airJumps:1}:a)}]] as const){
+ for(const [m,profile] of [[{...map,navigation:{...map.navigation,links:[link]}},player],[{...map,bodies:map.bodies.map(b=>({...b,mobility:'kinematic' as const}))},player],[map,{...player,abilities:player.abilities.map(a=>a.kind==='jump'?{...a,airJumps:17}:a)}]] as const){
   const nav=await Navigation.build(m,profile,1,undefined,undefined,async()=>{});expect(await nav.route(initial,gap)).toMatchObject({status:'unsupported',actions:[],frames:[]});
  }
  const actor=map.entities.find(e=>e.id==='spawn.ground')!;

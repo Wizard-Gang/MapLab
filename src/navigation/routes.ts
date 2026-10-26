@@ -1,16 +1,18 @@
+import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
+import {buildAirJumpActions} from './air-jumps';
 import {groundMotionAllowed} from './intent';
 // Static reference-route proofs. Authored links never become physical exemptions.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
 import type { Anchor, RegionShape } from '../contracts/common-types';
-import { createWorld, step, resolveStance, overlaps, digest, replayBytes, type ClimbState, type Step, type Input, type RunInput, type ContactMap, type World } from '../physics-reference';
+import { createWorld, resolveStance, overlaps, digest, replayBytes, type ClimbState, type Step, type Input, type RunInput, type ContactMap, type World } from '../physics-reference';
 import { buildSurfaceGraph, identity as surfaceIdentity, type Interval, type Identity } from './surface';
-import { buildAirborneActions, airborneIdentity, AIR_DEFAULTS, type AirSettings } from './airborne';
+import { buildAirborneActions, airborneIdentity, AIR_DEFAULTS, type AirOptions } from './airborne';
 import { augmentedSearch, type Move } from './search';
 
 function frozen<T>(value:T):T{if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))frozen(child);Object.freeze(value);}return value;}
 
-export interface RouteSettings {readonly maxExpanded:number;readonly maxReplayTicks:number;readonly maxActionTicks:number;readonly maxRouteTicks:number;readonly maxDepth:number;readonly maxTargets:number;readonly toleranceSu:number;readonly penaltyTicks:number;readonly air:AirSettings}
+export interface RouteSettings {readonly maxExpanded:number;readonly maxReplayTicks:number;readonly maxActionTicks:number;readonly maxRouteTicks:number;readonly maxDepth:number;readonly maxTargets:number;readonly toleranceSu:number;readonly penaltyTicks:number;readonly air:AirOptions}
 export const ROUTE_DEFAULTS:RouteSettings=frozen({maxExpanded:512,maxReplayTicks:200000,maxActionTicks:240,maxRouteTicks:3600,maxDepth:16,maxTargets:16,toleranceSu:128,penaltyTicks:0,air:{...AIR_DEFAULTS}});
 /** The owned slow ground-only patrol needs 360 movement ticks for one authored leg. */
 export function defaultRouteSettings(profile:MovementDocument):RouteSettings {return profile.abilities.length===0&&profile.ground.walkSpeed>0&&profile.ground.walkSpeed<=256?frozen({...ROUTE_DEFAULTS,maxActionTicks:512}):ROUTE_DEFAULTS;}
@@ -64,7 +66,7 @@ export function anchorState(w:World,anchor:Anchor,facing:1|-1=1):ClimbState{
   x=f.a[0]+Math.floor((f.b[0]-f.a[0])*Math.round(anchor.u*65536)/65536);const stance=resolveStance(w,x,anchor.footholdId)[0];if(!stance)throw Error('anchor has no full-footprint stance');y=stance.y;
  }else throw Error('unsupported entity-relative anchor');
  const stance=resolveStance(w,x,anchor.kind==='surface'?anchor.footholdId:undefined).find(v=>v.y===y);
- return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:0,dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true};
+ return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:airJumpCount(w.profile),dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true};
 }
 function validateSettings(s:RouteSettings){
  const limits={maxExpanded:10000,maxReplayTicks:2000000,maxActionTicks:3600,maxRouteTicks:36000,maxDepth:128,maxTargets:128,toleranceSu:8192,penaltyTicks:100000};
@@ -74,13 +76,15 @@ function validateSettings(s:RouteSettings){
 export function replayRouteActions(w:World,initial:ClimbState,actions:readonly RouteAction[]):{frames:Step[];input:RunInput[];terminal:ClimbState}|null{
  let s=initial;const frames:Step[]=[],input:RunInput[]=[];
  for(const action of actions){
+  let airJumpUsed=false;
   if(replayBytes(s)!==replayBytes(action.initial)||action.frames.length!==action.durationTicks||!action.input.length||action.input[0]!.fromTick!==s.tick)return null;
   if(action.input.some((c,i)=>!Number.isSafeInteger(c.fromTick)||c.fromTick>=s.tick+action.durationTicks||(i>0&&c.fromTick<=action.input[i-1]!.fromTick)))return null;
   let at=0;
   for(let n=0;n<action.frames.length;n++){
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
-   const {fromTick:_,...control}=c,f=step(w,s,control);if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state))return null;
+   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;
+   if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||(control.jump||airJumpUsed)&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
   }
   if(replayBytes(s)!==replayBytes(action.terminal))return null;
@@ -187,11 +191,12 @@ export class Navigation {
    }return matches(s,target)&&!s.jumpHeldPrev&&s.climbReady?action('align',start,frames,input,null):null;
   };
   const replayTemplate=async(start:ClimbState,t:Template):Promise<RouteAction|null>=>{
-   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb';const frames:Step[]=[],input:RunInput[]=[];
+   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false;const frames:Step[]=[],input:RunInput[]=[];
    for(let n=0;n<Math.min(t.ticks,settings.maxActionTicks);n++){
     while(t.input[index+1]&&t.input[index+1]!.fromTick<=n)index++;
     const {fromTick:_,...c}=t.input[index]!;if(!permitted(s,c))return null;const f=await advance(s,c),next=f.state as ClimbState;
-    if(f.status!=='ok'||!this.safe(next)||!permitted(next,c))return null;
+    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;
+    if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||(c.jump||airJumpUsed)&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
     if(['jump','drop','fall','land'].includes(t.kind)&&f.contacts.some(c=>c.kind==='blocking'&&!(t.kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===start.supportId&&next.y===start.y)))return null;
     if(t.kind==='walk'&&next.mode!=='ground')return null;
     if(s.mode==='ground'&&next.mode==='ground'){
@@ -236,6 +241,12 @@ export class Navigation {
      const add=(a:RouteAction)=>{if(!a.durationTicks)return;if(a.durationTicks>settings.maxActionTicks||a.terminal.tick-initial.tick>settings.maxRouteTicks){durationLimit=true;return;}out.push({key:a.key,to:{state:a.terminal,depth:node.depth+1},cost:a.durationTicks+a.penaltyTicks,action:a});};
      const direct=await align(s,goal);if(direct)add(direct);
      if(s.mode!=='ground'){
+      if(s.mode==='air'&&airJumpCount(this.profile)>0){
+       const generated=await buildAirJumpActions(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
+       replayTicks+=generated.replayTicks;
+       if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
+       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+      }
       for(const d of [-1,0,1] as const){const t:Template={key:'source-land-'+d,kind:'land',initial:s,input:[{...controls(d),moveY:s.mode==='climb'?1:0,fromTick:0}],ticks:settings.maxActionTicks};const a=await replayTemplate(s,t);if(a)add(a);}return out;
      }
      const interval=this.locate(s);if(!interval)return out;

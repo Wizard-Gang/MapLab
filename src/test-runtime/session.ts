@@ -1,7 +1,8 @@
+import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
 // ML-020: ephemeral Test state. This module has no authoring, storage, rendering or engine dependency.
 import type { GameplaySession, GameplayView, SensorActor } from '../gameplay/runtime';
 import type { Condition, ContractRef } from '../contracts';
-import { createWorld, step, resolveStance, replayBytes, type ContactMap, type Input, type State, type Step, type World, type RunInput } from '../physics-reference';
+import { createWorld, resolveStance, replayBytes, type ContactMap, type Input, type State, type Step, type World, type RunInput } from '../physics-reference';
 import type { MovementDocument } from '../contracts/movement-types';
 import { floorDiv, integer } from '../physics-reference/integer';
 import type { Entity } from '../contracts/gameplay-types';
@@ -49,7 +50,7 @@ export function spawn(world: World, entityId?: string): State {
   return { x, y, vx: 0, vy: 0, mode: stance ? 'ground' : 'air', supportId: stance?.face.supportId ?? null,
     planeId: stance?.face.planeId ?? world.defaultPlane, facing: start.facing === 'left' ? -1 : 1, tick: 0,
     jumpHeldPrev: false, jumpReleased: false, ticksSinceJump: 0, dropSuppression: null,
-    resources: { airJumps: 0, dashCharges: 0, cooldowns: {} }, traversalId: null, climbReady: true };
+    resources: { airJumps: airJumpCount(world.profile), dashCharges: 0, cooldowns: {} }, traversalId: null, climbReady: true };
 }
 
 /** Strict bounded schedule; failed imports leave the existing run untouched. */

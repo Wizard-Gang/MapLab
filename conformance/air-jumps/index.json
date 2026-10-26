@@ -1,0 +1,57 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2899a2fc3cd99bc2a5e6d1c526fc341fcbfe17e6692eda04d174bb2fb98a2750"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "24cbefdaca8346ab173473ab35732a724c875dc31f1a90ab9c3a4a2b1ff76cfa"
+    },
+    {
+      "path": "chain.map.json",
+      "sha256": "c6cc0388cc61d4909d9bd520e7af871a2aa131eda43bbf6703b879b92ff4b38a"
+    },
+    {
+      "path": "consume-hold-exhaust-reset.fixture.json",
+      "sha256": "f934abbb7b82f68fe9c93147dbe8a905627ccbe43e6ae84d8ef21a123b920550"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "5904245c9277cce9cf78fb57d1136c84ff2a92cc7d6d61006ca5304dc2f78791"
+    },
+    {
+      "path": "drop.map.json",
+      "sha256": "7a62ec4754a73c007dea8f5819dc1c772b854581c79f459c6f08a0e73cb2235a"
+    },
+    {
+      "path": "fall-consume.fixture.json",
+      "sha256": "42b8d1a331005bc1a7e56330ed86af33708dfe56a1ab34cd8765298d7283a78c"
+    },
+    {
+      "path": "flat.map.json",
+      "sha256": "8ec4c020018e3eec08e3b4c079d373d04cc1bc4dd2565e53e9624f5b8100ab18"
+    },
+    {
+      "path": "ground.movement.json",
+      "sha256": "0139247a5497e8c1cd0544fd8f14bf1a0c034cb5dc4c7db7fc4440e671627891"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "99018912fa50a7dd8b768741bc4094eb8ce86ed4997c2d8bac6a1278db679406"
+    },
+    {
+      "path": "two-charges.fixture.json",
+      "sha256": "4c9624046cb10b92d7034f3e1ec280463cfad69e82050eabe625c6ee43da2b5e"
+    },
+    {
+      "path": "two.movement.json",
+      "sha256": "bd50b51a42abc785a0445a3423a4f6db47b1abf4dd403b82e1fcafca4b2bfa05"
+    },
+    {
+      "path": "walk-off-retains.fixture.json",
+      "sha256": "1219d61005ab4e7af5abcd069d2674a683ba00eb8dc8da5542a12f2ae8cc7889"
+    }
+  ]
+}
