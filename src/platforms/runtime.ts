@@ -47,7 +47,7 @@ export function platformStep(source:ContactMap,p:MovementDocument,old:State,inpu
     // Sweep relative to the moving face. A one-way may push only from its outward support side;
     // its normal also admits horizontal approach on slopes, while flat tops never push laterally.
     const pushing={...only,faces:only.faces.flatMap(f=>f.bodyId!==''?[f]:s.y<=Math.min(groundY(f,s.x-before.half),groundY(f,s.x+before.half))?[{...f,bodyId:body.id}]:[])};
-    const hits=sweep(pushing,s,axis,-delta,true),hit=hits[0];
+    const hits=sweep(pushing,s,axis,-delta,true).filter(h=>!only.faces.some(f=>f.bodyId===''&&f.supportId===h.face.supportId)||resolveStance(only,axis===0?h.coordinate:s.x,h.face.supportId!).length>0),hit=hits[0];
     if(hits.filter(h=>h.coordinate===hit?.coordinate).length>8)return failed('Platform contact budget','contactBudget');
     const required=rider?delta:hit?integer(delta+hit.coordinate-(axis===0?s.x:s.y)):0;
     const moved=[...previous] as [number,number];moved[axis]=next[axis];offsets.set(body.id,moved);

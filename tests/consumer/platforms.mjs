@@ -37,6 +37,8 @@ function oracle(c,m,p){
   frames.push(f({...initial,y:surface,tick:1,mode:'ground',supportId:m.footholds[0].id},[event('push',[0,surface-initial.y])]));
  }else if(c.id==='oneway-below'){
   assert(initial.y>m.footholds[0].a[1]*256);frames.push(f(airborne(initial),[]));
+ }else if(c.id==='oneway-edge'){
+  assert(initial.x+half>m.footholds[0].b[0]*256);frames.push(f(airborne(initial),[]));
  }else if(c.id==='oneway-suppressed'){
   assert.equal(initial.dropSuppression.group,m.footholds[0].dropGroupId);frames.push(f(airborne(initial,{dropSuppression:{...initial.dropSuppression,ticksLeft:initial.dropSuppression.ticksLeft-1}}),[]));
  }else if(c.id==='carry-clipped'){

@@ -19,7 +19,7 @@
     },
     {
       "path": "cases.json",
-      "sha256": "4301a97676dd879e2c37b8891fd131d64be3a5eaf4dfc637a4ac20630f8dc11d"
+      "sha256": "69da79d41dd385df38100c1ea9d6b546f37970b88076044e7ce872fb5362afdb"
     },
     {
       "path": "ceiling-crush.fixture.json",
@@ -76,6 +76,14 @@
     {
       "path": "oneway-below.map.json",
       "sha256": "2d8f812a771f758563430d01c42a0ceed6fefd570d62869e9024a75f9dfebae7"
+    },
+    {
+      "path": "oneway-edge.fixture.json",
+      "sha256": "c5f594bae07a6c83124935aaa5fb6c449e6a071fa38cb1e262fe09cf079964ff"
+    },
+    {
+      "path": "oneway-edge.map.json",
+      "sha256": "9c034f586fdc9a65b0155e5fdcd7a5e5a1ecf029d6364f88c48c77fb78bc48cb"
     },
     {
       "path": "oneway-lift.fixture.json",
