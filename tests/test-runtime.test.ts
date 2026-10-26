@@ -76,7 +76,7 @@ test('independent process consumes Test recording through exported runtime witho
  try {
   writeFileSync(join(dir,'package.json'),'{"type":"module"}');
   for(const f of ['schemas','contracts'])cpSync(join(root,f),join(dir,f),{recursive:true});
-  for(const f of ['contracts','physics-reference','test-runtime']){
+  for(const f of ['contracts','physics-reference','platforms','test-runtime']){
    mkdirSync(join(dir,'src',f),{recursive:true});
    for(const file of readdirSync(join(root,'src',f)).filter(n=>n.endsWith('.ts'))){
     const source=readFileSync(join(root,'src',f,file),'utf8');if(f==='test-runtime')expect(source).not.toMatch(/from ['"].*(?:editor|library|render|react|node:)/);

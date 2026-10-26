@@ -39,30 +39,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-028** — squash `30ad4ac`, PR #28; [record](docs/changes/ML-028.md).
 - **ML-029** — squash `bf239b8`, PR #29; [record](docs/changes/ML-029.md).
 - **ML-030** — squash `9e79034`, PR #30; [record](docs/changes/ML-030.md).
+- **ML-031** — squash `2a229ff`, PR #31; [record](docs/changes/ML-031.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-031 / P1
-
-- **Source scope:** Runtime blocker overlay and regional navigation invalidation/replan preview.
-- **Non-goals:** No arbitrary gameplay AI or moving-platform rendezvous.
-- **Acceptance:** New blocker invalidates empty-space witness; deletion opens candidates; art-only edit stays warm; bounded cancellation.
-- **Depends on:** ML-030 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [E3](docs/specifications/2026-10-16-maplab.md#e3-one-way-drops-dynamic-movement), [E4](docs/specifications/2026-10-16-maplab.md#e4-search-costs-and-scalability), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Overlay runtime blockers on immutable source nav data and index affected geometry/witness regions.
-  2. Invalidate/replan bounded candidates on insertion/removal using cancellable revisioned jobs; preserve art-only cache warmth.
-  3. Create owned fixture(s): Blocker enters empty swept corridor, deletion opens jump candidate, stale job, sprite-only edit.
-  4. Add executable checks: Incremental-vs-clean rebuild comparison and cancellation budget tests.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-032 / P1
 
 - **Source scope:** Rigid translation moving-platform/elevator authoring and reference carry/departure/crush semantics.
@@ -77,6 +59,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Deterministic controller trace and explicit unsupported nav states.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-033 / P1
 
 - **Source scope:** Additional airborne jumps and bounded stateful navigation primitive search.

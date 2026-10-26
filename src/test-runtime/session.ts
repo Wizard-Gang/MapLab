@@ -5,6 +5,8 @@ import { createWorld, step, resolveStance, replayBytes, type ContactMap, type In
 import type { MovementDocument } from '../contracts/movement-types';
 import { floorDiv, integer } from '../physics-reference/integer';
 import type { Entity } from '../contracts/gameplay-types';
+import {hasPlatforms,platformStep} from '../platforms/runtime';
+import {platformWorld} from '../platforms/world';
 
 export const NEUTRAL: Input = Object.freeze({ moveX: 0, moveY: 0, run: false, jump: false, drop: false });
 export const MAX_TICKS = 3_600;
@@ -82,7 +84,7 @@ export class TestSession {
   constructor(source: ContactMap, profile: MovementDocument, initial?: State, gameplayFactory?: (source:ContactMap)=>GameplaySession) {
     this.gameplayFactory = gameplayFactory;
     this.source = owned(source); this.profile = owned(profile);
-    this.world = freeze(createWorld(this.source, this.profile));
+    this.world = freeze(this.worldAt(this.source,initial?.tick??0));
     this.initial = owned(initial ?? spawn(this.world));
     this.runInitial = this.initial;
     this.validateInitial(this.initial);
@@ -91,13 +93,15 @@ export class TestSession {
   }
   private validateInitial(state: State): void {
     if (state.traversalId === undefined || state.jumpHeldPrev === undefined) throw new Error('Test requires complete climb/locomotion state');
-    const probe = step(createWorld(this.source,this.profile), state, NEUTRAL);
+    const probe = step(this.worldAt(this.source,state.tick), state, NEUTRAL);
     if (probe.status !== 'ok') throw new Error(`${probe.status}: ${probe.reason ?? 'initial state'}`);
   }
   private actor(from:State,to:State):SensorActor {const c=this.profile.collider;if(c.kind!=='rect')throw Error('Test sensors require rectangular collider');return {id:'test.player.1',category:'player',from,to,width:c.width*256,height:c.height*256,abilities:this.profile.abilityTags.filter(tag=>{if(tag==='climb.ladder'||tag==='climb.rope')return this.profile.abilities.some(a=>a.kind==='climb'&&(tag==='climb.ladder'?a.ladder:a.rope));const kind=tag.startsWith('locomotion.')?tag.slice(11):tag;return !['jump','climb','dash','wall','ledge','swim','fly','grapple','teleport','launch','modifier','registered'].includes(kind)||this.profile.abilities.some(a=>a.kind===kind);})};}
   testConditions(conditions:readonly Condition[]):'passed'|'blocked'|'unsupported' {return this.gameplay?.conditions(conditions,this.actor(this.view.state,this.view.state))??(conditions.length?'unsupported':'passed');}
   private resetGameplay(initial:State):void {this.gameplay=this.gameplayFactory?.(this.source)??null;this.gameplay?.sense(initial.tick,[this.actor(initial,initial)],true);}
   private empty(state: State): TestView { return owned({ paused: true, state, frame: { status: 'ok', state, contacts: [] }, frames: [], input: [], gameplay:this.gameplay?.getSnapshot()??null }); }
+  private worldAt(source:ContactMap,tick:number):World {return hasPlatforms(source)?platformWorld(source,this.profile,tick):createWorld(source,this.profile);}
+  probeState(state:State):Step {return step(this.worldAt((this.gameplay?.physicsSource()??this.source) as ContactMap,state.tick),state,NEUTRAL);}
   injectEvent(event:ContractRef,encounterId:string):void {if(!this.gameplay)throw Error('No gameplay snapshot');if(this.eventSchedule.length>=1000)throw Error('Test injection schedule budget');this.pause();this.gameplay.inject(event,encounterId);this.eventSchedule.push(owned({afterTicks:this.view.frames.length,encounterId,event}));this.set({...this.view,gameplay:this.gameplay.getSnapshot()});}
 
   readonly subscribe = (listener: () => void): (() => void) => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
@@ -107,8 +111,9 @@ export class TestSession {
   reset(): void { this.eventSchedule=[];this.runInitial = this.initial; this.resetGameplay(this.initial); this.set(this.empty(this.initial)); }
   advance(input: Input = NEUTRAL): Step {
     if (this.view.frame.status !== 'ok' || this.view.gameplay&&this.view.gameplay.status!=='ready' || this.view.frames.length >= MAX_TICKS) { this.pause(); return this.view.frame; }
-    if(this.gameplay)this.world=freeze(createWorld(this.gameplay.physicsSource() as unknown as ContactMap,this.profile));
-    const controls = owned(input), frame = owned(step(this.world, this.view.state, controls));
+    const source=(this.gameplay?.physicsSource()??this.source) as ContactMap;
+    if(this.gameplay)this.world=freeze(this.worldAt(source,this.view.state.tick));
+    const controls = owned(input), frame = owned(hasPlatforms(source)?platformStep(source,this.profile,this.view.state,controls):step(this.world, this.view.state, controls));
     if(frame.status==='ok')this.gameplay?.sense(frame.state.tick,[this.actor(this.view.state,frame.state)]);
     const last = this.view.input.at(-1), { fromTick: _, ...previous } = last ?? { fromTick: 0 };
     const schedule = last && replayBytes(previous) === replayBytes(controls) ? this.view.input : [...this.view.input, Object.freeze({ ...controls, fromTick: this.view.state.tick })];
@@ -116,7 +121,7 @@ export class TestSession {
       frames: [...this.view.frames, frame], input: schedule, gameplay:this.gameplay?.getSnapshot()??null });
     return frame;
   }
-  runtimeSource(): ContactMap {return (this.gameplay?.physicsSource()??this.source) as unknown as ContactMap;}
+  runtimeSource(): ContactMap {const source=(this.gameplay?.physicsSource()??this.source) as ContactMap;return hasPlatforms(source)?this.worldAt(source,this.view.state.tick).source:source;}
   recording(): Recording { return owned({ initial: this.view.frames[0] ? this.runInitial : this.view.state, input: this.view.input, ticks: this.view.frames.length,...(this.eventSchedule.length?{events:this.eventSchedule}:{}) }); }
   replay(value: unknown): void {
     const r = parseRecording(value); this.validateInitial(r.initial);
