@@ -1,4 +1,4 @@
-import {step,airJumpCount,supportedJumpProfile,hasDash,initialDash,initialResources,type DashInput} from '../dash/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasDash,dashStarts,initialDash,initialResources,type DashInput,type DashState} from '../dash/runtime';
 import {buildDashActions} from './dash';
 import {buildAirJumpActions} from './air-jumps';
 import {groundMotionAllowed} from './intent';
@@ -77,14 +77,14 @@ function validateSettings(s:RouteSettings){
 export function replayRouteActions(w:World,initial:ClimbState,actions:readonly RouteAction[]):{frames:Step[];input:RunInput[];terminal:ClimbState}|null{
  let s=initial;const frames:Step[]=[],input:RunInput[]=[];
  for(const action of actions){
-  let airJumpUsed=false,dashUsed=false;
+  let airJumpUsed=false,dashUsed=!!(s as DashState).dash?.active;
   if(replayBytes(s)!==replayBytes(action.initial)||action.frames.length!==action.durationTicks||!action.input.length||action.input[0]!.fromTick!==s.tick)return null;
   if(action.input.some((c,i)=>!Number.isSafeInteger(c.fromTick)||c.fromTick>=s.tick+action.durationTicks||(i>0&&c.fromTick<=action.input[i-1]!.fromTick)))return null;
   let at=0;
   for(let n=0;n<action.frames.length;n++){
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
-   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;dashUsed ||= !!(control as DashInput).dash;
+   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;dashUsed ||= !!(s as DashState).dash?.active||dashStarts(w.profile,s,control as DashInput);
    if(dashUsed&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'dash',s,f.state))return null;
    if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||(control.jump||airJumpUsed)&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
@@ -175,7 +175,7 @@ export class Navigation {
   for(const l of legs)if(!l||!Number.isSafeInteger(l.wait)||l.wait<0||l.wait>3600||![l.goal.x,l.goal.vx,l.goal.toleranceSu].every(Number.isSafeInteger)||l.goal.toleranceSu<0||l.goal.toleranceSu>8192)throw Error('invalid route goal/wait');
   const take=async()=>{if(cancelled())throw new Exhausted('cancelled');if(replayTicks>=settings.maxReplayTicks)throw new Exhausted('budget');replayTicks++;if(replayTicks%256===0)await yieldTask();};
   const scan=async()=>{if(++clearanceSamples>settings.air.maxClearanceSamples)throw new Exhausted('budget');if(clearanceSamples%1024===0){await yieldTask();if(cancelled())throw new Exhausted('cancelled');}};
-  const advance=async(s:ClimbState,c:Input)=>{await take();const f=step(this.world,s,c);if(f.status==='contactBudget')throw new Exhausted('budget');return f;};
+  const advance=async(s:ClimbState,c:Input)=>{await take();const f=step(this.world,s,c);if(f.status==='contactBudget')throw new Exhausted('budget');if((!!(s as DashState).dash?.active||dashStarts(this.profile,s,c as DashInput))&&!groundMotionAllowed(this.map,this.profile,'dash',s,f.state))return {status:'unsupported',state:s,contacts:[],reason:'dash-forbidden swept region'} as Step;return f;};
   const permitted=(s:ClimbState,c:Input)=>{const i=this.locate(s);return s.mode!=='ground'||!!i&&this.allowed(i,s.vx)&&this.allowed(i,c.moveX);};
   const action=async(kind:string,start:ClimbState,frames:Step[],input:RunInput[],refinedFrom:string|null):Promise<RouteAction>=>{const schedule=compress(input);return {key:await digest({start,input:schedule,kind,refinedFrom}),kind,initial:start,terminal:(frames.at(-1)?.state??start) as ClimbState,input:schedule,frames,durationTicks:frames.length,penaltyTicks:settings.penaltyTicks,refinedFrom};};
   const align=async(start:ClimbState,target:Goal):Promise<RouteAction|null>=>{
@@ -193,11 +193,11 @@ export class Navigation {
    }return matches(s,target)&&!s.jumpHeldPrev&&s.climbReady?action('align',start,frames,input,null):null;
   };
   const replayTemplate=async(start:ClimbState,t:Template):Promise<RouteAction|null>=>{
-   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false,dashUsed=false;const frames:Step[]=[],input:RunInput[]=[];
+   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false,dashUsed=!!(start as DashState).dash?.active;const frames:Step[]=[],input:RunInput[]=[];
    for(let n=0;n<Math.min(t.ticks,settings.maxActionTicks);n++){
     while(t.input[index+1]&&t.input[index+1]!.fromTick<=n)index++;
     const {fromTick:_,...c}=t.input[index]!;if(!permitted(s,c))return null;const f=await advance(s,c),next=f.state as ClimbState;
-    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;dashUsed ||= !!(c as DashInput).dash;
+    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;dashUsed ||= !!(s as DashState).dash?.active||dashStarts(this.profile,s,c as DashInput);
     if(dashUsed&&!groundMotionAllowed(this.map,this.profile,'dash',s,next))return null;
     if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||(c.jump||airJumpUsed)&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
     if(['jump','drop','fall','land'].includes(t.kind)&&f.contacts.some(c=>c.kind==='blocking'&&!(t.kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===start.supportId&&next.y===start.y)))return null;

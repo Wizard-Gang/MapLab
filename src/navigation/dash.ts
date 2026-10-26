@@ -51,7 +51,7 @@ export async function buildDashActions(map:MapDocument,p:MovementDocument,w:Worl
    if(kind==='jump'&&!p.abilities.some(a=>a.kind==='jump'))continue;
    if(kind==='fall'&&initial.mode==='ground'&&!((initial.x===locate(initial)?.minX&&direction===-1)||(initial.x===locate(initial)?.maxX&&direction===1)))continue;
    if(!safe(initial)||!allowed(initial,direction))continue;
-   const seen=new Map<string,number>(),stack:Node[]=[{state:initial,trail:null,used:0,air:initial.mode==='air',dashed:false,jumped:false}];
+   const seen=new Map<string,number>(),stack:Node[]=[{state:initial,trail:null,used:0,air:initial.mode==='air',dashed:!!(initial as DashState).dash?.active,jumped:false}];
    while(stack.length){
     if(cancelled())throw Error('cancelled');
     if(samples>=Math.min(settings.maxCandidates,limits.maxAirStates))throw Error('state-budget');samples++;

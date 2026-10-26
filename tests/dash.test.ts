@@ -6,6 +6,7 @@ import {DASH_RUNTIME_SHA256,DASH_PRIMITIVE_SHA256} from '../src/dash/identity';
 import {createWorld,replayBytes,type ClimbState,type State,type ContactMap,type Step} from '../src/physics-reference';
 import {Navigation,replayRouteActions,physicalStateKey,type RouteProof} from '../src/navigation/routes';
 import {buildAirborneActions,AIR_DEFAULTS} from '../src/navigation/airborne';
+import {buildDashActions} from '../src/navigation/dash';
 import {RoutingSession,type RoutingRequest,type RouteQuery} from '../src/navigation/routing-protocol';
 import {TestSession,NEUTRAL,parseRecording} from '../src/test-runtime/session';
 import {canonical,validateSourceGraph,type MapDocument,type MovementDocument,type JsonValue} from '../src/contracts';import {exportLibrary} from '../src/library/export';
@@ -63,6 +64,20 @@ test('dash forbid applies to every frame of a route action',()=>{
  const c=read(cases[0]!),frames=run({...c,ticks:3}),initial=c.initial as ClimbState,action={key:'owned-dash',kind:'dash',initial,terminal:frames.at(-1)!.state as ClimbState,input:c.input.filter((i:any)=>i.fromTick<3),frames,durationTicks:3,penaltyTicks:0,refinedFrom:null};
  expect(replayRouteActions(createWorld(read(c.map),profile()),initial,[action])).not.toBeNull();
  const m:any=read(c.map);m.regions=[{id:'region.dash',name:'Dash forbid',role:'trigger',shape:{kind:'rect',rect:[25,40,1,8]}}];m.navigation.overrides=[{id:'nav.dash',regionId:'region.dash',profileIds:[profile().id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,profile()),initial,[action])).toBeNull();
+});
+test('last-tick active dash continuations cannot bypass a forbidden swept region',async()=>{
+ const m:any=map('flat'),p=profile(),c=read('air-exhaust-landing-reset.fixture.json');
+ const s:ClimbState&{dash:any}={...c.initial,x:20*256,y:48*256,resources:{airJumps:0,dashCharges:1,cooldowns:{'dash.ground':0,'dash.air':4}},dash:{held:false,remaining:{ground:1,air:0},active:{mode:'air',direction:1,ticksLeft:1}}};
+ const f=step(createWorld(m,p),s,NEUTRAL),a={key:'active-last-tick',kind:'land',initial:s,terminal:f.state as ClimbState,input:[{...NEUTRAL,fromTick:s.tick}],frames:[f],durationTicks:1,penaltyTicks:0,refinedFrom:null};expect(f.status).toBe('ok');expect(replayRouteActions(createWorld(m,p),s,[a])).not.toBeNull();
+ m.regions=[{id:'region.active',name:'Active dash forbid',role:'trigger',shape:{kind:'rect',rect:[25,40,1,8]}}];m.navigation.overrides=[{id:'nav.active',regionId:'region.active',profileIds:[p.id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,p),s,[a])).toBeNull();
+ const generated=await buildDashActions(m,p,createWorld(m,p),1,{...AIR_DEFAULTS,maxTicks:24},nav.identity,[{key:'owned-flat',supportId:'fh.west',materialId:'material.ground',direction:'both',minX:256,maxX:159*256}],()=>false,async()=>{},undefined,s);expect(generated.edges).toEqual([]);
+});
+test('additional airborne jump and dash pools coexist without replenishing each other',()=>{
+ const p=profile(),combined={...p,abilities:p.abilities.map(a=>a.kind==='jump'?{...a,airJumps:2,holdTicks:4}:a)},c=read('air-exhaust-landing-reset.fixture.json'),w=createWorld(read(c.map),combined);
+ let s:State={...c.initial,resources:initialResources(combined),...initialDash(combined)};
+ const start=step(w,s,{...NEUTRAL,dash:true,jump:true});expect(start.status).toBe('ok');expect(start.state.resources!.airJumps).toBe(2);expect(start.state.resources!.dashCharges).toBe(1);s=start.state;
+ for(let n=0;n<2;n++){const f=step(w,s,NEUTRAL);expect(f.status).toBe('ok');s=f.state;}
+ const before=s as DashState,next=step(w,s,{...NEUTRAL,jump:true});expect(next.status).toBe('ok');expect(next.state.resources!.airJumps).toBe(1);expect((next.state as DashState).dash!.remaining).toEqual(before.dash!.remaining);expect(next.state.resources!.dashCharges).toBe(before.resources!.dashCharges);expect(next.state.resources!.cooldowns['dash.air']).toBe(before.resources!.cooldowns['dash.air']!-1);
 });
 test('separate final-byte consumer verifies equations and rejects rehashed corruption',async()=>{
  const dir=realpathSync(mkdtempSync(join(tmpdir(),'maplab-dash-consumer-')));try{

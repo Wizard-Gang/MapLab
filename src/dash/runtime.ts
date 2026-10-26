@@ -28,7 +28,8 @@ const count=(n:unknown,max:number)=>Number.isSafeInteger(n)&&Number(n)>=0&&Numbe
 /** Call only with a validated complete runtime state. Detection precedes same-tick reset. */
 export function dashStarts(p:MovementDocument,s:State,input:DashInput):boolean {
  const d=(s as DashState).dash,a=dashDefinitions(p).find(a=>a.mode===s.mode);
- return !!(d&&a&&!d.active&&!d.held&&input.dash&&(input.moveY??0)===0&&s.resources!.cooldowns['dash.'+a.mode]!<=1&&(d.remaining[a.mode]>0||a.reset==='timer'));
+ if(!d||!a||!d.remaining||!Number.isSafeInteger(s.resources?.cooldowns?.['dash.'+a.mode]))return false;
+ return !!(!d.active&&!d.held&&input.dash&&(input.moveY??0)===0&&s.resources!.cooldowns['dash.'+a.mode]!<=1&&(d.remaining[a.mode]>0||a.reset==='timer'));
 }
 /** Dash has a rising input edge, horizontal direction (moveX, otherwise facing), and
  * exactly durationTicks swept movement ticks unless a blocking contact stops it.
