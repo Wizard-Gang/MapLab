@@ -69,6 +69,8 @@ jobs:
         run: npm install --global npm@12.1.0 --ignore-scripts --no-audit --no-fund
       - name: Clean install without dependency lifecycle scripts
         run: npm ci
+      - name: Use the Ubuntu archive for browser dependencies
+        run: sudo sed -i 's|azure\.archive\.ubuntu\.com|archive.ubuntu.com|g' /etc/apt/apt-mirrors.txt
       - name: Install the browser outside npm lifecycle scripts
         run: npx playwright install --with-deps ${{ matrix.project }}
       - name: Run the browser test shard
