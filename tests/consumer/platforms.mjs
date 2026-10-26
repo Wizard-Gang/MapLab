@@ -24,6 +24,10 @@ function oracle(c,m,p){
   for(let i=1;i<=c.ticks;i++){if(i>1)x+=vx;y+=vy;vy+=p.air.gravity;const events=i===1?[event('carry',[dx,0]),event('carry',[0,dy])]:[];
    if(i===1&&motion.departure==='addPlatformVelocity'){vx+=dx;vy+=dy;events.push(event('departure',[dx,dy]));}
    frames.push(f({...initial,x,y,vx,vy,mode:'air',supportId:null,tick:i,jumpHeldPrev:true,ticksSinceJump:i},events));}
+ }else if(c.id==='edge-departure'){
+  const wall=m.bodies.find(b=>b.id==='body.wall'),x=wall.shapes[0].rect[0]*256-half,dx=offset(motion,1)[0];assert(x<initial.x+dx);assert(x+half<body.shapes[0].rect[0]*256+dx);
+  frames.push(f(airborne(initial,{x,vx:dx}),[event('carry',[x-initial.x,0]),event('departure',[dx,0])]));
+  frames.push(f(airborne(frames[0].state,{vx:0,y:initial.y+p.air.gravity}),[]));
  }else if(c.id==='disabled'){
   assert.equal(body.enabled,false);frames.push(f(airborne(initial),[event('disabled',[0,0])]));
  }else if(['swept-push','side-crush'].includes(c.id)){

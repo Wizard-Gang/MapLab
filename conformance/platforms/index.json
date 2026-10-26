@@ -3,7 +3,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "252003d26b1373126fa818c87153bca9e57b367763164f82b328e8973e9de120"
+      "sha256": "2403d8502d76ad8a1d165ea942300421273506e7f50844c9f387a902eabf716a"
     },
     {
       "path": "authoring.map.json",
@@ -19,7 +19,7 @@
     },
     {
       "path": "cases.json",
-      "sha256": "69da79d41dd385df38100c1ea9d6b546f37970b88076044e7ce872fb5362afdb"
+      "sha256": "098ccc992c99bf7e642d9b12dc00a456881e1abebd89ad374b843f8fd4327a59"
     },
     {
       "path": "ceiling-crush.fixture.json",
@@ -36,6 +36,14 @@
     {
       "path": "disabled.map.json",
       "sha256": "b2fe3c7229dea7365ca21597ffc3f6b65f0576ad625925790263d02b6b2393fb"
+    },
+    {
+      "path": "edge-departure.fixture.json",
+      "sha256": "57604c220ba22abe47e6ed095ceff7da7cfc85f28e66c7c3694280d4b52e8d32"
+    },
+    {
+      "path": "edge-departure.map.json",
+      "sha256": "e1eb9be9f4086ebc8a54d70fd085db646ad18bc49fb8d792c92fc3ab2e1ac571"
     },
     {
       "path": "elevator.fixture.json",

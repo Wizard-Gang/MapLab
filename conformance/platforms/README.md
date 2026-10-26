@@ -25,9 +25,9 @@ The adapter bounds worlds to 16 kinematic bodies, 4096 faces and eight equal con
 invalid states, unsafe integers and exhausted budgets refuse without partial actor advancement.
 
 The cases cover elevator carry, diagonal initial-phase reversal, unregistered riders,
-jump-off with/without inherited velocity, disabled support, fast full-path push, upward push,
+jump-off with/without inherited velocity, edge departure after clipped carry, disabled support, fast full-path push, upward push,
 side/ceiling crush, clipped carry, one-way below/suppression/lower landing, masked owners and
-horizontal sloped one-way push. Unit cases cover negative interpolation, once/loop boundaries,
+horizontal sloped one-way push and partial-footprint endpoint refusal. Unit cases cover negative interpolation, once/loop boundaries,
 resume/repeat/order invariance, malformed schedules, finite overlap, contact/body/face budgets,
 static parity, real tick-zero gameplay disable and unsupported static navigation.
 
