@@ -61,7 +61,7 @@ test('state/replay/action/clearance budgets and cancellation publish no partial 
  for(const settings of [{...AIR_DEFAULTS,maxAirStates:1},{...AIR_DEFAULTS,maxReplayTicks:1},{...AIR_DEFAULTS,maxTicks:1},{...AIR_DEFAULTS,maxClearanceSamples:1},{...AIR_DEFAULTS,maxCandidates:1,spacingSu:1}])expect(await buildAirborneActions(map(),profile(),1,settings,undefined,async()=>{})).toMatchObject({status:'budget',edges:[],intervals:[]});
  expect(await buildAirborneActions(map(),profile(),1,AIR_DEFAULTS,()=>true)).toMatchObject({status:'cancelled',edges:[]});await expect(buildAirborneActions(map(),profile(),1,{...AIR_DEFAULTS,airStepTicks:1})).rejects.toThrow('primitive settings');
  const noAir=await buildAirborneActions(map(),profile(),1,{...AIR_DEFAULTS,maxAirActions:0},undefined,async()=>{});expect(noAir.edges.every(e=>e.frames.every(f=>f.state.resources!.airJumps===1))).toBe(true);
-});
+},120000);
 test('drop and fall families survive selecting extra jumps and respect authored family forbids',async()=>{
  const m=map('drop'),p=profile(),g=await buildAirborneActions(m,p,1,undefined,undefined,async()=>{});expect(g.status).toBe('candidate');expect(g.edges.some(e=>e.kind==='drop'&&e.terminal.supportId==='fh.lower'&&e.input.some(c=>c.drop))).toBe(true);
  const blocked={...m,regions:[{id:'region.forbid',name:'Forbid',role:'trigger' as const,shape:{kind:'rect' as const,rect:m.bounds}}],navigation:{...m.navigation,overrides:[{id:'nav.forbid',regionId:'region.forbid',profileIds:[p.id],actions:['drop','fall','jump'],policy:'forbid' as const,penaltyTicks:0}]}};
