@@ -1,0 +1,9 @@
+{
+  "baseControllerSha256": "1e36b7364146fe1fc75b1540b099e57babad7aae575699f1d68184784a573b02",
+  "airJumpAdapter": {
+    "key": "maplab.reference-air-jumps",
+    "version": 1
+  },
+  "airJumpAdapterSha256": "0d3811f6ba63a55706125fcf1db8cf61f74ddc4e70806a1954f1864a50d30524",
+  "primitiveSha256": "4bb1bedc923fb47572fa6a7ab6697608ffc78243432b90c3e5f973c7c2352b0d"
+}

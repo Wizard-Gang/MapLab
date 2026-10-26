@@ -1,0 +1,1 @@
+{"license":"CC0-1.0","cases":["consume-hold-exhaust-reset.fixture.json","fall-consume.fixture.json","walk-off-retains.fixture.json","two-charges.fixture.json"],"route":{"map":"chain.map.json","profile":"player.movement.json","goal":{"supportId":"fh.east","x":17920,"toleranceSu":128,"vx":0}}}

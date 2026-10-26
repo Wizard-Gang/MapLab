@@ -76,13 +76,15 @@ function validateSettings(s:RouteSettings){
 export function replayRouteActions(w:World,initial:ClimbState,actions:readonly RouteAction[]):{frames:Step[];input:RunInput[];terminal:ClimbState}|null{
  let s=initial;const frames:Step[]=[],input:RunInput[]=[];
  for(const action of actions){
+  let airJumpUsed=false;
   if(replayBytes(s)!==replayBytes(action.initial)||action.frames.length!==action.durationTicks||!action.input.length||action.input[0]!.fromTick!==s.tick)return null;
   if(action.input.some((c,i)=>!Number.isSafeInteger(c.fromTick)||c.fromTick>=s.tick+action.durationTicks||(i>0&&c.fromTick<=action.input[i-1]!.fromTick)))return null;
   let at=0;
   for(let n=0;n<action.frames.length;n++){
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
-   const {fromTick:_,...control}=c,f=step(w,s,control);if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||control.jump&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
+   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;
+   if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||(control.jump||airJumpUsed)&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
   }
   if(replayBytes(s)!==replayBytes(action.terminal))return null;
@@ -189,11 +191,12 @@ export class Navigation {
    }return matches(s,target)&&!s.jumpHeldPrev&&s.climbReady?action('align',start,frames,input,null):null;
   };
   const replayTemplate=async(start:ClimbState,t:Template):Promise<RouteAction|null>=>{
-   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb';const frames:Step[]=[],input:RunInput[]=[];
+   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false;const frames:Step[]=[],input:RunInput[]=[];
    for(let n=0;n<Math.min(t.ticks,settings.maxActionTicks);n++){
     while(t.input[index+1]&&t.input[index+1]!.fromTick<=n)index++;
     const {fromTick:_,...c}=t.input[index]!;if(!permitted(s,c))return null;const f=await advance(s,c),next=f.state as ClimbState;
-    if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||c.jump&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
+    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;
+    if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||(c.jump||airJumpUsed)&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
     if(['jump','drop','fall','land'].includes(t.kind)&&f.contacts.some(c=>c.kind==='blocking'&&!(t.kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===start.supportId&&next.y===start.y)))return null;
     if(t.kind==='walk'&&next.mode!=='ground')return null;
     if(s.mode==='ground'&&next.mode==='ground'){
