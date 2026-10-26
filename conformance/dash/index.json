@@ -1,0 +1,75 @@
+{
+  "format": "maplab.dash-fixtures",
+  "version": 1,
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "97d50b8045aa1cde6602d408267fe329132b229b4d99a9287ed0e95228e111b4"
+    },
+    {
+      "path": "air-exhaust-landing-reset.fixture.json",
+      "sha256": "955ef0003ea3503a248f18fd414d8edfe370043e144482552802a91f45b007b8"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "fa2d28e9232bd43bc726be6e3ee115ec284a3808e99f4ede81d860c1b6f121df"
+    },
+    {
+      "path": "chain.map.json",
+      "sha256": "859afa1614475921f7cd7f64f1bf942d23e9fc382fe73d425a432443f701a9cc"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "5d72f24b18b750f98fa094b20bab5cff7f58d101c24d637e4561074455975eab"
+    },
+    {
+      "path": "facing-left.fixture.json",
+      "sha256": "3a69ca93d4a5786bf07d580bda14e2fc4338eb19c4349dfd01874f94746cf3bb"
+    },
+    {
+      "path": "fast.movement.json",
+      "sha256": "241a13fe160046b982f8565b70647222a38c0325e916fc9167f7fa24f16cf12b"
+    },
+    {
+      "path": "flat.map.json",
+      "sha256": "ac8de94457b7719f4b0bb92a330d3c440bffbbf8dbabac4cbbbb658805b12202"
+    },
+    {
+      "path": "ground-hold-duration.fixture.json",
+      "sha256": "cace8f06fb65a95ff808421a8ecb4013ac08fe42f78d6c814103b1d7cfc166be"
+    },
+    {
+      "path": "none.movement.json",
+      "sha256": "c24e84fcac93aaaae553fa428bad4451b342ae0dacfdcdb96c84bbf44161c3b3"
+    },
+    {
+      "path": "one-tick-reset.fixture.json",
+      "sha256": "c24358d92b783808b980a77e107f9402c3836477473cd0124f78302dd1c7eaa0"
+    },
+    {
+      "path": "one.movement.json",
+      "sha256": "18028bd56453744b2e81013fd249ce60cb0eceef1ca4ed4f67ea47a361897ed8"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "75c3f238516bbd68843d9691988a5babfc77c8fa7fc30eadbf0b4a677c1c87b8"
+    },
+    {
+      "path": "thin-wall.fixture.json",
+      "sha256": "36b9284a7d8f121d83504a6652c181a0a32a3f77e9f339b00186f4aa0f89906d"
+    },
+    {
+      "path": "thin-wall.map.json",
+      "sha256": "bf31d50dd53c1e7c93c52a870c62268b64dcb9993e1fc49dc454674f12806af6"
+    },
+    {
+      "path": "timer-recharge.fixture.json",
+      "sha256": "4c6b669877cdfa29774b3367c1093a2c04f6126e3d5df750eeebfef2eb5001a0"
+    },
+    {
+      "path": "timer.movement.json",
+      "sha256": "12bd969242a23429ecc692a46c4c3fb359a3beaac3cf8a2834d89b6f8250ff64"
+    }
+  ]
+}

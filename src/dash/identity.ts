@@ -1,0 +1,4 @@
+// Final-byte module identities, checked independently by CI.
+export const DASH_RUNTIME_SHA256='4302972479d9cb939087b133d9c5e05f5dd4b4474c57d0ebb1dde3849eabe85a';
+export const DASH_PRIMITIVE_SHA256='d2a5d90e45a1738fe2a5690ddb3a09900b2083682ad40a4b3562062e41759f64';
+export const DASH_INTENT_SHA256='8308a5668819fdff81e1c43577b7a2c01697016e5612c817bb1d5ec8987d0faf';
