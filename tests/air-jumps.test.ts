@@ -82,7 +82,7 @@ test('a fall-family replay keeps jump restrictions after the airborne input puls
 });
 test('separate final-byte importer and equation oracle reject rehashed semantic corruption',async()=>{
  const dir=realpathSync(mkdtempSync(join(tmpdir(),'maplab-air-jump-consumer-')));try{
- const library=join(dir,'library');cpSync('placeholder-library',library,{recursive:true});const ix=JSON.parse(readFileSync(join(library,'maplab.project.json'),'utf8'));
+ const library=join(dir,'library');cpSync('placeholder-library',library,{recursive:true});const ix=JSON.parse(readFileSync(join(library,'maplab.project.json'),'utf8'));ix.documents=[];ix.defaults.movementId=profile().id;
  for(const d of [{doc:map(),kind:'map',path:'maps/chain.map.json'},...['player','ground','two'].map(n=>({doc:profile(n),kind:'movement',path:'movement/'+n+'.movement.json'}))]){const bytes=JSON.stringify(d.doc);writeFileSync(join(library,d.path),bytes);ix.documents.push({id:d.doc.id,kind:d.kind,path:d.path,sha256:sha(bytes)});}writeFileSync(join(library,'maplab.project.json'),JSON.stringify(ix));
  const selected={dir:library,label:'Owned airborne jumps',placeholder:false},expected=sha(readFileSync(join(library,'maps/chain.map.json'))),bundle=await exportLibrary(selected,map().id,expected);expect((await exportLibrary(selected,map().id,expected)).zip).toEqual(bundle.zip);
  for(const [path,bytes] of bundle.files){mkdirSync(dirname(join(dir,'bundle',path)),{recursive:true});writeFileSync(join(dir,'bundle',path),bytes);}cpSync(root,join(dir,'fixtures'),{recursive:true});cpSync('schemas',join(dir,'schemas'),{recursive:true});cpSync('tests/consumer/reader',join(dir,'reader'),{recursive:true});cpSync('tests/consumer/air-jumps.mjs',join(dir,'consumer.mjs'));
