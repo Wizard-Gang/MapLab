@@ -40,6 +40,11 @@ test('real Test controls, recording parser, reset and replay preserve exact dash
  for(let n=0;n<c.ticks;n++){const {fromTick:_,...control}=c.input.filter((i:any)=>i.fromTick<=n).at(-1);session.advance(control);}expect(session.getSnapshot().frames.map(project)).toEqual(c.expect);const rec=parseRecording(session.recording());session.reset();session.replay(rec);expect(session.getSnapshot().frames.map(project)).toEqual(c.expect);expect(replayBytes(session.source)).toBe(before);
  expect(()=>parseRecording({...rec,input:rec.input.map((c,i)=>i?c:{...c,dash:1})})).toThrow('Invalid input schedule');
 });
+test('unsupported dash anywhere in a recording is rejected before changing the current run',()=>{
+ const c=read(cases[0]!),p=profile('none'),{dash:_,...plain}=c.initial,initial={...plain,resources:initialResources(p)},session=new TestSession(read(c.map),p,initial);
+ session.advance(NEUTRAL);const before=session.getSnapshot();
+ expect(()=>session.replay({initial,input:[{...NEUTRAL,fromTick:0},{...NEUTRAL,dash:true,fromTick:1}],ticks:2})).toThrow('profile without dash capability');expect(session.getSnapshot()).toBe(before);
+});
 test('whole chained route retains resources and uses admissible zero heuristic',async()=>{
  expect(nav.status).toBe('candidate');expect(proof.status).toBe('verified reachable with replay witness');expect(proof.heuristic).toBe('zero');expect(proof.canCertify).toBe(false);expect(proof.actions.some(a=>a.kind==='dash')).toBe(true);
  expect(replayRouteActions(createWorld(map(),profile()),proof.initial!,proof.actions)?.frames).toEqual(proof.frames);

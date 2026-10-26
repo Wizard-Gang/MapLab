@@ -1,4 +1,4 @@
-import {step,initialDash,initialResources,type DashInput as Input,type DashRunInput as RunInput} from '../dash/runtime';
+import {step,hasDash,initialDash,initialResources,type DashInput as Input,type DashRunInput as RunInput} from '../dash/runtime';
 // ML-020: ephemeral Test state. This module has no authoring, storage, rendering or engine dependency.
 import type { GameplaySession, GameplayView, SensorActor } from '../gameplay/runtime';
 import type { Condition, ContractRef } from '../contracts';
@@ -125,7 +125,9 @@ export class TestSession {
   runtimeSource(): ContactMap {const source=(this.gameplay?.physicsSource()??this.source) as ContactMap;return hasPlatforms(source)?this.worldAt(source,this.view.state.tick).source:source;}
   recording(): Recording { return owned({ initial: this.view.frames[0] ? this.runInitial : this.view.state, input: this.view.input, ticks: this.view.frames.length,...(this.eventSchedule.length?{events:this.eventSchedule}:{}) }); }
   replay(value: unknown): void {
-    const r = parseRecording(value); this.validateInitial(r.initial);
+    const r = parseRecording(value);
+    if(!hasDash(this.profile)&&r.input.some(i=>i.dash))throw new Error('Recording requests dash for a profile without dash capability');
+    this.validateInitial(r.initial);
     // Build atomically so an invalid input never destroys the current recording.
     const run = new TestSession(this.source, this.profile, r.initial, this.gameplayFactory);
     let index = 0,eventIndex=0;
