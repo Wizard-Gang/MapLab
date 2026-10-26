@@ -67,7 +67,19 @@ test('drop and fall families survive selecting extra jumps and respect authored 
  const m=map('drop'),p=profile(),g=await buildAirborneActions(m,p,1,undefined,undefined,async()=>{});expect(g.status).toBe('candidate');expect(g.edges.some(e=>e.kind==='drop'&&e.terminal.supportId==='fh.lower'&&e.input.some(c=>c.drop))).toBe(true);
  const blocked={...m,regions:[{id:'region.forbid',name:'Forbid',role:'trigger' as const,shape:{kind:'rect' as const,rect:m.bounds}}],navigation:{...m.navigation,overrides:[{id:'nav.forbid',regionId:'region.forbid',profileIds:[p.id],actions:['drop','fall','jump'],policy:'forbid' as const,penaltyTicks:0}]}};
  expect(await buildAirborneActions(blocked,p,1,undefined,undefined,async()=>{})).toMatchObject({status:'no route found within declared search/sampling budget',edges:[]});
+ const jumpOnly={...blocked,navigation:{...blocked.navigation,overrides:blocked.navigation.overrides.map(o=>({...o,actions:['jump']}))}};
+ const legal=await buildAirborneActions(jumpOnly,p,1,undefined,undefined,async()=>{});expect(legal.status).toBe('candidate');expect(legal.edges.some(e=>e.kind==='drop')).toBe(true);expect(legal.edges.every(e=>e.frames.every(f=>f.state.resources!.airJumps===1))).toBe(true);
 },120000);
+test('a fall-family replay keeps jump restrictions after the airborne input pulse has ended',()=>{
+ const c=read('fall-consume.fixture.json'),m=map('flat'),p=profile(),initial=c.initial as ClimbState;
+ const input=[{...c.input[0],jump:true},{...c.input[0],fromTick:1,jump:false}],frames=run({...c,input});
+ const action={key:'owned-fall-jump',kind:'fall',initial,terminal:frames.at(-1)!.state as ClimbState,input,frames,durationTicks:frames.length,penaltyTicks:0,refinedFrom:null};
+ expect(replayRouteActions(createWorld(m,p),initial,[action])?.frames).toEqual(frames);
+ const restricted={...m,regions:[{id:'region.later',name:'Later jump forbid',role:'trigger' as const,shape:{kind:'rect' as const,rect:[0,19,12,1] as [number,number,number,number]}}],navigation:{...m.navigation,overrides:[{id:'nav.later',regionId:'region.later',profileIds:[p.id],actions:['jump'],policy:'forbid' as const,penaltyTicks:0}]}};
+ // The first pulse stays below this region; only later coast frames enter it.
+ expect(frames[0]!.state.y-p.collider.height*256).toBeGreaterThan(20*256);
+ expect(replayRouteActions(createWorld(restricted,p),initial,[action])).toBeNull();
+});
 test('separate final-byte importer and equation oracle reject rehashed semantic corruption',async()=>{
  const dir=realpathSync(mkdtempSync(join(tmpdir(),'maplab-air-jump-consumer-')));try{
  const library=join(dir,'library');cpSync('placeholder-library',library,{recursive:true});const ix=JSON.parse(readFileSync(join(library,'maplab.project.json'),'utf8'));
