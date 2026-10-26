@@ -41,7 +41,7 @@ export function step(world:World,old:State,input:DashInput):Step {
  const {dash:button=false,...control}=input,definitions=dashDefinitions(world.profile),state=old as DashState;
  const fail=(status:Step['status'],reason:string):Step=>({status,state:old,contacts:[],reason});
  if(typeof button!=='boolean')return fail('invalidState','dash input');
- if(!definitions.length){if(state.dash!==undefined)return fail('invalidState','dash state without capability');return jumpStep(world,old,control);}
+ if(!definitions.length){if(state.dash!==undefined)return fail('invalidState','dash state without capability');if(button)return fail('unsupported','dash input without capability');return jumpStep(world,old,control);}
  if(!supportedJumpProfile(world.profile))return fail('unsupported','dash adapter capability budget');
  if(![-1,0,1].includes(control.moveX)||typeof control.run!=='boolean'||old.traversalId!==undefined&&![-1,0,1].includes(control.moveY!)||old.jumpHeldPrev!==undefined&&(typeof control.jump!=='boolean'||typeof control.drop!=='boolean'))return fail('invalidState','original dash controls');
  const d=state.dash,r=old.resources;

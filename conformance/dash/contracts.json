@@ -4,6 +4,7 @@
     "key": "maplab.reference-dash",
     "version": 1
   },
-  "dashAdapterSha256": "214ca203f486626d414bee3ffd8495dce053c917c1c8903a261ef888b2f64917",
-  "primitiveSha256": "4f5ac82faf9ffff65e7abf2ed2f79143dde0b0215992135527c200dc226c9b5c"
+  "dashAdapterSha256": "4302972479d9cb939087b133d9c5e05f5dd4b4474c57d0ebb1dde3849eabe85a",
+  "primitiveSha256": "d2a5d90e45a1738fe2a5690ddb3a09900b2083682ad40a4b3562062e41759f64",
+  "dashIntentSha256": "8308a5668819fdff81e1c43577b7a2c01697016e5612c817bb1d5ec8987d0faf"
 }

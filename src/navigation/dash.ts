@@ -6,7 +6,7 @@ import type {MovementDocument} from '../contracts/movement-types';
 import type {AirResult,AirOptions,Witness} from './airborne';
 import type {Identity,Interval} from './surface';
 import {primitiveLimits} from './air-jumps';
-import {groundMotionAllowed} from './intent';
+import {groundMotionAllowed} from '../dash/intent';
 interface Trail {readonly prior:Trail|null;readonly frame:Step;readonly input:DashRunInput;readonly length:number}
 interface Node {readonly state:ClimbState;readonly trail:Trail|null;readonly used:number;readonly air:boolean;readonly dashed:boolean;readonly jumped:boolean}
 export async function buildDashActions(map:MapDocument,p:MovementDocument,w:World,revision:number,settings:AirOptions,identity:Identity,intervals:readonly Interval[],cancelled:()=>boolean,yieldTask:()=>Promise<void>,launchRegionSu?:readonly[number,number,number,number],sourceInitial?:ClimbState):Promise<AirResult> {

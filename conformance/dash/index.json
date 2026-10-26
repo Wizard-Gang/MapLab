@@ -9,11 +9,11 @@
     },
     {
       "path": "air-exhaust-landing-reset.fixture.json",
-      "sha256": "d36d87cdbc7eb34c1022f43a4f935491adc0c88b2690439b4759339a8d212e06"
+      "sha256": "955ef0003ea3503a248f18fd414d8edfe370043e144482552802a91f45b007b8"
     },
     {
       "path": "cases.json",
-      "sha256": "4c6cced68e55e6cb5ad3e50ffe5f780f471732a66eddb3e721d7f25384d9c31e"
+      "sha256": "fa2d28e9232bd43bc726be6e3ee115ec284a3808e99f4ede81d860c1b6f121df"
     },
     {
       "path": "chain.map.json",
@@ -21,11 +21,11 @@
     },
     {
       "path": "contracts.json",
-      "sha256": "263fe70922c51791d81cf58398cfa60fa3a5fd987bdaf5b76b91216d7a4ea0a5"
+      "sha256": "5d72f24b18b750f98fa094b20bab5cff7f58d101c24d637e4561074455975eab"
     },
     {
       "path": "facing-left.fixture.json",
-      "sha256": "b7dfce81b1bc4c5093c164a2296bfc6a2f1835dbc8e04bdc4d6bf00d6e0e4bf9"
+      "sha256": "3a69ca93d4a5786bf07d580bda14e2fc4338eb19c4349dfd01874f94746cf3bb"
     },
     {
       "path": "fast.movement.json",
@@ -37,7 +37,7 @@
     },
     {
       "path": "ground-hold-duration.fixture.json",
-      "sha256": "71a5e49644a4f40dc225d2034c5c572e77026adbce0356989722c17af3655d26"
+      "sha256": "cace8f06fb65a95ff808421a8ecb4013ac08fe42f78d6c814103b1d7cfc166be"
     },
     {
       "path": "none.movement.json",
@@ -45,15 +45,15 @@
     },
     {
       "path": "one-tick-reset.fixture.json",
-      "sha256": "8705e8f8ab222a94a854b67f70f93ecbb4dc54b5bdd3b862785de3c81a118b98"
+      "sha256": "c24358d92b783808b980a77e107f9402c3836477473cd0124f78302dd1c7eaa0"
     },
     {
       "path": "one.movement.json",
-      "sha256": "17b4ad65e4b70ad013de3df37a23c46b9f6d518d702d1db86a1963d946a9ad56"
+      "sha256": "18028bd56453744b2e81013fd249ce60cb0eceef1ca4ed4f67ea47a361897ed8"
     },
     {
       "path": "player.movement.json",
-      "sha256": "9face44027e944dff8b6559735b82b8d1a5496e9fa201308ffe11b59c94b4945"
+      "sha256": "75c3f238516bbd68843d9691988a5babfc77c8fa7fc30eadbf0b4a677c1c87b8"
     },
     {
       "path": "thin-wall.fixture.json",
@@ -65,11 +65,11 @@
     },
     {
       "path": "timer-recharge.fixture.json",
-      "sha256": "e89c104db2f1f6869fb61b33b55a0a125848feff01dc71f8a449f24319eba286"
+      "sha256": "4c6b669877cdfa29774b3367c1093a2c04f6126e3d5df750eeebfef2eb5001a0"
     },
     {
       "path": "timer.movement.json",
-      "sha256": "bf350bdbb4f085a9594b43aa51ab96ce4a0d7365b5e35cc5f7573d90a11cf5f0"
+      "sha256": "12bd969242a23429ecc692a46c4c3fb359a3beaac3cf8a2834d89b6f8250ff64"
     }
   ]
 }

@@ -3,7 +3,7 @@ import {buildDashActions} from './dash';
 import {DASH_PRIMITIVE_SHA256} from '../dash/identity';
 import {buildAirJumpActions,primitiveLimits,type PrimitiveLimits} from './air-jumps';
 import {AIR_PRIMITIVE_SHA256} from '../air-jumps/identity';
-import {groundIntentSupported,groundMotionAllowed} from './intent';
+import {groundIntentSupported,groundMotionAllowed} from '../dash/intent';
 // Bounded single-action solver. These exact action states are not a route graph.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';

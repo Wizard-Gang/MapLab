@@ -1,7 +1,7 @@
 import {step,airJumpCount,supportedJumpProfile,hasDash,dashStarts,initialDash,initialResources,type DashInput,type DashState} from '../dash/runtime';
 import {buildDashActions} from './dash';
 import {buildAirJumpActions} from './air-jumps';
-import {groundMotionAllowed} from './intent';
+import {groundMotionAllowed} from '../dash/intent';
 // Static reference-route proofs. Authored links never become physical exemptions.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';

@@ -5,14 +5,15 @@ const [folder,reportPath,bundle,schemas]=process.argv.slice(2),read=f=>JSON.pars
 const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
 const sha=v=>createHash('sha256').update(canonical(v)).digest('hex'),hash=b=>createHash('sha256').update(b).digest('hex');
 const same=(a,b,message='independent dash equation')=>assert.deepEqual(a,b,message);
+const normalize=p=>({...p,mask:[...p.mask].sort(),abilityTags:[...p.abilityTags].sort(),forbiddenMaterialTags:[...p.forbiddenMaterialTags].sort(),abilities:[...p.abilities].sort((a,b)=>a.kind<b.kind?-1:a.kind>b.kind?1:(a.mode??'')<(b.mode??'')?-1:(a.mode??'')>(b.mode??'')?1:0)});
 const ix=read('index.json');assert.equal(ix.license,'CC0-1.0');for(const f of ix.files){assert(!f.path.startsWith('/')&&!f.path.split('/').includes('..'));assert.equal(hash(readFileSync(join(folder,f.path))),f.sha256);}
 const cases=read('cases.json');for(const name of cases.cases){const c=read(name),computed=equations(read(c.map),read(c.profile),c.initial,c.input,c.ticks);same(computed.frames,c.expect);same(computed.events,c.events);same(reports.cases[name],computed.frames);}
 const loaded=readBundle(bundle,schemas);assert(loaded.ok,'independent final-byte import: '+JSON.stringify(loaded.diagnostics));
 const manifest=JSON.parse(readFileSync(join(bundle,'manifest.json'),'utf8')),docs=manifest.documents.map(d=>JSON.parse(readFileSync(join(bundle,d.path),'utf8'))),map=docs.find(d=>d.id===manifest.entryMapId),p=docs.find(d=>d.id==='movement.dash');
-same(p,read('player.movement.json'),'exported profile binding');
+same(p,normalize(read('player.movement.json')),'exported profile binding');
 const expectedMap=read('chain.map.json');for(const key of ['dependencies','bodies','footholds'])expectedMap[key].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);expectedMap.requiredFeatures.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:a.version-b.version);same(map,expectedMap,'exported world binding');
 const proof=reports.proof;assert.equal(proof.status,'verified reachable with replay witness');assert.equal(proof.heuristic,'zero');assert.equal(proof.canCertify,false);assert.equal(proof.complete,false);same(proof.goals,[cases.route.goal]);
-const normalized={...p,mask:[...p.mask].sort(),abilityTags:[...p.abilityTags].sort(),forbiddenMaterialTags:[...p.forbiddenMaterialTags].sort(),abilities:[...p.abilities].sort((a,b)=>a.kind<b.kind?-1:a.kind>b.kind?1:(a.mode??'')<(b.mode??'')?-1:(a.mode??'')>(b.mode??'')?1:0)};
+const normalized=normalize(p);
 assert.equal(proof.identity.profileSha256,sha(normalized));const contracts=read('contracts.json');assert.equal(proof.identity.controllerSha256,sha({base:contracts.baseControllerSha256,dashAdapterSha256:contracts.dashAdapterSha256}));
 assert.equal(proof.identity.cacheKey,sha({worldSha256:proof.identity.worldSha256,profileSha256:proof.identity.profileSha256,controllerSha256:proof.identity.controllerSha256,settingsSha256:proof.identity.settingsSha256}));assert.equal(proof.querySha256,sha({initial:proof.initial,goals:proof.goals,algorithm:proof.algorithm}));
 const computed=equations(map,p,proof.initial,proof.input,proof.frames.length);same(proof.frames.map(f=>({status:f.status,state:f.state})),computed.frames);same(computed.frames.at(-1).state,proof.terminal);assert.equal(proof.durationTicks,proof.frames.length);

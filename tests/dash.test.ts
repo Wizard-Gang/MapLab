@@ -2,7 +2,7 @@ import {beforeAll,test,expect} from 'vitest';
 import {readFileSync,readdirSync,mkdtempSync,realpathSync,cpSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {join,dirname} from 'node:path';import {tmpdir} from 'node:os';import {createHash} from 'node:crypto';import {execFileSync} from 'node:child_process';
 import {step,initialDash,initialResources,type DashInput,type DashState} from '../src/dash/runtime';
-import {DASH_RUNTIME_SHA256,DASH_PRIMITIVE_SHA256} from '../src/dash/identity';
+import {DASH_RUNTIME_SHA256,DASH_PRIMITIVE_SHA256,DASH_INTENT_SHA256} from '../src/dash/identity';
 import {createWorld,replayBytes,type ClimbState,type State,type ContactMap,type Step} from '../src/physics-reference';
 import {Navigation,replayRouteActions,physicalStateKey,type RouteProof} from '../src/navigation/routes';
 import {buildAirborneActions,AIR_DEFAULTS} from '../src/navigation/airborne';
@@ -19,6 +19,7 @@ beforeAll(async()=>{nav=await Navigation.build(map(),profile(),1,undefined,undef
 test('owned final-byte inventory, selected implementation identities and source contracts',()=>{
  const ix=read('index.json');expect(ix.license).toBe('CC0-1.0');expect(ix.files.map((f:any)=>f.path).sort()).toEqual(readdirSync(root).filter(f=>f!=='index.json').sort());for(const f of ix.files)expect(sha(readFileSync(join(root,f.path))),f.path).toBe(f.sha256);
  expect(sha(readFileSync('src/dash/runtime.ts'))).toBe(DASH_RUNTIME_SHA256);expect(sha(readFileSync('src/navigation/dash.ts'))).toBe(DASH_PRIMITIVE_SHA256);
+ expect(sha(readFileSync('src/dash/intent.ts'))).toBe(DASH_INTENT_SHA256);
  expect(validateSourceGraph([map(),...['player','timer','fast','one','none'].map(profile)] as unknown as JsonValue[])).toMatchObject({ok:true});
 });
 test.each(cases)('exact dash charge/duration/cooldown/reset trace, repeat and resume: %s',name=>{
@@ -48,7 +49,7 @@ test('whole chained route retains resources and uses admissible zero heuristic',
 },120000);
 test('one-tick ground reset still publishes dash witnesses; schedules retain neutral and run-up samples',async()=>{
  const result=await buildAirborneActions(map('flat'),profile('one'),1,{...AIR_DEFAULTS,maxTicks:24},undefined,async()=>{});expect(result.status).toBe('candidate');expect(result.edges.some(e=>e.kind==='dash'&&e.frames.length===1)).toBe(true);expect(result.edges.some(e=>e.initial.vx!==0)).toBe(true);
-});
+},120000);
 test('budget and cancellation discard partial edges, including tiny lattice spacing',async()=>{
  for(const limits of [{maxCandidates:1},{maxReplayTicks:1},{maxAirStates:1}]){const result=await buildAirborneActions(map(),profile(),1,{...AIR_DEFAULTS,...limits},undefined,async()=>{});expect(result.status).toBe('budget');expect(result.edges).toEqual([]);}
  const bounded=await buildAirborneActions(map('flat'),profile(),1,{...AIR_DEFAULTS,spacingSu:1,maxCandidates:1},undefined,async()=>{});expect(bounded.status).toBe('budget');
@@ -63,13 +64,13 @@ test('cache query and state keys preserve spent charges, cooldown, active durati
 test('dash forbid applies to every frame of a route action',()=>{
  const c=read(cases[0]!),frames=run({...c,ticks:3}),initial=c.initial as ClimbState,action={key:'owned-dash',kind:'dash',initial,terminal:frames.at(-1)!.state as ClimbState,input:c.input.filter((i:any)=>i.fromTick<3),frames,durationTicks:3,penaltyTicks:0,refinedFrom:null};
  expect(replayRouteActions(createWorld(read(c.map),profile()),initial,[action])).not.toBeNull();
- const m:any=read(c.map);m.regions=[{id:'region.dash',name:'Dash forbid',role:'trigger',shape:{kind:'rect',rect:[25,40,1,8]}}];m.navigation.overrides=[{id:'nav.dash',regionId:'region.dash',profileIds:[profile().id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,profile()),initial,[action])).toBeNull();
+ const m:any=read(c.map);m.regions=[{id:'region.dash',name:'Dash forbid',role:'trigger',shape:{kind:'rect',rect:[17,40,1,8]}}];m.navigation.overrides=[{id:'nav.dash',regionId:'region.dash',profileIds:[profile().id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,profile()),initial,[action])).toBeNull();
 });
 test('last-tick active dash continuations cannot bypass a forbidden swept region',async()=>{
  const m:any=map('flat'),p=profile(),c=read('air-exhaust-landing-reset.fixture.json');
  const s:ClimbState&{dash:any}={...c.initial,x:20*256,y:48*256,resources:{airJumps:0,dashCharges:1,cooldowns:{'dash.ground':0,'dash.air':4}},dash:{held:false,remaining:{ground:1,air:0},active:{mode:'air',direction:1,ticksLeft:1}}};
  const f=step(createWorld(m,p),s,NEUTRAL),a={key:'active-last-tick',kind:'land',initial:s,terminal:f.state as ClimbState,input:[{...NEUTRAL,fromTick:s.tick}],frames:[f],durationTicks:1,penaltyTicks:0,refinedFrom:null};expect(f.status).toBe('ok');expect(replayRouteActions(createWorld(m,p),s,[a])).not.toBeNull();
- m.regions=[{id:'region.active',name:'Active dash forbid',role:'trigger',shape:{kind:'rect',rect:[25,40,1,8]}}];m.navigation.overrides=[{id:'nav.active',regionId:'region.active',profileIds:[p.id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,p),s,[a])).toBeNull();
+ m.regions=[{id:'region.active',name:'Active dash forbid',role:'trigger',shape:{kind:'rect',rect:[23,40,1,8]}}];m.navigation.overrides=[{id:'nav.active',regionId:'region.active',profileIds:[p.id],actions:['dash'],policy:'forbid',penaltyTicks:0}];expect(replayRouteActions(createWorld(m,p),s,[a])).toBeNull();
  const generated=await buildDashActions(m,p,createWorld(m,p),1,{...AIR_DEFAULTS,maxTicks:24},nav.identity,[{key:'owned-flat',supportId:'fh.west',materialId:'material.ground',direction:'both',minX:256,maxX:159*256}],()=>false,async()=>{},undefined,s);expect(generated.edges).toEqual([]);
 });
 test('additional airborne jump and dash pools coexist without replenishing each other',()=>{

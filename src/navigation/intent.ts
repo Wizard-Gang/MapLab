@@ -4,7 +4,7 @@ import type {MapDocument,MovementDocument} from '../contracts';
 import type {State} from '../physics-reference';
 export function groundIntentSupported(map:MapDocument,p:MovementDocument):boolean {
  if(map.navigation.links.length||map.navigation.modeVolumes.some(v=>v.profileIds.includes(p.id))||map.navigation.overrides.length>64)return false;
- return map.navigation.overrides.filter(o=>o.profileIds.includes(p.id)).every(o=>o.policy==='forbid'&&o.penaltyTicks===0&&o.actions.length>0&&o.actions.every(a=>['jump','fall','drop','dash'].includes(a))&&map.regions.find(r=>r.id===o.regionId)?.shape.kind==='rect');
+ return map.navigation.overrides.filter(o=>o.profileIds.includes(p.id)).every(o=>o.policy==='forbid'&&o.penaltyTicks===0&&o.actions.length>0&&o.actions.every(a=>['jump','fall','drop'].includes(a))&&map.regions.find(r=>r.id===o.regionId)?.shape.kind==='rect');
 }
 /** Each controller tick moves X then Y. Test both full-body axis sweeps, not just feet/endpoints.
  * Open interior overlap forbids an action; contact/tangency with the region boundary is legal. */
