@@ -1,4 +1,5 @@
-import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasDash,initialDash,initialResources,type DashInput} from '../dash/runtime';
+import {buildDashActions} from './dash';
 import {buildAirJumpActions} from './air-jumps';
 import {groundMotionAllowed} from './intent';
 // Static reference-route proofs. Authored links never become physical exemptions.
@@ -66,7 +67,7 @@ export function anchorState(w:World,anchor:Anchor,facing:1|-1=1):ClimbState{
   x=f.a[0]+Math.floor((f.b[0]-f.a[0])*Math.round(anchor.u*65536)/65536);const stance=resolveStance(w,x,anchor.footholdId)[0];if(!stance)throw Error('anchor has no full-footprint stance');y=stance.y;
  }else throw Error('unsupported entity-relative anchor');
  const stance=resolveStance(w,x,anchor.kind==='surface'?anchor.footholdId:undefined).find(v=>v.y===y);
- return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:airJumpCount(w.profile),dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true};
+ return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),traversalId:null,climbReady:true};
 }
 function validateSettings(s:RouteSettings){
  const limits={maxExpanded:10000,maxReplayTicks:2000000,maxActionTicks:3600,maxRouteTicks:36000,maxDepth:128,maxTargets:128,toleranceSu:8192,penaltyTicks:100000};
@@ -76,14 +77,15 @@ function validateSettings(s:RouteSettings){
 export function replayRouteActions(w:World,initial:ClimbState,actions:readonly RouteAction[]):{frames:Step[];input:RunInput[];terminal:ClimbState}|null{
  let s=initial;const frames:Step[]=[],input:RunInput[]=[];
  for(const action of actions){
-  let airJumpUsed=false;
+  let airJumpUsed=false,dashUsed=false;
   if(replayBytes(s)!==replayBytes(action.initial)||action.frames.length!==action.durationTicks||!action.input.length||action.input[0]!.fromTick!==s.tick)return null;
   if(action.input.some((c,i)=>!Number.isSafeInteger(c.fromTick)||c.fromTick>=s.tick+action.durationTicks||(i>0&&c.fromTick<=action.input[i-1]!.fromTick)))return null;
   let at=0;
   for(let n=0;n<action.frames.length;n++){
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
-   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;
+   const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;dashUsed ||= !!(control as DashInput).dash;
+   if(dashUsed&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'dash',s,f.state))return null;
    if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||(control.jump||airJumpUsed)&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
   }
@@ -191,11 +193,12 @@ export class Navigation {
    }return matches(s,target)&&!s.jumpHeldPrev&&s.climbReady?action('align',start,frames,input,null):null;
   };
   const replayTemplate=async(start:ClimbState,t:Template):Promise<RouteAction|null>=>{
-   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false;const frames:Step[]=[],input:RunInput[]=[];
+   let s=start,index=0,air=s.mode==='air',attached=s.mode==='climb',airJumpUsed=false,dashUsed=false;const frames:Step[]=[],input:RunInput[]=[];
    for(let n=0;n<Math.min(t.ticks,settings.maxActionTicks);n++){
     while(t.input[index+1]&&t.input[index+1]!.fromTick<=n)index++;
     const {fromTick:_,...c}=t.input[index]!;if(!permitted(s,c))return null;const f=await advance(s,c),next=f.state as ClimbState;
-    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;
+    airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;dashUsed ||= !!(c as DashInput).dash;
+    if(dashUsed&&!groundMotionAllowed(this.map,this.profile,'dash',s,next))return null;
     if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||(c.jump||airJumpUsed)&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
     if(['jump','drop','fall','land'].includes(t.kind)&&f.contacts.some(c=>c.kind==='blocking'&&!(t.kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===start.supportId&&next.y===start.y)))return null;
     if(t.kind==='walk'&&next.mode!=='ground')return null;
@@ -233,7 +236,7 @@ export class Navigation {
     }
     const groundMax=BigInt(Math.max(this.profile.ground.walkSpeed,this.profile.ground.runSpeed)),ratios=[this.profile.ground.uphill,this.profile.ground.downhill];
     const bound=[BigInt(Math.abs(initial.vx)),BigInt(this.profile.air.maxSpeed),groundMax,...ratios.map(r=>(groundMax*BigInt(r.num)+BigInt(r.den)-1n)/BigInt(r.den))].reduce((a,b)=>a>b?a:b)+BigInt(Math.max(0,...this.map.materials.map(m=>Math.abs(m.conveyorSu))));
-    const zero=algorithm==='dijkstra'||this.profile.abilities.some(a=>a.kind==='climb')||bound===0n;usedHorizontal=!zero;
+    const zero=algorithm==='dijkstra'||this.profile.abilities.some(a=>a.kind==='climb'||a.kind==='dash')||bound===0n;usedHorizontal=!zero;
     let depthLimit=false,durationLimit=false;
     const neighbors=async(node:Node):Promise<Transition[]>=>{
      if(node.depth>=settings.maxDepth){depthLimit=true;return [];}
@@ -241,8 +244,8 @@ export class Navigation {
      const add=(a:RouteAction)=>{if(!a.durationTicks)return;if(a.durationTicks>settings.maxActionTicks||a.terminal.tick-initial.tick>settings.maxRouteTicks){durationLimit=true;return;}out.push({key:a.key,to:{state:a.terminal,depth:node.depth+1},cost:a.durationTicks+a.penaltyTicks,action:a});};
      const direct=await align(s,goal);if(direct)add(direct);
      if(s.mode!=='ground'){
-      if(s.mode==='air'&&airJumpCount(this.profile)>0){
-       const generated=await buildAirJumpActions(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
+      if(s.mode==='air'&&(airJumpCount(this.profile)>0||hasDash(this.profile))){
+       const generated=await (hasDash(this.profile)?buildDashActions:buildAirJumpActions)(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
        replayTicks+=generated.replayTicks;
        if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
        for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}

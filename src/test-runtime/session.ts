@@ -1,8 +1,8 @@
-import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
+import {step,initialDash,initialResources,type DashInput as Input,type DashRunInput as RunInput} from '../dash/runtime';
 // ML-020: ephemeral Test state. This module has no authoring, storage, rendering or engine dependency.
 import type { GameplaySession, GameplayView, SensorActor } from '../gameplay/runtime';
 import type { Condition, ContractRef } from '../contracts';
-import { createWorld, resolveStance, replayBytes, type ContactMap, type Input, type State, type Step, type World, type RunInput } from '../physics-reference';
+import { createWorld, resolveStance, replayBytes, type ContactMap, type State, type Step, type World } from '../physics-reference';
 import type { MovementDocument } from '../contracts/movement-types';
 import { floorDiv, integer } from '../physics-reference/integer';
 import type { Entity } from '../contracts/gameplay-types';
@@ -50,7 +50,7 @@ export function spawn(world: World, entityId?: string): State {
   return { x, y, vx: 0, vy: 0, mode: stance ? 'ground' : 'air', supportId: stance?.face.supportId ?? null,
     planeId: stance?.face.planeId ?? world.defaultPlane, facing: start.facing === 'left' ? -1 : 1, tick: 0,
     jumpHeldPrev: false, jumpReleased: false, ticksSinceJump: 0, dropSuppression: null,
-    resources: { airJumps: airJumpCount(world.profile), dashCharges: 0, cooldowns: {} }, traversalId: null, climbReady: true };
+    resources: initialResources(world.profile), ...initialDash(world.profile), traversalId: null, climbReady: true };
 }
 
 /** Strict bounded schedule; failed imports leave the existing run untouched. */
@@ -62,10 +62,10 @@ export function parseRecording(value: unknown): Recording {
     !Array.isArray(r.input) || !r.input.length || r.input.length > r.ticks) throw new Error('Invalid recording or tick budget');
   for (let i = 0; i < r.input.length; i++) {
     const v = r.input[i]!;
-    if (!v || typeof v !== 'object' || Object.keys(v).sort().join(',') !== 'drop,fromTick,jump,moveX,moveY,run' ||
+    if (!v || typeof v !== 'object' || !['drop,fromTick,jump,moveX,moveY,run','dash,drop,fromTick,jump,moveX,moveY,run'].includes(Object.keys(v).sort().join(',')) ||
       !Number.isSafeInteger(v.fromTick) || (i === 0 ? v.fromTick !== r.initial.tick : v.fromTick <= r.input[i - 1]!.fromTick) ||
       v.fromTick >= r.initial.tick + r.ticks || ![-1,0,1].includes(v.moveX) || ![-1,0,1].includes(v.moveY!) ||
-      typeof v.run !== 'boolean' || typeof v.jump !== 'boolean' || typeof v.drop !== 'boolean') throw new Error('Invalid input schedule');
+      typeof v.run !== 'boolean' || typeof v.jump !== 'boolean' || typeof v.drop !== 'boolean' || ('dash' in v && typeof v.dash !== 'boolean')) throw new Error('Invalid input schedule');
   }
   if(r.events!==undefined&&(!Array.isArray(r.events)||r.events.length>1000||r.events.some((e,i)=>!e||Object.keys(e).sort().join(',')!=='afterTicks,encounterId,event'||!Number.isSafeInteger(e.afterTicks)||e.afterTicks<0||e.afterTicks>r.ticks||(i>0&&e.afterTicks<r.events![i-1]!.afterTicks)||typeof e.encounterId!=='string'||!e.event||Object.keys(e.event).sort().join(',')!=='key,version'||typeof e.event.key!=='string'||!Number.isSafeInteger(e.event.version)||e.event.version<1)))throw Error('Invalid event injection schedule');
   return owned(r);

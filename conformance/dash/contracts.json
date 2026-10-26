@@ -1,0 +1,9 @@
+{
+  "baseControllerSha256": "1e36b7364146fe1fc75b1540b099e57babad7aae575699f1d68184784a573b02",
+  "dashAdapter": {
+    "key": "maplab.reference-dash",
+    "version": 1
+  },
+  "dashAdapterSha256": "39be39598f7f9ccec387d4057142d45273082511ab8478ff2b70ad1d604df63d",
+  "primitiveSha256": "350d019f8a2baab4eb1c8f79624583747d36ef44ac59ef41f6f0c112d8592a2c"
+}

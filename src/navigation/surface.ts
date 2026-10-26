@@ -1,5 +1,6 @@
 import {AIR_JUMP_SHA256} from '../air-jumps/identity';
-import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasDash,initialDash,initialResources} from '../dash/runtime';
+import {DASH_RUNTIME_SHA256} from '../dash/identity';
 // Rebuildable, bounded foundational graph. No route search or airborne solver.
 import type { ContactMap, ClimbState, Input, Step, World } from '../physics-reference/types';
 import type { MapDocument } from '../contracts/document-types';
@@ -21,9 +22,10 @@ export async function identity(map:MapDocument,p:MovementDocument,settings:Setti
  const sorted=<T extends {id:string}>(a:readonly T[])=>[...a].sort(order);
  const worldSha256=await digest({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sorted(map.bodies),footholds:sorted(map.footholds),materials:sorted(map.materials),traversals:sorted(map.traversals),regions:sorted(map.regions as unknown as {id:string}[]),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
  const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',...(map.navigation.modeVolumes.length||map.navigation.overrides.length?{intentSha256:INTENT_SHA256}:{}),latticeSu:1,fullBody:true,...settings});
- const value={worldSha256,profileSha256,controllerSha256:airJumpCount(p)>0?await digest({base:CONTROLLER_SHA256,airJumpAdapterSha256:AIR_JUMP_SHA256}):CONTROLLER_SHA256,settingsSha256};return {...value,cacheKey:await digest(value)};
+ const baseController=airJumpCount(p)>0?await digest({base:CONTROLLER_SHA256,airJumpAdapterSha256:AIR_JUMP_SHA256}):CONTROLLER_SHA256;
+ const value={worldSha256,profileSha256,controllerSha256:hasDash(p)?await digest({base:baseController,dashAdapterSha256:DASH_RUNTIME_SHA256}):baseController,settingsSha256};return {...value,cacheKey:await digest(value)};
 }
-const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:airJumpCount(w.profile),dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true});
+const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),traversalId:null,climbReady:true});
 const controls=(moveX:-1|0|1,moveY:-1|0|1=0):Input=>({moveX,moveY,run:false,jump:false,drop:false});
 /** All integer center positions are tested, including true slope stance, never endpoint shrink alone.
  * Budget/cancellation return no partial graph. Each motion edge retains its full finite-body replay.
