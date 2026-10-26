@@ -1,7 +1,7 @@
 {
-  "id": "ML-032",
+  "id": "ML-033",
   "type": "FEATURE",
-  "title": "[ML-032] [FEATURE] Author rigid translating platforms and reference rider semantics",
-  "branch": "ml-032-translating-platforms",
-  "record": "docs/changes/ML-032.md"
+  "title": "[ML-033] [FEATURE] Add airborne jump charges and stateful navigation witnesses",
+  "branch": "ml-033-airborne-jumps",
+  "record": "docs/changes/ML-033.md"
 }
