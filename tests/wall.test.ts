@@ -58,6 +58,10 @@ test('whole route needs wall permission, preserves exact state and uses zero heu
  const d=await nav.route(read('cases.json').route.initial,read('cases.json').route.goal,'dijkstra',undefined,async()=>{});expect(d.costTicks).toBe(proof.costTicks);expect(d.status).toBe(proof.status);expect(['budget','no route found within declared search/sampling budget']).toContain(noneProof.status);expect(noneProof.frames).toEqual([]);
  const forged=structuredClone(proof.actions);(forged[0]!.initial as any).wall.staminaTicks=0;expect(replayRouteActions(createWorld(map(),profile()),proof.initial!,forged)).toBeNull();
 },120000);
+test('bounded wall jump sequence launches from the correct side and lands on the opposite wall',async()=>{
+ const base=profile(),p:MovementDocument={...base,abilities:base.abilities.map(a=>a.kind==='wall'?{...a,permissions:['jump']}:a)},settings={...wallSettings,air:{...wallSettings.air,maxAirActions:1}},n=await Navigation.build(map(),p,1,settings,undefined,async()=>{}),c=read('right-jump.fixture.json'),initial={...c.initial,y:20*256};
+ const result=await n.route(initial,{supportId:'fh.left',x:7*256,toleranceSu:128,vx:0},'astar',undefined,async()=>{});expect(result.status).toBe('verified reachable with replay witness');expect(result.actions.some(a=>a.kind==='wallJump')).toBe(true);expect(result.frames.some(f=>(f.state as WallState).wall?.action==='wallJump'&&f.state.vx===-512)).toBe(true);expect(replayRouteActions(createWorld(map(),p),result.initial!,result.actions)?.frames).toEqual(result.frames);
+},120000);
 test('wall restrictions survive forged action splits and query state retains stamina',()=>{
  const c=read('right-jump.fixture.json'),frames=run(c),s=frames[0]!.state as ClimbState;expect(physicalStateKey(s)).not.toBe(physicalStateKey({...s,wall:{...(s as WallState).wall!,staminaTicks:0}} as ClimbState));
  const m=map();(m.regions as any).push({id:'region.wall',name:'Wall jump forbidden',role:'trigger',shape:{kind:'rect',rect:[18,24,4,12]}});(m.navigation.overrides as any).push({id:'nav.wall',regionId:'region.wall',profileIds:[profile().id],actions:['wallJump'],policy:'forbid',penaltyTicks:0});

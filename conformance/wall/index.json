@@ -25,7 +25,7 @@
     },
     {
       "path": "corridor.map.json",
-      "sha256": "e076868234b3c28587383b12f6cc20fed92e3308cabc0999bbe1c96c0ad35ead"
+      "sha256": "d3be8fcc24b65b36620e2eac98defc767cc316d91f8864af44f74a83c37dbad7"
     },
     {
       "path": "landing-reset.fixture.json",
@@ -57,7 +57,7 @@
     },
     {
       "path": "roof.map.json",
-      "sha256": "cf86009b3cf842c3d489d9405eb0bb4885e90aedc216c9485ab0464096f70086"
+      "sha256": "2423491f1fb59a80e97835b10b2ec45a632c29b327b956fa7578e48a2950c865"
     },
     {
       "path": "short.movement.json",
