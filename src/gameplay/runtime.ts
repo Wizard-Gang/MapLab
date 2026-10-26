@@ -79,5 +79,5 @@ export class GameplaySession {
   if(v.actions.length+e.onComplete.length>10000)throw Error('Test action budget');
   let next:GameplayView={...v,encounters:{...v.encounters,[e.id]:'completed'}};for(const call of e.onComplete)next=this.apply(call,e.id,v.tick,next);this.view=own(next);
  }
- physicsSource():MapDocument{return {...this.source,bodies:this.source.bodies.map(b=>({...b,enabled:this.view.bodies[b.id]??b.enabled}))};}
+ physicsSource():MapDocument{return {...this.source,bodies:this.source.bodies.map(b=>({...b,enabled:this.view.bodies[b.id]??b.enabled})),footholds:this.source.footholds.map(f=>f.mode==='solid'&&f.ownerBodyId?{...f,enabled:this.view.bodies[f.ownerBodyId]??f.enabled}:f)};}
 }
