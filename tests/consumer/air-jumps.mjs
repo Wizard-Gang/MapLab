@@ -32,7 +32,10 @@ function equations(m,p,initial,input,ticks){
 const cases=read('cases.json');for(const name of cases.cases){const c=read(name),computed=equations(read(c.map),read(c.profile),c.initial,c.input,c.ticks);same(computed.states,c.expect);same(computed.events,c.events);same(reports.cases[name],computed.states);}
 const loaded=readBundle(bundle,schemas);assert(loaded.ok,'independent final-byte import: '+JSON.stringify(loaded.diagnostics));
 const manifest=JSON.parse(readFileSync(join(bundle,'manifest.json'),'utf8')),docs=manifest.documents.map(d=>JSON.parse(readFileSync(join(bundle,d.path),'utf8'))),map=docs.find(d=>d.id===manifest.entryMapId),p=docs.find(d=>d.id==='movement.air-jumps');
-same(p,read('player.movement.json'),'exported profile binding');same(map,read('chain.map.json'),'exported world binding');
+same(p,read('player.movement.json'),'exported profile binding');
+const expectedMap=read('chain.map.json');for(const key of ['dependencies','bodies','footholds'])expectedMap[key].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
+expectedMap.requiredFeatures.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:a.version-b.version);
+same(map,expectedMap,'exported world binding');
 const proof=reports.proof;assert.equal(proof.status,'verified reachable with replay witness');assert.equal(proof.canCertify,false);assert.equal(proof.complete,false);
 assert(proof.initial&&proof.terminal);assert.equal(proof.durationTicks,proof.frames.length);same(proof.goals,[cases.route.goal]);
 const normalized={...p,mask:[...p.mask].sort(),abilityTags:[...p.abilityTags].sort(),forbiddenMaterialTags:[...p.forbiddenMaterialTags].sort(),abilities:[...p.abilities].sort((a,b)=>a.kind<b.kind?-1:a.kind>b.kind?1:0)};
@@ -49,5 +52,13 @@ for(const f of proof.frames){const s=f.state;assert([s.x,s.y,s.vx,s.vy,s.tick,s.
  for(const b of map.bodies)for(const shape of b.shapes){assert.equal(shape.kind,'rect');const [x,y,w,h]=shape.rect.map((v,i)=>(v+(i===0?b.position[0]:i===1?b.position[1]:0))*256);assert(!(s.x+half>x&&s.x-half<x+w&&s.y>y&&s.y-height<y+h),'finite body clearance');if(prior.y>y&&prior.y-height<y+h)assert(!(Math.max(prior.x,s.x)+half>x&&Math.min(prior.x,s.x)-half<x+w),'finite X sweep');}
  if(s.mode==='ground')assert(f.contacts.some(c=>c.kind==='support'&&c.supportId===s.supportId));else assert.equal(f.contacts.length,0);prior=s;
 }
-assert.equal(reports.groundProof.status,'no route found within declared search/sampling budget');same(reports.groundProof.frames,[]);same(reports.groundProof.actions,[]);
+assert(['budget','no route found within declared search/sampling budget'].includes(reports.groundProof.status));assert.equal(reports.groundProof.canCertify,false);same(reports.groundProof.frames,[]);same(reports.groundProof.actions,[]);
+// Independent restricted-case bound: equal-height supports require a 22 WU
+// full-footprint crossing, beyond 17 fixed-impulse airborne ticks at 1 WU/tick.
+const ground=read('ground.movement.json'),gj=ground.abilities[0],west=map.footholds.find(f=>f.id==='fh.west'),middle=map.footholds.find(f=>f.id==='fh.middle');
+same(docs.find(d=>d.id===ground.id),ground,'exported ground profile binding');
+assert.equal(ground.abilities.length,1);assert.equal(gj.kind,'jump');assert.equal(gj.airJumps,0);assert.equal(gj.holdTicks,0);assert.equal(gj.release.num,gj.release.den);
+assert.equal(west.a[1],middle.a[1]);assert.equal(map.traversals.length,0);assert(map.materials.every(m=>m.conveyorSu===0));
+const maximumTicks=Math.ceil(2*gj.impulse/ground.air.gravity)+1,maximumSpeed=Math.max(ground.ground.walkSpeed,ground.ground.runSpeed,ground.air.maxSpeed);
+assert((middle.a[0]-west.b[0]+ground.collider.width)*256>maximumTicks*maximumSpeed,'ground-only first gap exceeds its declared fixed-impulse envelope');
 console.log(JSON.stringify({verified:true,cases:cases.cases.length,chainedRoute:true,finalByteImport:true}));
