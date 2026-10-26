@@ -1,0 +1,47 @@
+name: Feature gate
+
+# Task PRs into the open release branch: the non-test checks only. The full suite runs on the release PR.
+on:
+  pull_request:
+    branches: ['release/**']
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: delivery-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAPLAB_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Assert tested revision
+        run: test "$(git rev-parse HEAD)" = "$MAPLAB_EXPECTED_HEAD"
+      - name: Set up pinned Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Install pinned npm
+        run: npm install --global npm@12.1.0 --ignore-scripts --no-audit --no-fund
+      - name: Clean install without dependency lifecycle scripts
+        run: npm ci
+      - name: Verify foundation contracts
+        run: npm run check:foundation
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      - name: Smoke the built assets
+        run: npm run smoke

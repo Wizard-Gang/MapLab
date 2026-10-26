@@ -1,12 +1,19 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { demand, sha, readJson, checkChange, checkSections } from './check-change.mjs';
-import { ghApi, readPolicy } from './repository-policy.mjs';
+import { demand, sha, readJson, checkChange, checkSections, releaseTitle } from './check-change.mjs';
+import { ghApi, optionalGhApi, readPolicy } from './repository-policy.mjs';
 
-export function requiredContexts(policy) {
-  const requirements = policy.effectiveMain.filter((r) => r.type === 'required_status_checks')
+// Release protocol: task PRs merge into the open release branch on the fast gate; only its release PR reaches main.
+export function requiredChecksFor(base) {
+  if (base === 'main') return ['verify', 'change-id', 'security'];
+  demand(/^release\/r\d{3}$/.test(base), `No delivery path into ${base}`);
+  return ['gate', 'change-id'];
+}
+
+export function requiredContexts(effective, branchProtection) {
+  const requirements = effective.filter((r) => r.type === 'required_status_checks')
     .flatMap((r) => r.parameters.required_status_checks.map((c) => ({ name: c.context, appId: c.integration_id ?? null })));
-  const legacy = policy.branchProtection?.required_status_checks;
+  const legacy = branchProtection?.required_status_checks;
   for (const c of legacy?.checks ?? []) requirements.push({ name: c.context, appId: c.app_id ?? null });
   for (const name of legacy?.contexts ?? []) {
     if (!requirements.some((r) => r.name === name)) requirements.push({ name, appId: null });
@@ -47,26 +54,34 @@ export function checkHeadChecks(checks, head, appId, requirements = ['verify', '
 export function verifyPr(root, number, head) {
   demand(Number.isSafeInteger(number) && number > 0 && sha.test(head), 'PR number/head required');
   const change = checkChange(root);
+  const release = readJson(root, 'config/release.json');
   const p = readJson(root, 'config/github-repository-settings.json');
   const policy = readPolicy(p); // A plan/access failure blocks delivery, never bypasses policy.
   const prefix = `repos/${p.repository}`;
   const pr = ghApi(`${prefix}/pulls/${number}`);
-  demand(pr.state === 'open' && pr.draft === false && pr.head.sha === head && pr.head.ref === change.branch
-    && pr.base.ref === 'main' && pr.title === change.title, 'PR identity/state/head differs');
+  const base = pr.base.ref;
+  const releasing = pr.head.ref === release.branch;
+  demand(pr.state === 'open' && pr.draft === false && pr.head.sha === head && (releasing
+    ? base === 'main' && pr.title === releaseTitle(release)
+    : base === release.branch && pr.head.ref === change.branch && pr.title === change.title), 'PR identity/state/head differs');
   checkSections(pr.body ?? '');
   demand(pr.body.includes(head), 'PR must record exact tested head');
-  const main = ghApi(`${prefix}/git/ref/heads/main`).object.sha;
-  const compare = ghApi(`${prefix}/compare/${main}...${head}`);
-  demand(compare.behind_by === 0 && compare.ahead_by > 0 && compare.status === 'ahead', 'PR is not current with main');
+  const tip = ghApi(`${prefix}/git/ref/heads/${base}`).object.sha;
+  const compare = ghApi(`${prefix}/compare/${tip}...${head}`);
+  demand(compare.behind_by === 0 && compare.ahead_by > 0 && compare.status === 'ahead', `PR is not current with ${base}`);
   demand(pr.mergeable === true && pr.mergeable_state === 'clean', 'Provider has not confirmed all merge/review requirements');
   const response = ghApi(`${prefix}/commits/${head}/check-runs?filter=latest&per_page=100`);
   demand(response.total_count <= 100, 'Check pagination requires explicit inspection');
   const status = ghApi(`${prefix}/commits/${head}/status?per_page=100`);
   demand(status.sha === head && status.total_count <= 100, 'Status SHA/pagination requires explicit inspection');
-  const checks = checkHeadChecks(response.check_runs, head, p.main.checksAppId, requiredContexts(policy), status.statuses);
+  const required = base === 'main' ? requiredContexts(policy.effectiveMain, policy.branchProtection)
+    : requiredContexts(ghApi(`${prefix}/rules/branches/${base}`), optionalGhApi(`${prefix}/branches/${base}/protection`));
+  demand(requiredChecksFor(base).every((name) => required.some((r) => r.name === name)), `Live ${base} rules do not require its checks`);
+  const checks = checkHeadChecks(response.check_runs, head, p.main.checksAppId, required, status.statuses);
   // Recheck identity after all read operations. Merge must still submit head as its SHA guard.
-  demand(ghApi(`${prefix}/pulls/${number}`).head.sha === head && ghApi(`${prefix}/git/ref/heads/main`).object.sha === main, 'Head/main changed during evidence collection');
-  return { task: change.id, pr: pr.html_url, head, main, checks, policy, mergeMethod: 'squash', bypass: false };
+  demand(ghApi(`${prefix}/pulls/${number}`).head.sha === head && ghApi(`${prefix}/git/ref/heads/${base}`).object.sha === tip, `Head/${base} changed during evidence collection`);
+  return { task: releasing ? release.id : change.id, pr: pr.html_url, head, base, tip, checks, policy,
+    mergeMethod: base === 'main' ? 'rebase' : 'squash', bypass: false };
 }
 
 const self = fileURLToPath(import.meta.url);

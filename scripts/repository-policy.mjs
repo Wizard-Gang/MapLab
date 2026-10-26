@@ -5,13 +5,18 @@ import { demand, readJson } from './check-change.mjs';
 
 export function checkPolicyConfig(p) {
   demand(p.repository === 'Wizard-Gang/MapLab' && p.visibility === 'public' && p.defaultBranch === 'main', 'Repository policy identity disagrees');
+  // Release protocol: task PRs squash into release/*, and release PRs rebase into main one commit per task.
   demand(p.merge?.allowSquashMerge === true && p.merge.allowMergeCommit === false
-    && p.merge.allowRebaseMerge === false && p.merge.deleteBranchOnMerge === true, 'Squash-only merge policy disagrees');
+    && p.merge.allowRebaseMerge === true && p.merge.deleteBranchOnMerge === true, 'Squash-and-rebase merge policy disagrees');
   demand(p.main?.requirePullRequest === true && p.main.requireCurrentWithMain === true
     && p.main.requireExactHeadEvidence === true && p.main.allowDeletion === false && p.main.allowNonFastForward === false
     && JSON.stringify(p.main.requiredChecks) === '["verify","change-id","security"]'
     && JSON.stringify(p.main.bypassActors) === '[]' && p.main.requiredApprovingReviewCount === 0
-    && p.main.checksAppId === 15368, 'Main required checks/no-bypass policy disagrees');
+    && p.main.checksAppId === 15368 && JSON.stringify(p.main.allowedMergeMethods) === '["rebase"]', 'Main required checks/no-bypass policy disagrees');
+  demand(p.release?.pattern === 'refs/heads/release/*' && p.release.requirePullRequest === true
+    && JSON.stringify(p.release.requiredChecks) === '["gate","change-id"]' && JSON.stringify(p.release.allowedMergeMethods) === '["squash"]'
+    && JSON.stringify(p.release.bypassActors) === '[]' && p.release.allowDeletion === true && p.release.allowNonFastForward === false,
+  'Release branch checks/no-bypass policy disagrees');
   demand(p.tags?.pattern === 'v*' && p.tags.immutable === true && JSON.stringify(p.tags.bypassActors) === '[]'
     && p.releases?.immutable === true, 'Tag/release immutability policy disagrees');
 }
@@ -19,21 +24,22 @@ export function checkPolicyConfig(p) {
 export function desiredRules(p) {
   checkPolicyConfig(p);
   const base = { enforcement: 'active', bypass_actors: [] };
+  const pullRequest = (methods) => ({ type: 'pull_request', parameters: {
+    required_approving_review_count: p.main.requiredApprovingReviewCount,
+    dismiss_stale_reviews_on_push: true, require_code_owner_review: false,
+    require_last_push_approval: false, required_review_thread_resolution: true,
+    allowed_merge_methods: methods,
+  } });
+  const checks = (contexts, onCreate) => ({ type: 'required_status_checks', parameters: {
+    strict_required_status_checks_policy: true, do_not_enforce_on_create: onCreate,
+    required_status_checks: contexts.map((context) => ({ context, integration_id: p.main.checksAppId })),
+  } });
   return [
     { ...base, name: 'MapLab main', target: 'branch',
       conditions: { ref_name: { include: ['refs/heads/main'], exclude: [] } },
       rules: [
         { type: 'deletion' }, { type: 'non_fast_forward' }, { type: 'required_linear_history' },
-        { type: 'pull_request', parameters: {
-          required_approving_review_count: p.main.requiredApprovingReviewCount,
-          dismiss_stale_reviews_on_push: true, require_code_owner_review: false,
-          require_last_push_approval: false, required_review_thread_resolution: true,
-          allowed_merge_methods: ['squash'],
-        } },
-        { type: 'required_status_checks', parameters: {
-          strict_required_status_checks_policy: true, do_not_enforce_on_create: false,
-          required_status_checks: p.main.requiredChecks.map((context) => ({ context, integration_id: p.main.checksAppId })),
-        } },
+        pullRequest(p.main.allowedMergeMethods), checks(p.main.requiredChecks, false),
       ],
     },
     { ...base, name: 'MapLab immutable versions', target: 'tag',
@@ -41,6 +47,12 @@ export function desiredRules(p) {
       // update_allows_fetch_and_merge is a branch-only option: GitHub stores tag
       // rulesets' update rule without parameters, so expecting it breaks read-back.
       rules: [{ type: 'update' }, { type: 'deletion' }],
+    },
+    // No deletion rule, so auto-delete removes a merged release branch. It is cut from main's tip by a
+    // plain ref push, which carries no `gate` run, so its checks apply from the first PR on.
+    { ...base, name: 'MapLab release', target: 'branch',
+      conditions: { ref_name: { include: [p.release.pattern], exclude: [] } },
+      rules: [{ type: 'non_fast_forward' }, pullRequest(p.release.allowedMergeMethods), checks(p.release.requiredChecks, true)],
     },
   ];
 }
@@ -68,7 +80,7 @@ export function ghApi(endpoint, method = 'GET', body) {
   return raw.trim() ? JSON.parse(raw) : null;
 }
 
-function optionalGhApi(endpoint) {
+export function optionalGhApi(endpoint) {
   try { return ghApi(endpoint); }
   catch (error) {
     // Only an explicit provider 404 means no legacy protection. Access, plan and
@@ -85,7 +97,7 @@ export function readPolicy(p) {
   const prefix = `repos/${p.repository}`;
   const repo = ghApi(prefix);
   demand(repo.private === false && repo.visibility === p.visibility && repo.default_branch === 'main', 'Live repository must remain public on main');
-  requireMatch(repo, { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: false, delete_branch_on_merge: true }, 'repository');
+  requireMatch(repo, { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: true, delete_branch_on_merge: true }, 'repository');
   const summaries = ghApi(`${prefix}/rulesets?includes_parents=true&per_page=100`);
   demand(summaries.length < 100, 'Ruleset pagination requires explicit inspection');
   const rulesets = summaries.filter((s) => s.source === p.repository && s.source_type === 'Repository').map((s) => ghApi(`${prefix}/rulesets/${s.id}`));
@@ -107,7 +119,7 @@ export function applyPolicy(p) {
   const prefix = `repos/${p.repository}`;
   const repo = ghApi(prefix);
   demand(repo.private === false && repo.visibility === p.visibility && repo.default_branch === 'main', 'Refuse to apply to unexpected repository state');
-  ghApi(prefix, 'PATCH', { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: false, delete_branch_on_merge: true });
+  ghApi(prefix, 'PATCH', { allow_squash_merge: true, allow_merge_commit: false, allow_rebase_merge: true, delete_branch_on_merge: true });
   ghApi(`${prefix}/immutable-releases`, 'PUT');
   const summaries = ghApi(`${prefix}/rulesets?includes_parents=false&per_page=100`);
   demand(summaries.length < 100, 'Ruleset pagination requires explicit inspection');
@@ -125,7 +137,8 @@ if (process.argv[1] && resolve(process.argv[1]) === self) {
     demand(process.argv.length === 2 || (process.argv.length === 3 && process.argv[2] === '--apply'), 'Usage: repository-policy.mjs [--apply]');
     const root = resolve(dirname(self), '..');
     const p = readJson(root, 'config/github-repository-settings.json');
-    if (process.argv[2] === '--apply') demand(readJson(root, 'config/change.json').id === 'ML-002', 'Live settings application belongs to ML-002');
+    // ML-002 applied the original policy; ML-031 carries the owner-approved release-branch cut-over.
+    if (process.argv[2] === '--apply') demand(['ML-002', 'ML-031'].includes(readJson(root, 'config/change.json').id), 'Live settings application belongs to ML-002 or the ML-031 release cut-over');
     console.log(JSON.stringify(process.argv[2] === '--apply' ? applyPolicy(p) : readPolicy(p), null, 2));
   } catch (error) { console.error(`Repository policy rejected: ${error.message}`); process.exitCode = 1; }
 }

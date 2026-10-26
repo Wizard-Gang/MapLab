@@ -1,0 +1,37 @@
+{
+  "license": "CC0-1.0",
+  "owner": "MapLab authors",
+  "controller": "1e36b7364146fe1fc75b1540b099e57babad7aae575699f1d68184784a573b02",
+  "settings": {
+    "maxCandidates": 20000,
+    "maxClearanceSamples": 2000000,
+    "maxReplayTicks": 1000000,
+    "maxTicks": 240,
+    "spacingSu": 8192
+  },
+  "blocker": {
+    "id": "runtime.door",
+    "boundsSu": [
+      143360,
+      0,
+      151552,
+      131072
+    ]
+  },
+  "farBlocker": {
+    "id": "runtime.remote",
+    "boundsSu": [
+      1024000,
+      0,
+      1028096,
+      131072
+    ]
+  },
+  "expected": {
+    "insertionDisablesEmptyWitness": true,
+    "deletionRestoresCandidates": true,
+    "artOnlyWarm": true,
+    "staleJobPublishes": false,
+    "regionSu": 16384
+  }
+}
