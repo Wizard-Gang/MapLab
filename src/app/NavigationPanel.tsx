@@ -85,6 +85,7 @@ function Active({store,doc}:{readonly store:LibraryStore;readonly doc:OpenDoc}):
 export function NavigationPanel({store,doc}:{readonly store:LibraryStore;readonly doc:OpenDoc}):ReactNode{
  const selection=store.selection(doc.id),state=useSyncExternalStore(selection.subscribe,selection.getSnapshot,selection.getSnapshot),active=state.mode==='Navigation';
  return <section className="selection-panel" aria-label="Navigation"><h3>Navigation</h3>
+  {Array.from(doc.state.model.collections.get('bodies')?.byId.values()??[]).some(b=>b.enabled&&b.mobility==='kinematic')&&<p aria-label="Moving platform navigation status">Unsupported timed platform links: source motion is visible, but static navigation cannot certify boarding, riding or rendezvous.</p>}
   <button type="button" onClick={()=>selection.mode(active?'All':'Navigation')}>{active?'Exit Navigation':'Navigation mode'}</button>
   {active&&<><Active key={doc.id} store={store} doc={doc}/><FlightPanel key={'flight:'+doc.id} store={store} doc={doc}/><BlockerPanel key={'blocker:'+doc.id} store={store} doc={doc}/></>}
  </section>;

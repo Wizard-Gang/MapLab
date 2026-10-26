@@ -4,6 +4,7 @@ import type { SelectionSession } from '../editor/selection';
 import { assignSolidEdge, connectFootholds, disconnectFootholds, foothold, joinFootholds, moveHandle, physicalHandles, splitFoothold, type Endpoint } from '../editor/geometry';
 import { records } from '../render/scene';
 import { shapeEdges, type CollisionBody } from '../contracts';
+import {PlatformPanel} from './PlatformPanel';
 
 export function GeometryPanel({ model, session, locked }: { readonly model: MapModel; readonly session: SelectionSession; readonly locked: boolean }): ReactNode {
   const s=useSyncExternalStore(session.subscribe,session.getSnapshot,session.getSnapshot);
@@ -39,5 +40,6 @@ export function GeometryPanel({ model, session, locked }: { readonly model: MapM
       <button type="button" disabled={!edge} onClick={()=>session.run(()=>assignSolidEdge(model,f.id,JSON.parse(edge)))}>Assign solid edge</button>
       <button type="button" onClick={()=>session.run(()=>assignSolidEdge(model,f.id,null))}>Make one-way</button>
     </fieldset>}
+    <PlatformPanel model={model} session={session} locked={locked}/>
   </details>;
 }

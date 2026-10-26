@@ -15,7 +15,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
   const view = useSyncExternalStore(run.subscribe, run.getSnapshot, run.getSnapshot);
   const controls = useRef<Input>(NEUTRAL), keys = useRef(new Set<string>());
   const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState(''),[portal,setPortal]=useState(''),[showCamera,setShowCamera]=useState(true);
-  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,JSON.stringify(view.gameplay?.bodies??{})]);
+  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,view.state.tick,JSON.stringify(view.gameplay?.bodies??{})]);
   const clear = (): void => { keys.current.clear(); controls.current = NEUTRAL; };
   useEffect(() => {
     // Wall time only schedules whole controller ticks. It never enters controller arithmetic.
