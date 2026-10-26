@@ -1,4 +1,6 @@
 import {CameraPreview,type CameraView} from '../camera/preview';
+import {hasPlatforms} from '../platforms/runtime';
+import {platformWorld} from '../platforms/world';
 // Captured Test worlds only. No editor, storage, network or engine implementation dependency.
 import {validateSourceGraph,type MapDocument,type MovementDocument,type JsonValue,type ContractRef} from '../contracts';
 import type {Entity} from '../contracts/gameplay-types';
@@ -66,10 +68,10 @@ export class PortalTestSession {
  private fail(e:unknown):void {this.status=String(e).includes('budget')?'budget':'unsupported';this.diagnosis=String(e);this.pending=null;this.run.pause();}
  private destination(p:Portal):TestSession {
   const map=this.maps.get(p.destination.mapId);if(!map)throw Error('Portal destination outside captured map closure');
-  const world=createWorld(map as never,this.profile),state={...spawn(world,p.destination.entityId),tick:this.run.getSnapshot().state.tick};
+  const tick=this.run.getSnapshot().state.tick,world=hasPlatforms(map as never)?platformWorld(map as never,this.profile,tick):createWorld(map as never,this.profile),state={...spawn(world,p.destination.entityId),tick};
   // Constructor probes collision/support before any world is committed.
   const run=this.instance(map,state);if(run.getSnapshot().gameplay?.status!=='ready')throw Error('Portal arrival gameplay '+run.getSnapshot().gameplay?.status);
-  const probe=step(createWorld(run.runtimeSource(),this.profile),state,NEUTRAL);if(probe.status!=='ok')throw Error('Unsafe portal arrival after initial events: '+probe.status+' '+probe.reason);return run;
+  const probe=run.probeState(state);if(probe.status!=='ok')throw Error('Unsafe portal arrival after initial events: '+probe.status+' '+probe.reason);return run;
  }
  private commit(p:Portal):void {
   if(this.travels.length>=64)throw Error('Portal transition budget');

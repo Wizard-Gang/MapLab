@@ -15,7 +15,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
   const view = useSyncExternalStore(run.subscribe, run.getSnapshot, run.getSnapshot);
   const controls = useRef<Input>(NEUTRAL), keys = useRef(new Set<string>());
   const [text, setText] = useState(''), [notice, setNotice] = useState(''),[encounter,setEncounter]=useState(''),[portal,setPortal]=useState(''),[showCamera,setShowCamera]=useState(true);
-  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,JSON.stringify(view.gameplay?.bodies??{})]);
+  const scene = useMemo(() => { const normalized = normalize(run.runtimeSource() as unknown as JsonValue); if (!normalized.ok) throw new Error('Invalid Test snapshot'); return buildScene(normalized.model); }, [run,view.mapId,view.state.tick,JSON.stringify(view.gameplay?.bodies??{})]);
   const clear = (): void => { keys.current.clear(); controls.current = NEUTRAL; };
   useEffect(() => {
     // Wall time only schedules whole controller ticks. It never enters controller arithmetic.
@@ -69,6 +69,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
     </output>
     <TestRig source={run.runtimeSource()} state={state}/>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
+    {'platforms' in view.frame&&<pre aria-label="Test platform events">{JSON.stringify(view.frame.platforms,null,2)}</pre>}
     {view.gameplay&&<section aria-label="Test gameplay boundary"><h4>Declarative Test events</h4><p>Explicit fixture injection only. No combat victory, AI or wave executor is simulated.</p>
     <label>Test encounter<select aria-label="Test encounter" value={encounter} onChange={e=>setEncounter(e.target.value)}><option value="">Choose active encounter</option>{Object.entries(view.gameplay.encounters).map(([id,status])=><option key={id} value={id}>{id} · {status}</option>)}</select></label>
     <button disabled={!encounter||view.gameplay.encounters[encounter]!=='active'} onClick={()=>{const e=(run.source as unknown as {encounters:{id:string;completionEvent:{key:string;version:number}}[]}).encounters.find(e=>e.id===encounter);if(e)try{clear();run.injectEvent(e.completionEvent,e.id);setNotice('Explicit fixture event injected: '+e.completionEvent.key);}catch(e){setNotice(String(e));}}}>Inject declared completion event</button>

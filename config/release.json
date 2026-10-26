@@ -2,6 +2,7 @@
   "id": "r001",
   "branch": "release/r001",
   "tasks": [
-    "ML-031"
+    "ML-031",
+    "ML-032"
   ]
 }
