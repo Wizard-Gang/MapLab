@@ -65,7 +65,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
     {showCamera&&view.camera&&body.kind==='rect'&&<CameraViewport view={view.camera} scene={scene} state={state} body={body}/>}
     {view.cameraDiagnosis&&<p aria-label="Camera preview diagnosis">{view.cameraDiagnosis} · Physics remains independent.</p>}
     <output aria-label="Test movement HUD" data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''}>
-      Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing}
+      Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing} · Air jumps {state.resources?.airJumps??0}
     </output>
     <TestRig source={run.runtimeSource()} state={state}/>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>

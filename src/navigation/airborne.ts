@@ -1,8 +1,11 @@
+import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
+import {buildAirJumpActions,primitiveLimits,type PrimitiveLimits} from './air-jumps';
+import {AIR_PRIMITIVE_SHA256} from '../air-jumps/identity';
 import {groundIntentSupported,groundMotionAllowed} from './intent';
 // Bounded single-action solver. These exact action states are not a route graph.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
-import { createWorld, step, resolveStance, overlaps, digest } from '../physics-reference';
+import { createWorld, resolveStance, overlaps, digest } from '../physics-reference';
 import type { ContactMap, ClimbState, Step, RunInput, World } from '../physics-reference';
 import { buildSurfaceGraph, identity as surfaceIdentity, DEFAULT_SETTINGS, type Interval, type Identity } from './surface';
 
@@ -10,6 +13,7 @@ export interface AirSettings {
  readonly spacingSu:number; readonly maxCandidates:number; readonly maxTicks:number;
  readonly maxReplayTicks:number; readonly maxClearanceSamples:number;
 }
+export type AirOptions=AirSettings&Partial<PrimitiveLimits>;
 export const AIR_DEFAULTS:AirSettings={spacingSu:8192,maxCandidates:20_000,maxTicks:240,maxReplayTicks:1_000_000,maxClearanceSamples:2_000_000};
 export type Action='jump'|'fall'|'drop';
 export interface Witness {
@@ -21,26 +25,27 @@ export interface Witness {
 export interface AirResult {
  readonly format:'maplab.airborne-actions'; readonly version:1; readonly revision:number;
  readonly status:'candidate'|'no route found within declared search/sampling budget'|'budget'|'unsupported'|'cancelled';
- readonly canCertify:false; readonly complete:false; readonly identity:Identity; readonly settings:AirSettings;
+ readonly canCertify:false; readonly complete:false; readonly identity:Identity; readonly settings:AirOptions;
  readonly assumptions:readonly string[]; readonly diagnostics:readonly string[];
  readonly samples:number; readonly replayTicks:number; readonly rejected:Readonly<Record<string,number>>;
  readonly intervals:readonly Interval[]; readonly edges:readonly Witness[];
 }
-export async function airborneIdentity(map:MapDocument,p:MovementDocument,settings:AirSettings):Promise<Identity>{
+export async function airborneIdentity(map:MapDocument,p:MovementDocument,settings:AirOptions):Promise<Identity>{
  const base=await surfaceIdentity(map,p,DEFAULT_SETTINGS);
- const settingsSha256=await digest({solver:'single-airborne@2',surfaceSolver:base.settingsSha256,...settings});
+ const settingsSha256=await digest({solver:airJumpCount(p)>0?'stateful-airborne@1':'single-airborne@2',surfaceSolver:base.settingsSha256,...settings,...(airJumpCount(p)>0?{...primitiveLimits(settings),primitiveSha256:AIR_PRIMITIVE_SHA256}:{})});
  const value={...base,settingsSha256};return {...value,cacheKey:await digest({worldSha256:value.worldSha256,profileSha256:value.profileSha256,controllerSha256:value.controllerSha256,settingsSha256})};
 }
 const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
  const pose=resolveStance(w,x,i.supportId).find(s=>s.face.supportId===i.supportId);if(!pose)return null;
- return {x,y:pose.y,vx,vy:0,mode:'ground',supportId:i.supportId,planeId:w.source.footholds.find(f=>f.id===i.supportId)?.planeId??w.defaultPlane,facing:vx<0?-1:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:0,dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true};
+ return {x,y:pose.y,vx,vy:0,mode:'ground',supportId:i.supportId,planeId:w.source.footholds.find(f=>f.id===i.supportId)?.planeId??w.defaultPlane,facing:vx<0?-1:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:{airJumps:airJumpCount(w.profile),dashCharges:0,cooldowns:{}},traversalId:null,climbReady:true};
 };
 /** Physical identity includes empty space and all sources, so insertion/deletion anywhere
  * invalidates these witnesses. Swept bounds additionally identify the local dependency area.
  * Launch velocities are explicit preconditions, never a claim of reachable run-up/reset. */
-export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirSettings=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number]):Promise<AirResult>{
- const limits:AirSettings={spacingSu:1_000_000,maxCandidates:100_000,maxTicks:3600,maxReplayTicks:2_000_000,maxClearanceSamples:2_000_000};
- for(const k of Object.keys(limits) as (keyof AirSettings)[])if(!Number.isSafeInteger(settings[k])||settings[k]<1||settings[k]>limits[k])throw Error('invalid airborne settings');
+export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirOptions=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number]):Promise<AirResult>{
+ const limits={spacingSu:1_000_000,maxCandidates:100_000,maxTicks:3600,maxReplayTicks:2_000_000,maxClearanceSamples:2_000_000};
+ for(const k of Object.keys(limits) as (keyof typeof limits)[])if(!Number.isSafeInteger(settings[k])||settings[k]<1||settings[k]>limits[k])throw Error('invalid airborne settings');
+ primitiveLimits(settings);
  if(!Number.isSafeInteger(revision)||revision<0)throw Error('invalid airborne revision');
  const map=structuredClone(source),p=structuredClone(profile),options={...settings},id=await airborneIdentity(map,p,options);
  let samples=0,replayTicks=0;const rejected:Record<string,number>={};
@@ -49,10 +54,11 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
  const result=(status:AirResult['status'],diagnostics:readonly string[],intervals:readonly Interval[]=[],edges:readonly Witness[]=[]):AirResult=>({format:'maplab.airborne-actions',version:1,revision,status,canCertify:false,complete:false,identity:id,settings:options,assumptions,diagnostics,samples,replayTicks,rejected,intervals,edges});
  if(cancelled())return result('cancelled',['cancelled']);
  // Keep applicable intent explicit; unrelated flyer volumes cannot disable ground patrols.
- if(p.abilities.some(a=>a.kind==='jump'?a.airJumps!==0:a.kind!=='climb')||!groundIntentSupported(map,p))return result('unsupported',['unsupported capability or navigation intent']);
+ if(!supportedJumpProfile(p)||!groundIntentSupported(map,p))return result('unsupported',['unsupported capability or navigation intent']);
  let w:World;try{w=createWorld(map as unknown as ContactMap,p);}catch(e){return result('unsupported',[String(e)]);}
  const surface=await buildSurfaceGraph(map,p,revision,{maxSamples:options.maxClearanceSamples,maxTicks:3600},cancelled,yieldTask);
  if(surface.status!=='candidate')return result(surface.status,surface.diagnostics);
+ if(airJumpCount(p)>0)return buildAirJumpActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  const intervals=surface.intervals,edges:Witness[]=[];
  const jump=p.abilities.find(a=>a.kind==='jump');
  const holds=jump?[...new Set([0,Math.floor(jump.holdTicks/2),jump.holdTicks])].sort((a,b)=>a-b):[];

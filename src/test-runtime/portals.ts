@@ -1,3 +1,4 @@
+import {step,airJumpCount,supportedJumpProfile} from '../air-jumps/runtime';
 import {CameraPreview,type CameraView} from '../camera/preview';
 import {hasPlatforms} from '../platforms/runtime';
 import {platformWorld} from '../platforms/world';
@@ -6,7 +7,7 @@ import {validateSourceGraph,type MapDocument,type MovementDocument,type JsonValu
 import type {Entity} from '../contracts/gameplay-types';
 import {GameplaySession} from '../gameplay/runtime';
 import {sensorSpans} from '../gameplay/sensors';
-import {createWorld,step,replayBytes,type State,type Input,type Step,type RunInput} from '../physics-reference';
+import {createWorld,replayBytes,type State,type Input,type Step,type RunInput} from '../physics-reference';
 import {TestSession,spawn,parseRecording,NEUTRAL,MAX_TICKS,type TestView,type Recording,type Injection} from './session';
 type Portal=Extract<Entity,{kind:'portal'}>;
 function own<T>(v:T):T {const copy=structuredClone(v);const freeze=(n:unknown):void=>{if(n&&typeof n==='object'){Object.values(n).forEach(freeze);Object.freeze(n);}};freeze(copy);return copy;}
