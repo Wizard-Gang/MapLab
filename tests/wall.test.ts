@@ -25,7 +25,7 @@ test.each(cases)('exact contact, launch, stamina and roof trace repeats and resu
 });
 test('contact comes from enabled collision geometry, masks and material permission',()=>{
  const c=read('right-slide.fixture.json'),p=profile(),w=createWorld(map(),p);expect(wallContact(w,c.initial)).toMatchObject({side:1,bodyId:'body.right',edgeIndex:3});
- const m=map();for(const b of m.bodies)if(b.id==='body.right')(b as any).enabled=false;expect(wallContact(createWorld(m,p),c.initial)).toBeNull();
+ const m=map();for(const b of m.bodies)if(b.id==='body.right')(b as any).enabled=false;for(const f of m.footholds)if(f.ownerBodyId==='body.right')(f as any).enabled=false;expect(wallContact(createWorld(m,p),c.initial)).toBeNull();
  expect(wallContact(createWorld(map(),{...p,mask:[]}),c.initial)).toBeNull();
  const forbidden=map();(forbidden.materials[0] as any).tags=['hazard'];expect(wallContact(createWorld(forbidden,p),c.initial)).toBeNull();expect(wallContact(w,{...c.initial,x:c.initial.x-1})).toBeNull();
 });
@@ -60,7 +60,7 @@ test('whole route needs wall permission, preserves exact state and uses zero heu
  const forged=structuredClone(proof.actions);(forged[0]!.initial as any).wall.staminaTicks=0;expect(replayRouteActions(createWorld(map(),profile()),proof.initial!,forged)).toBeNull();
 },120000);
 test('bounded wall jump sequence launches from the correct side and lands on the opposite wall',async()=>{
- const base=profile(),p:MovementDocument={...base,abilities:base.abilities.map(a=>a.kind==='wall'?{...a,permissions:['jump']}:a)},settings={...wallSettings,air:{...wallSettings.air,maxAirActions:1}},n=await Navigation.build(map(),p,1,settings,undefined,async()=>{}),c=read('right-jump.fixture.json'),initial={...c.initial,y:20*256};
+ const base=profile(),p:MovementDocument={...base,abilities:base.abilities.map(a=>a.kind==='wall'?{...a,permissions:['jump']}:a)},settings={...wallSettings,air:{...wallSettings.air,maxAirActions:1,airStepTicks:4}},n=await Navigation.build(map(),p,1,settings,undefined,async()=>{}),c=read('right-jump.fixture.json'),initial={...c.initial,y:20*256};
  const result=await n.route(initial,{supportId:'fh.left',x:7*256,toleranceSu:128,vx:0},'astar',undefined,async()=>{});expect(result.status).toBe('verified reachable with replay witness');expect(result.actions.some(a=>a.kind==='wallJump')).toBe(true);expect(result.frames.some(f=>(f.state as WallState).wall?.action==='wallJump'&&f.state.vx===-512)).toBe(true);expect(replayRouteActions(createWorld(map(),p),result.initial!,result.actions)?.frames).toEqual(result.frames);
 },120000);
 test('wall restrictions survive forged action splits and query state retains stamina',()=>{
