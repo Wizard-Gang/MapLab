@@ -1,5 +1,6 @@
+import {WALL_RUNTIME_SHA256,WALL_INTENT_SHA256} from '../wall/identity';
 import {AIR_JUMP_SHA256} from '../air-jumps/identity';
-import {step,airJumpCount,supportedJumpProfile,hasDash,initialDash,initialResources} from '../dash/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasWall,hasDash,initialDash,initialWall,initialResources} from '../wall/runtime';
 import {DASH_RUNTIME_SHA256,DASH_INTENT_SHA256} from '../dash/identity';
 // Rebuildable, bounded foundational graph. No route search or airborne solver.
 import type { ContactMap, ClimbState, Input, Step, World } from '../physics-reference/types';
@@ -8,7 +9,7 @@ import type { MovementDocument } from '../contracts/movement-types';
 import { createWorld, resolveStance, overlaps, digest } from '../physics-reference';
 import { movementProfileDigest } from '../contracts/movement';
 import { CONTROLLER_SHA256, INTENT_SHA256 } from './identity';
-import {groundIntentSupported} from '../dash/intent';
+import {groundIntentSupported} from '../wall/intent';
 export interface Settings { readonly maxSamples:number; readonly maxTicks:number }
 export const DEFAULT_SETTINGS:Settings={maxSamples:2_000_000,maxTicks:3600};
 export interface Interval {readonly key:string;readonly supportId:string;readonly materialId:string;readonly direction:'both'|'aToB'|'bToA';readonly minX:number;readonly maxX:number}
@@ -21,11 +22,12 @@ const order=(a:{id:string},b:{id:string})=>a.id<b.id?-1:a.id>b.id?1:0;
 export async function identity(map:MapDocument,p:MovementDocument,settings:Settings):Promise<Identity>{
  const sorted=<T extends {id:string}>(a:readonly T[])=>[...a].sort(order);
  const worldSha256=await digest({mapId:map.id,version:map.version,bounds:map.bounds,collision:map.collisionContract,bodies:sorted(map.bodies),footholds:sorted(map.footholds),materials:sorted(map.materials),traversals:sorted(map.traversals),regions:sorted(map.regions as unknown as {id:string}[]),navigation:map.navigation,planes:map.layers.filter(l=>l.kind==='actors').map(l=>l.id)});
- const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',...(map.navigation.modeVolumes.length||map.navigation.overrides.length?{intentSha256:INTENT_SHA256}:{}),...(hasDash(p)?{dashIntentSha256:DASH_INTENT_SHA256}:{}),latticeSu:1,fullBody:true,...settings});
+ const profileSha256=await movementProfileDigest(p),settingsSha256=await digest({solver:'surface-climb@3',...(map.navigation.modeVolumes.length||map.navigation.overrides.length?{intentSha256:INTENT_SHA256}:{}),...(hasDash(p)?{dashIntentSha256:DASH_INTENT_SHA256}:{}),...(hasWall(p)?{wallIntentSha256:WALL_INTENT_SHA256}:{}),latticeSu:1,fullBody:true,...settings});
  const baseController=airJumpCount(p)>0?await digest({base:CONTROLLER_SHA256,airJumpAdapterSha256:AIR_JUMP_SHA256}):CONTROLLER_SHA256;
- const value={worldSha256,profileSha256,controllerSha256:hasDash(p)?await digest({base:baseController,dashAdapterSha256:DASH_RUNTIME_SHA256}):baseController,settingsSha256};return {...value,cacheKey:await digest(value)};
+ const dashController=hasDash(p)?await digest({base:baseController,dashAdapterSha256:DASH_RUNTIME_SHA256}):baseController;
+ const value={worldSha256,profileSha256,controllerSha256:hasWall(p)?await digest({base:dashController,wallAdapterSha256:WALL_RUNTIME_SHA256}):dashController,settingsSha256};return {...value,cacheKey:await digest(value)};
 }
-const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),traversalId:null,climbReady:true});
+const initial=(w:World,x:number,y:number,supportId:string):ClimbState=>({x,y,vx:0,vy:0,mode:'ground',supportId,planeId:w.source.footholds.find(f=>f.id===supportId)?.planeId??w.defaultPlane,facing:1,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),...initialWall(w.profile),traversalId:null,climbReady:true});
 const controls=(moveX:-1|0|1,moveY:-1|0|1=0):Input=>({moveX,moveY,run:false,jump:false,drop:false});
 /** All integer center positions are tested, including true slope stance, never endpoint shrink alone.
  * Budget/cancellation return no partial graph. Each motion edge retains its full finite-body replay.
