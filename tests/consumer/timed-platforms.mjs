@@ -37,6 +37,9 @@ let s=d.initial;for(let i=0;i<d.expect.length;i++){const first=i===0,vx=first?de
  const expected={...s,x:s.x+(first?delta[0]:s.vx),y:s.y+(first?delta[1]-jump.impulse:s.vy),vx,vy,mode:'air',supportId:null,tick:s.tick+1,jumpHeldPrev:true,ticksSinceJump:s.ticksSinceJump+1};same(d.expect[i].state,expected);s=expected;}
 const loaded=readBundle(bundle,schemas);assert(loaded.ok,'independent exported timed load: '+JSON.stringify(loaded.diagnostics));
 const manifest=JSON.parse(readFileSync(join(bundle,'manifest.json'),'utf8')),docs=manifest.documents.map(d=>JSON.parse(readFileSync(join(bundle,d.path),'utf8'))),exported=docs.find(d=>d.id==='map.timed-platform');
-same(exported,read('elevator.map.json'),'exported timed document binding');same(docs.find(d=>d.id===p.id),p,'exported timed document binding');
+// Contract features are an unordered set; export canonicalizes their key/version order.
+// Compare every value while independently accounting for that published ordering rule.
+const expectedMap=read('elevator.map.json');expectedMap.requiredFeatures.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:a.version-b.version);
+same(exported,expectedMap,'exported timed document binding');same(docs.find(d=>d.id===p.id),p,'exported timed document binding');
 vertical(read('cases.json')[0],reports['wait-board-ride-exit'],exported);
 console.log(JSON.stringify({verified:true,exportedPeriodicWorld:true,cases:read('cases.json').length}));
