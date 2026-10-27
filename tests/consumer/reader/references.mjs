@@ -6,7 +6,7 @@ import { validate } from './schema.mjs';
 /** Exact versions this reader accepts (F7: never `version <= latest`). Prefabs never ship in exports (F4). */
 export const SUPPORTED_FORMATS = Object.freeze(['maplab.catalog@1', 'maplab.map@1', 'maplab.movement@1', 'maplab.tileset@1']);
 export const SUPPORTED_CONTRACTS = Object.freeze(['riglab.export@1','riglab.rig@1','riglab.anim@3','riglab.baked@1','riglab.weapon@1','maplab.camera@1', 'maplab.catalog@1', 'maplab.climb@1', 'maplab.collision@1',
-  'maplab.map@1', 'maplab.movement@1', 'maplab.reference-controller@1', 'maplab.tileset@1',
+  'maplab.map@1', 'maplab.movement@1', 'maplab.reference-controller@1', 'maplab.reference-grapple@1', 'maplab.tileset@1',
   // ML-016: exact vocabulary understood by this data-only proof consumer. Planned entries
   // remain configured, not simulated; no gameplay handler is executed here.
   'enemy.slime@1', 'enemy.bat@1', 'enemy.forest-guardian@1', 'npc.ranger@1', 'chest.wooden@1',

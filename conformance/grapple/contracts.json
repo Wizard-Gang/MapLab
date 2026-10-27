@@ -1,0 +1,11 @@
+{
+  "collision": "1e36b7364146fe1fc75b1540b099e57babad7aae575699f1d68184784a573b02",
+  "flight": "04f4a00860d1d07eb50aa263eb9d2ebff482244487b068302c91994b25e0b015",
+  "motor": "8cbfffe401ab141b882ac508df06e907e0db8401ee5f12b6813d891962b8b52a",
+  "geometry": "7905ecbe45a5087f7aabd5d73e630a0a4ccd01fa553e8d8e327816999687494c",
+  "planner": "2aadf7e8a6982df60d387d53487fe3605d6b19e0e6e1a79bc29516070f59b402",
+  "solver": {
+    "key": "maplab.reference-grapple",
+    "version": 1
+  }
+}
