@@ -119,8 +119,8 @@ cannot include its own final squash hash. The next release's first task appends 
 Stop sequential activation on any failed predecessor, gate, access or protection
 check; preserve work and evidence.
 
-## Permanent plan and J2 traceability
+## Permanent plan and traceability
 
-`implementation_plan.md` is the sole current/future task queue. Each reserved J2 ID retains exact scope, exclusions and acceptance and now has executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `scripts/check-queue.mjs` enforces sequential first-open selection, uninterrupted delivered predecessor chain, retirement of completed IDs, future preservation, exact J2 fields, and section link validity. `check:change` and canonical `check` invoke it. Synthetic next-task and malformed-queue tests demonstrate generic selection rather than ML-002-only parsing.
+`implementation_plan.md` is the sole current/future task queue. Each task has scope, exclusions, acceptance, executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `scripts/check-queue.mjs` enforces those fields and section link validity, an active block holding exactly the controlled task, retirement of completed IDs, unique live IDs and the plan's highest ID ever used. Since the owner's 2026-10-27 ruling the queue's content and order are free and no longer must match J2; `change-id` rejects a new task at or below the base's highest ID. `check:change` and canonical `check` invoke it.
 
 ML-002 delivered this governance scope. Later tasks change it only through their own controlled records; ML-003 generalized the queue tests to follow the delivery chain.

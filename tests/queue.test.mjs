@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, expect, test } from 'vitest';
-import { checkQueue } from '../scripts/check-queue.mjs';
+import { checkNewIds, checkQueue } from '../scripts/check-queue.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const temporary = [];
@@ -24,34 +24,63 @@ const edit = (p, file, fn) => {
 };
 // Corruptions target whichever task is active, so activation never edits this file.
 const delivered = JSON.parse(readFileSync(join(root, 'docs/deliveries.json'), 'utf8')).length;
-const makeId = (n) => 'ML-' + String(n).padStart(3, '0');
-const active = makeId(delivered + 1), next = makeId(delivered + 2);
+const active = JSON.parse(readFileSync(join(root, 'config/change.json'), 'utf8')).id;
 const plan = readFileSync(join(root, 'implementation_plan.md'), 'utf8');
+const futureBlock = plan.slice(plan.indexOf('<!-- future-queue:start -->'), plan.indexOf('<!-- future-queue:end -->'));
+const queued = [...futureBlock.matchAll(/^### (ML-\d{3}) \//gm)].map((m) => m[1]);
+const highest = plan.match(/^\*\*Highest ID ever used:\*\* (ML-\d{3})/m)[1];
+const above = (n) => 'ML-' + String(Number(highest.slice(3)) + n).padStart(3, '0');
 const activeBlock = plan.slice(plan.indexOf('<!-- active-queue:start -->'), plan.indexOf('<!-- active-queue:end -->'));
 const fieldOf = (label) => activeBlock.split('\n').find((l) => l.startsWith('- **' + label + ':** ')).slice(label.length + 8);
-const scope = fieldOf('Source scope'), acceptance = fieldOf('Acceptance');
+const scope = fieldOf('Source scope');
 const fixtures = activeBlock.split('\n').find((l) => l.startsWith('  3. ')).split('Create owned fixture(s): ')[1];
-test('all 44 J2 IDs and original scope/acceptance preserved; first open follows the delivery chain', () => {
-  expect(checkQueue(fixture())).toEqual({ active, completed: delivered, future: 43 - delivered, reserved: 44 });
+const taskBlock = activeBlock.slice(activeBlock.indexOf('### '));
+// A queued copy of the active block under another ID, as a plan edit would add it.
+const queue = (s, id) => s.replace('<!-- future-queue:end -->', taskBlock.replace(/^### ML-\d{3} \//, '### ' + id + ' /').trim() + '\n\n<!-- future-queue:end -->');
+const ahead = (s, id) => s.replace('<!-- future-queue:start -->', '<!-- future-queue:start -->\n' + taskBlock.replace(/^### ML-\d{3} \//, '### ' + id + ' /').trim() + '\n');
+const drop = (s, id) => s.replace(new RegExp('### ' + id + ' \\/[\\s\\S]*?(?=### ML-|<!-- future-queue:end -->)'), '');
+const raise = (s, id) => s.replace(/^(\*\*Highest ID ever used:\*\* )ML-\d{3}/m, '$1' + id);
+test('the live queue passes with the active task, history and the highest ID ever used', () => {
+  expect(checkQueue(fixture())).toEqual({ active, completed: delivered, future: queued.length, highest });
+});
+// Owner ruling 2026-10-27: the plan changes whenever anyone wants.
+test.each([
+  ['an edited queued scope', (s) => s.replace('**Source scope:** ' + scope, '**Source scope:** Replaced ' + scope)],
+  ['a removed queued task', (s) => drop(raise(queue(s, above(1)), above(1)), queued[0] ?? above(1))],
+  ['an emptied queue', (s) => raise(s, above(1)).replace(/<!-- future-queue:start -->[\s\S]*?<!-- future-queue:end -->/, '<!-- future-queue:start -->\n<!-- future-queue:end -->')],
+  ['a new task placed ahead of the queue', (s) => raise(ahead(s, above(1)), above(1))],
+  ['a new task above the mark, skipping IDs', (s) => raise(queue(s, above(3)), above(3))],
+])('accepts %s', (_label, transform) => {
+  const p = fixture(); edit(p, 'implementation_plan.md', transform);
+  expect(readFileSync(join(p, 'implementation_plan.md'), 'utf8')).not.toBe(plan);
+  expect(() => checkQueue(p)).not.toThrow();
 });
 test.each([
-  ['missing future ML-044', 'implementation_plan.md', (s) => s.replace(/### ML-044 \/[\s\S]*?(?=<!-- future-queue:end -->)/, ''), 'Reserved future tasks'],
-  ['duplicate future ID', 'implementation_plan.md', (s) => s.replace('### ' + next + ' /', '### ' + next + ' / P0\n\n### ' + next + ' /'), 'Reserved future tasks'],
-  ['skipped first open', 'implementation_plan.md', (s) => s.replace('### ' + active + ' /', '### ' + next + ' /'), 'Active queue'],
-  ['tampered scope', 'implementation_plan.md', (s) => s.replace('**Source scope:** ' + scope, '**Source scope:** Replaced ' + scope), 'Specification J2 Source scope drift'],
-  ['relaxed acceptance', 'implementation_plan.md', (s) => s.replace('**Acceptance:** ' + acceptance, '**Acceptance:** ' + acceptance.slice(0, -1) + ' unless waived.'), 'Specification J2 Acceptance drift'],
+  ['duplicate queued ID', 'implementation_plan.md', (s) => queue(s, active), 'Duplicate live task'],
+  ['a delivered ID back in the queue', 'implementation_plan.md', (s) => queue(s, 'ML-002'), 'Duplicate live task'],
+  ['active task other than the controlled change', 'implementation_plan.md', (s) => s.replace('### ' + active + ' /', '### ' + above(1) + ' /'), 'Active queue'],
+  ['an ID above the mark', 'implementation_plan.md', (s) => queue(s, above(1)), 'highest ID ever used'],
+  ['a missing mark', 'implementation_plan.md', (s) => s.replace(/^\*\*Highest ID ever used:\*\*.*$/m, ''), 'highest ID ever used exactly once'],
   ['wrong specification anchor', 'implementation_plan.md', (s) => s.replace(/(### ML-\d{3} \/[^\n]*\n[\s\S]*?\[[A-K]\d+\]\(docs\/specifications\/2026-10-16-maplab\.md#)[^)]+\)/, '$1wrong)'), 'Specification traceability'],
   ['missing fixture', 'implementation_plan.md', (s) => s.replace('Create owned fixture(s): ' + fixtures, 'Create owned fixture(s): TODO'), 'Executable subtasks'],
+  ['missing acceptance', 'implementation_plan.md', (s) => s.replace(/^- \*\*Acceptance:\*\* .*\n/m, ''), 'Missing task field: Acceptance'],
   ['premature completion', 'implementation_plan.md', (s) => s.replace('<!-- completed-history:end -->', '- **' + active + '** — prematurely complete\n<!-- completed-history:end -->'), 'Completed tasks'],
+  ['duplicate delivery', 'docs/deliveries.json', (s) => { const v = JSON.parse(s); v.push(v[1]); return JSON.stringify(v); }, 'Predecessor delivery chain'],
 ])('rejects %s', (_label, file, transform, diagnostic) => {
   const p=fixture();
   edit(p, file, transform);
   expect(readFileSync(join(p, file), 'utf8')).not.toBe(readFileSync(join(root, file), 'utf8'));
   expect(() => checkQueue(p)).toThrow(diagnostic);
 });
-test('spec J2 contract drift cannot pass unchanged delivery queue', () => {
-  const p=fixture();
-  edit(p,'docs/specifications/2026-10-16-maplab.md', (s) => s.replace('| ' + scope + ' |', '| Loose ' + scope + ' |'));
-  expect(readFileSync(join(p, 'docs/specifications/2026-10-16-maplab.md'), 'utf8')).toContain('Loose ' + scope);
-  expect(() => checkQueue(p)).toThrow('Specification J2 Source scope drift');
+test('a plan change may add a task above every ID ever used and retire queued IDs', () => {
+  expect(() => checkNewIds(plan, raise(queue(plan, above(1)), above(1)))).not.toThrow();
+  const retired = raise(plan, above(1));
+  expect(() => checkNewIds(plan, retired)).not.toThrow();
+  expect(() => checkNewIds(retired, raise(queue(retired, above(1)), above(1)))).toThrow('above every ID ever used: ' + above(1));
+});
+test.each([
+  ['a falling mark', () => raise(plan, 'ML-002'), 'must never fall'],
+  ['a recycled delivered ID', () => queue(plan, 'ML-002'), 'above every ID ever used: ML-002'],
+])('a plan change rejects %s', (_label, head, diagnostic) => {
+  expect(() => checkNewIds(plan, head())).toThrow(diagnostic);
 });

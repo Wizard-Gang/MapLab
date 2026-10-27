@@ -3,7 +3,23 @@
 Use one controlled `ML-###` task, one branch, one scoped PR, and one squash commit
 into the open `release/rNNN` branch per delivery after bootstrap. Title form:
 `[ML-###] [FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY] Imperative summary`.
-IDs never get reused. The permanent implementation plan is the sole current/future queue; the first open ID follows the contiguous delivered chain. All later reserved IDs stay in that file with their full scope and acceptance. Adjust oversized scope through separately reviewed plan/spec changes before implementation. Unrelated cleanup/upgrades are excluded.
+IDs never get reused. The permanent implementation plan is the sole current/future queue. Unrelated cleanup/upgrades are excluded.
+
+## Plan edits (owner ruling, 2026-10-27)
+
+- Any PR may add, edit, reorder or remove queued tasks in `implementation_plan.md`, at
+  any time and whatever the queue holds, including a task PR that also edits other tasks.
+  The next task is any queued task; the spec's J2 table is the original baseline only.
+- A PR that changes only the plan is titled `[PLAN] Imperative summary` on a
+  `plan-<summary>` branch into the open release branch, with every commit titled the
+  same. Once that release has merged (its branch is gone) and before the next task, it
+  targets the next branch (`release/rNNN+1`), cut from main's tip. The next task then
+  reuses that branch instead of cutting it again. It takes no task ID, leaves `config/` alone, and joins no release task list;
+  its squash `[PLAN] Imperative summary (#PR)` rides the release PR beside the tasks.
+- IDs are unique and never recycled. The plan records the highest ID ever used; a new
+  task takes an ID above it and raises it, and it never falls. A removed queued ID is
+  retired, so the queue and the delivery chain need not be contiguous. `change-id`
+  compares the base and head plans to enforce this.
 
 PR records contain Change, Reason, Impact, Risk, Controls, Validation, Evidence,
 Source, and Release. Evidence scales to risk. Format/physics work needs fixtures
@@ -41,7 +57,7 @@ The owner's 2026-10-25 ruling batches tasks so the full suite runs once per rele
 - The release PR, `release/rNNN` -> `main`, opens only when Jacob says "release". Its
   title is `[RELEASE] rNNN: ML-0xx..ML-0yy` (one ID when the release holds one task).
   Its commits are exactly one squash commit per listed task, oldest first, each titled
-  as that task's record. It rebase-merges, so main gains one commit per task.
+  as that task's record, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
 - Deliveries up to ML-030 keep `mainCi`. Later entries carry
   `gate: {head, conclusion, url}` on their last tested head.
 - [docs/releases.json](releases.json) records each merged release as

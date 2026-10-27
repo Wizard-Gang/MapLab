@@ -1,7 +1,7 @@
 {
-  "id": "ML-039",
-  "type": "FEATURE",
-  "title": "[ML-039] [FEATURE] Add stateful teleport launch and modifier witnesses",
-  "branch": "ml-039-stateful-solvers",
-  "record": "docs/changes/ML-039.md"
+  "id": "ML-045",
+  "type": "CHORE",
+  "title": "[ML-045] [CHORE] Allow plan edits at any time",
+  "branch": "ml-045-free-plan-edits",
+  "record": "docs/changes/ML-045.md"
 }
