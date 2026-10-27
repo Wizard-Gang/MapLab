@@ -1,8 +1,12 @@
 # Permanent implementation plan — current and future delivery queue
 
-**Authority:** this file is the only live queue. [The specification](docs/specifications/2026-10-16-maplab.md), with the owner-approved R1 revision amended into its bodies at ML-003, governs design and holds J2, the 44-ID baseline that every task block below must match. To work, read only the active block: `sed -n '/^<!-- active-queue:start/,/^<!-- active-queue:end/p' implementation_plan.md`.
+**Authority:** this file is the only live queue. [The specification](docs/specifications/2026-10-16-maplab.md), with the owner-approved R1 revision amended into its bodies at ML-003, governs design; its J2 table is the original 44-ID baseline, and the queue below may depart from it. To work, read only the active block: `sed -n '/^<!-- active-queue:start/,/^<!-- active-queue:end/p' implementation_plan.md`.
 
-**Selection and retirement:** the first open reserved ID after [the delivery chain](docs/deliveries.json) is the only executable task and sits alone in the active block. Every later ID stays in the future block once, in order. After a verified protected squash into the open release branch on its green exact-head gate, the next activation appends the predecessor's evidence to the delivery chain, retires it to one history line, promotes exactly the next ID and leaves all later tasks untouched. Never reuse, renumber, skip, implement early or silently delete IDs. An oversized task needs a separately governed queue/spec revision first.
+**Editing the plan (owner ruling, 2026-10-27):** any PR may add, edit, reorder or remove queued tasks at any time, whatever the queue holds. A PR that changes only this file is titled `[PLAN] Imperative summary` on a `plan-<summary>` branch into the open release branch; it takes no task ID and joins no release task list. IDs are unique and never recycled: a new task takes the ID above the mark below, which then rises to it, and a removed queued ID is retired for good, so IDs need not be contiguous.
+
+**Highest ID ever used:** ML-045.
+
+**Selection and retirement:** the active block holds exactly the controlled task in [config/change.json](config/change.json); any queued task may be the next one. After a verified protected squash into the open release branch on its green exact-head gate, the next activation appends the predecessor's evidence to [the delivery chain](docs/deliveries.json), retires it to one history line and moves its own task into the active block.
 
 ## Completed history
 
@@ -47,28 +51,29 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-036** — squash `4d5330a`, PR #36; [record](docs/changes/ML-036.md).
 - **ML-037** — squash `2c3428b`, PR #37; [record](docs/changes/ML-037.md).
 - **ML-038** — squash `3140855`, PR #38; [record](docs/changes/ML-038.md).
+- **ML-039** — squash `ba25f60`, PR #39; [record](docs/changes/ML-039.md).
 <!-- completed-history:end -->
 
-## Current first-open task
+## Active task
 
 <!-- active-queue:start -->
-### ML-039 / P2
+### ML-045 / P1
 
-- **Source scope:** Teleport, launch/knockback and temporary modifier solvers, effective-profile hashing.
-- **Non-goals:** No combat damage resolution.
-- **Acceptance:** Destination body clearance, launch recoverability, modifier stack/clamp, cache invalidation and zero-heuristic shortcut fixtures.
-- **Depends on:** ML-038 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [E4](docs/specifications/2026-10-16-maplab.md#e4-search-costs-and-scalability), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **Source scope:** Change-contract checker, contract tests and process docs so the plan can change at any time; `[PLAN]` plan-only PRs; unique never-recycled IDs above a recorded high-water mark.
+- **Non-goals:** No repository settings, rulesets, workflows, release, or product code; no change to the spec's J2 text or to any other task's scope.
+- **Acceptance:** A plan-only PR and a task PR may add, edit, reorder or remove queued tasks with any queue state; new IDs above the mark pass, recycled or retired IDs fail; delivery and release chains follow delivery order, not contiguous IDs.
+- **Depends on:** ML-039 squashed into release/r001 on its green exact-head gate; owner ruling of 2026-10-27.
+- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [J2](docs/specifications/2026-10-16-maplab.md#j2-sequential-tasks); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
 - **Subtasks:**
-  1. Implement teleport target body-clearance check, launch/knockback recoverability and temporary modifier stacking/clamps.
-  2. Hash effective per-state profile for cache invalidation; use zero admissible heuristic when shortcuts break assumptions.
-  3. Create owned fixture(s): Teleport into solid, launch recovery, stacked buff changes and stale cache.
-  4. Add executable checks: Determinism, stateful route verification and forbidden destination cases.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
+  1. Drop the J2 equality, contiguity and 44-ID bounds from the queue and change checkers; record the highest ID ever used.
+  2. Accept `[PLAN]` PRs that change only the plan, keep them out of release task lists, and teach the merge guard their identity.
+  3. Create owned fixture(s): Synthetic plans that skip, reorder, edit, retire and recycle IDs, and plan/task/release PR events.
+  4. Add executable checks: Contract tests that accept free plan edits and reject recycled IDs, a falling mark and wider plan PRs.
+- **Task gate:** Run clean `npm ci`, `npm run check:foundation`, typecheck, build, smoke, `npm run check:change` and `npm run security` locally, with `npm run check` met by exact PR-head CI; exact PR-head `gate/change-id`, independent review and delivery read-back. No merge without protected gates.
 
 <!-- active-queue:end -->
 
-## Preserved future reserved tasks
+## Queued tasks
 
 <!-- future-queue:start -->
 ### ML-040 / P2

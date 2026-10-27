@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { checkQueue } from './check-queue.mjs';
+import { checkNewIds, checkQueue } from './check-queue.mjs';
 
 export const sections = ['Change', 'Reason', 'Impact', 'Risk', 'Controls', 'Validation', 'Evidence', 'Source', 'Release'];
 export const demand = (ok, message) => { if (!ok) throw new Error(message); };
@@ -14,6 +14,10 @@ export const lastMainCiDelivery = 30;
 const runUrl = /^https:\/\/github\.com\/Wizard-Gang\/MapLab\/actions\/runs\/\d+$/;
 const taskId = (n) => `ML-${String(n).padStart(3, '0')}`;
 const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)\] [A-Z][^\r\n]+) \(#\d+\)$/;
+// A plan-only PR takes no task ID: it edits implementation_plan.md alone and never joins a release's task list.
+export const planTitle = /^\[PLAN\] [A-Z][^\r\n]+$/;
+export const planBranch = /^plan-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const planSquash = /^\[PLAN\] [A-Z][^\r\n]+ \(#\d+\)$/;
 export const releaseTitle = (release) => `[RELEASE] ${release.id}: ${release.tasks.length === 1
   ? release.tasks[0] : `${release.tasks[0]}..${release.tasks.at(-1)}`}`;
 export function checkSections(text) {
@@ -28,7 +32,7 @@ export function checkChange(root) {
   demand(JSON.stringify(Object.keys(change).sort()) === JSON.stringify(['branch', 'id', 'record', 'title', 'type']), 'Controlled change fields disagree; bootstrap is closed');
   demand(/^ML-\d{3}$/.test(change.id) && /^(FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)$/.test(change.type), 'Malformed controlled change ID/type');
   const number = Number(change.id.slice(3));
-  demand(number >= 2 && number <= 44, 'Task must be a reserved post-bootstrap ID');
+  demand(number >= 2, 'Task must be a post-bootstrap ID');
   demand(new RegExp(`^\\[${change.id}\\] \\[${change.type}\\] [A-Z][^\\r\\n]+$`).test(change.title), 'Malformed controlled change title');
   demand(new RegExp(`^${change.id.toLowerCase()}-[a-z0-9]+(?:-[a-z0-9]+)*$`).test(change.branch), 'Controlled branch identity disagrees');
   demand(change.record === `docs/changes/${change.id}.md` && existsSync(resolve(root, change.record)), 'Change record identity disagrees');
@@ -36,10 +40,15 @@ export function checkChange(root) {
   demand(record.startsWith(`# ${change.title}\n`), 'Change record title disagrees');
   checkSections(record);
   checkQueue(root);
+  const { release, releases } = checkRelease(root, change);
+  // Delivery order, not ID order: ML-001..ML-030, then every released task before the current one.
+  const delivered = [...Array.from({ length: lastMainCiDelivery }, (_, i) => taskId(i + 1)),
+    ...[...releases.map((entry) => entry.tasks), release.tasks].flat().slice(0, -1)];
   const deliveries = readJson(root, 'docs/deliveries.json');
-  demand(Array.isArray(deliveries) && deliveries.length === number - 1, 'Predecessor delivery chain is incomplete');
+  demand(Array.isArray(deliveries) && JSON.stringify(deliveries.map((entry) => entry.id)) === JSON.stringify(delivered),
+    'Predecessor delivery chain is incomplete');
   for (const [i, entry] of deliveries.entries()) {
-    demand(entry.id === `ML-${String(i + 1).padStart(3, '0')}` && sha.test(entry.commit), 'Predecessor ID/commit disagrees');
+    demand(sha.test(entry.commit), 'Predecessor ID/commit disagrees');
     if (i < lastMainCiDelivery) demand(entry.gate === undefined && entry.mainCi?.conclusion === 'success'
       && entry.mainCi.head === entry.commit && runUrl.test(entry.mainCi.url), 'Predecessor main CI evidence disagrees');
     else demand(entry.mainCi === undefined && entry.gate?.conclusion === 'success'
@@ -49,12 +58,11 @@ export function checkChange(root) {
     else demand(Number.isSafeInteger(entry.pr) && entry.pr > 0 && entry.testedHeads?.length > 0
       && entry.testedHeads.every((h) => sha.test(h)), 'Predecessor PR/head evidence is missing');
   }
-  checkRelease(root, change);
   return change;
 }
 
 // config/release.json names the open release branch and its tasks; docs/releases.json records each one
-// rebase-merged into main. Together their tasks run consecutively from the cut-over to the current task.
+// rebase-merged into main. Together they list each task delivered after the cut-over once, ending at the current task.
 export function checkRelease(root, change) {
   const release = readJson(root, 'config/release.json');
   const releases = readJson(root, 'docs/releases.json');
@@ -68,8 +76,10 @@ export function checkRelease(root, change) {
       && entry.ci?.conclusion === 'success' && runUrl.test(entry.ci.url), 'Release evidence disagrees');
   }
   const chain = [...releases.map((entry) => entry.tasks), release.tasks];
-  demand(chain.every((tasks) => Array.isArray(tasks) && tasks.length > 0) && chain.flat().at(-1) === change.id
-    && chain.flat().every((id, i) => id === taskId(lastMainCiDelivery + 1 + i)), 'Release task chain disagrees');
+  const ids = chain.flat();
+  demand(chain.every((tasks) => Array.isArray(tasks) && tasks.length > 0) && ids.at(-1) === change.id
+    && new Set(ids).size === ids.length
+    && ids.every((id) => /^ML-\d{3}$/.test(id) && Number(id.slice(3)) > lastMainCiDelivery), 'Release task chain disagrees');
   for (const id of release.tasks) demand(existsSync(resolve(root, `docs/changes/${id}.md`)), 'Release task record is missing');
   return { release, releases };
 }
@@ -86,7 +96,7 @@ export function checkReleaseTrees(releases, git) {
 }
 
 export function checkEvent(change, context) {
-  const { eventName, event, actualHead, commitTitles, changedFiles, release, taskTitles } = context;
+  const { eventName, event, actualHead, commitTitles, changedFiles, release, taskTitles, basePlan, headPlan } = context;
   demand(sha.test(actualHead), 'Actual checkout SHA is invalid');
   demand(eventName === 'pull_request', 'Change identity runs only on pull requests');
   const pr = event.pull_request;
@@ -94,15 +104,23 @@ export function checkEvent(change, context) {
   demand(sha.test(pr.base.sha) && pr.head.sha === actualHead, 'PR base/head differs from tested checkout');
   checkSections(pr.body ?? '');
   demand(commitTitles.length > 0, 'Commit title differs from controlled task');
+  checkNewIds(basePlan, headPlan);
   if (pr.head.ref === release.branch) {
-    // The release PR carries one squash commit per listed task, oldest first, each titled as its record.
+    // The release PR carries one squash commit per listed task, oldest first, each titled as its record,
+    // plus any plan-only squash commits, which belong to no task.
     demand(pr.base.ref === 'main' && pr.title === releaseTitle(release), 'Release PR base/title disagrees');
-    const titles = [...commitTitles].reverse().map((title) => title.match(squashTitle));
+    const titles = [...commitTitles].reverse().filter((title) => !planSquash.test(title)).map((title) => title.match(squashTitle));
     demand(titles.length === release.tasks.length && titles.every((m, i) => m?.[2] === release.tasks[i]
       && m[1] === taskTitles[i]), 'Release commits must be one squash commit per listed task');
     return;
   }
   demand(pr.base.ref === release.branch, 'Task PR base must be the open release branch');
+  if (planTitle.test(pr.title)) {
+    demand(planBranch.test(pr.head.ref), 'Plan PR branch must be plan-<summary>');
+    demand(commitTitles.every((title) => title === pr.title), 'Commit title differs from plan PR');
+    demand(changedFiles.length === 1 && changedFiles[0] === 'implementation_plan.md', 'A plan PR changes implementation_plan.md alone');
+    return;
+  }
   demand(pr.head.ref === change.branch && pr.title === change.title, 'PR controlled branch/title disagrees');
   demand(commitTitles.every((title) => title === change.title), 'Commit title differs from controlled task');
   demand(['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'].every((f) => changedFiles.includes(f)),
@@ -124,9 +142,11 @@ if (process.argv[1] && resolve(process.argv[1]) === self) {
       const base = event.pull_request?.base?.sha;
       demand(sha.test(base ?? '') && !/^0+$/.test(base), 'Missing post-bootstrap base revision');
       git('merge-base', '--is-ancestor', base, 'HEAD');
+      const plan = (revision) => git('show', `${revision}:implementation_plan.md`);
       checkReleaseTrees(releases, git);
       checkEvent(change, {
         eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release,
+        basePlan: plan(base), headPlan: plan('HEAD'),
         taskTitles: release.tasks.map((id) => readFileSync(resolve(root, `docs/changes/${id}.md`), 'utf8').split('\n')[0].slice(2)),
         commitTitles: git('log', '--format=%s', `${base}..HEAD`).split('\n'),
         changedFiles: git('diff', '--name-only', base, 'HEAD').split('\n'),
