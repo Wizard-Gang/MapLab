@@ -45,6 +45,7 @@ export function step(w:World,old:State,input:DashInput):Step {
  const a=ledgeDefinition(w.profile),s=old as LedgeState;
  const fail=(status:Step['status'],reason:string):Step=>({status,state:old,contacts:[],reason});
  if(!a){if(s.ledge!==undefined)return fail('invalidState','ledge state without capability');return baseStep(w,old,input);}
+ if((w as World&{dynamicSnapshot?:true}).dynamicSnapshot)return fail('unsupported','ledge runtime supports static worlds only');
  if(!supportedJumpProfile(w.profile))return fail('unsupported','ledge action key/version or bounded duration unsupported');
  const l=s.ledge;
  if(!l||keys(l)!=='action,actionRef,attachment'||![null,'ledgeGrab','ledgeClimb'].includes(l.action)||replayBytes(l.actionRef)!==replayBytes(l.action===null?null:a.action))return fail('invalidState','complete ledge state/action metadata required');
@@ -70,7 +71,7 @@ export function step(w:World,old:State,input:DashInput):Step {
  const valid=baseStep(still,{...plain,vx:0,vy:0},{moveX:0,moveY:0,run:false,jump:false,drop:false,dash:false});
  if(valid.status!=='ok')return {...valid,state:old};
  const stamina=(old as WallState).wall?.staminaTicks;
- if(stamina!==undefined&&stamina<1)return active?fail('invalidState','ledge stamina exhausted'):ordinary();
+ if(stamina!==undefined&&stamina<1)return ordinary();
  if(active&&((input.moveY??0)!==-1||input.drop||input.jump||input.dash||input.moveX!==active.side))return {...valid,state:{...valid.state,...initialLedge(w.profile)}};
  const elapsed=active?active.elapsed+1:0,startY=active?.startY??old.y,done=elapsed===a.climbTicks;
  const x=done?grip.x+grip.side*w.half:old.x,y=done?grip.y:startY+Number(BigInt(grip.y-startY)*BigInt(elapsed)/BigInt(a.climbTicks-1));

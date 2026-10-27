@@ -251,11 +251,26 @@ export class Navigation {
      const add=(a:RouteAction)=>{if(!a.durationTicks)return;if(a.durationTicks>settings.maxActionTicks||a.terminal.tick-initial.tick>settings.maxRouteTicks){durationLimit=true;return;}out.push({key:a.key,to:{state:a.terminal,depth:node.depth+1},cost:a.durationTicks+a.penaltyTicks,action:a});};
      const direct=await align(s,goal);if(direct)add(direct);
      if((hasLedge(this.profile)||hasWall(this.profile))&&(s.mode==='ground'||s.mode==='air')){
-      const generated=await (hasLedge(this.profile)?buildLedgeActions:buildWallActions)(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
-      replayTicks+=generated.replayTicks;
-      if(generated.status==='unsupported')throw new Exhausted('unsupported');
-      if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
-      for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+      const ingest=async(generated:import('./airborne').AirResult)=>{
+       replayTicks+=generated.replayTicks;
+       if(generated.status==='unsupported')throw new Exhausted('unsupported');
+       if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
+       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-e.initial.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+      };
+      const options=()=>({...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))});
+      if(hasLedge(this.profile)){
+       await ingest(await buildLedgeActions(this.map,this.profile,this.world,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,s));
+       // A sampled direct goal needs no unrelated expansion. Otherwise preserve
+       // every earlier ability family through a ledge-free candidate view; each
+       // candidate is replayed with the complete actual profile and state above.
+       if(out.some(t=>matches(t.to.state,goal)))return out;
+       const p={...this.profile,abilities:this.profile.abilities.filter(a=>a.kind!=='ledge')},w={...this.world,profile:p};
+       const {ledge:_,...plain}=s as ClimbState&import('../ledge/runtime').LedgeState;
+       if(!(s as import('../ledge/runtime').LedgeState).ledge?.attachment){
+        if(hasWall(p)||hasDash(p)||airJumpCount(p)>0)await ingest(await (hasWall(p)?buildWallActions:hasDash(p)?buildDashActions:buildAirJumpActions)(this.map,p,w,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,plain));
+        else if(s.mode==='ground'){const ordinary=await buildAirborneActions(this.map,p,this.revision,options(),cancelled,yieldTask,[s.x,s.y,s.x,s.y]);await ingest(ordinary);}
+       }
+      }else await ingest(await buildWallActions(this.map,this.profile,this.world,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,s));
      }
      if(s.mode!=='ground'){
       if(s.mode==='air'&&!hasLedge(this.profile)&&!hasWall(this.profile)&&(airJumpCount(this.profile)>0||hasDash(this.profile))){
@@ -263,7 +278,7 @@ export class Navigation {
        replayTicks+=generated.replayTicks;
        if(generated.status==='unsupported')throw new Exhausted('unsupported');
       if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
-       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-e.initial.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
       }
       for(const d of [-1,0,1] as const){const t:Template={key:'source-land-'+d,kind:'land',initial:s,input:[{...controls(d),moveY:s.mode==='climb'?1:0,fromTick:0}],ticks:settings.maxActionTicks};const a=await replayTemplate(s,t);if(a)add(a);}return out;
      }

@@ -1,4 +1,4 @@
-import {step} from '../ledge/runtime';
+import {step,hasLedge} from '../ledge/runtime';
 import {resolveStance,overlaps,type ContactMap,type Input,type State,type Step,type World} from '../physics-reference';
 import {sweep,groundY} from '../physics-reference/controller';
 import {integer} from '../physics-reference/integer';
@@ -29,6 +29,7 @@ export function platformStep(source:ContactMap,p:MovementDocument,old:State,inpu
  const events:PlatformEvent[]=[],offsets=new Map<string,Pair>();let s={...old};
  const wrap=(frame:Step,status:PlatformStep['platforms']['status']='ok'):PlatformStep=>({...frame,platforms:{tick:old.tick+1,status,events,offsets:Object.fromEntries(offsets)}});
  const failed=(reason:string,status:Step['status']='unsupported')=>wrap({status,state:old,contacts:[],reason},'unsupported');
+ if(hasLedge(p))return failed('ledge runtime supports static worlds only');
  try{
   const start=platformWorld(source,p,old.tick),owner=source.footholds.find(f=>f.id===old.supportId)?.ownerBodyId??source.bodies.find(b=>b.shapes.some(sh=>old.supportId?.startsWith(`unregistered:${b.id}/${sh.id}/`)))?.id;
   const supportBody=source.bodies.find(b=>b.id===owner),lastDelta:Pair=supportBody?.enabled&&supportBody.motion?motionOffset(supportBody.motion,old.tick+1).map((n,i)=>n-motionOffset(supportBody.motion!,old.tick)[i]!) as unknown as Pair:[0,0];
