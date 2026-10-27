@@ -13,6 +13,7 @@ import { worldToCss, visibleWorld } from '../render/transform';
 import { overlaps } from '../render/picking';
 import { searchCostGraph } from '../navigation/search';
 import { CONTROLLER_SHA256 } from '../navigation/identity';
+import { createNavigationWorker } from '../navigation/client';
 import { materialize, costFixture, type Workload } from './fixture';
 export const summarize=(raw:readonly number[])=>{
   if(raw.length!==5||raw.some(n=>!Number.isFinite(n)||n<0))throw Error('Expected five finite warm measurements');
@@ -24,7 +25,7 @@ const heap=():number|null=>(performance as Performance & {memory?:{usedJSHeapSiz
 async function warm(fn:()=>void|Promise<unknown>) {
   await fn();const raw:number[]=[];for(let i=0;i<5;i++){const start=performance.now();await fn();raw.push(performance.now()-start);}return summarize(raw);
 }
-async function navigation(map:MapDocument,profile:MovementDocument,cancel:boolean) {
+async function navigation(map:MapDocument,profile:MovementDocument) {
   const worker=new Worker(new URL('./worker.ts',import.meta.url),{type:'module'});
   let stop=()=>{};
   try {
@@ -33,14 +34,23 @@ async function navigation(map:MapDocument,profile:MovementDocument,cancel:boolea
     const result=new Promise<{status:string;ms:number}>((resolve)=>{
       const timer=setTimeout(()=>resolve({status:'timeout; terminated',ms:performance.now()-start}),20000);stop=()=>clearTimeout(timer);
       worker.onmessage=e=>{if(e.data.kind==='result'){stop();resolve({status:e.data.graph.status,ms:performance.now()-start});}
-        else if(e.data.kind==='pong'){stop();resolve({status:'cancel processed; event loop responsive',ms:performance.now()-cancelAt});}
         else if(e.data.kind==='error'){stop();resolve({status:e.data.reason,ms:performance.now()-start});}};
     });
-    let cancelAt=start;
-    worker.postMessage({kind:'build',job:1,revision:1,map,profile,settings:{maxSamples:cancel?2000000:4096,maxTicks:60}});
-    if(cancel){await wait(20);cancelAt=performance.now();worker.postMessage({kind:'cancel',job:1});worker.postMessage({kind:'ping',id:1});}
+    worker.postMessage({kind:'build',job:1,revision:1,map,profile,settings:{maxSamples:4096,maxTicks:60}});
     return await result;
   } finally {stop();worker.terminate();}
+}
+async function hardCancel(map:MapDocument,profile:MovementDocument,phase:'identity'|'graph') {
+  let terminated=0;
+  const runtime=createNavigationWorker(()=>{const worker=new Worker(new URL('../navigation/worker.ts',import.meta.url),{type:'module'}),terminate=worker.terminate.bind(worker);worker.terminate=()=>{terminated++;terminate();};return worker;});
+  try {
+    const building=runtime.session.build(map,profile,1);
+    if(phase==='graph')await building;
+    await wait(20);const start=performance.now();runtime.session.invalidate();await building;await wait(0);
+    const ms=performance.now()-start;
+    if(!terminated||runtime.session.graph!==null)throw Error('Dense cancellation retained worker or stale graph');
+    return {ms,status:'cancelled; worker terminated',terminated};
+  } finally {runtime.dispose();}
 }
 export async function runBenchmarks(base:MapDocument,profile:MovementDocument,tileset:TilesetDocument,recipes:{standard:Workload;dense:Workload;baseline:Workload;multilevel:Workload}) {
   const baselineHeap=heap(),map=materialize(base,recipes.standard),n=normalize(map as unknown as JsonValue);
@@ -78,14 +88,17 @@ export async function runBenchmarks(base:MapDocument,profile:MovementDocument,ti
   const frameP95=frames.map(raw=>[...raw].sort((a,b)=>a-b)[Math.ceil(raw.length*0.95)-1]!);
   const memory={baselineHeap,usedHeap:heap(),historyBytes:state.bytes,historyBudget:state.budget,scope:'JS heap snapshot only; browser/GPU working set unmeasured'};
   const nav:Record<string,unknown>={};
-  for(const key of ['baseline','multilevel','dense'] as const){const source=materialize(base,recipes[key]),raw=[];let status='';
-    await navigation(source,profile,key==='dense');
-    for(let i=0;i<5;i++){const r=await navigation(source,profile,key==='dense');raw.push(r.ms);status=r.status;}nav[key]={...summarize(raw),status};}
+  for(const key of ['baseline','multilevel'] as const){const source=materialize(base,recipes[key]),raw=[],statuses:string[]=[];
+    for(let i=0;i<5;i++){const r=await navigation(source,profile);raw.push(r.ms);statuses.push(r.status);}nav[key]={...summarize(raw),statuses,measurement:'cold worker build; full warm graph gate deferred'};}
+  const dense=materialize(base,recipes.dense);
+  for(const phase of ['identity','graph'] as const){await hardCancel(dense,profile,phase);const raw=[],statuses:string[]=[];
+    for(let i=0;i<5;i++){const r=await hardCancel(dense,profile,phase);raw.push(r.ms);statuses.push(r.status);}nav[`cancel-${phase}`]={...summarize(raw),statuses,measurement:'warm main-thread cancel path; worker is destroyed by cancellation'};}
   return {controller:CONTROLLER_SHA256,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,userAgent:navigator.userAgent,
     counts:recipes.standard,input,history,select,search,query,camera:{...summarize(frameP95),frames,longTasks,visibleObjects,taskObservation:observer?'supported':'unavailable'},memory,nav,
     scopeSplits:['CI browser build on Linux is not the Apple M1/16 GiB hardware-accelerated baseline or Safari.',
       'Input measures synchronous preview preparation; end-to-end pointer-to-present latency remains unmeasured.',
       '4096-sample graph jobs report budget honestly; full 100/300-support and incremental-edit targets remain unproven.',
+      'Baseline graph timings use cold worker realms; warm selected-region/graph targets require persistent worker measurements.',
       '10 MiB validated plugin save and 100 MiB cancellable worker export require a separate storage workload.',
       'JS heap excludes browser/GPU allocations; total 512 MiB working-set target remains unproven.']};
 }

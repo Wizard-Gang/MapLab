@@ -8,9 +8,11 @@ The consumer process independently validates generated source bytes against the 
 
 The scripted Chromium/WebKit runner is `tests/browser/performance.spec.ts`, using `/benchmarks/` at 1440×900 CSS pixels, DPR 2.
 It discards a warm-up, records five ten-second camera sweeps, and retains every frame interval and observed long task.
-Other operations retain five warm measurements plus p50/p95 (nearest rank: median and maximum for five samples).
-Navigation uses actual module workers; the dense cancel probe times cancel-message processing plus a queued event-loop ping.
-The worker is terminated after each probe, including a 20-second timeout. Graph baselines use a declared 4,096-sample budget, not a full-graph claim.
+Editor operations retain five warm measurements plus p50/p95 (nearest rank: median and maximum for five samples).
+Navigation uses actual module workers. Full-graph probes report five cold worker runs with a declared 4,096-sample budget and a 20-second timeout, not a warm/full-graph claim.
+Dense cancellation probes run the production worker client during identity and graph preprocessing; each requires worker termination, no published graph and a main-event-loop turn within 100 ms. Each phase discards one warm-up and records five cancellation samples.
+Cancellation intentionally destroys the worker realm. Identity hashing runs in the worker; main-thread snapshot/transport cost is still part of the deferred large-job preparation measurement.
+The graph cache has a 64 MiB retained serialized-byte budget and four LRU entries per profile; this byte charge is not a whole-heap guarantee. Art/history keep their existing explicit budgets.
 
 CI prints summaries and uploads `performance-<browser>-<shard>` JSON artifacts, including exact source head, controller digest, CPU/RAM/OS,
 browser version, Node version, build mode, raw timing arrays and heap snapshots. These are benchmark data, not delivery ledgers.

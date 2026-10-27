@@ -21,6 +21,9 @@ test('negative recipes refuse unsafe or out-of-scope allocations',()=>{
 test('dense stress retains all bodies and footholds rather than silently truncating',()=>{
   const map=materialize(base,recipes.dense);expect(map.bodies).toHaveLength(5000);expect(map.footholds).toHaveLength(10000);expect(new Set(map.footholds.map(f=>f.a.join(','))).size).toBe(100);
 });
+test('300-support benchmark has multiple separated elevations',()=>{
+  const map=materialize(base,recipes.multilevel);expect(map.footholds).toHaveLength(300);expect(new Set(map.footholds.map(f=>f.a[1])).size).toBe(30);
+});
 test('2000/8000 query agrees with independent analytic shortest cost and Dijkstra',async()=>{
   const graph=costFixture();expect(graph.nodes).toHaveLength(2000);expect(graph.edges).toHaveLength(8000);
   for(const algorithm of ['astar','dijkstra'] as const){const r=await searchCostGraph(graph,'n0','n1999',algorithm);expect([r.status,r.cost]).toEqual(['candidate',1999]);}

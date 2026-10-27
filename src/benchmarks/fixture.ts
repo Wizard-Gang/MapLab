@@ -5,7 +5,8 @@ export interface Workload { readonly cells: number; readonly layers: number; rea
 export function materialize(base: MapDocument, w: Workload): MapDocument {
   if (![w.cells,w.layers,w.objects,w.bodies,w.footholds].every(n=>Number.isSafeInteger(n)&&n>=0) || w.cells>100000 || w.layers<3 || w.layers>20 || w.objects>5000 || w.bodies>5000 || w.footholds>10000) throw Error('Invalid bounded workload');
   const body=base.bodies[0]!, foothold=base.footholds[0]!;
-  const position=(i:number):readonly [number,number]=>w.dense?[i%10,100+Math.floor(i/10)%10]:[(i%1000)*128,128+Math.floor(i/1000)*512];
+  const columns=w.footholds<=300?10:1000;
+  const position=(i:number):readonly [number,number]=>w.dense?[i%10,100+Math.floor(i/10)%10]:[(i%columns)*128,128+Math.floor(i/columns)*512];
   const cell:Cell={tileId:'tile.grass',quarterTurns:0,mirrorX:false,mirrorY:false}, chunks=new Map<string,TerrainChunk>();
   for(let i=0;i<w.cells;i++) {
     const x=i%5000,y=Math.floor(i/5000),column=Math.floor(x/32),row=Math.floor(y/32),key=`${column},${row}`;
