@@ -52,7 +52,7 @@ The owner-approved [R1 revision](docs/specifications/2026-10-17-maplab-r1/README
 amends that specification (1/16 WU quantum, ±131,072 WU range, 60 Hz ticks).
 
 See [the permanent current/future queue](implementation_plan.md),
-[contribution rules](CONTRIBUTING.md), and [ML-001 evidence](docs/changes/ML-001.md).
+and [contribution rules](CONTRIBUTING.md).
 Desired repository protections are committed in
 [`config/github-repository-settings.json`](config/github-repository-settings.json).
 They are **not evidence of live enforcement**. ML-002 adds the

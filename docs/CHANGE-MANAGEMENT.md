@@ -18,7 +18,7 @@ IDs never get reused. The permanent implementation plan is the sole current/futu
   its squash `[PLAN] Imperative summary (#PR)` rides the release PR beside the tasks.
 - IDs are unique and never recycled. The plan records the highest ID ever used; a new
   task takes an ID above it and raises it, and it never falls. A removed queued ID is
-  retired, so the queue and the delivery chain need not be contiguous. `change-id`
+  retired, so IDs need not be contiguous. `change-id`
   compares the base and head plans to enforce this.
 
 PR records contain Change, Reason, Impact, Risk, Controls, Validation, Evidence,
@@ -57,13 +57,9 @@ The owner's 2026-10-25 ruling batches tasks so the full suite runs once per rele
 - The release PR, `release/rNNN` -> `main`, opens only when Jacob says "release". Its
   title is `[RELEASE] rNNN: ML-0xx..ML-0yy` (one ID when the release holds one task).
   Its commits are exactly one squash commit per listed task, oldest first, each titled
-  as that task's record with or without its ` (#PR)` suffix, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
-- Deliveries up to ML-030 keep `mainCi`. Later entries carry
-  `gate: {head, conclusion, url}` on their last tested head.
-- [docs/releases.json](releases.json) records each merged release as
-  `{id, pr, testedHead, ci: {conclusion, url}, mainHead, tasks}`, appended by the
-  next release's first task. `change-id` fetches each release PR's head, requires it
-  to equal `testedHead`, and requires `mainHead`'s tree to equal `testedHead`'s tree.
+  `[ML-###] [TYPE] Summary` with or without its ` (#PR)` suffix, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
+- GitHub is the release and delivery record: merged PRs, their commits and their
+  exact-head checks. The repository keeps no delivery chain, release ledger or per-task change records.
   A rebase rewrites SHAs, so tree equality is the evidence.
 - A spec-locked "completed and passing main CI" dependency is met by the
   predecessor's green exact-head release gate; the full suite reaches main through

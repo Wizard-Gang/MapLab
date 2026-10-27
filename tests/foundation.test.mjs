@@ -8,14 +8,12 @@ import { requiredFiles } from '../scripts/check-foundation.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const temporary = [];
-const current = JSON.parse(readFileSync(join(root, 'config/change.json')));
-const history = JSON.parse(readFileSync(join(root, 'docs/deliveries.json')));
 afterEach(() => { for (const path of temporary.splice(0)) rmSync(path, { recursive: true, force: true }); });
 
 function fixture() {
   const path = mkdtempSync(join(tmpdir(), 'maplab-foundation-'));
   temporary.push(path);
-  for (const file of [...requiredFiles, current.record, ...history.map((e) => `docs/changes/${e.id}.md`)]) {
+  for (const file of requiredFiles) {
     mkdirSync(dirname(join(path, file)), { recursive: true });
     cpSync(join(root, file), join(path, file));
   }
