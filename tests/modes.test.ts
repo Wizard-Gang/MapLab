@@ -33,7 +33,7 @@ test('flight turn limits and acceleration change routes; A* cost equals Dijkstra
 test('volume edges, seams, missing bindings, wrong modes, malformed inputs and swept gaps fail closed',()=>{
  const map=read('water.map.json'),p=read('swimmer.movement.json'),world=new ModeWorld(map,p),s=cases[0].query.initial;
  expect(world.valid({...s,x:8*256})).toBe(false);expect(world.valid({...s,x:20*256})).toBe(true);expect(world.step({...s,x:11*256,vx:-256},{targetVx:-256,targetVy:0})).not.toBeNull();expect(world.step({...s,x:11*256-1,vx:-256},{targetVx:-256,targetVy:0})).toBeNull();
- const gap=structuredClone(map);gap.regions[1].shape.rect[0]+=1;expect(new ModeWorld(gap,p).valid({...s,x:20*256})).toBe(false);
+ const gap=structuredClone(map);gap.regions.find((r:any)=>r.id==='water.b').shape.rect[0]+=1;expect(new ModeWorld(gap,p).valid({...s,x:20*256})).toBe(false);
  expect(()=>new ModeWorld({...map,navigation:{...map.navigation,modeVolumes:[]}},p)).toThrow('matching');expect(world.valid({...s,mode:'fly'})).toBe(false);expect(world.step(s,{targetVx:NaN,targetVy:0})).toBeNull();expect(world.valid({...s,tick:Number.MAX_SAFE_INTEGER})).toBe(false);
 });
 test('entry/exit cannot be inferred, scripted diagonal links and unsupported swim drift are qualified',async()=>{
@@ -41,6 +41,8 @@ test('entry/exit cannot be inferred, scripted diagonal links and unsupported swi
  const bad=read('shore.map.json');bad.navigation.links[0].to.point=[10,19];expect(()=>new ModeWorld(bad,p)).toThrow('cardinal');const scripted=read('shore.map.json');scripted.navigation.links[0].action.key='animation.moves-me';expect(()=>new ModeWorld(scripted,p)).toThrow('Unsupported');
  const drift={...p,abilities:p.abilities.map((a:any)=>({...a,buoyancy:8192}))};expect(()=>new ModeWorld(map,drift)).toThrow('drift');
  const duplicate=read('shore.map.json');duplicate.navigation.links.push({...structuredClone(duplicate.navigation.links[0]),id:'shore:reverse'});expect(()=>new ModeWorld(duplicate,p)).toThrow('Duplicate mode transition');
+ const w=new ModeWorld(read('shore.map.json'),p),t=w.transitions.find(t=>t.id==='shore')!;expect(w.transition({...c.query.initial,tick:Number.MAX_SAFE_INTEGER-2},t,128)).toBeNull();expect(w.transition(c.query.initial,t,Infinity)).toBeNull();
+ const initial=structuredClone(c.query.initial),session=new ModeTestSession(w,initial);initial.x+=256;expect(session.recording().initial).toEqual(c.query.initial);
 },60000);
 test('mode/profile/volume/query/velocity identities and old worker replies cannot cross revisions',async()=>{
  const c=cases[0],m=read(c.map),p=read(c.profile),id=await modeIdentity(m,p,MODE_DEFAULTS);expect((await modeIdentity({...m,metadata:{...m.metadata,name:'Art only'}},p,MODE_DEFAULTS)).cacheKey).toBe(id.cacheKey);

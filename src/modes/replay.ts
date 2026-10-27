@@ -12,7 +12,7 @@ export function replayModes(world:ModeWorld,initial:ModeState,frames:readonly Mo
 }
 export class ModeTestSession {
  private current:ModeState;private frames:ModeFrame[]=[];
- constructor(readonly world:ModeWorld,readonly initial:ModeState){if(!world.valid(initial))throw Error('Invalid mode Test initial');this.current=own(initial);}
+ constructor(readonly world:ModeWorld,readonly initial:ModeState){if(!world.valid(initial))throw Error('Invalid mode Test initial');this.initial=own(initial);this.current=this.initial;}
  get state(){return this.current;}
  recording(){return own({initial:this.initial,frames:this.frames});}
  tick(input:ModeControl):boolean {const state=this.world.step(this.current,input);if(!state)return false;this.frames.push(own({state,input,action:null}));this.current=state;return true;}

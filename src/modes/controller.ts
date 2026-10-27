@@ -59,6 +59,7 @@ export class ModeWorld {
  /** Rest-to-rest straight transition; every intermediate sweep is inside the union
   * of the two mode domains. A dry endpoint contributes only its standing body. */
  transition(s:ModeState,t:Transition,maxTicks:number):readonly ModeFrame[]|null {
+  if(!Number.isSafeInteger(maxTicks)||maxTicks<1||maxTicks>600||!Number.isSafeInteger(s.tick+maxTicks)||s.tick+maxTicks>=Number.MAX_SAFE_INTEGER)return null;
   if(!this.valid(s)||s.mode!==t.from||s.x!==t.a[0]||s.y!==t.a[1]||s.vx||s.vy)return null;
   const moving=t.from==='ground'?t.to:t.from;if(moving==='ground')return null;
   const motor=this.motors.get(moving);if(!motor)return null;

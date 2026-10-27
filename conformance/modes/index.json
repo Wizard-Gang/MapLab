@@ -8,7 +8,7 @@
     },
     {
       "path": "blocked.map.json",
-      "sha256": "4f5e2784df2c5f660bc0ad05a26ced865e24faf47307f0d611744f26f52b4e56"
+      "sha256": "c343de2cfb31a5fcd25321b1516dd1f16243d21a7d04798c19a063f64404ff2d"
     },
     {
       "path": "cases.json",
@@ -16,11 +16,11 @@
     },
     {
       "path": "contracts.json",
-      "sha256": "e8a3ce6ba98c285b4225a237a2bcda35c3b701aadc1172a9467bf8dba057e8ca"
+      "sha256": "965a2146151e2d0d830c0bdef4e1980cbf3bbb5d2302bd5dd77c491ba1aeef9e"
     },
     {
       "path": "corner.map.json",
-      "sha256": "c21996ad1ed546dcb4f4956163de28237e15a3d66105a8f3b7171b60de8b0c41"
+      "sha256": "c9a6bcb687db55c5a1f6b488c7d3640b1086f08b2a3150b84e6f08c4650485ee"
     },
     {
       "path": "drift.movement.json",
@@ -32,7 +32,7 @@
     },
     {
       "path": "hybrid.movement.json",
-      "sha256": "7407c8621af096ff84ed8e6cc40116d609542370926fb9c1b7d6e3516d76a3ca"
+      "sha256": "ccd99d128643b5fe2a6df356366b8b272110ca96fd07eb3bb03095cf895041a5"
     },
     {
       "path": "modes.catalog.json",
@@ -40,7 +40,7 @@
     },
     {
       "path": "shore.map.json",
-      "sha256": "d4459f9f0635f95a706ed665c851ebe5f5a71cb1442a1d84ffc1b1d7ba87ccdb"
+      "sha256": "81f458f3f59c2e8401671df2a9e60bc330adc5e6e93c9f930e34946ae29c3622"
     },
     {
       "path": "slow.movement.json",
@@ -52,7 +52,7 @@
     },
     {
       "path": "transitions.map.json",
-      "sha256": "293937b0c4f649863f8147754d1787da563c3011258d3f46ae8c94d332198701"
+      "sha256": "9402d7d00ad6f6bd960efe45b50492202dcdab1426c592f1ebd47982f631ff9b"
     },
     {
       "path": "turn.fixture.json",
@@ -60,7 +60,7 @@
     },
     {
       "path": "water.map.json",
-      "sha256": "6475e6ac6e390749e52e8a7b99fed37e433b08adce555be6ac6adca257add755"
+      "sha256": "efc3069109299b9b6d5733044286d59cadc3baeda9ab3c7b7e7796f612fad52e"
     },
     {
       "path": "wide.movement.json",
