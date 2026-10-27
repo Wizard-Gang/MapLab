@@ -2,13 +2,13 @@
 
 ML-001's root commit `b0b1ff57859371be5aef7071394cb50c405d4794` is historical.
 Its [successful push CI](https://github.com/Wizard-Gang/MapLab/actions/runs/38990031757)
-was read back before ML-002 activation. Its change record is preserved unchanged.
+was read back before ML-002 activation.
 There is no root-commit path in current validation. Every new task uses one
 controlled branch, one scoped PR and one squash commit.
 
-`config/change.json`, the single active queue, the reserved future queue, current
-change record and preceding delivery chain must agree. The same validator accepts
-any reserved post-bootstrap task with a complete preceding chain; a synthetic
+`config/change.json`, the single active queue, the reserved future queue and
+`config/release.json` must agree. The same validator accepts
+any reserved post-bootstrap task; a synthetic
 ML-003 test proves it is not bound to ML-002. Offline evidence validation checks
 consistency; authenticated provider read-back establishes actual delivery.
 
@@ -112,15 +112,13 @@ be satisfied before merge.
 
 No CI runs on the merged result; the exact-head PR run is the evidence. GitHub's
 authorized automatic branch deletion occurs at merge; remove the local completed
-branch afterwards. Record final SHA, PR, checks and independent review in
-the external resumable ledger. On the next controlled activation, append that
-completed evidence to `docs/deliveries.json` and synchronize the permanent implementation plan's completed/current/future blocks. A commit
-cannot include its own final squash hash. The next release's first task appends the merged release to `docs/releases.json`.
+branch afterwards. GitHub's merged PR and its checks are the delivery record. On the next
+controlled activation, move the next task into the plan's active block and drop the delivered one.
 Stop sequential activation on any failed predecessor, gate, access or protection
 check; preserve work and evidence.
 
 ## Permanent plan and traceability
 
-`implementation_plan.md` is the sole current/future task queue. Each task has scope, exclusions, acceptance, executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `scripts/check-queue.mjs` enforces those fields and section link validity, an active block holding exactly the controlled task, retirement of completed IDs, unique live IDs and the plan's highest ID ever used. Since the owner's 2026-10-27 ruling the queue's content and order are free and no longer must match J2; `change-id` rejects a new task at or below the base's highest ID. `check:change` and canonical `check` invoke it.
+`implementation_plan.md` is the sole current/future task queue. Each task has scope, exclusions, acceptance, executable subtasks, owned fixtures, negative/positive tests, precise specification section anchors and delivery gates. `scripts/check-queue.mjs` enforces those fields and section link validity, an active block holding exactly the controlled task, unique live IDs and the plan's highest ID ever used. Since the owner's 2026-10-27 ruling the queue's content and order are free and no longer must match J2; `change-id` rejects a new task at or below the base's highest ID. `check:change` and canonical `check` invoke it.
 
-ML-002 delivered this governance scope. Later tasks change it only through their own controlled records; ML-003 generalized the queue tests to follow the delivery chain.
+ML-002 delivered this governance scope; later tasks change it only through their own controlled PRs.

@@ -4,73 +4,26 @@
 
 **Editing the plan (owner ruling, 2026-10-27):** any PR may add, edit, reorder or remove queued tasks at any time, whatever the queue holds. A PR that changes only this file is titled `[PLAN] Imperative summary` on a `plan-<summary>` branch into the open release branch; it takes no task ID and joins no release task list. IDs are unique and never recycled: a new task takes the ID above the mark below, which then rises to it, and a removed queued ID is retired for good, so IDs need not be contiguous.
 
-**Highest ID ever used:** ML-046.
+**Highest ID ever used:** ML-047.
 
-**Selection and retirement:** the active block holds exactly the controlled task in [config/change.json](config/change.json); any queued task may be the next one. After a verified protected squash into the open release branch on its green exact-head gate, the next activation appends the predecessor's evidence to [the delivery chain](docs/deliveries.json), retires it to one history line and moves its own task into the active block.
-
-## Completed history
-
-Full evidence for each line lives in the delivery chain and the linked change record.
-
-<!-- completed-history:start -->
-- **ML-001** — root commit `b0b1ff57859371be5aef7071394cb50c405d4794`; [record](docs/changes/ML-001.md). Its root exception is permanently closed.
-- **ML-002** — squash `3e27093`, PR #1; [record](docs/changes/ML-002.md).
-- **ML-003** — squash `cb3ba44`, PR #2; [record](docs/changes/ML-003.md).
-- **ML-004** — squash `5a35bf9`, PR #3; [record](docs/changes/ML-004.md).
-- **ML-005** — squash `ab87eec`, PR #4; [record](docs/changes/ML-005.md).
-- **ML-006** — squash `9d23326`, PR #5; [record](docs/changes/ML-006.md).
-- **ML-007** — squash `a6f3d61`, PR #6; [record](docs/changes/ML-007.md).
-- **ML-008** — squash `b7016dc`, PR #7; [record](docs/changes/ML-008.md).
-- **ML-009** — squash `211a18a`, PR #8; [record](docs/changes/ML-009.md).
-- **ML-010** — squash `61b4e28`, PR #9; [record](docs/changes/ML-010.md).
-- **ML-011** — squash `5727a5e`, PR #10; [record](docs/changes/ML-011.md).
-- **ML-012** — squash `4b1429e`, PR #11; [record](docs/changes/ML-012.md).
-- **ML-013** — squash `c435c2f`, PR #12; [record](docs/changes/ML-013.md).
-- **ML-014** — squash `99fe49a`, PR #13; [record](docs/changes/ML-014.md).
-- **ML-015** — squash `450e331`, PR #14; [record](docs/changes/ML-015.md).
-- **ML-016** — squash `3c51ff8`, PR #15; [record](docs/changes/ML-016.md).
-- **ML-017** — squash `87dcda0`, PR #16; [record](docs/changes/ML-017.md).
-- **ML-018** — squash `6b462c1`, PR #17; [record](docs/changes/ML-018.md).
-- **ML-019** — squash `6f5cf70`, PR #18; [record](docs/changes/ML-019.md).
-- **ML-020** — squash `4ca03bf`, PR #19; [record](docs/changes/ML-020.md).
-- **ML-021** — squash `cf091e7`, PR #20; [record](docs/changes/ML-021.md).
-- **ML-022** — squash `f4997bd`, PR #22 (security repair of PR #21); [record](docs/changes/ML-022.md).
-- **ML-023** — squash `a144833`, PR #23; [record](docs/changes/ML-023.md).
-- **ML-024** — squash `10f5a75`, PR #24; [record](docs/changes/ML-024.md).
-- **ML-025** — squash `8cae118`, PR #25; [record](docs/changes/ML-025.md).
-- **ML-026** — squash `db24c46`, PR #26; [record](docs/changes/ML-026.md).
-- **ML-027** — squash `faa1255`, PR #27; [record](docs/changes/ML-027.md).
-- **ML-028** — squash `30ad4ac`, PR #28; [record](docs/changes/ML-028.md).
-- **ML-029** — squash `bf239b8`, PR #29; [record](docs/changes/ML-029.md).
-- **ML-030** — squash `9e79034`, PR #30; [record](docs/changes/ML-030.md).
-- **ML-031** — squash `2a229ff`, PR #31; [record](docs/changes/ML-031.md).
-- **ML-032** — squash `f697149`, PR #32; [record](docs/changes/ML-032.md).
-- **ML-033** — squash `5a626ea`, PR #33; [record](docs/changes/ML-033.md).
-- **ML-034** — squash `8d4dba8`, PR #34; [record](docs/changes/ML-034.md).
-- **ML-035** — squash `16f32f3`, PR #35; [record](docs/changes/ML-035.md).
-- **ML-036** — squash `4d5330a`, PR #36; [record](docs/changes/ML-036.md).
-- **ML-037** — squash `2c3428b`, PR #37; [record](docs/changes/ML-037.md).
-- **ML-038** — squash `3140855`, PR #38; [record](docs/changes/ML-038.md).
-- **ML-039** — squash `ba25f60`, PR #39; [record](docs/changes/ML-039.md).
-- **ML-045** — squash `e61cf40`, PR #40; [record](docs/changes/ML-045.md).
-<!-- completed-history:end -->
+**Selection and retirement:** the active block holds exactly the controlled task in [config/change.json](config/change.json); any queued task may be the next one. After a verified protected squash into the open release branch on its green exact-head gate, the next activation drops it from the plan and moves its own task into the active block. GitHub's merged PRs and checks are the delivery record.
 
 ## Active task
 
 <!-- active-queue:start -->
-### ML-046 / P1
+### ML-047 / P1
 
-- **Source scope:** Release-PR commit matching in the change-contract checker, its contract tests and the change-management doc, so release squash commits match with or without a ` (#PR)` suffix.
+- **Source scope:** The change and queue checkers, the foundation check, their tests and the delivery docs, so the repository keeps no delivery chain, release ledger, per-task change records or completed history.
 - **Non-goals:** No repository settings, rulesets, workflows, product code or history rewrite; no change to any other task's scope.
-- **Acceptance:** The r001 release PR's change-id accepts its commits, three of which (ML-032, ML-033, ML-036) were squashed without ` (#PR)`; unlisted, missing, retitled or malformed commits still fail.
-- **Depends on:** ML-045 squashed into release/r001 on its green exact-head gate; owner's "release" call of 2026-10-27.
+- **Acceptance:** `docs/deliveries.json`, `docs/releases.json` and `docs/changes/` are gone; change-id still enforces task identity, the release task list and release PR commits; GitHub's merged PRs and checks are the record.
+- **Depends on:** Owner ruling of 2026-10-27: "we dont need to record releases or delivers. github does that."
 - **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [J2](docs/specifications/2026-10-16-maplab.md#j2-sequential-tasks); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
 - **Subtasks:**
-  1. Make the ` (#PR)` suffix optional in the task and plan squash patterns, matching the title lazily.
-  2. Record the suffix rule in the change-management doc's release PR description.
-  3. Create owned fixture(s): Release PR events whose task and plan squash commits omit the PR suffix.
-  4. Add executable checks: Contract tests that accept suffix-less release commits and reject a malformed plan commit.
-- **Task gate:** Run clean `npm ci`, `npm run check:foundation`, typecheck, build, smoke, `npm run check:change` and `npm run security` locally, with `npm run check` met by exact PR-head CI; exact PR-head `gate/change-id`, independent review and delivery read-back. No merge without protected gates.
+  1. Remove the delivery chain, release ledger and change-record checks from check-change, check-queue and check-foundation.
+  2. Delete the record files and the plan's completed history; update the delivery docs.
+  3. Create owned fixture(s): Controlled change and release configs without a record field or ledger.
+  4. Add executable checks: Contract tests that accept a task and release PR without records and still reject a mismatched task identity.
+- **Task gate:** Run clean `npm ci`, `npm run check:foundation`, typecheck, build, smoke, `npm run check:change` and `npm run security` locally, with `npm run check` met by exact PR-head CI; exact PR-head `gate/change-id`. No merge without protected gates.
 
 <!-- active-queue:end -->
 

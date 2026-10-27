@@ -30,12 +30,12 @@ export const requiredFiles = [
   'docs/RELEASE-MANAGEMENT.md',
   'docs/PROVENANCE.md', 'docs/specifications/2026-10-16-maplab.md',
   'config/github-repository-settings.json', 'config/lifecycle-scripts.json',
-  'config/change.json', 'config/release.json', 'docs/releases.json', 'package.json', 'package-lock.json', '.node-version',
+  'config/change.json', 'config/release.json', 'package.json', 'package-lock.json', '.node-version',
   '.npmrc', '.gitignore', 'index.html', 'tsconfig.json', 'vite.config.ts',
   'vitest.config.ts', 'src/app/App.tsx', 'src/app/main.tsx', 'src/app/styles.css',
   'tests/app.test.tsx', 'tests/foundation.test.mjs', 'scripts/check-foundation.mjs',
   'scripts/check-build.mjs', '.github/workflows/verify.yml', '.github/workflows/gate.yml', '.github/workflows/change.yml',
-  '.github/pull_request_template.md', 'docs/deliveries.json',
+  '.github/pull_request_template.md',
   'scripts/check-change.mjs', 'scripts/check-queue.mjs', 'scripts/repository-policy.mjs', 'scripts/verify-pr.mjs',
   'tests/change.test.mjs', 'tests/policy.test.mjs', 'docs/DELIVERY-GATES.md',
   // ML-009: the library folder, its loopback plugin, the npm start launcher and the browser gate.
@@ -197,10 +197,10 @@ export function checkFoundation(root) {
       && /^sha512-[A-Za-z0-9+/]+=*$/.test(entry.integrity ?? ''),
     `Unpinned registry bytes or local dependency: ${path}`);
   }
-  const change = checkChange(root);
+  checkChange(root);
   checkPolicyConfig(json('config/github-repository-settings.json'));
   checkWorkflows(read);
-  for (const file of [...requiredFiles.filter((p) => p.endsWith('.md')), change.record]) {
+  for (const file of requiredFiles.filter((p) => p.endsWith('.md'))) {
     for (const [, target] of read(file).matchAll(/\]\(([^\s)]+)\)/g)) {
       if (/^(?:https?:|#|mailto:)/.test(target)) continue;
       demand(existsSync(resolve(root, dirname(file), target.split('#')[0])),

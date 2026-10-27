@@ -1,7 +1,6 @@
 {
-  "id": "ML-046",
-  "type": "FIX",
-  "title": "[ML-046] [FIX] Match release commits without a PR suffix",
-  "branch": "ml-046-release-title-match",
-  "record": "docs/changes/ML-046.md"
+  "id": "ML-047",
+  "type": "CHORE",
+  "title": "[ML-047] [CHORE] Drop delivery and release records; GitHub is the record",
+  "branch": "ml-047-drop-delivery-records"
 }
