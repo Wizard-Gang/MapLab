@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { demand, sha, readJson, checkChange, checkSections, releaseTitle } from './check-change.mjs';
+import { demand, sha, readJson, checkChange, checkSections, releaseTitle, planTitle, planBranch, planBase } from './check-change.mjs';
 import { ghApi, optionalGhApi, readPolicy } from './repository-policy.mjs';
 
 // Release protocol: task PRs merge into the open release branch on the fast gate; only its release PR reaches main.
@@ -61,9 +61,11 @@ export function verifyPr(root, number, head) {
   const pr = ghApi(`${prefix}/pulls/${number}`);
   const base = pr.base.ref;
   const releasing = pr.head.ref === release.branch;
+  const planning = planTitle.test(pr.title);
   demand(pr.state === 'open' && pr.draft === false && pr.head.sha === head && (releasing
     ? base === 'main' && pr.title === releaseTitle(release)
-    : base === release.branch && pr.head.ref === change.branch && pr.title === change.title), 'PR identity/state/head differs');
+    : planning ? base === planBase(release, optionalGhApi(`${prefix}/git/ref/heads/${release.branch}`) !== null) && planBranch.test(pr.head.ref)
+      : base === release.branch && pr.head.ref === change.branch && pr.title === change.title), 'PR identity/state/head differs');
   checkSections(pr.body ?? '');
   demand(pr.body.includes(head), 'PR must record exact tested head');
   const tip = ghApi(`${prefix}/git/ref/heads/${base}`).object.sha;
@@ -80,7 +82,7 @@ export function verifyPr(root, number, head) {
   const checks = checkHeadChecks(response.check_runs, head, p.main.checksAppId, required, status.statuses);
   // Recheck identity after all read operations. Merge must still submit head as its SHA guard.
   demand(ghApi(`${prefix}/pulls/${number}`).head.sha === head && ghApi(`${prefix}/git/ref/heads/${base}`).object.sha === tip, `Head/${base} changed during evidence collection`);
-  return { task: releasing ? release.id : change.id, pr: pr.html_url, head, base, tip, checks, policy,
+  return { task: releasing ? release.id : planning ? pr.title : change.id, pr: pr.html_url, head, base, tip, checks, policy,
     mergeMethod: base === 'main' ? 'rebase' : 'squash', bypass: false };
 }
 
