@@ -65,6 +65,7 @@ test('independent exported consumer rejects forged controls, traces and rehashed
  }finally{rmSync(dir,{recursive:true,force:true});}
 },120000);
 test('bounded work, duration and cancellation publish no partial route',async()=>{
- const c=cases[0];for(const o of [{...MODE_DEFAULTS,maxReplayTicks:1},{...MODE_DEFAULTS,maxExpanded:1},{...MODE_DEFAULTS,maxRouteTicks:1}]){const proof=await planModes(read(c.map),read(c.profile),c.query,0,o,()=>false,sync);expect(proof.status).not.toBe('verified reachable with replay witness');expect(proof.frames).toEqual([]);}
+ const c=cases[0];for(const o of [{...MODE_DEFAULTS,maxReplayTicks:1},{...MODE_DEFAULTS,maxRouteTicks:1}]){const proof=await planModes(read(c.map),read(c.profile),c.query,0,o,()=>false,sync);expect(proof.status).not.toBe('verified reachable with replay witness');expect(proof.frames).toEqual([]);}
+ const corner={initial:{...read('turn.fixture.json').initial,vx:0},goal:{x:20*256,y:12*256,mode:'fly' as const},algorithm:'astar' as const},limited=await planModes(read('corner.map.json'),read('flyer.movement.json'),corner,0,{...MODE_DEFAULTS,maxExpanded:1},()=>false,sync);expect(limited.status).toBe('budget');expect(limited.frames).toEqual([]);
  const cancelled=await planModes(read(c.map),read(c.profile),c.query,0,MODE_DEFAULTS,()=>true,sync);expect(cancelled.status).toBe('cancelled');expect(cancelled.frames).toEqual([]);
 });

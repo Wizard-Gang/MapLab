@@ -26,6 +26,7 @@ materials, navigation overrides and unsupported transition intents are qualified
 These bounds do not claim arbitrary multimodal or continuous reachability.
 
 The search samples cardinal/stop controls, short macro durations and exact goal/anchor deltas.
+Replayed rest connectors include real braking displacement and both cardinal axis orders.
 Its state includes position, velocity and mode. Static shortest paths dominate later visits to
 the same physical state. A* uses L1 distance divided by the largest motor speed; Dijkstra uses
 zero. Work, expansion, transition and duration budgets never publish partial witnesses.

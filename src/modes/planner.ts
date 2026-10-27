@@ -31,6 +31,23 @@ export async function planModes(source:MapDocument,profile:MovementDocument,quer
   if(!world.valid(end))return result('no route found within declared search/sampling budget',[],'Goal body outside its mode domain or blocked');
   const goal=(s:ModeState)=>s.x===q.goal.x&&s.y===q.goal.y&&s.mode===q.goal.mode&&s.vx===0&&s.vy===0;
   const spend=(n:number)=>{replayTicks+=n;if(replayTicks>o.maxReplayTicks)throw Error('budget');if(cancelled())throw Error('cancelled');};
+  // Exact rest connectors refine terminal/anchor poses without filling the search
+  // with every one-tick sub-speed permutation. Braking is real displacement.
+  const connector=(start:ModeState,target:{x:number;y:number},order:readonly ('x'|'y')[]):readonly ModeFrame[]|null=>{
+   if(start.mode!=='swim'&&start.mode!=='fly')return null;
+   const m=world.motors.get(start.mode)!,swim=p.abilities.find(a=>a.kind==='swim');
+   if(start.mode==='swim'&&swim?.kind==='swim'&&swim.buoyancy!==p.air.gravity)return null;
+   let state=start;const frames:ModeFrame[]=[];
+   const tick=(u:ModeControl)=>{if(state.tick-q.initial.tick>=o.maxRouteTicks)return false;spend(1);const next=world.step(state,u);if(!next)return false;frames.push({state:next,input:u,action:null});state=next;return true;};
+   while(state.vx||state.vy)if(!tick({targetVx:0,targetVy:0}))return null;
+   for(const axis of order){
+    while(state[axis]!==target[axis]||state.vx||state.vy){
+     const delta=target[axis]-state[axis],remaining=Math.abs(delta),sign=Math.sign(delta),stop=(v:number)=>{const k=Math.max(0,Math.floor((v-1)/m.acceleration));return k*v-m.acceleration*k*(k+1)/2;};
+     let lo=0,hi=Math.min(m.speed,remaining);while(lo<hi){const v=Math.ceil((lo+hi)/2);if(v+stop(v)<=remaining)lo=v;else hi=v-1;}
+     if(!tick({targetVx:axis==='x'?(sign*lo||0):0,targetVy:axis==='y'?(sign*lo||0):0})||(target[axis]-state[axis])*sign<0)return null;
+    }
+   }return frames;
+  };
   const edges=async(s:ModeState):Promise<Edge[]>=>{
    expanded++;if(expanded%16===0){await yieldTask();if(cancelled())throw Error('cancelled');}
    const out:Edge[]=[],push=(frames:readonly ModeFrame[],key:string)=>{const to=frames.at(-1)?.state;if(to&&world.valid(to)&&to.tick-q.initial.tick<=o.maxRouteTicks)out.push({key,to,cost:frames.length,frames});};
@@ -43,12 +60,14 @@ export async function planModes(source:MapDocument,profile:MovementDocument,quer
    const controls:ModeControl[]=[{targetVx:0,targetVy:0},{targetVx:-speed,targetVy:0},{targetVx:speed,targetVy:0},{targetVx:0,targetVy:-speed},{targetVx:0,targetVy:speed}];
    // Refine around the goal and authored transition anchors, including sub-speed commands.
    const targets=[q.goal,...world.transitions.filter(t=>t.from===s.mode).map(t=>({x:t.a[0],y:t.a[1]}))];
+   const connectors=[...(q.goal.mode===s.mode?[q.goal]:[]),...world.transitions.filter(t=>t.from===s.mode).map(t=>({x:t.a[0],y:t.a[1]}))];
+   for(const t of connectors)for(const order of [['x','y'],['y','x']] as const){const frames=connector(s,t,order);if(frames?.length)push(frames,'connector:'+t.x+':'+t.y+':'+order.join(''));}
    for(const t of targets){const dx=t.x-s.x,dy=t.y-s.y;for(const [x,y] of [[dx,0],[0,dy]])if(Math.abs(x!)+Math.abs(y!)<=speed)controls.push({targetVx:x!||0,targetVy:y!||0});}
    const seen=new Set<string>();
    for(const u of controls){const k=JSON.stringify(u);if(seen.has(k))continue;seen.add(k);let state=s;const frames:ModeFrame[]=[];
     for(let n=0;n<o.actionTicks&&state.tick-q.initial.tick<o.maxRouteTicks;n++){
      spend(1);const next=world.step(state,u);if(!next)break;frames.push({state:next,input:u,action:null});state=next;
-     if(n===0||n===o.actionTicks-1||goal(state)||world.transitions.some(t=>t.from===state.mode&&t.a[0]===state.x&&t.a[1]===state.y&&!state.vx&&!state.vy))push([...frames],'control:'+k+':'+n);
+     if(n===o.actionTicks-1||goal(state)||world.transitions.some(t=>t.from===state.mode&&t.a[0]===state.x&&t.a[1]===state.y&&!state.vx&&!state.vy))push([...frames],'control:'+k+':'+n);
     }
    }
    return out;

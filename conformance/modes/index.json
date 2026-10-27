@@ -4,7 +4,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "38137958016f13565a0801ae791a08fdc52df7aa2a345870cafebeac884f3438"
+      "sha256": "1cca77d703f83416e432b768d1a1e5c7be5fbc7c967bfc4197594a0b3bcebf51"
     },
     {
       "path": "blocked.map.json",
@@ -16,7 +16,7 @@
     },
     {
       "path": "contracts.json",
-      "sha256": "965a2146151e2d0d830c0bdef4e1980cbf3bbb5d2302bd5dd77c491ba1aeef9e"
+      "sha256": "a10afb88820c8135e1d7271e63f09b44a552a8b29cbf0bf8af8b7aeaae352275"
     },
     {
       "path": "corner.map.json",
