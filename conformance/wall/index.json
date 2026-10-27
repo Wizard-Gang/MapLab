@@ -1,0 +1,75 @@
+{
+  "format": "maplab.conformance-index",
+  "version": 1,
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "61460efb3a6537ba9467fe836b43b4e0d25654103b4871d51f3a955be47167ce"
+    },
+    {
+      "path": "blocked-roof.fixture.json",
+      "sha256": "489a9244c8c5ca5ef11560e459825843ef52292f42106b9a3eac1b3a33265acd"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "f4d80b80c271e1d2792aa6b11ff62dde5bbcb0430e12337a8939abd8f0c78c47"
+    },
+    {
+      "path": "climb.fixture.json",
+      "sha256": "a8ee5e463adc70c2322315d90ff16a8a86c325e0464cd02195bc76d9febcf830"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "8930fccab89f973ee4da5563c8df556360003e7af98879d5da65efab7944c8a9"
+    },
+    {
+      "path": "corridor.map.json",
+      "sha256": "d3be8fcc24b65b36620e2eac98defc767cc316d91f8864af44f74a83c37dbad7"
+    },
+    {
+      "path": "landing-reset.fixture.json",
+      "sha256": "2341ff7bac0c2d2096c383f47474ddde33f62ad636d9e471da8c84d9547f9ef1"
+    },
+    {
+      "path": "left-jump.fixture.json",
+      "sha256": "1ba88e723ae2a8008e15a5c351b13739dfc1702d53d14569cf825809b4557550"
+    },
+    {
+      "path": "left-slide.fixture.json",
+      "sha256": "0eb0057dc1eb2530f1a9c7a6868df64403b5b9454f92a19694b42bc7c3c91e87"
+    },
+    {
+      "path": "none.movement.json",
+      "sha256": "1e5d799fbeacde6f4884f4db65d7e1ebd20ab6d214a57de2ce0e65357dd7bc95"
+    },
+    {
+      "path": "player.movement.json",
+      "sha256": "4c1b893307e2c4f34f05915d6a7cf692b7dce7984b0b7d116867c764a7697e6f"
+    },
+    {
+      "path": "right-jump.fixture.json",
+      "sha256": "a2b6c1ee5eeba520768896d0a555085885f1f87609d16bcb74704b6d84bb91ba"
+    },
+    {
+      "path": "right-slide.fixture.json",
+      "sha256": "ae0351ddf323833db4b7c6c4ac8ba3f8716dbe1e40da4a69bffed1d985f6e373"
+    },
+    {
+      "path": "roof.map.json",
+      "sha256": "2423491f1fb59a80e97835b10b2ec45a632c29b327b956fa7578e48a2950c865"
+    },
+    {
+      "path": "short.movement.json",
+      "sha256": "babdd580f2463c4a36c9ab6f061e3e1366da65ef64913cbe6363147ae93a2b2d"
+    },
+    {
+      "path": "slide.movement.json",
+      "sha256": "8ac904c6dc72baa1cc3c70d6d95ab7e4e8ebf4b914b962ba7ca06c168d9112f1"
+    },
+    {
+      "path": "stamina-exhaustion.fixture.json",
+      "sha256": "608d017002ffeef5546161004141c7cec2b33c465881798b6bff8c55d355e388"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+// Final-source identities are independently checked by CI.
+export const WALL_RUNTIME_SHA256='2f096b414fe9163a98d9d41331e02fecf99b759a06bea07ba1bab123a193a391';
+export const WALL_PRIMITIVE_SHA256='a77f3cf820bc7e9fb07a6d7dcc6db1503bf6d696a60e981f697baaf3b49bf238';
+export const WALL_INTENT_SHA256='0d4cf43f29241b889659d9ff0523220a1191b7c4e16e7d09eadb78e60c0ca56c';

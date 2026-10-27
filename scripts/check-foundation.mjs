@@ -55,6 +55,7 @@ const setup = [
 const prTypes = '    types: [opened, synchronize, reopened, edited, ready_for_review]';
 const aggregateRun = 'test "${{ needs.check.result }}" = success && test "${{ needs.browser.result }}" = success';
 const browserInstall = 'npx playwright install --with-deps ${{ matrix.project }}';
+const browserMirror = "sudo sed -i 's|azure\\.archive\\.ubuntu\\.com|archive.ubuntu.com|g' /etc/apt/apt-mirrors.txt";
 const browserRun = 'npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}';
 // Release protocol (ML-031): the full suite runs on release -> main PRs and on dispatch, the fast gate
 // on task PRs into release/**, and change identity on both. No workflow runs on push.
@@ -63,7 +64,7 @@ export const workflowPins = {
     on: ['  pull_request:', '    branches: [main]', prTypes, '  workflow_dispatch:'], uses: 6,
     jobs: {
       check: [[...setup, 'npm ci', 'npm run check'], 'Required CI job/command missing: check'],
-      browser: [[...setup, 'npm ci', browserInstall, browserRun],
+      browser: [[...setup, 'npm ci', browserMirror, browserInstall, browserRun],
         'CI must install Chromium and WebKit outside npm, then run every shard of the browser tests'],
       verify: [[aggregateRun], 'CI verify must require the check job and every browser shard to pass'],
       security: [[...setup, 'npm ci', 'npm run security'], 'Required CI job/command missing: security'],

@@ -1,4 +1,4 @@
-import {step,hasDash,initialDash,initialResources,type DashInput as Input,type DashRunInput as RunInput} from '../dash/runtime';
+import {step,hasDash,initialDash,initialWall,initialResources,type DashInput as Input,type DashRunInput as RunInput} from '../wall/runtime';
 // ML-020: ephemeral Test state. This module has no authoring, storage, rendering or engine dependency.
 import type { GameplaySession, GameplayView, SensorActor } from '../gameplay/runtime';
 import type { Condition, ContractRef } from '../contracts';
@@ -50,7 +50,7 @@ export function spawn(world: World, entityId?: string): State {
   return { x, y, vx: 0, vy: 0, mode: stance ? 'ground' : 'air', supportId: stance?.face.supportId ?? null,
     planeId: stance?.face.planeId ?? world.defaultPlane, facing: start.facing === 'left' ? -1 : 1, tick: 0,
     jumpHeldPrev: false, jumpReleased: false, ticksSinceJump: 0, dropSuppression: null,
-    resources: initialResources(world.profile), ...initialDash(world.profile), traversalId: null, climbReady: true };
+    resources: initialResources(world.profile), ...initialDash(world.profile), ...initialWall(world.profile), traversalId: null, climbReady: true };
 }
 
 /** Strict bounded schedule; failed imports leave the existing run untouched. */
