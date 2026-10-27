@@ -48,7 +48,7 @@ const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
 /** Physical identity includes empty space and all sources, so insertion/deletion anywhere
  * invalidates these witnesses. Swept bounds additionally identify the local dependency area.
  * Launch velocities are explicit preconditions, never a claim of reachable run-up/reset. */
-export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirOptions=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number]):Promise<AirResult>{
+export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirOptions=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number],sourceInitial?:ClimbState):Promise<AirResult>{
  const limits={spacingSu:1_000_000,maxCandidates:100_000,maxTicks:3600,maxReplayTicks:2_000_000,maxClearanceSamples:2_000_000};
  for(const k of Object.keys(limits) as (keyof typeof limits)[])if(!Number.isSafeInteger(settings[k])||settings[k]<1||settings[k]>limits[k])throw Error('invalid airborne settings');
  primitiveLimits(settings);
@@ -71,21 +71,23 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
  const intervals=surface.intervals,edges:Witness[]=[];
  const jump=p.abilities.find(a=>a.kind==='jump');
  const holds=jump?[...new Set([0,Math.floor(jump.holdTicks/2),jump.holdTicks])].sort((a,b)=>a-b):[];
- const speeds=[...new Set([0,p.ground.walkSpeed,p.ground.runSpeed,Math.floor(p.ground.runSpeed/2),-p.ground.walkSpeed,-p.ground.runSpeed,-Math.floor(p.ground.runSpeed/2)])].sort((a,b)=>a-b);
+ const speeds=sourceInitial?[sourceInitial.vx]:[...new Set([0,p.ground.walkSpeed,p.ground.runSpeed,Math.floor(p.ground.runSpeed/2),-p.ground.walkSpeed,-p.ground.runSpeed,-Math.floor(p.ground.runSpeed/2)])].sort((a,b)=>a-b);
  const safe=(s:ClimbState)=>s.x-w.half>=map.bounds[0]*256&&s.x+w.half<=(map.bounds[0]+map.bounds[2])*256&&s.y-w.height>=map.bounds[1]*256&&s.y<=(map.bounds[1]+map.bounds[3])*256&&!overlaps(w,s.x,s.y);
  const locate=(s:ClimbState)=>intervals.find(i=>i.supportId===s.supportId&&s.x>=i.minX&&s.x<=i.maxX);
  const allowed=(i:Interval,v:number)=>v===0||i.direction==='both'||(v>0?i.direction==='aToB':i.direction==='bToA');
  const checkpoint=async()=>{if(replayTicks%256===0)await yieldTask();if(cancelled())throw Error('cancelled');};
  try{
  for(const i of intervals){
+  if(sourceInitial&&(sourceInitial.mode!=='ground'||sourceInitial.supportId!==i.supportId))continue;
   const positions=new Set([i.minX,i.maxX,Math.floor((i.minX+i.maxX)/2)]);
+  if(sourceInitial)positions.add(sourceInitial.x);
   for(let x=Math.ceil(i.minX/options.spacingSu)*options.spacingSu;x<=i.maxX;x+=options.spacingSu)positions.add(x);
   // Target and obstacle critical X positions supplement the declared lattice, including narrow gaps.
   for(const x of [...intervals.flatMap(t=>[t.minX,t.maxX]),...w.faces.flatMap(f=>[f.a[0]-w.half,f.a[0]+w.half,f.b[0]-w.half,f.b[0]+w.half])])for(const refined of [x-Math.floor(options.spacingSu/2),x,x+Math.floor(options.spacingSu/2)])if(refined>=i.minX&&refined<=i.maxX)positions.add(refined);
   for(const x of [...positions].sort((a,b)=>a-b))for(const vx of speeds){
    if(launchRegionSu&&(x<launchRegionSu[0]||x>launchRegionSu[2]))continue;
    if(!allowed(i,vx))continue;
-   const initial=stateAt(w,i,x,vx);if(!initial||!safe(initial))continue;
+   const initial=sourceInitial?structuredClone(sourceInitial):stateAt(w,i,x,vx);if(!initial||!safe(initial))continue;
    // Conservative horizontal capability envelope, including ground conveyor run-out.
    const baseSpeed=BigInt(Math.max(p.ground.walkSpeed,p.ground.runSpeed));
    const scaled=[p.ground.uphill,p.ground.downhill].map(r=>(baseSpeed*BigInt(r.num)+BigInt(r.den)-1n)/BigInt(r.den));
@@ -102,7 +104,7 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
     let minX=s.x-w.half,maxX=s.x+w.half,minY=s.y-w.height,maxY=s.y;
     for(let tick=0;tick<options.maxTicks;tick++){
      if(replayTicks>=options.maxReplayTicks)throw Error('replay-budget');await checkpoint();replayTicks++;
-     const command:RunInput={fromTick:tick,moveX:schedule==='coast'&&air?0:direction,moveY:0,run:true,jump:kind==='jump'&&tick<=hold,drop:kind==='drop'&&tick===0};
+     const command:RunInput={fromTick:s.tick,moveX:schedule==='coast'&&air?0:direction,moveY:0,run:true,jump:kind==='jump'&&tick<=hold,drop:kind==='drop'&&tick===0};
      const previous=input.at(-1);if(!previous||previous.moveX!==command.moveX||previous.jump!==command.jump||previous.drop!==command.drop)input.push(command);
      const {fromTick:_,...controls}=command;
      const f=step(w,s,controls),next=f.state as ClimbState;frames.push(f);

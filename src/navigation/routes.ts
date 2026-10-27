@@ -264,11 +264,11 @@ export class Navigation {
        // every earlier ability family through a ledge-free candidate view; each
        // candidate is replayed with the complete actual profile and state above.
        if(out.some(t=>matches(t.to.state,goal)))return out;
-       const p={...this.profile,abilities:this.profile.abilities.filter(a=>a.kind!=='ledge')},w={...this.world,profile:p};
+       const p={...this.profile,abilities:this.profile.abilities.filter(a=>a.kind!=='ledge')},map={...this.map,navigation:{...this.map.navigation,overrides:this.map.navigation.overrides.map(o=>({...o,actions:o.actions.filter(a=>!['ledge','ledgeGrab','ledgeClimb'].includes(a))})).filter(o=>o.actions.length)}},w={...this.world,profile:p,source:map as unknown as ContactMap};
        const {ledge:_,...plain}=s as ClimbState&import('../ledge/runtime').LedgeState;
        if(!(s as import('../ledge/runtime').LedgeState).ledge?.attachment){
-        if(hasWall(p)||hasDash(p)||airJumpCount(p)>0)await ingest(await (hasWall(p)?buildWallActions:hasDash(p)?buildDashActions:buildAirJumpActions)(this.map,p,w,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,plain));
-        else if(s.mode==='ground'){const ordinary=await buildAirborneActions(this.map,p,this.revision,options(),cancelled,yieldTask,[s.x,s.y,s.x,s.y]);await ingest(ordinary);}
+        if(hasWall(p)||hasDash(p)||airJumpCount(p)>0)await ingest(await (hasWall(p)?buildWallActions:hasDash(p)?buildDashActions:buildAirJumpActions)(map,p,w,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,plain));
+        else if(s.mode==='ground'){const ordinary=await buildAirborneActions(map,p,this.revision,options(),cancelled,yieldTask,[s.x,s.y,s.x,s.y],plain);await ingest(ordinary);}
        }
       }else await ingest(await buildWallActions(this.map,this.profile,this.world,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,s));
      }
