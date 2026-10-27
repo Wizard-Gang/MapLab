@@ -10,7 +10,7 @@ export const SUPPORTED_CONTRACTS = Object.freeze(['riglab.export@1','riglab.rig@
   // ML-016: exact vocabulary understood by this data-only proof consumer. Planned entries
   // remain configured, not simulated; no gameplay handler is executed here.
   'enemy.slime@1', 'enemy.bat@1', 'enemy.forest-guardian@1', 'npc.ranger@1', 'chest.wooden@1',
-  'core.patrol@1', 'core.guard@1', 'core.idle@1', 'core.encounter.activate@1', 'core.encounter.cleared@1',
+  'core.ledge.climb@1', 'core.patrol@1', 'core.guard@1', 'core.idle@1', 'core.encounter.activate@1', 'core.encounter.cleared@1',
   'core.flag.set@1', 'core.body.set-enabled@1', 'core.checkpoint.activate@1', 'core.chest.open@1',
   'core.respawn-at-checkpoint@1', 'core.camera.shake.small@1', 'core.env.fireflies@1', 'core.env.tint@1']);
 /** The contracts each `{key, version}` member may bind, by document format and member name (F1). A supported
