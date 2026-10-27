@@ -3,10 +3,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { cpus, totalmem, platform, release } from 'node:os';
 import { execFileSync } from 'node:child_process';
 const read=(file:string)=>JSON.parse(readFileSync(file,'utf8'));
-test('owned large-world workloads publish five warm raw samples and explicit H5 scope splits',async({page,browser},info)=>{
+test('owned large-world workloads publish five warm raw samples and explicit H5 scope splits',async({page,browser,baseURL},info)=>{
   test.setTimeout(300000);await page.setViewportSize({width:1440,height:900});
   // DPR must be set by the browser context, not approximated by canvas scaling.
-  const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:2});const surface=await context.newPage();
+  const context=await browser.newContext({baseURL:baseURL!,viewport:{width:1440,height:900},deviceScaleFactor:2});const surface=await context.newPage();
   try {
     await surface.goto('/benchmarks/');
     const report=await surface.evaluate(async input=>{

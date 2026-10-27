@@ -9,6 +9,8 @@ import { ViewportSession } from '../editor/viewport';
 import { buildScene } from '../render/scene';
 import { PickIndex } from '../render/picking';
 import { CanvasViewport } from '../render/canvas';
+import { worldToCss, visibleWorld } from '../render/transform';
+import { overlaps } from '../render/picking';
 import { searchCostGraph } from '../navigation/search';
 import { CONTROLLER_SHA256 } from '../navigation/identity';
 import { materialize, costFixture, type Workload } from './fixture';
@@ -44,6 +46,7 @@ export async function runBenchmarks(base:MapDocument,profile:MovementDocument,ti
   const baselineHeap=heap(),map=materialize(base,recipes.standard),n=normalize(map as unknown as JsonValue);
   if(!n.ok)throw Error(JSON.stringify(n.problems));
   let state=openDocument(n.model),view=new ViewportSession();view.resize([1440,900],map.bounds);view.zoom([720,450],1);
+  const resetCamera=()=>{view.zoom([720,450],1);const c=view.getSnapshot().view.camera;view.pan([c[0]-720,c[1]-450]);};resetCamera();
   const scene=buildScene(state.model,new Map([[tileset.id,tileset]])),pick=new PickIndex(state.model,scene);
   const art=document.querySelector<HTMLCanvasElement>('#art')!,overlay=document.querySelector<HTMLCanvasElement>('#overlay')!;
   const renderer=new CanvasViewport(art,overlay,scene,view.getSnapshot());
@@ -55,18 +58,21 @@ export async function runBenchmarks(base:MapDocument,profile:MovementDocument,ti
   const delta=buffer.delta()!;const committed=commit(state,{label:'Benchmark 10k paint',ops:[{op:'paint',layerId:'layer.tiles',delta}]});
   if(committed.outcome!=='recorded')throw Error('Paint was refused');state=committed.state;
   const history=await warm(()=>{state=redo(undo(state));if(state.bytes>state.budget)throw Error('History exceeded budget');});
-  const select=await warm(()=>{pick.pick([32,128],view.getSnapshot(),'Objects');});
+  const select=await warm(()=>{const hits=pick.pick(worldToCss(view.getSnapshot().view,[16,144]),view.getSnapshot(),'Objects');if(!hits.some(k=>k.id==='visual.0'))throw Error('Selection benchmark missed the intended object');});
   const search=await warm(()=>{state.model.collections.get('visuals')!.order.filter(id=>state.model.collections.get('visuals')!.byId.get(id)!.name!.toString().includes('42'));});
   const graph=costFixture(),query=await warm(async()=>{const r=await searchCostGraph(graph,'n0','n1999','astar');if(r.status!=='candidate'||r.cost!==1999)throw Error('Wrong graph result');});
-  const frames:number[][]=[],longTasks:number[][]=[];
+  const frames:number[][]=[],longTasks:number[][]=[],visibleObjects:number[]=[];
   let tasks:number[]=[];const observer=typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes.includes('longtask')?new PerformanceObserver(list=>{tasks.push(...list.getEntries().map(e=>e.duration));}):null;
   observer?.observe({type:'longtask'});
   try {
     // One discarded warm sweep, then five ten-second camera sweeps at the specified viewport/DPR.
     for(let run=-1;run<5;run++){
+      resetCamera();const visible=visibleWorld(view.getSnapshot().view,[1440,900]);
+      const count=scene.art.reduce((n,l)=>n+l.commands.filter(p=>overlaps(p.bounds,visible)).length,0);
+      if(count<1||count>1000)throw Error('Camera workload must show 1..1000 objects');visibleObjects.push(count);
       const raw:number[]=[];tasks=[];const start=performance.now();let previous=await frame();
-      do {view.pan([-2,0]);renderer.update(scene,view.getSnapshot());const now=await frame();raw.push(now-previous);previous=now;}while(performance.now()-start<(run<0?500:10000));
-      if(run>=0){frames.push(raw);longTasks.push(tasks);}view.pan([2000,0]);
+      do {view.pan([-2,0]);view.zoom([720,450],1+0.1*Math.sin((performance.now()-start)/1000));renderer.update(scene,view.getSnapshot());const now=await frame();raw.push(now-previous);previous=now;}while(performance.now()-start<(run<0?500:10000));
+      if(run>=0){frames.push(raw);longTasks.push(tasks);}
     }
   } finally {observer?.disconnect();renderer.dispose();session.cancel();}
   const frameP95=frames.map(raw=>[...raw].sort((a,b)=>a-b)[Math.ceil(raw.length*0.95)-1]!);
@@ -76,7 +82,7 @@ export async function runBenchmarks(base:MapDocument,profile:MovementDocument,ti
     await navigation(source,profile,key==='dense');
     for(let i=0;i<5;i++){const r=await navigation(source,profile,key==='dense');raw.push(r.ms);status=r.status;}nav[key]={...summarize(raw),status};}
   return {controller:CONTROLLER_SHA256,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,userAgent:navigator.userAgent,
-    counts:recipes.standard,input,history,select,search,query,camera:{...summarize(frameP95),frames,longTasks,taskObservation:observer?'supported':'unavailable'},memory,nav,
+    counts:recipes.standard,input,history,select,search,query,camera:{...summarize(frameP95),frames,longTasks,visibleObjects,taskObservation:observer?'supported':'unavailable'},memory,nav,
     scopeSplits:['CI browser build on Linux is not the Apple M1/16 GiB hardware-accelerated baseline or Safari.',
       'Input measures synchronous preview preparation; end-to-end pointer-to-present latency remains unmeasured.',
       '4096-sample graph jobs report budget honestly; full 100/300-support and incremental-edit targets remain unproven.',
