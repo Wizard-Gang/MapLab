@@ -16,12 +16,16 @@
       "sha256": "07be86464f9e61c7fceab429a8f66dd688d8a452503ea6ed611f9f8ecec1937f"
     },
     {
+      "path": "boosted.movement.json",
+      "sha256": "66d236e5304cbc4232363f91f17e3204d36bad778dfe4cd374386ea08c12352a"
+    },
+    {
       "path": "cases.json",
-      "sha256": "e2cce77293789b40a3508a5a42655f9337f7cfd76e88da9ea072377a779df826"
+      "sha256": "c4f271cb4d70be37d3c80f7ab58a11c6898a6259267ae74b7a70d01a1adcb492"
     },
     {
       "path": "contracts.json",
-      "sha256": "f90822d72fcfe08e6a11dd5bb6006a65077f1518bc1bfdb7a611a38bb22e2682"
+      "sha256": "f789b6dd05d1445dd9df851609002e939fce9c123aad2d2c52c066bd86a967fd"
     },
     {
       "path": "control.movement.json",
@@ -33,7 +37,7 @@
     },
     {
       "path": "open.map.json",
-      "sha256": "154db2cdca68f0dfdec31ff28b36e098b485ee3dd1e86c5a6c789fc9416f91d9"
+      "sha256": "ab8a1f591f8bd9a6d5a379e4cefda812ccb63abcfcac5637261f0d6a8c1602ad"
     },
     {
       "path": "replace.movement.json",
@@ -57,7 +61,7 @@
     },
     {
       "path": "wall.map.json",
-      "sha256": "2f82517903e2eecdae93f6e51f5920cd81952733348fe4a44e95f6d2ab3fff12"
+      "sha256": "c655014eaf5e3a3254acc8bd137d5ca6c779c4c91cc86b8c401a081f8ee6b8ee"
     },
     {
       "path": "wide.movement.json",

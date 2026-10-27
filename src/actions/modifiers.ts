@@ -8,7 +8,7 @@ export interface ActiveModifier {readonly id:string;readonly key:typeof MODIFIER
 export const keys=(v:object)=>Object.keys(v).sort().join(',');
 const small=(n:number,lo:number,hi:number)=>Number.isSafeInteger(n)&&n>=lo&&n<=hi;
 export function validModifiers(values:readonly ActiveModifier[]):boolean {
- return Array.isArray(values)&&values.length<=8&&new Set(values.map(v=>v?.id)).size===values.length&&values.every(v=>v&&keys(v)==='den,field,id,key,num,ticksLeft,version'&&/^[a-z0-9][a-z0-9._:-]{0,95}$/.test(v.id)&&v.key===MODIFIER.key&&v.version===1&&FIELDS.includes(v.field)&&small(v.num,0,16)&&small(v.den,1,16)&&small(v.ticksLeft,1,600));
+ return Array.isArray(values)&&values.length<=8&&new Set(values.map(v=>v?.id)).size===values.length&&values.every(v=>v&&keys(v)==='den,field,id,key,num,ticksLeft,version'&&typeof v.id==='string'&&/^[a-z0-9][a-z0-9._:-]{0,95}$/.test(v.id)&&v.key===MODIFIER.key&&v.version===1&&FIELDS.includes(v.field)&&small(v.num,0,16)&&small(v.den,1,16)&&small(v.ticksLeft,1,600));
 }
 export function applyModifier(p:MovementDocument,active:readonly ActiveModifier[],id:string,call:Call):readonly ActiveModifier[] {
  const ability=p.abilities.find(a=>a.kind==='modifier');

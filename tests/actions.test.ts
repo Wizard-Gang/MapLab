@@ -38,7 +38,7 @@ test('rational stack, single truncation, clamp, replacement, expiry and effectiv
  const replace=read('replace.movement.json'),r=applyModifier(replace,applyModifier(replace,[],'buff.a',call(2,1)),'buff.b',call(3,1));expect(r).toHaveLength(1);expect(effectiveProfile(replace,r).ground.runSpeed).toBe(768);
  expect(await effectiveProfileHash(p,y)).toBe(await effectiveProfileHash(p,[...y].reverse()));expect(await effectiveProfileHash(p,y)).not.toBe(await effectiveProfileHash(p,y.map(v=>({...v,ticksLeft:v.ticksLeft-1}))));expect(await effectiveProfileHash(p,[])).not.toBe(await effectiveProfileHash(p,y));
  for(const bad of [call(17,1),call(1,0),{...call(1,1),params:{...call(1,1).params,extra:0}},{...call(1,1),key:'unknown.modifier'}])expect(()=>applyModifier(p,[],'buff.bad',bad)).toThrow();
- expect(()=>applyModifier(p,[],'bad id',call(1,1))).toThrow();expect(()=>effectiveProfile(replace,y)).toThrow('replacement');
+ expect(()=>applyModifier(p,[],'bad id',call(1,1))).toThrow();expect(()=>applyModifier(p,[],123 as any,call(1,1))).toThrow();expect(()=>effectiveProfile(replace,y)).toThrow('replacement');
 });
 test('cache identity retains state, profile and physical changes; stale/cancelled workers publish nothing',async()=>{
  const m=read('open.map.json'),p=read('actions.movement.json'),q=cases[0].query,id=await actionIdentity(m,p,initial,ACTION_DEFAULTS);
@@ -46,6 +46,7 @@ test('cache identity retains state, profile and physical changes; stale/cancelle
  const art={...m,metadata:{...m.metadata,name:'Art only'}};expect((await actionIdentity(art,p,initial,ACTION_DEFAULTS)).cacheKey).toBe(id.cacheKey);
  expect((await actionIdentity(m,{...p,air:{...p.air,gravity:p.air.gravity+1}},initial,ACTION_DEFAULTS)).cacheKey).not.toBe(id.cacheKey);
  const moved=structuredClone(m);moved.bodies[0].position[0]++;expect((await actionIdentity(moved,p,initial,ACTION_DEFAULTS)).cacheKey).not.toBe(id.cacheKey);
+ const layer=structuredClone(m);layer.layers[0].id='layer.changed';expect((await actionIdentity(layer,p,initial,ACTION_DEFAULTS)).cacheKey).not.toBe(id.cacheKey);
  const requests:ActionRequest[]=[],session=new ActionSession(r=>requests.push(r));await session.solve(m,p,q,7);const r=requests.at(-1)!;const proof=await planActions(m,p,q,7,ACTION_DEFAULTS,()=>false,sync);expect(session.accept({kind:'proof',job:r.job,proof:{...proof,querySha256:'stale'}})).toBe(false);expect(session.accept({kind:'proof',job:r.job,proof:{...proof,revision:6}})).toBe(false);session.invalidate();expect(session.accept({kind:'proof',job:r.job,proof})).toBe(false);session.dispose();
  const replies:ActionReply[]=[],endpoint=createActionEndpoint(r=>replies.push(r));const pending=endpoint({...r,job:99});await endpoint({kind:'cancel',job:99});await pending;expect(replies).toEqual([]);
 });
