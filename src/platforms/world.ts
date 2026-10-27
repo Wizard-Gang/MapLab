@@ -15,7 +15,7 @@ function basis(source:ContactMap,p:MovementDocument):World{
  if(world.faces.length>PLATFORM_LIMITS.faces)throw Error('Platform face budget');profiles.set(p,world);return world;
 }
 /** Ephemeral collision snapshot. Static navigation never receives this adapter. */
-export function platformWorld(source:ContactMap,p:MovementDocument,tick:number,overrides:ReadonlyMap<string,Pair>=new Map(),omit:ReadonlySet<string>=new Set()):World{
+export function platformWorld(source:ContactMap,p:MovementDocument,tick:number,overrides:ReadonlyMap<string,Pair>=new Map(),omit:ReadonlySet<string>=new Set()):World&{readonly dynamicSnapshot:true}{
  const base=basis(source,p),offsets=new Map(source.bodies.map(b=>[b.id,overrides.get(b.id)??(b.motion?motionOffset(b.motion,tick):[0,0] as Pair)]));
  const owner=(supportId:string|null)=>source.footholds.find(f=>f.id===supportId)?.ownerBodyId??'';
  const shift=(point:Point,offset:Pair):Point=>[integer(point[0]+offset[0]),integer(point[1]+offset[1])];
@@ -27,5 +27,5 @@ export function platformWorld(source:ContactMap,p:MovementDocument,tick:number,o
   if(shape.kind==='segment')continue;const points=base.solids[index++]!;if(!omit.has(b.id))solids.push(points.map(v=>shift(v,offsets.get(b.id)!)));
  }
  const snapshot={...base.source,bodies:base.source.bodies.map(b=>({...b,enabled:b.enabled&&!omit.has(b.id),position:[b.position[0]+offsets.get(b.id)![0]/256,b.position[1]+offsets.get(b.id)![1]/256] as Pair}))};
- return {...base,source:snapshot,faces,solids};
+ return {...base,source:snapshot,faces,solids,dynamicSnapshot:true};
 }

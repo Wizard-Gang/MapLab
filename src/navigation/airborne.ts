@@ -1,11 +1,13 @@
+import {buildLedgeActions} from './ledge';
+import {LEDGE_PRIMITIVE_SHA256} from '../ledge/identity';
 import {buildWallActions} from './wall';
 import {WALL_PRIMITIVE_SHA256} from '../wall/identity';
-import {step,airJumpCount,supportedJumpProfile,hasWall,hasDash} from '../wall/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasLedge,hasWall,hasDash} from '../ledge/runtime';
 import {buildDashActions} from './dash';
 import {DASH_PRIMITIVE_SHA256} from '../dash/identity';
 import {buildAirJumpActions,primitiveLimits,type PrimitiveLimits} from './air-jumps';
 import {AIR_PRIMITIVE_SHA256} from '../air-jumps/identity';
-import {groundIntentSupported,groundMotionAllowed} from '../wall/intent';
+import {groundIntentSupported,groundMotionAllowed} from '../ledge/intent';
 // Bounded single-action solver. These exact action states are not a route graph.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -19,7 +21,7 @@ export interface AirSettings {
 }
 export type AirOptions=AirSettings&Partial<PrimitiveLimits>;
 export const AIR_DEFAULTS:AirSettings={spacingSu:8192,maxCandidates:20_000,maxTicks:240,maxReplayTicks:1_000_000,maxClearanceSamples:2_000_000};
-export type Action='jump'|'fall'|'drop'|'dash'|'wallSlide'|'wallJump'|'wallClimb';
+export type Action='jump'|'fall'|'drop'|'dash'|'wallSlide'|'wallJump'|'wallClimb'|'ledgeClimb';
 export interface Witness {
  readonly key:string; readonly kind:Action; readonly status:'verified reachable with replay witness';
  readonly fromInterval:string; readonly toInterval:string; readonly initial:ClimbState; readonly terminal:ClimbState;
@@ -36,7 +38,7 @@ export interface AirResult {
 }
 export async function airborneIdentity(map:MapDocument,p:MovementDocument,settings:AirOptions):Promise<Identity>{
  const base=await surfaceIdentity(map,p,DEFAULT_SETTINGS);
- const settingsSha256=await digest({solver:hasWall(p)?'stateful-wall@1':hasDash(p)?'stateful-dash@1':airJumpCount(p)>0?'stateful-airborne@1':'single-airborne@2',surfaceSolver:base.settingsSha256,...settings,...(hasWall(p)?{...primitiveLimits(settings),primitiveSha256:WALL_PRIMITIVE_SHA256}:hasDash(p)?{...primitiveLimits(settings),primitiveSha256:DASH_PRIMITIVE_SHA256}:airJumpCount(p)>0?{...primitiveLimits(settings),primitiveSha256:AIR_PRIMITIVE_SHA256}:{})});
+ const settingsSha256=await digest({solver:hasLedge(p)?'stateful-ledge@1':hasWall(p)?'stateful-wall@1':hasDash(p)?'stateful-dash@1':airJumpCount(p)>0?'stateful-airborne@1':'single-airborne@2',surfaceSolver:base.settingsSha256,...settings,...(hasLedge(p)?{...primitiveLimits(settings),primitiveSha256:LEDGE_PRIMITIVE_SHA256}:hasWall(p)?{...primitiveLimits(settings),primitiveSha256:WALL_PRIMITIVE_SHA256}:hasDash(p)?{...primitiveLimits(settings),primitiveSha256:DASH_PRIMITIVE_SHA256}:airJumpCount(p)>0?{...primitiveLimits(settings),primitiveSha256:AIR_PRIMITIVE_SHA256}:{})});
  const value={...base,settingsSha256};return {...value,cacheKey:await digest({worldSha256:value.worldSha256,profileSha256:value.profileSha256,controllerSha256:value.controllerSha256,settingsSha256})};
 }
 const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
@@ -46,7 +48,7 @@ const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
 /** Physical identity includes empty space and all sources, so insertion/deletion anywhere
  * invalidates these witnesses. Swept bounds additionally identify the local dependency area.
  * Launch velocities are explicit preconditions, never a claim of reachable run-up/reset. */
-export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirOptions=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number]):Promise<AirResult>{
+export async function buildAirborneActions(source:MapDocument,profile:MovementDocument,revision:number,settings:AirOptions=AIR_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0)),launchRegionSu?:readonly[number,number,number,number],sourceInitial?:ClimbState):Promise<AirResult>{
  const limits={spacingSu:1_000_000,maxCandidates:100_000,maxTicks:3600,maxReplayTicks:2_000_000,maxClearanceSamples:2_000_000};
  for(const k of Object.keys(limits) as (keyof typeof limits)[])if(!Number.isSafeInteger(settings[k])||settings[k]<1||settings[k]>limits[k])throw Error('invalid airborne settings');
  primitiveLimits(settings);
@@ -62,27 +64,30 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
  let w:World;try{w=createWorld(map as unknown as ContactMap,p);}catch(e){return result('unsupported',[String(e)]);}
  const surface=await buildSurfaceGraph(map,p,revision,{maxSamples:options.maxClearanceSamples,maxTicks:3600},cancelled,yieldTask);
  if(surface.status!=='candidate')return result(surface.status,surface.diagnostics);
+ if(hasLedge(p))return buildLedgeActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(hasWall(p))return buildWallActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(hasDash(p))return buildDashActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(airJumpCount(p)>0)return buildAirJumpActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  const intervals=surface.intervals,edges:Witness[]=[];
  const jump=p.abilities.find(a=>a.kind==='jump');
  const holds=jump?[...new Set([0,Math.floor(jump.holdTicks/2),jump.holdTicks])].sort((a,b)=>a-b):[];
- const speeds=[...new Set([0,p.ground.walkSpeed,p.ground.runSpeed,Math.floor(p.ground.runSpeed/2),-p.ground.walkSpeed,-p.ground.runSpeed,-Math.floor(p.ground.runSpeed/2)])].sort((a,b)=>a-b);
+ const speeds=sourceInitial?[sourceInitial.vx]:[...new Set([0,p.ground.walkSpeed,p.ground.runSpeed,Math.floor(p.ground.runSpeed/2),-p.ground.walkSpeed,-p.ground.runSpeed,-Math.floor(p.ground.runSpeed/2)])].sort((a,b)=>a-b);
  const safe=(s:ClimbState)=>s.x-w.half>=map.bounds[0]*256&&s.x+w.half<=(map.bounds[0]+map.bounds[2])*256&&s.y-w.height>=map.bounds[1]*256&&s.y<=(map.bounds[1]+map.bounds[3])*256&&!overlaps(w,s.x,s.y);
  const locate=(s:ClimbState)=>intervals.find(i=>i.supportId===s.supportId&&s.x>=i.minX&&s.x<=i.maxX);
  const allowed=(i:Interval,v:number)=>v===0||i.direction==='both'||(v>0?i.direction==='aToB':i.direction==='bToA');
  const checkpoint=async()=>{if(replayTicks%256===0)await yieldTask();if(cancelled())throw Error('cancelled');};
  try{
  for(const i of intervals){
+  if(sourceInitial&&(sourceInitial.mode!=='ground'||sourceInitial.supportId!==i.supportId))continue;
   const positions=new Set([i.minX,i.maxX,Math.floor((i.minX+i.maxX)/2)]);
+  if(sourceInitial)positions.add(sourceInitial.x);
   for(let x=Math.ceil(i.minX/options.spacingSu)*options.spacingSu;x<=i.maxX;x+=options.spacingSu)positions.add(x);
   // Target and obstacle critical X positions supplement the declared lattice, including narrow gaps.
   for(const x of [...intervals.flatMap(t=>[t.minX,t.maxX]),...w.faces.flatMap(f=>[f.a[0]-w.half,f.a[0]+w.half,f.b[0]-w.half,f.b[0]+w.half])])for(const refined of [x-Math.floor(options.spacingSu/2),x,x+Math.floor(options.spacingSu/2)])if(refined>=i.minX&&refined<=i.maxX)positions.add(refined);
   for(const x of [...positions].sort((a,b)=>a-b))for(const vx of speeds){
    if(launchRegionSu&&(x<launchRegionSu[0]||x>launchRegionSu[2]))continue;
    if(!allowed(i,vx))continue;
-   const initial=stateAt(w,i,x,vx);if(!initial||!safe(initial))continue;
+   const initial=sourceInitial?structuredClone(sourceInitial):stateAt(w,i,x,vx);if(!initial||!safe(initial))continue;
    // Conservative horizontal capability envelope, including ground conveyor run-out.
    const baseSpeed=BigInt(Math.max(p.ground.walkSpeed,p.ground.runSpeed));
    const scaled=[p.ground.uphill,p.ground.downhill].map(r=>(baseSpeed*BigInt(r.num)+BigInt(r.den)-1n)/BigInt(r.den));
@@ -99,7 +104,7 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
     let minX=s.x-w.half,maxX=s.x+w.half,minY=s.y-w.height,maxY=s.y;
     for(let tick=0;tick<options.maxTicks;tick++){
      if(replayTicks>=options.maxReplayTicks)throw Error('replay-budget');await checkpoint();replayTicks++;
-     const command:RunInput={fromTick:tick,moveX:schedule==='coast'&&air?0:direction,moveY:0,run:true,jump:kind==='jump'&&tick<=hold,drop:kind==='drop'&&tick===0};
+     const command:RunInput={fromTick:s.tick,moveX:schedule==='coast'&&air?0:direction,moveY:0,run:true,jump:kind==='jump'&&tick<=hold,drop:kind==='drop'&&tick===0};
      const previous=input.at(-1);if(!previous||previous.moveX!==command.moveX||previous.jump!==command.jump||previous.drop!==command.drop)input.push(command);
      const {fromTick:_,...controls}=command;
      const f=step(w,s,controls),next=f.state as ClimbState;frames.push(f);

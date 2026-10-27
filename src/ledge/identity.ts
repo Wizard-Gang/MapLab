@@ -1,0 +1,4 @@
+// Final-source identities are independently checked by CI.
+export const LEDGE_RUNTIME_SHA256='1c61abbeaf4e2aac9cba9c5de4e28cc07888403a328637949a7cc114f3c61562';
+export const LEDGE_PRIMITIVE_SHA256='b116e92801ec4f10177ae940df62b57cdfdc95c3f22ba8eda8935f4f9836f005';
+export const LEDGE_INTENT_SHA256='3aa1c8d911c0357536036406320e9d5d31611b6e8573213e6c0043c5d7405b2e';
