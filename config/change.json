@@ -1,7 +1,7 @@
 {
-  "id": "ML-045",
-  "type": "CHORE",
-  "title": "[ML-045] [CHORE] Allow plan edits at any time",
-  "branch": "ml-045-free-plan-edits",
-  "record": "docs/changes/ML-045.md"
+  "id": "ML-046",
+  "type": "FIX",
+  "title": "[ML-046] [FIX] Match release commits without a PR suffix",
+  "branch": "ml-046-release-title-match",
+  "record": "docs/changes/ML-046.md"
 }
