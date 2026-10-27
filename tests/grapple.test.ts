@@ -13,7 +13,7 @@ test('owned grapple inventory, exact source identity and complete source graph',
 for(const c of cases)test('bounded grapple plan '+c.id,async()=>{
  const m=read(c.map),p=read(c.profile),before=JSON.stringify({m,p,q:c.query}),proof=await solve(c);expect(JSON.stringify({m,p,q:c.query})).toBe(before);expect(proof.canCertify).toBe(false);expect(proof.complete).toBe(false);
  if(c.status==='verified reachable with replay witness'){
-  expect(proof.status,proof.diagnostics.join(';')).toBe(c.status);expect(proof.frames.length).toBeGreaterThan(0);const world=new GrappleWorld(m,p);expect(replayGrapple(world,c.query.initial,proof.frames)).toEqual(proof.frames);const session=new GrappleTestSession(world,c.query.initial);expect(session.replay(proof.frames)).toBe(true);expect(session.state).toEqual(proof.terminal);expect(proof.costTicks).toBe(proof.frames.length);
+  expect(proof.status,proof.diagnostics.join(';')).toBe(c.status);expect(proof.frames.length).toBeGreaterThan(0);const world=new GrappleWorld(m,p);expect(replayGrapple(world,c.query.initial,proof.frames)).toEqual(proof.frames);const session=new GrappleTestSession(world,c.query.initial);expect(session.replay(proof.frames)).toBe(true);expect(session.state).toEqual(proof.terminal);expect(proof.costTicks).toBe(proof.frames.length);if(c.id==='attach-reel-release')expect(proof.frames.map(f=>f.input.action)).toEqual(['attach','coast','release']);
  }else{expect(c.allowedStatuses??[c.status]).toContain(proof.status);expect(proof.frames).toEqual([]);expect(proof.terminal).toBeNull();}
 },60000);
 for(const c of traces)test('integer grapple checkpoints '+c.id,()=>{
