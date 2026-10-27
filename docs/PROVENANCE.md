@@ -173,3 +173,10 @@ fixture. `tests/consumer/timed-platforms.mjs` uses separate Node-only schedule a
 contact equations to check timed checkpoints and exported source bytes; it imports
 no MapLab motor or solver. Repaired-digest source edits and forged witness states
 must still fail. No assets or executable schema extensions were borrowed.
+
+## ML-041 performance workloads
+
+`conformance/performance/` contains original owned CC0-1.0 numeric workload recipes,
+with a SHA-256 index and dedication. Generated maps use the owned surface template;
+no third-party world, art or implementation was borrowed. CI timing/memory artifacts
+record measurements and machine identity, not transferable hardware guarantees.

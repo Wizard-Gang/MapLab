@@ -1,0 +1,10 @@
+{
+  "license": "CC0-1.0",
+  "provenance": "Original MapLab numeric workload recipes by the owner and contributors; no external assets.",
+  "standard": {"cells":100000,"layers":20,"objects":5000,"bodies":5000,"footholds":10000,"dense":false},
+  "dense": {"cells":0,"layers":3,"objects":0,"bodies":5000,"footholds":10000,"dense":true},
+  "baseline": {"cells":0,"layers":3,"objects":0,"bodies":0,"footholds":100,"dense":false},
+  "multilevel": {"cells":0,"layers":3,"objects":0,"bodies":0,"footholds":300,"dense":false},
+  "warmRuns":5,
+  "negative": ["oversized recipe", "negative recipe", "zero cache budget", "oversized cache entry", "stale cancelled job"]
+}

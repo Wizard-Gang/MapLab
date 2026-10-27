@@ -2,5 +2,5 @@
   "id": "ML-041",
   "type": "CHORE",
   "title": "[ML-041] [CHORE] Measure large-world performance and bound benchmark claims",
-  "branch": "codex/ml-041-large-world-benchmarks"
+  "branch": "ml-041-large-world-benchmarks"
 }

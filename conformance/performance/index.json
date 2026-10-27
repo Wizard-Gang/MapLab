@@ -1,0 +1,13 @@
+{
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "LICENSE.json",
+      "sha256": "5345e8800cf3ee74b0f2e185f6c9c98e4097fdfca95c022ffd8385b74d683919"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "f658c01b83cd4cdbe64cc4063d6fdc7ffab2d40c19351f0bc8643e6505058b16"
+    }
+  ]
+}
