@@ -4,7 +4,7 @@
 
 **Editing the plan (owner ruling, 2026-10-27):** any PR may add, edit, reorder or remove queued tasks at any time, whatever the queue holds. A PR that changes only this file is titled `[PLAN] Imperative summary` on a `plan-<summary>` branch into the open release branch; it takes no task ID and joins no release task list. IDs are unique and never recycled: a new task takes the ID above the mark below, which then rises to it, and a removed queued ID is retired for good, so IDs need not be contiguous.
 
-**Highest ID ever used:** ML-045.
+**Highest ID ever used:** ML-046.
 
 **Selection and retirement:** the active block holds exactly the controlled task in [config/change.json](config/change.json); any queued task may be the next one. After a verified protected squash into the open release branch on its green exact-head gate, the next activation appends the predecessor's evidence to [the delivery chain](docs/deliveries.json), retires it to one history line and moves its own task into the active block.
 
@@ -52,23 +52,24 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-037** — squash `2c3428b`, PR #37; [record](docs/changes/ML-037.md).
 - **ML-038** — squash `3140855`, PR #38; [record](docs/changes/ML-038.md).
 - **ML-039** — squash `ba25f60`, PR #39; [record](docs/changes/ML-039.md).
+- **ML-045** — squash `e61cf40`, PR #40; [record](docs/changes/ML-045.md).
 <!-- completed-history:end -->
 
 ## Active task
 
 <!-- active-queue:start -->
-### ML-045 / P1
+### ML-046 / P1
 
-- **Source scope:** Change-contract checker, contract tests and process docs so the plan can change at any time; `[PLAN]` plan-only PRs; unique never-recycled IDs above a recorded high-water mark.
-- **Non-goals:** No repository settings, rulesets, workflows, release, or product code; no change to the spec's J2 text or to any other task's scope.
-- **Acceptance:** A plan-only PR and a task PR may add, edit, reorder or remove queued tasks with any queue state; new IDs above the mark pass, recycled or retired IDs fail; delivery and release chains follow delivery order, not contiguous IDs.
-- **Depends on:** ML-039 squashed into release/r001 on its green exact-head gate; owner ruling of 2026-10-27.
+- **Source scope:** Release-PR commit matching in the change-contract checker, its contract tests and the change-management doc, so release squash commits match with or without a ` (#PR)` suffix.
+- **Non-goals:** No repository settings, rulesets, workflows, product code or history rewrite; no change to any other task's scope.
+- **Acceptance:** The r001 release PR's change-id accepts its commits, three of which (ML-032, ML-033, ML-036) were squashed without ` (#PR)`; unlisted, missing, retitled or malformed commits still fail.
+- **Depends on:** ML-045 squashed into release/r001 on its green exact-head gate; owner's "release" call of 2026-10-27.
 - **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [J2](docs/specifications/2026-10-16-maplab.md#j2-sequential-tasks); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
 - **Subtasks:**
-  1. Drop the J2 equality, contiguity and 44-ID bounds from the queue and change checkers; record the highest ID ever used.
-  2. Accept `[PLAN]` PRs that change only the plan, keep them out of release task lists, and teach the merge guard their identity.
-  3. Create owned fixture(s): Synthetic plans that skip, reorder, edit, retire and recycle IDs, and plan/task/release PR events.
-  4. Add executable checks: Contract tests that accept free plan edits and reject recycled IDs, a falling mark and wider plan PRs.
+  1. Make the ` (#PR)` suffix optional in the task and plan squash patterns, matching the title lazily.
+  2. Record the suffix rule in the change-management doc's release PR description.
+  3. Create owned fixture(s): Release PR events whose task and plan squash commits omit the PR suffix.
+  4. Add executable checks: Contract tests that accept suffix-less release commits and reject a malformed plan commit.
 - **Task gate:** Run clean `npm ci`, `npm run check:foundation`, typecheck, build, smoke, `npm run check:change` and `npm run security` locally, with `npm run check` met by exact PR-head CI; exact PR-head `gate/change-id`, independent review and delivery read-back. No merge without protected gates.
 
 <!-- active-queue:end -->

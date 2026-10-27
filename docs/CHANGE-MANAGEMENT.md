@@ -57,7 +57,7 @@ The owner's 2026-10-25 ruling batches tasks so the full suite runs once per rele
 - The release PR, `release/rNNN` -> `main`, opens only when Jacob says "release". Its
   title is `[RELEASE] rNNN: ML-0xx..ML-0yy` (one ID when the release holds one task).
   Its commits are exactly one squash commit per listed task, oldest first, each titled
-  as that task's record, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
+  as that task's record with or without its ` (#PR)` suffix, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
 - Deliveries up to ML-030 keep `mainCi`. Later entries carry
   `gate: {head, conclusion, url}` on their last tested head.
 - [docs/releases.json](releases.json) records each merged release as
