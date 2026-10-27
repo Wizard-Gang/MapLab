@@ -11,25 +11,6 @@
 ## Active task
 
 <!-- active-queue:start -->
-### ML-047 / P1
-
-- **Source scope:** The change and queue checkers, the foundation check, their tests and the delivery docs, so the repository keeps no delivery chain, release ledger, per-task change records or completed history.
-- **Non-goals:** No repository settings, rulesets, workflows, product code or history rewrite; no change to any other task's scope.
-- **Acceptance:** `docs/deliveries.json`, `docs/releases.json` and `docs/changes/` are gone; change-id still enforces task identity, the release task list and release PR commits; GitHub's merged PRs and checks are the record.
-- **Depends on:** Owner ruling of 2026-10-27: "we dont need to record releases or delivers. github does that."
-- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [J2](docs/specifications/2026-10-16-maplab.md#j2-sequential-tasks); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Remove the delivery chain, release ledger and change-record checks from check-change, check-queue and check-foundation.
-  2. Delete the record files and the plan's completed history; update the delivery docs.
-  3. Create owned fixture(s): Controlled change and release configs without a record field or ledger.
-  4. Add executable checks: Contract tests that accept a task and release PR without records and still reject a mismatched task identity.
-- **Task gate:** Run clean `npm ci`, `npm run check:foundation`, typecheck, build, smoke, `npm run check:change` and `npm run security` locally, with `npm run check` met by exact PR-head CI; exact PR-head `gate/change-id`. No merge without protected gates.
-
-<!-- active-queue:end -->
-
-## Queued tasks
-
-<!-- future-queue:start -->
 ### ML-040 / P2
 
 - **Source scope:** Time/phase-aware periodic moving-platform navigation with wait/board/ride/exit.
@@ -44,6 +25,11 @@
   4. Add executable checks: Bounded time-search and conditional/unsupported status regression.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Queued tasks
+
+<!-- future-queue:start -->
 ### ML-041 / P1 hardening
 
 - **Source scope:** Large-world benchmarks, incremental indexes, cache/history budgets and targeted optimization.
