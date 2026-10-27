@@ -18,6 +18,10 @@ const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|
 export const planTitle = /^\[PLAN\] [A-Z][^\r\n]+$/;
 export const planBranch = /^plan-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const planSquash = /^\[PLAN\] [A-Z][^\r\n]+ \(#\d+\)$/;
+// A plan PR targets the open release branch. Once that release has merged, config/release.json still names it
+// until the next task cuts the next one, so a plan PR may target that next branch instead.
+export const planBases = (release, releases) => releases.some((entry) => entry.id === release.id)
+  ? [release.branch, `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`] : [release.branch];
 export const releaseTitle = (release) => `[RELEASE] ${release.id}: ${release.tasks.length === 1
   ? release.tasks[0] : `${release.tasks[0]}..${release.tasks.at(-1)}`}`;
 export function checkSections(text) {
@@ -96,7 +100,7 @@ export function checkReleaseTrees(releases, git) {
 }
 
 export function checkEvent(change, context) {
-  const { eventName, event, actualHead, commitTitles, changedFiles, release, taskTitles, basePlan, headPlan } = context;
+  const { eventName, event, actualHead, commitTitles, changedFiles, release, releases, taskTitles, basePlan, headPlan } = context;
   demand(sha.test(actualHead), 'Actual checkout SHA is invalid');
   demand(eventName === 'pull_request', 'Change identity runs only on pull requests');
   const pr = event.pull_request;
@@ -114,13 +118,14 @@ export function checkEvent(change, context) {
       && m[1] === taskTitles[i]), 'Release commits must be one squash commit per listed task');
     return;
   }
-  demand(pr.base.ref === release.branch, 'Task PR base must be the open release branch');
   if (planTitle.test(pr.title)) {
+    demand(planBases(release, releases).includes(pr.base.ref), 'Plan PR base must be the open or next release branch');
     demand(planBranch.test(pr.head.ref), 'Plan PR branch must be plan-<summary>');
     demand(commitTitles.every((title) => title === pr.title), 'Commit title differs from plan PR');
     demand(changedFiles.length === 1 && changedFiles[0] === 'implementation_plan.md', 'A plan PR changes implementation_plan.md alone');
     return;
   }
+  demand(pr.base.ref === release.branch, 'Task PR base must be the open release branch');
   demand(pr.head.ref === change.branch && pr.title === change.title, 'PR controlled branch/title disagrees');
   demand(commitTitles.every((title) => title === change.title), 'Commit title differs from controlled task');
   demand(['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'].every((f) => changedFiles.includes(f)),
@@ -145,7 +150,7 @@ if (process.argv[1] && resolve(process.argv[1]) === self) {
       const plan = (revision) => git('show', `${revision}:implementation_plan.md`);
       checkReleaseTrees(releases, git);
       checkEvent(change, {
-        eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release,
+        eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release, releases,
         basePlan: plan(base), headPlan: plan('HEAD'),
         taskTitles: release.tasks.map((id) => readFileSync(resolve(root, `docs/changes/${id}.md`), 'utf8').split('\n')[0].slice(2)),
         commitTitles: git('log', '--format=%s', `${base}..HEAD`).split('\n'),

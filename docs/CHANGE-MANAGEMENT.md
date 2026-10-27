@@ -12,7 +12,8 @@ IDs never get reused. The permanent implementation plan is the sole current/futu
   The next task is any queued task; the spec's J2 table is the original baseline only.
 - A PR that changes only the plan is titled `[PLAN] Imperative summary` on a
   `plan-<summary>` branch into the open release branch, with every commit titled the
-  same. It takes no task ID, leaves `config/` alone, and joins no release task list;
+  same. Once that release has merged and before the next task cuts the next one, it may
+  target the next branch (`release/rNNN+1`), cut from main's tip. It takes no task ID, leaves `config/` alone, and joins no release task list;
   its squash `[PLAN] Imperative summary (#PR)` rides the release PR beside the tasks.
 - IDs are unique and never recycled. The plan records the highest ID ever used; a new
   task takes an ID above it and raises it, and it never falls. A removed queued ID is
@@ -55,7 +56,7 @@ The owner's 2026-10-25 ruling batches tasks so the full suite runs once per rele
 - The release PR, `release/rNNN` -> `main`, opens only when Jacob says "release". Its
   title is `[RELEASE] rNNN: ML-0xx..ML-0yy` (one ID when the release holds one task).
   Its commits are exactly one squash commit per listed task, oldest first, each titled
-  as that task's record, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task.
+  as that task's record, plus any `[PLAN]` squash commits. It rebase-merges, so main gains one commit per task and per plan PR.
 - Deliveries up to ML-030 keep `mainCi`. Later entries carry
   `gate: {head, conclusion, url}` on their last tested head.
 - [docs/releases.json](releases.json) records each merged release as

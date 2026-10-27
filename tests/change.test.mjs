@@ -16,7 +16,7 @@ const currentNumber = Number(change.id.slice(3));
 const plan = readFileSync(join(root, 'implementation_plan.md'), 'utf8');
 const futureBlock = plan.slice(plan.indexOf('<!-- future-queue:start -->'), plan.indexOf('<!-- future-queue:end -->'));
 // Any queued task may be delivered next; the fixture takes the first one.
-const otherId = futureBlock.match(/^### (ML-\d{3}) \//m)[1];
+const otherId = futureBlock.match(/^### (ML-\d{3}) \//m)?.[1];
 const highest = Number(plan.match(/^\*\*Highest ID ever used:\*\* ML-(\d{3})/m)[1]);
 const nextId = `ML-${String(highest + 1).padStart(3, '0')}`;
 // A plan edit that queues a task: the new ID must sit above every ID ever used, and the mark rises to it.
@@ -40,7 +40,7 @@ const run = (p) => spawnSync(process.execPath, [resolve(root, 'scripts/check-cha
 test('real CLI accepts current task independently of credentials and Git', () => {
   const result = run(fixture()); expect(result.status, result.stderr).toBe(0);
 });
-test('real CLI accepts any queued task as the next delivery', () => {
+test.skipIf(!otherId)('real CLI accepts any queued task as the next delivery', () => {
   const p = fixture();
   json(p, 'config/change.json', (v) => { v.id = otherId; v.type = 'SECURITY'; v.title = `[${otherId}] [SECURITY] Exercise future task fixture`; v.branch = `${otherId.toLowerCase()}-fixture`; v.record = `docs/changes/${otherId}.md`; });
   const c = JSON.parse(readFileSync(join(p, 'config/change.json')));
@@ -74,8 +74,8 @@ test.each([
   ['record path escape', (p) => json(p, 'config/change.json', (v) => { v.record = `../${change.id}.md`; }), 'record identity'],
   ['record title mismatch', (p) => edit(p, change.record, (s) => s.replace(`# ${change.title}`, '# Mismatched record title')), 'record title'],
   ['missing record section', (p) => edit(p, change.record, (s) => s.replace('## Controls', '## Control')), 'sections disagree'],
-  ['duplicate future ID', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${otherId} /`, `### ${change.id} /`)), 'Duplicate live task'],
-  ['queue mismatch', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${change.id} /`, `### ${otherId} /`)), 'Active queue'],
+  ['duplicate future ID', (p) => edit(p, 'implementation_plan.md', (s) => s.replace('<!-- future-queue:end -->', `### ${change.id} / P2\n\n<!-- future-queue:end -->`)), 'Duplicate live task'],
+  ['queue mismatch', (p) => edit(p, 'implementation_plan.md', (s) => s.replace(`### ${change.id} /`, `### ${nextId} /`)), 'Active queue'],
   ['missing predecessor', (p) => writeFileSync(join(p, 'docs/deliveries.json'), '[]\n'), 'Predecessor delivery chain'],
   ['failed predecessor CI', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.conclusion = 'failure'; }), 'main CI evidence'],
   ['different predecessor SHA', (p) => json(p, 'docs/deliveries.json', (v) => { v[0].mainCi.head = 'f'.repeat(40); }), 'main CI evidence'],
@@ -100,7 +100,7 @@ const body = sections.map((s) => `## ${s}\n\nFixture prose.\n`).join('\n');
 function eventFixture() {
   return { eventName: 'pull_request', actualHead: 'b'.repeat(40), release, taskTitles: release.tasks.map(() => change.title),
     commitTitles: [change.title], changedFiles: ['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'],
-    basePlan: plan, headPlan: plan,
+    basePlan: plan, headPlan: plan, releases: [],
     event: { repository: { full_name: 'Wizard-Gang/MapLab' }, pull_request: {
       title: change.title, body,
       head: { sha: 'b'.repeat(40), ref: change.branch },
@@ -130,6 +130,11 @@ test('event validation accepts a task PR that also edits other queued tasks', ()
   const v = eventFixture(); v.headPlan = withTask(nextId); expect(() => checkEvent(change, v)).not.toThrow();
 });
 test('event validation accepts a plan-only PR', () => expect(() => checkEvent(change, planFixture())).not.toThrow());
+test('event validation accepts a plan-only PR into the next release once the open one has merged', () => {
+  const v = planFixture(); v.releases = [{ id: release.id }];
+  v.event.pull_request.base.ref = `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`;
+  expect(() => checkEvent(change, v)).not.toThrow();
+});
 test('event validation accepts a plan-only PR that removes queued tasks', () => {
   const v = planFixture(); v.headPlan = plan.replace(/<!-- future-queue:start -->[\s\S]*?<!-- future-queue:end -->/, '<!-- future-queue:start -->\n<!-- future-queue:end -->');
   expect(() => checkEvent(change, v)).not.toThrow();
@@ -139,6 +144,7 @@ test.each([
   ['a task record', (v) => { v.changedFiles = [change.record]; }],
   ['a task branch', (v) => { v.event.pull_request.head.ref = change.branch; }],
   ['a base of main', (v) => { v.event.pull_request.base.ref = 'main'; }],
+  ['the next release while the open one is unmerged', (v) => { v.event.pull_request.base.ref = `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`; }],
   ['a commit titled otherwise', (v) => { v.commitTitles.push(change.title); }],
   ['a lower-case summary', (v) => { v.event.pull_request.title = '[PLAN] queue a new task'; v.commitTitles = [v.event.pull_request.title]; }],
   ['a recycled delivered ID', (v) => { v.headPlan = withTask('ML-002'); }],
