@@ -11,25 +11,6 @@
 ## Active task
 
 <!-- active-queue:start -->
-### ML-040 / P2
-
-- **Source scope:** Time/phase-aware periodic moving-platform navigation with wait/board/ride/exit.
-- **Non-goals:** No completeness for unpredictable motion.
-- **Acceptance:** Timed boarding/departure/full-body sweeps and phase-drift replan; static cache never certifies future rendezvous.
-- **Depends on:** ML-039 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [E3](docs/specifications/2026-10-16-maplab.md#e3-one-way-drops-dynamic-movement), [E4](docs/specifications/2026-10-16-maplab.md#e4-search-costs-and-scalability), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Build explicitly time/phase-aware periodic-body safe intervals and wait/board/ride/exit transitions.
-  2. Replay full-body timed witnesses and invalidate drifted phase; keep static search from certifying timed links.
-  3. Create owned fixture(s): Elevator initial phase, missed boarding, narrow rider sweep, departure and phase drift.
-  4. Add executable checks: Bounded time-search and conditional/unsupported status regression.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Queued tasks
-
-<!-- future-queue:start -->
 ### ML-041 / P1 hardening
 
 - **Source scope:** Large-world benchmarks, incremental indexes, cache/history budgets and targeted optimization.
@@ -44,6 +25,11 @@
   4. Add executable checks: Publish raw timing/memory snapshots and scope-split any unmet H5 gate.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Queued tasks
+
+<!-- future-queue:start -->
 ### ML-042 / P1 hardening
 
 - **Source scope:** Optional browser handle/OPFS save adapters and recoverable directory-save journal.
