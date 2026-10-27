@@ -158,6 +158,10 @@ test('event validation accepts the release PR into main', () => expect(() => che
 test('release event validation skips plan-only squash commits', () => {
   const v = releaseFixture(); v.commitTitles.splice(1, 0, '[PLAN] Queue a new task (#150)'); expect(() => checkEvent(change, v)).not.toThrow();
 });
+test('release event validation accepts squash commits without a PR suffix', () => {
+  const v = releaseFixture(); v.commitTitles = v.commitTitles.map((t, i) => (i % 2 ? t.replace(/ \(#\d+\)$/, '') : t));
+  v.commitTitles.splice(1, 0, '[PLAN] Queue a new task'); expect(() => checkEvent(change, v)).not.toThrow();
+});
 test.each([
   ['checkout merge revision', (v) => { v.actualHead = 'c'.repeat(40); }],
   ['wrong PR title', (v) => { v.event.pull_request.title = `[${change.id}] [${change.type}] Wrong task`; }],
@@ -177,7 +181,7 @@ test.each([
   ['an unsquashed commit', (v) => { v.commitTitles.unshift(change.title); }],
   ['a missing task commit', (v) => { v.commitTitles.pop(); }],
   ['an unlisted task commit', (v) => { v.commitTitles.unshift(`[${nextId}] [FIX] Unlisted task (#151)`); }],
-  ['an unsquashed plan commit', (v) => { v.commitTitles.unshift('[PLAN] Queue a new task'); }],
+  ['a malformed plan commit', (v) => { v.commitTitles.unshift('[PLAN] queue a new task (#150)'); }],
   ['a commit retitled away from its record', (v) => { v.taskTitles[0] = `[${release.tasks[0]}] [FIX] Another title`; }],
 ])('release event validation rejects %s', (_name, corrupt) => {
   const v = releaseFixture(); corrupt(v); expect(() => checkEvent(change, v)).toThrow();

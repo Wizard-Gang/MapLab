@@ -13,11 +13,12 @@ export const sha = /^[a-f0-9]{40}$/;
 export const lastMainCiDelivery = 30;
 const runUrl = /^https:\/\/github\.com\/Wizard-Gang\/MapLab\/actions\/runs\/\d+$/;
 const taskId = (n) => `ML-${String(n).padStart(3, '0')}`;
-const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)\] [A-Z][^\r\n]+) \(#\d+\)$/;
+// The release ruleset allows only squash merges, so the " (#PR)" suffix is optional: a REST squash given an explicit subject omits it.
+const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|SECURITY)\] [A-Z][^\r\n]+?)(?: \(#\d+\))?$/;
 // A plan-only PR takes no task ID: it edits implementation_plan.md alone and never joins a release's task list.
 export const planTitle = /^\[PLAN\] [A-Z][^\r\n]+$/;
 export const planBranch = /^plan-[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const planSquash = /^\[PLAN\] [A-Z][^\r\n]+ \(#\d+\)$/;
+const planSquash = /^\[PLAN\] [A-Z][^\r\n]+?(?: \(#\d+\))?$/;
 // A plan PR targets the open release branch. Once that release has merged, its branch is deleted but
 // config/release.json still names it until the next task, so a plan PR then targets the next branch instead.
 export const planBase = (release, releaseOpen) => releaseOpen ? release.branch
