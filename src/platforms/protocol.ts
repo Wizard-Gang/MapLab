@@ -12,7 +12,8 @@ export function createTimedEndpoint(post:(r:TimedReply)=>void){let current:{job:
 export class TimedSession {
  private serial=0;private disposed=false;private pending:{job:number;revision:number;identity:string;querySha256:string}|null=null;
  private view:{phase:'idle'|'building'|'complete'|'failed';proof:TimedProof|null;error:string}={phase:'idle',proof:null,error:''};private listeners=new Set<()=>void>();
- constructor(private readonly send:(r:TimedRequest)=>void){}
+ private readonly send:(r:TimedRequest)=>void;
+ constructor(send:(r:TimedRequest)=>void){this.send=send;}
  getSnapshot=()=>this.view;subscribe=(f:()=>void)=>{this.listeners.add(f);return()=>{this.listeners.delete(f);};};
  private set(view:typeof this.view){this.view=view;for(const f of this.listeners)f();}
  invalidate(){this.serial++;if(this.pending)this.send({kind:'cancel',job:this.pending.job});this.pending=null;this.set({phase:'idle',proof:null,error:''});}

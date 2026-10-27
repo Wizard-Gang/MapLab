@@ -25,7 +25,7 @@ export async function timedIdentity(map:MapDocument,p:MovementDocument,settings:
  return {...value,cacheKey:await digest(value)};
 }
 interface Edge extends Move<State> {readonly frame:TimedFrame}
-class Stop extends Error {constructor(readonly status:TimedStatus,message:string){super(message);}}
+class Stop extends Error {readonly status:TimedStatus;constructor(status:TimedStatus,message:string){super(message);this.status=status;}}
 function own<T>(v:T):T {const out=structuredClone(v);const freeze=(o:unknown)=>{if(o&&typeof o==='object'){Object.values(o).forEach(freeze);Object.freeze(o);}};freeze(out);return out;}
 export async function planTimedPlatforms(source:MapDocument,profile:MovementDocument,query:TimedQuery,revision=0,settings:TimedSettings=TIMED_DEFAULTS,cancelled:()=>boolean=()=>false,yieldTask:()=>Promise<void>=()=>new Promise(r=>setTimeout(r,0))):Promise<TimedProof>{
  const map=own(source),p=own(profile),q=own(query),o=own(settings);
