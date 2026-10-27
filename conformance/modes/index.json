@@ -1,0 +1,74 @@
+{
+  "license": "CC0-1.0",
+  "provenance": "Original MapLab ML-037 numeric fixtures, 2026-10-27; no borrowed assets.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "1cca77d703f83416e432b768d1a1e5c7be5fbc7c967bfc4197594a0b3bcebf51"
+    },
+    {
+      "path": "blocked.map.json",
+      "sha256": "c343de2cfb31a5fcd25321b1516dd1f16243d21a7d04798c19a063f64404ff2d"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "ae79b05abbb7161c0c4be91a8d5d71206d18126b77452667a89afd7f2076c1f8"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "a10afb88820c8135e1d7271e63f09b44a552a8b29cbf0bf8af8b7aeaae352275"
+    },
+    {
+      "path": "corner.map.json",
+      "sha256": "c9a6bcb687db55c5a1f6b488c7d3640b1086f08b2a3150b84e6f08c4650485ee"
+    },
+    {
+      "path": "drift.movement.json",
+      "sha256": "479192f2762040241fe9b61cc711d765c2e2002d3f4725d78ce1ffc5acb74c06"
+    },
+    {
+      "path": "flyer.movement.json",
+      "sha256": "dc9309445d3db3f92295781cedaaad91da2ab5708bd1d694e592904a53e18d81"
+    },
+    {
+      "path": "hybrid.movement.json",
+      "sha256": "ccd99d128643b5fe2a6df356366b8b272110ca96fd07eb3bb03095cf895041a5"
+    },
+    {
+      "path": "modes.catalog.json",
+      "sha256": "16b47cc2cee69f9911c263f5cca4c1268a9fb3492641ed5d8122a4f81a526dcc"
+    },
+    {
+      "path": "shore.map.json",
+      "sha256": "81f458f3f59c2e8401671df2a9e60bc330adc5e6e93c9f930e34946ae29c3622"
+    },
+    {
+      "path": "slow.movement.json",
+      "sha256": "55d6ec579c46b4b32f59783bc0e21681ba246bcd60708d3964051f2bf2000a8b"
+    },
+    {
+      "path": "swimmer.movement.json",
+      "sha256": "80624f22978080794672913874fa64cf8b7c7c28a07bf9b0f47bb2fb45c27040"
+    },
+    {
+      "path": "transitions.map.json",
+      "sha256": "9402d7d00ad6f6bd960efe45b50492202dcdab1426c592f1ebd47982f631ff9b"
+    },
+    {
+      "path": "turn.fixture.json",
+      "sha256": "31eba0caaebd6289f548324d6596b9c3b5218814d1cc5d5c26c1f9f2f8ff7c5b"
+    },
+    {
+      "path": "water.map.json",
+      "sha256": "efc3069109299b9b6d5733044286d59cadc3baeda9ab3c7b7e7796f612fad52e"
+    },
+    {
+      "path": "wide.movement.json",
+      "sha256": "e8203fb7c15e98cbbe685bce200ccabbda94efde9617c284d6d61a762b723949"
+    },
+    {
+      "path": "wrong.movement.json",
+      "sha256": "b4c0dd74444716348c5941aec46712010d41421adcabe62d18ed8a720fe1924f"
+    }
+  ]
+}

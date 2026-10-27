@@ -1,0 +1,1 @@
+{"format":"maplab.catalog","version":1,"id":"catalog.modes","entries":[{"key":"core.mode.transition","version":1,"kind":"traversal","stage":"available","fields":[{"name":"fromMode","type":"string","required":true,"maxLength":6},{"name":"toMode","type":"string","required":true,"maxLength":6}],"stateNames":[]}]}
