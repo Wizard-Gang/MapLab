@@ -1,9 +1,10 @@
+import {buildLedgeActions} from './ledge';
 import {buildWallActions} from './wall';
-import type {WallAction} from '../wall/runtime';
-import {step,airJumpCount,supportedJumpProfile,hasWall,hasDash,dashStarts,initialDash,initialWall,initialResources,type DashInput,type DashState} from '../wall/runtime';
+import type {WallAction} from '../ledge/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasLedge,hasWall,hasDash,dashStarts,initialLedge,initialDash,initialWall,initialResources,type DashInput,type DashState} from '../ledge/runtime';
 import {buildDashActions} from './dash';
 import {buildAirJumpActions} from './air-jumps';
-import {groundMotionAllowed,wallMotionAllowed} from '../wall/intent';
+import {groundMotionAllowed,wallMotionAllowed,ledgeMotionAllowed} from '../ledge/intent';
 // Static reference-route proofs. Authored links never become physical exemptions.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -69,7 +70,7 @@ export function anchorState(w:World,anchor:Anchor,facing:1|-1=1):ClimbState{
   x=f.a[0]+Math.floor((f.b[0]-f.a[0])*Math.round(anchor.u*65536)/65536);const stance=resolveStance(w,x,anchor.footholdId)[0];if(!stance)throw Error('anchor has no full-footprint stance');y=stance.y;
  }else throw Error('unsupported entity-relative anchor');
  const stance=resolveStance(w,x,anchor.kind==='surface'?anchor.footholdId:undefined).find(v=>v.y===y);
- return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),...initialWall(w.profile),traversalId:null,climbReady:true};
+ return {x,y,vx:0,vy:0,mode:stance?'ground':'air',supportId:stance?.face.supportId??null,planeId:stance?.face.planeId??w.defaultPlane,facing,tick:0,jumpHeldPrev:false,jumpReleased:false,ticksSinceJump:0,dropSuppression:null,resources:initialResources(w.profile),...initialDash(w.profile),...initialLedge(w.profile),...initialWall(w.profile),traversalId:null,climbReady:true};
 }
 function validateSettings(s:RouteSettings){
  const limits={maxExpanded:10000,maxReplayTicks:2000000,maxActionTicks:3600,maxRouteTicks:36000,maxDepth:128,maxTargets:128,toleranceSu:8192,penaltyTicks:100000};
@@ -87,7 +88,7 @@ export function replayRouteActions(w:World,initial:ClimbState,actions:readonly R
    while(action.input[at+1]&&action.input[at+1]!.fromTick<=s.tick)at++;
    const c=action.input[at]!;if(c.fromTick>s.tick)return null;
    const {fromTick:_,...control}=c,f=step(w,s,control);airJumpUsed ||= (f.state.resources?.airJumps??0)<s.resources.airJumps;dashUsed ||= !!(s as DashState).dash?.active||dashStarts(w.profile,s,control as DashInput);
-   if(!wallMotionAllowed(w.source as unknown as MapDocument,w.profile,s,f.state,walls))return null;
+   if(!ledgeMotionAllowed(w.source as unknown as MapDocument,w.profile,s,f.state)||!wallMotionAllowed(w.source as unknown as MapDocument,w.profile,s,f.state,walls))return null;
    if(dashUsed&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'dash',s,f.state))return null;
    if(f.status!=='ok'||replayBytes(f)!==replayBytes(action.frames[n]!)||!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,action.kind,s,f.state)||(control.jump||airJumpUsed)&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'jump',s,f.state)||control.drop&&!groundMotionAllowed(w.source as unknown as MapDocument,w.profile,'drop',s,f.state))return null;
    input.push({...control,fromTick:s.tick});frames.push(f);s=f.state as ClimbState;
@@ -107,7 +108,7 @@ export class Navigation {
   let world:World;try{world=createWorld(map as unknown as ContactMap,p);}catch(e){return new Navigation(map,p,{} as World,id,revision,options,'unsupported',[String(e)],[],[]);}
   if(surface.status!=='candidate')return new Navigation(map,p,world,id,revision,options,surface.status,surface.diagnostics,[],[]);
   // Wall sequences expand from actual actor states; prebuilding every wall launch is unnecessary.
-  if(hasWall(p)){const templates:Template[]=surface.edges.map(e=>({key:e.key,kind:e.kind,initial:e.initial,input:[{...e.input,fromTick:0}],ticks:e.frames.length}));return new Navigation(map,p,world,id,revision,options,'candidate',[],surface.intervals,templates);}
+  if(hasLedge(p)||hasWall(p)){const templates:Template[]=surface.edges.map(e=>({key:e.key,kind:e.kind,initial:e.initial,input:[{...e.input,fromTick:0}],ticks:e.frames.length}));return new Navigation(map,p,world,id,revision,options,'candidate',[],surface.intervals,templates);}
   const air=await buildAirborneActions(map,p,revision,options.air,cancelled,yieldTask);
   if(air.status==='budget'||air.status==='unsupported'||air.status==='cancelled')return new Navigation(map,p,world,id,revision,options,air.status,air.diagnostics,[],[]);
   const templates:Template[]=[...surface.edges.map(e=>({key:e.key,kind:e.kind,initial:e.initial,input:[{...e.input,fromTick:0}],ticks:e.frames.length})),...air.edges.map(e=>({key:e.key,kind:e.kind,initial:e.initial,input:e.input,ticks:e.costTicks}))].sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0);
@@ -203,7 +204,7 @@ export class Navigation {
     while(t.input[index+1]&&t.input[index+1]!.fromTick<=n)index++;
     const {fromTick:_,...c}=t.input[index]!;if(!permitted(s,c))return null;const f=await advance(s,c),next=f.state as ClimbState;
     airJumpUsed ||= next.resources.airJumps<s.resources.airJumps;dashUsed ||= !!(s as DashState).dash?.active||dashStarts(this.profile,s,c as DashInput);
-    if(!wallMotionAllowed(this.map,this.profile,s,next,walls))return null;
+    if(!ledgeMotionAllowed(this.map,this.profile,s,next)||!wallMotionAllowed(this.map,this.profile,s,next,walls))return null;
     if(dashUsed&&!groundMotionAllowed(this.map,this.profile,'dash',s,next))return null;
     if(f.status!=='ok'||!this.safe(next)||!permitted(next,c)||!groundMotionAllowed(this.map,this.profile,t.kind,s,next)||(c.jump||airJumpUsed)&&!groundMotionAllowed(this.map,this.profile,'jump',s,next)||c.drop&&!groundMotionAllowed(this.map,this.profile,'drop',s,next))return null;
     if(['jump','drop','fall','land'].includes(t.kind)&&f.contacts.some(c=>c.kind==='blocking'&&!(t.kind==='fall'&&c.axis==='y'&&c.normal[1]<0&&c.supportId===start.supportId&&next.y===start.y)))return null;
@@ -242,25 +243,42 @@ export class Navigation {
     }
     const groundMax=BigInt(Math.max(this.profile.ground.walkSpeed,this.profile.ground.runSpeed)),ratios=[this.profile.ground.uphill,this.profile.ground.downhill];
     const bound=[BigInt(Math.abs(initial.vx)),BigInt(this.profile.air.maxSpeed),groundMax,...ratios.map(r=>(groundMax*BigInt(r.num)+BigInt(r.den)-1n)/BigInt(r.den))].reduce((a,b)=>a>b?a:b)+BigInt(Math.max(0,...this.map.materials.map(m=>Math.abs(m.conveyorSu))));
-    const zero=algorithm==='dijkstra'||this.profile.abilities.some(a=>a.kind==='climb'||a.kind==='dash'||a.kind==='wall')||bound===0n;usedHorizontal=!zero;
+    const zero=algorithm==='dijkstra'||this.profile.abilities.some(a=>a.kind==='climb'||a.kind==='dash'||a.kind==='wall'||a.kind==='ledge')||bound===0n;usedHorizontal=!zero;
     let depthLimit=false,durationLimit=false;
     const neighbors=async(node:Node):Promise<Transition[]>=>{
      if(node.depth>=settings.maxDepth){depthLimit=true;return [];}
      const s=node.state,out:Transition[]=[];
      const add=(a:RouteAction)=>{if(!a.durationTicks)return;if(a.durationTicks>settings.maxActionTicks||a.terminal.tick-initial.tick>settings.maxRouteTicks){durationLimit=true;return;}out.push({key:a.key,to:{state:a.terminal,depth:node.depth+1},cost:a.durationTicks+a.penaltyTicks,action:a});};
      const direct=await align(s,goal);if(direct)add(direct);
-     if(hasWall(this.profile)&&(s.mode==='ground'||s.mode==='air')){
-      const generated=await buildWallActions(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
-      replayTicks+=generated.replayTicks;
-      if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
-      for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+     if((hasLedge(this.profile)||hasWall(this.profile))&&(s.mode==='ground'||s.mode==='air')){
+      const ingest=async(generated:import('./airborne').AirResult)=>{
+       replayTicks+=generated.replayTicks;
+       if(generated.status==='unsupported')throw new Exhausted('unsupported');
+       if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
+       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-e.initial.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+      };
+      const options=()=>({...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))});
+      if(hasLedge(this.profile)){
+       await ingest(await buildLedgeActions(this.map,this.profile,this.world,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,s));
+       // A sampled direct goal needs no unrelated expansion. Otherwise preserve
+       // every earlier ability family through a ledge-free candidate view; each
+       // candidate is replayed with the complete actual profile and state above.
+       if(out.some(t=>matches(t.to.state,goal)))return out;
+       const p={...this.profile,abilities:this.profile.abilities.filter(a=>a.kind!=='ledge')},map={...this.map,navigation:{...this.map.navigation,overrides:this.map.navigation.overrides.map(o=>({...o,actions:o.actions.filter(a=>!['ledge','ledgeGrab','ledgeClimb'].includes(a))})).filter(o=>o.actions.length)}},w={...this.world,profile:p,source:map as unknown as ContactMap};
+       const {ledge:_,...plain}=s as ClimbState&import('../ledge/runtime').LedgeState;
+       if(!(s as import('../ledge/runtime').LedgeState).ledge?.attachment){
+        if(hasWall(p)||hasDash(p)||airJumpCount(p)>0)await ingest(await (hasWall(p)?buildWallActions:hasDash(p)?buildDashActions:buildAirJumpActions)(map,p,w,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,plain));
+        else if(s.mode==='ground'){const ordinary=await buildAirborneActions(map,p,this.revision,options(),cancelled,yieldTask,[s.x,s.y,s.x,s.y],plain);await ingest(ordinary);}
+       }
+      }else await ingest(await buildWallActions(this.map,this.profile,this.world,this.revision,options(),this.identity,this.intervals,cancelled,yieldTask,undefined,s));
      }
      if(s.mode!=='ground'){
-      if(s.mode==='air'&&!hasWall(this.profile)&&(airJumpCount(this.profile)>0||hasDash(this.profile))){
+      if(s.mode==='air'&&!hasLedge(this.profile)&&!hasWall(this.profile)&&(airJumpCount(this.profile)>0||hasDash(this.profile))){
        const generated=await (hasWall(this.profile)?buildWallActions:hasDash(this.profile)?buildDashActions:buildAirJumpActions)(this.map,this.profile,this.world,this.revision,{...settings.air,maxReplayTicks:Math.max(1,Math.min(settings.air.maxReplayTicks,settings.maxReplayTicks-replayTicks))},this.identity,this.intervals,cancelled,yieldTask,undefined,s);
        replayTicks+=generated.replayTicks;
-       if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
-       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-s.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
+       if(generated.status==='unsupported')throw new Exhausted('unsupported');
+      if(replayTicks>settings.maxReplayTicks||generated.status==='budget'||generated.status==='cancelled')throw new Exhausted(generated.status==='cancelled'?'cancelled':'budget');
+       for(const e of generated.edges){const t:Template={key:e.key,kind:e.kind,initial:s,input:e.input.map(c=>({...c,fromTick:c.fromTick-e.initial.tick})),ticks:e.costTicks};const a=await replayTemplate(s,t);if(a)add(a);}
       }
       for(const d of [-1,0,1] as const){const t:Template={key:'source-land-'+d,kind:'land',initial:s,input:[{...controls(d),moveY:s.mode==='climb'?1:0,fromTick:0}],ticks:settings.maxActionTicks};const a=await replayTemplate(s,t);if(a)add(a);}return out;
      }
@@ -291,6 +309,6 @@ export class Navigation {
    const all=[initial,...complete.frames.map(f=>f.state)],w=this.world,bounds=[Math.min(...all.map(s=>s.x-w.half)),Math.min(...all.map(s=>s.y-w.height)),Math.max(...all.map(s=>s.x+w.half)),Math.max(...all.map(s=>s.y))] as const;
    const proof=await finish('verified reachable with replay witness',[]);
    return {...proof,heuristic:usedHorizontal?'horizontal tick lower bound':'zero',terminal:complete.terminal,actions,input:complete.input,frames:complete.frames,durationTicks:complete.frames.length,costTicks:actions.reduce((n,a)=>n+a.durationTicks+a.penaltyTicks,0),dependencies:{sweptBoundsSu:bounds,sha256:await digest({identity:this.identity,initial,goals,actions,frames:complete.frames})}};
-  }catch(e){if(e instanceof Exhausted)return finish(e.message==='cancelled'?'cancelled':'budget',[e.message]);throw e;}
+  }catch(e){if(e instanceof Exhausted)return finish(e.message==='cancelled'?'cancelled':e.message==='unsupported'?'unsupported':'budget',[e.message]);throw e;}
  }
 }
