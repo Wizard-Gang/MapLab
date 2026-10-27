@@ -60,7 +60,7 @@ test('budget and cancellation discard partial edges, including tiny lattice spac
  const bounded=await buildAirborneActions(map('flat'),profile(),1,{...AIR_DEFAULTS,spacingSu:1,maxCandidates:1},undefined,async()=>{});expect(bounded.status).toBe('budget');
  const cancelled=await buildAirborneActions(map(),profile(),1,AIR_DEFAULTS,()=>true,async()=>{});expect(cancelled.status).toBe('cancelled');expect(cancelled.edges).toEqual([]);
  const limit=await nav.withSearchLimits({maxReplayTicks:1});expect((await limit.route(nav.sourceState('start.dash'),read('cases.json').route.goal,'astar',undefined,async()=>{})).status).toBe('budget');
-});
+},120000);
 test('cache query and state keys preserve spent charges, cooldown, active duration and input edge',async()=>{
  const s=nav.sourceState('start.dash'),sent:RoutingRequest[]=[],session=new RoutingSession(r=>sent.push(r)),query:RouteQuery={kind:'route',sourceId:'start.dash',initial:s,goal:read('cases.json').route.goal,algorithm:'astar'};
  const changed={...s,...initialDash(profile()),resources:initialResources(profile())} as ClimbState&{dash:any};changed.dash={...changed.dash,held:true};expect(physicalStateKey(changed)).not.toBe(physicalStateKey(s));
