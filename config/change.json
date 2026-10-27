@@ -1,6 +1,6 @@
 {
-  "id": "ML-047",
-  "type": "CHORE",
-  "title": "[ML-047] [CHORE] Drop delivery and release records; GitHub is the record",
-  "branch": "ml-047-drop-delivery-records"
+  "id": "ML-040",
+  "type": "FEATURE",
+  "title": "[ML-040] [FEATURE] Add timed periodic-platform navigation witnesses",
+  "branch": "ml-040-timed-platform-navigation"
 }
