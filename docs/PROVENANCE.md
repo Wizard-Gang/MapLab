@@ -162,3 +162,14 @@ ML-030 adds `conformance/riglab/`, a new CC0-1.0 MapLab-owned seven-bone rig, an
 ## ML-031 runtime blocker fixtures
 
 `conformance/blockers/` contains owned CC0 numeric gap geometry, movement settings and a verified 45-tick witness carried from the existing airborne conformance corpus. The new cases place a runtime wall in previously empty gap space, remove it, add a distant obstacle, change physical source, retain art-only cache warmth and cancel stale work. No borrowed assets or solver code. An indexed SHA-256 inventory pins all inputs; CI constructs incremental and clean reports and runs a separate Node-only final-byte consumer over their exact bytes.
+
+## ML-040 periodic platform fixtures
+
+`conformance/timed-platforms/` is owned CC0 integer geometry derived from the
+existing platform corpus. It covers phased elevators, missed boarding and a later
+trip, wait/board/ride/exit checkpoints, a thin blocker between clear rider poses,
+once-motion refusal and departure velocity. Its SHA-256 inventory binds every
+fixture. `tests/consumer/timed-platforms.mjs` uses separate Node-only schedule and
+contact equations to check timed checkpoints and exported source bytes; it imports
+no MapLab motor or solver. Repaired-digest source edits and forged witness states
+must still fail. No assets or executable schema extensions were borrowed.
