@@ -43,30 +43,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-032** — squash `f697149`, PR #32; [record](docs/changes/ML-032.md).
 - **ML-033** — squash `5a626ea`, PR #33; [record](docs/changes/ML-033.md).
 - **ML-034** — squash `8d4dba8`, PR #34; [record](docs/changes/ML-034.md).
+- **ML-035** — squash `16f32f3`, PR #35; [record](docs/changes/ML-035.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-035 / P1
-
-- **Source scope:** Wall slide/jump/climb geometry permissions, controller and bounded wall-sequence solver.
-- **Non-goals:** No ledge/grapple/swing.
-- **Acceptance:** Contact side, stamina and launch-state fixtures; routes differ by permissions; no physics from artwork.
-- **Depends on:** ML-034 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [E2](docs/specifications/2026-10-16-maplab.md#e2-deterministic-graph-building-pipeline), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Add wall side contact, slide, jump and climb permission/resource handling to reference controller.
-  2. Bound wall-sequence graph expansion with clearance and release/launch transition checks.
-  3. Create owned fixture(s): Left/right wall, stamina exhaustion, blocked roof, launch velocity and incompatible profiles.
-  4. Add executable checks: Collision truth/route-profile distinction tests.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-036 / P2
 
 - **Source scope:** Ledge-grab/climb capability and supported transition solver.
@@ -81,6 +63,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Witness replay with no animation-derived physics authority.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-037 / P2
 
 - **Source scope:** Swimming/entry/exit plus refined flight acceleration/turn-state navigation.

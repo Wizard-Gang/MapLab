@@ -1,0 +1,28 @@
+// Independent numeric ledge consumer. No MapLab runtime or solver imports.
+import {readFileSync} from 'node:fs';import {join} from 'node:path';import {createHash} from 'node:crypto';import assert from 'node:assert/strict';
+import {readBundle} from './reader/read-bundle.mjs';
+const [folder,reportPath,bundle,schemas]=process.argv.slice(2),read=f=>JSON.parse(readFileSync(join(folder,f),'utf8')),reports=JSON.parse(readFileSync(reportPath,'utf8'));
+const hash=b=>createHash('sha256').update(b).digest('hex'),canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+const project=f=>({status:f.status,tick:f.state.tick,x:f.state.x,y:f.state.y,vx:f.state.vx,vy:f.state.vy,mode:f.state.mode,supportId:f.state.supportId,stamina:f.state.wall.staminaTicks,action:f.state.ledge.action,attachment:f.state.ledge.attachment,actionRef:f.state.ledge.actionRef});
+function equations(c,map,p){
+ const a=p.abilities.find(a=>a.kind==='ledge'),wall=p.abilities.find(a=>a.kind==='wall'),side=c.input[0].moveX,half=p.collider.width*128,height=p.collider.height*256;
+ const t=map.traversals.find(t=>t.kind==='ledge'&&t.edge.bodyId==='body.'+(side===1?'right':'left')),b=map.bodies.find(b=>b.id===t.edge.bodyId),sh=b.shapes.find(s=>s.id===t.edge.shapeId),gx=(t.points[0][0]+b.position[0])*256,gy=(t.points[0][1]+b.position[1])*256;
+ assert.equal(sh.kind,'rect');assert.equal(gx,(sh.rect[0]+b.position[0]+(side===1?0:sh.rect[2]))*256);assert.equal(gy,(sh.rect[1]+b.position[1])*256);assert.equal(c.initial.x,gx-side*half);assert(Math.abs(c.initial.y-p.grabHeight*256-gy)<=a.grabReach*256);
+ let prior=project({status:'ok',state:c.initial}),out=[];
+ for(let n=0;n<c.ticks;n++){
+  const done=n===a.climbTicks,x=done?gx+side*half:c.initial.x,y=done?gy:c.initial.y+Math.trunc((gy-c.initial.y)*n/(a.climbTicks-1));
+  const collision=(x,y,oldX,oldY)=>map.bodies.some(b=>b.enabled&&b.shapes.some(s=>{const [left,top,width,h]=s.rect.map((v,i)=>(v+(i===0?b.position[0]:i===1?b.position[1]:0))*256);return x+half>left&&x-half<left+width&&Math.max(oldY,y)>top&&Math.min(oldY,y)-height<top+h||Math.max(oldX,x)+half>left&&Math.min(oldX,x)-half<left+width&&oldY>top&&oldY-height<top+h;}));
+  if(collision(x,y,prior.x,prior.y)){out.push({...prior,status:'unsupported'});break;}
+  const row={status:'ok',tick:c.initial.tick+n+1,x,y,vx:done?0:x-prior.x,vy:done?0:y-prior.y,mode:done?'ground':'air',supportId:done?'fh.'+(side===1?'right':'left'):null,stamina:done?wall.staminaTicks:c.initial.wall.staminaTicks-n-1,action:n===0?'ledgeGrab':'ledgeClimb',attachment:done?null:{traversalId:t.id,startY:c.initial.y,elapsed:n,side},actionRef:a.action};out.push(row);prior=row;
+ }return out;
+}
+const ix=read('index.json');assert.equal(ix.license,'CC0-1.0');for(const f of ix.files)assert.equal(hash(readFileSync(join(folder,f.path))),f.sha256);
+for(const name of read('cases.json').cases){const c=read(name),expected=equations(c,read(c.map),read(c.profile));assert.deepEqual(c.expect,expected,'independent ledge equation');assert.deepEqual(reports.cases[name],expected,'reported ledge trace');}
+const imported=readBundle(bundle,schemas);assert(imported.ok,'independent final-byte import: '+JSON.stringify(imported.diagnostics));
+const manifest=JSON.parse(readFileSync(join(bundle,'manifest.json'),'utf8')),docs=manifest.documents.map(d=>JSON.parse(readFileSync(join(bundle,d.path),'utf8'))),p=docs.find(d=>d.id==='movement.ledge'),map=docs.find(d=>d.id===manifest.entryMapId);
+const normalize=p=>({...p,mask:[...p.mask].sort(),abilityTags:[...p.abilityTags].sort(),forbiddenMaterialTags:[...p.forbiddenMaterialTags].sort(),abilities:p.abilities.map(a=>a.kind==='wall'?{...a,permissions:[...a.permissions].sort()}:a).sort((a,b)=>a.kind.localeCompare(b.kind))});
+assert.deepEqual(p,normalize(read('player.movement.json')),'exported ledge profile binding');const expected=read('ledge.map.json');for(const key of ['dependencies','bodies','footholds','traversals'])expected[key].sort((a,b)=>a.id.localeCompare(b.id));expected.requiredFeatures.sort((a,b)=>a.key.localeCompare(b.key)||a.version-b.version);assert.deepEqual(map,expected,'exported ledge geometry binding');
+const proof=reports.proof;assert.equal(proof.status,'verified reachable with replay witness');assert.equal(proof.heuristic,'zero');assert.equal(proof.identity.profileSha256,hash(canonical(normalize(p))));assert.equal(proof.canCertify,false);assert.equal(proof.complete,false);assert.deepEqual(proof.frames.map(project),equations(read('right-climb.fixture.json'),map,p),'independent entire ledge route');
+let prior=proof.initial,cost=0;const combined=[];for(const a of proof.actions){assert.deepEqual(a.initial,prior,'resource-compatible action joins');assert.equal(a.durationTicks,a.frames.length);assert.deepEqual(a.terminal,a.frames.at(-1).state);cost+=a.durationTicks+a.penaltyTicks;combined.push(...a.frames);prior=a.terminal;}assert.deepEqual(combined,proof.frames);assert.deepEqual(prior,proof.terminal);assert.equal(cost,proof.costTicks);
+assert.notEqual(reports.noneProof.status,'verified reachable with replay witness');assert.deepEqual(reports.noneProof.frames,[]);
+console.log(JSON.stringify({verified:true,cases:read('cases.json').cases.length,chainedRoute:true,finalByteImport:true}));

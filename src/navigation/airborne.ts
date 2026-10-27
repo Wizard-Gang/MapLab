@@ -1,11 +1,13 @@
+import {buildLedgeActions} from './ledge';
+import {LEDGE_PRIMITIVE_SHA256} from '../ledge/identity';
 import {buildWallActions} from './wall';
 import {WALL_PRIMITIVE_SHA256} from '../wall/identity';
-import {step,airJumpCount,supportedJumpProfile,hasWall,hasDash} from '../wall/runtime';
+import {step,airJumpCount,supportedJumpProfile,hasLedge,hasWall,hasDash} from '../ledge/runtime';
 import {buildDashActions} from './dash';
 import {DASH_PRIMITIVE_SHA256} from '../dash/identity';
 import {buildAirJumpActions,primitiveLimits,type PrimitiveLimits} from './air-jumps';
 import {AIR_PRIMITIVE_SHA256} from '../air-jumps/identity';
-import {groundIntentSupported,groundMotionAllowed} from '../wall/intent';
+import {groundIntentSupported,groundMotionAllowed} from '../ledge/intent';
 // Bounded single-action solver. These exact action states are not a route graph.
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
@@ -19,7 +21,7 @@ export interface AirSettings {
 }
 export type AirOptions=AirSettings&Partial<PrimitiveLimits>;
 export const AIR_DEFAULTS:AirSettings={spacingSu:8192,maxCandidates:20_000,maxTicks:240,maxReplayTicks:1_000_000,maxClearanceSamples:2_000_000};
-export type Action='jump'|'fall'|'drop'|'dash'|'wallSlide'|'wallJump'|'wallClimb';
+export type Action='jump'|'fall'|'drop'|'dash'|'wallSlide'|'wallJump'|'wallClimb'|'ledgeClimb';
 export interface Witness {
  readonly key:string; readonly kind:Action; readonly status:'verified reachable with replay witness';
  readonly fromInterval:string; readonly toInterval:string; readonly initial:ClimbState; readonly terminal:ClimbState;
@@ -36,7 +38,7 @@ export interface AirResult {
 }
 export async function airborneIdentity(map:MapDocument,p:MovementDocument,settings:AirOptions):Promise<Identity>{
  const base=await surfaceIdentity(map,p,DEFAULT_SETTINGS);
- const settingsSha256=await digest({solver:hasWall(p)?'stateful-wall@1':hasDash(p)?'stateful-dash@1':airJumpCount(p)>0?'stateful-airborne@1':'single-airborne@2',surfaceSolver:base.settingsSha256,...settings,...(hasWall(p)?{...primitiveLimits(settings),primitiveSha256:WALL_PRIMITIVE_SHA256}:hasDash(p)?{...primitiveLimits(settings),primitiveSha256:DASH_PRIMITIVE_SHA256}:airJumpCount(p)>0?{...primitiveLimits(settings),primitiveSha256:AIR_PRIMITIVE_SHA256}:{})});
+ const settingsSha256=await digest({solver:hasLedge(p)?'stateful-ledge@1':hasWall(p)?'stateful-wall@1':hasDash(p)?'stateful-dash@1':airJumpCount(p)>0?'stateful-airborne@1':'single-airborne@2',surfaceSolver:base.settingsSha256,...settings,...(hasLedge(p)?{...primitiveLimits(settings),primitiveSha256:LEDGE_PRIMITIVE_SHA256}:hasWall(p)?{...primitiveLimits(settings),primitiveSha256:WALL_PRIMITIVE_SHA256}:hasDash(p)?{...primitiveLimits(settings),primitiveSha256:DASH_PRIMITIVE_SHA256}:airJumpCount(p)>0?{...primitiveLimits(settings),primitiveSha256:AIR_PRIMITIVE_SHA256}:{})});
  const value={...base,settingsSha256};return {...value,cacheKey:await digest({worldSha256:value.worldSha256,profileSha256:value.profileSha256,controllerSha256:value.controllerSha256,settingsSha256})};
 }
 const stateAt=(w:World,i:Interval,x:number,vx:number):ClimbState|null=>{
@@ -62,6 +64,7 @@ export async function buildAirborneActions(source:MapDocument,profile:MovementDo
  let w:World;try{w=createWorld(map as unknown as ContactMap,p);}catch(e){return result('unsupported',[String(e)]);}
  const surface=await buildSurfaceGraph(map,p,revision,{maxSamples:options.maxClearanceSamples,maxTicks:3600},cancelled,yieldTask);
  if(surface.status!=='candidate')return result(surface.status,surface.diagnostics);
+ if(hasLedge(p))return buildLedgeActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(hasWall(p))return buildWallActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(hasDash(p))return buildDashActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);
  if(airJumpCount(p)>0)return buildAirJumpActions(map,p,w,revision,options,id,surface.intervals,cancelled,yieldTask,launchRegionSu);

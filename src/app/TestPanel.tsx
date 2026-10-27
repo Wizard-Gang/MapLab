@@ -3,7 +3,7 @@ import {CameraFootprint,CameraViewport} from './CameraOverlay';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { NEUTRAL, MAX_TICKS } from '../test-runtime/session';
 import type { PortalTestSession } from '../test-runtime/portals';
-import type { DashInput as Input, DashState, WallState } from '../wall/runtime';
+import type { DashInput as Input, DashState, WallState, LedgeState } from '../ledge/runtime';
 import type { Entity } from '../contracts/gameplay-types';
 import { records } from '../render/scene';
 import { buildScene } from '../render/scene';
@@ -48,7 +48,7 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
       <button onClick={() => { clear(); stop(); }}>Stop Test</button>
       <button disabled={!view.frames.length} onClick={() => { setText(JSON.stringify(run.recording(), null, 2)); setNotice('Recording copied to replay input'); }}>Use recorded input</button>
     </div>
-    <p>Focus the Test stage: arrows move/climb, Shift runs, Space jumps, D drops, X dashes horizontally, N steps while paused. With wall permission, push into a wall to slide, add Up/Down to climb, or press Space to jump away. Blur pauses and clears keys.</p>
+    <p>Focus the Test stage: arrows move/climb, Shift runs, Space jumps, D drops, X dashes horizontally, N steps while paused. With wall permission, push into a wall to slide, add Up/Down to climb, or press Space to jump away. With ledge permission, hold toward its face and Up to grab, lift and climb onto its top. Blur pauses and clears keys.</p>
     <label>Show camera preview<input aria-label="Show camera preview" type="checkbox" checked={showCamera} onChange={e=>setShowCamera(e.target.checked)}/></label>
     <svg aria-label="Test stage" role="application" tabIndex={0} viewBox={run.source.bounds.join(' ')} style={{ width:'100%', maxHeight:480, background:'#16251f' }}
       onBlur={() => { clear(); run.pause(); }}
@@ -64,8 +64,8 @@ function RunningTest({ run, stop }: { readonly run: PortalTestSession; readonly 
     </svg>
     {showCamera&&view.camera&&body.kind==='rect'&&<CameraViewport view={view.camera} scene={scene} state={state} body={body}/>}
     {view.cameraDiagnosis&&<p aria-label="Camera preview diagnosis">{view.cameraDiagnosis} · Physics remains independent.</p>}
-    <output aria-label="Test movement HUD" data-wall-side={(state as WallState).wall?.contact?.side??0} data-wall-stamina={(state as WallState).wall?.staminaTicks??0} data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''} data-dash-left={(state as DashState).dash?.active?.ticksLeft??0}>
-      Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing} · Air jumps {state.resources?.airJumps??0} · Dash charges {state.resources?.dashCharges??0} · Dash cooldowns {JSON.stringify(state.resources?.cooldowns??{})} · Wall side {(state as WallState).wall?.contact?.side??'none'} · Wall stamina {(state as WallState).wall?.staminaTicks??0}
+    <output aria-label="Test movement HUD" data-ledge-action={(state as LedgeState).ledge?.action??'none'} data-ledge-traversal={(state as LedgeState).ledge?.attachment?.traversalId??'none'} data-wall-side={(state as WallState).wall?.contact?.side??0} data-wall-stamina={(state as WallState).wall?.staminaTicks??0} data-tick={state.tick} data-state={state.mode} data-support={state.supportId??''} data-dash-left={(state as DashState).dash?.active?.ticksLeft??0}>
+      Tick {state.tick} · Foot ({state.x/256}, {state.y/256}) WU · Velocity ({state.vx}, {state.vy}) su/tick · State {state.mode} · Foothold {state.supportId??'none'} · Traversal {state.traversalId??'none'} · Plane {state.planeId??'none'} · Facing {state.facing} · Air jumps {state.resources?.airJumps??0} · Dash charges {state.resources?.dashCharges??0} · Dash cooldowns {JSON.stringify(state.resources?.cooldowns??{})} · Ledge {(state as LedgeState).ledge?.action??'none'} · Wall side {(state as WallState).wall?.contact?.side??'none'} · Wall stamina {(state as WallState).wall?.staminaTicks??0}
     </output>
     <TestRig source={run.runtimeSource()} state={state}/>
     <pre aria-label="Test contacts">{JSON.stringify(view.frame.contacts, null, 2)}</pre>
