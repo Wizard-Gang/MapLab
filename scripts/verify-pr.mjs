@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { demand, sha, readJson, checkChange, checkSections, releaseTitle, planTitle, planBranch, planBases } from './check-change.mjs';
+import { demand, sha, readJson, checkChange, checkSections, releaseTitle, planTitle, planBranch, planBase } from './check-change.mjs';
 import { ghApi, optionalGhApi, readPolicy } from './repository-policy.mjs';
 
 // Release protocol: task PRs merge into the open release branch on the fast gate; only its release PR reaches main.
@@ -64,7 +64,7 @@ export function verifyPr(root, number, head) {
   const planning = planTitle.test(pr.title);
   demand(pr.state === 'open' && pr.draft === false && pr.head.sha === head && (releasing
     ? base === 'main' && pr.title === releaseTitle(release)
-    : planning ? planBases(release, readJson(root, 'docs/releases.json')).includes(base) && planBranch.test(pr.head.ref)
+    : planning ? base === planBase(release, optionalGhApi(`${prefix}/git/ref/heads/${release.branch}`) !== null) && planBranch.test(pr.head.ref)
       : base === release.branch && pr.head.ref === change.branch && pr.title === change.title), 'PR identity/state/head differs');
   checkSections(pr.body ?? '');
   demand(pr.body.includes(head), 'PR must record exact tested head');

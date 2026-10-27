@@ -100,7 +100,7 @@ const body = sections.map((s) => `## ${s}\n\nFixture prose.\n`).join('\n');
 function eventFixture() {
   return { eventName: 'pull_request', actualHead: 'b'.repeat(40), release, taskTitles: release.tasks.map(() => change.title),
     commitTitles: [change.title], changedFiles: ['config/change.json', 'config/release.json', change.record, 'implementation_plan.md'],
-    basePlan: plan, headPlan: plan, releases: [],
+    basePlan: plan, headPlan: plan, releaseOpen: true,
     event: { repository: { full_name: 'Wizard-Gang/MapLab' }, pull_request: {
       title: change.title, body,
       head: { sha: 'b'.repeat(40), ref: change.branch },
@@ -131,7 +131,7 @@ test('event validation accepts a task PR that also edits other queued tasks', ()
 });
 test('event validation accepts a plan-only PR', () => expect(() => checkEvent(change, planFixture())).not.toThrow());
 test('event validation accepts a plan-only PR into the next release once the open one has merged', () => {
-  const v = planFixture(); v.releases = [{ id: release.id }];
+  const v = planFixture(); v.releaseOpen = false;
   v.event.pull_request.base.ref = `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`;
   expect(() => checkEvent(change, v)).not.toThrow();
 });
@@ -144,6 +144,7 @@ test.each([
   ['a task record', (v) => { v.changedFiles = [change.record]; }],
   ['a task branch', (v) => { v.event.pull_request.head.ref = change.branch; }],
   ['a base of main', (v) => { v.event.pull_request.base.ref = 'main'; }],
+  ['the merged release branch', (v) => { v.releaseOpen = false; }],
   ['the next release while the open one is unmerged', (v) => { v.event.pull_request.base.ref = `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`; }],
   ['a commit titled otherwise', (v) => { v.commitTitles.push(change.title); }],
   ['a lower-case summary', (v) => { v.event.pull_request.title = '[PLAN] queue a new task'; v.commitTitles = [v.event.pull_request.title]; }],

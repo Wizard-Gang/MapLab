@@ -12,8 +12,9 @@ IDs never get reused. The permanent implementation plan is the sole current/futu
   The next task is any queued task; the spec's J2 table is the original baseline only.
 - A PR that changes only the plan is titled `[PLAN] Imperative summary` on a
   `plan-<summary>` branch into the open release branch, with every commit titled the
-  same. Once that release has merged and before the next task cuts the next one, it may
-  target the next branch (`release/rNNN+1`), cut from main's tip. It takes no task ID, leaves `config/` alone, and joins no release task list;
+  same. Once that release has merged (its branch is gone) and before the next task, it
+  targets the next branch (`release/rNNN+1`), cut from main's tip. The next task then
+  reuses that branch instead of cutting it again. It takes no task ID, leaves `config/` alone, and joins no release task list;
   its squash `[PLAN] Imperative summary (#PR)` rides the release PR beside the tasks.
 - IDs are unique and never recycled. The plan records the highest ID ever used; a new
   task takes an ID above it and raises it, and it never falls. A removed queued ID is

@@ -18,10 +18,10 @@ const squashTitle = /^(\[(ML-\d{3})\] \[(?:FEATURE|FIX|DOCS|CHORE|REFACTOR|TEST|
 export const planTitle = /^\[PLAN\] [A-Z][^\r\n]+$/;
 export const planBranch = /^plan-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const planSquash = /^\[PLAN\] [A-Z][^\r\n]+ \(#\d+\)$/;
-// A plan PR targets the open release branch. Once that release has merged, config/release.json still names it
-// until the next task cuts the next one, so a plan PR may target that next branch instead.
-export const planBases = (release, releases) => releases.some((entry) => entry.id === release.id)
-  ? [release.branch, `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`] : [release.branch];
+// A plan PR targets the open release branch. Once that release has merged, its branch is deleted but
+// config/release.json still names it until the next task, so a plan PR then targets the next branch instead.
+export const planBase = (release, releaseOpen) => releaseOpen ? release.branch
+  : `release/r${String(Number(release.id.slice(1)) + 1).padStart(3, '0')}`;
 export const releaseTitle = (release) => `[RELEASE] ${release.id}: ${release.tasks.length === 1
   ? release.tasks[0] : `${release.tasks[0]}..${release.tasks.at(-1)}`}`;
 export function checkSections(text) {
@@ -100,7 +100,7 @@ export function checkReleaseTrees(releases, git) {
 }
 
 export function checkEvent(change, context) {
-  const { eventName, event, actualHead, commitTitles, changedFiles, release, releases, taskTitles, basePlan, headPlan } = context;
+  const { eventName, event, actualHead, commitTitles, changedFiles, release, releaseOpen, taskTitles, basePlan, headPlan } = context;
   demand(sha.test(actualHead), 'Actual checkout SHA is invalid');
   demand(eventName === 'pull_request', 'Change identity runs only on pull requests');
   const pr = event.pull_request;
@@ -119,7 +119,7 @@ export function checkEvent(change, context) {
     return;
   }
   if (planTitle.test(pr.title)) {
-    demand(planBases(release, releases).includes(pr.base.ref), 'Plan PR base must be the open or next release branch');
+    demand(pr.base.ref === planBase(release, releaseOpen), 'Plan PR base must be the open release branch, or the next once it has merged');
     demand(planBranch.test(pr.head.ref), 'Plan PR branch must be plan-<summary>');
     demand(commitTitles.every((title) => title === pr.title), 'Commit title differs from plan PR');
     demand(changedFiles.length === 1 && changedFiles[0] === 'implementation_plan.md', 'A plan PR changes implementation_plan.md alone');
@@ -148,9 +148,13 @@ if (process.argv[1] && resolve(process.argv[1]) === self) {
       demand(sha.test(base ?? '') && !/^0+$/.test(base), 'Missing post-bootstrap base revision');
       git('merge-base', '--is-ancestor', base, 'HEAD');
       const plan = (revision) => git('show', `${revision}:implementation_plan.md`);
+      // Any fetch failure counts as merged, which only narrows a plan PR to the next branch: it fails closed.
+      const releaseOpen = event.pull_request.base.ref === release.branch || (() => {
+        try { git('fetch', '--no-tags', '--quiet', 'origin', `refs/heads/${release.branch}`); return true; } catch { return false; }
+      })();
       checkReleaseTrees(releases, git);
       checkEvent(change, {
-        eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release, releases,
+        eventName: process.env.GITHUB_EVENT_NAME, event, actualHead: git('rev-parse', 'HEAD'), release, releaseOpen,
         basePlan: plan(base), headPlan: plan('HEAD'),
         taskTitles: release.tasks.map((id) => readFileSync(resolve(root, `docs/changes/${id}.md`), 'utf8').split('\n')[0].slice(2)),
         commitTitles: git('log', '--format=%s', `${base}..HEAD`).split('\n'),
