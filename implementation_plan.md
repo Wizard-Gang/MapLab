@@ -46,30 +46,12 @@ Full evidence for each line lives in the delivery chain and the linked change re
 - **ML-035** — squash `16f32f3`, PR #35; [record](docs/changes/ML-035.md).
 - **ML-036** — squash `4d5330a`, PR #36; [record](docs/changes/ML-036.md).
 - **ML-037** — squash `2c3428b`, PR #37; [record](docs/changes/ML-037.md).
+- **ML-038** — squash `3140855`, PR #38; [record](docs/changes/ML-038.md).
 <!-- completed-history:end -->
 
 ## Current first-open task
 
 <!-- active-queue:start -->
-### ML-038 / P2
-
-- **Source scope:** Grapple anchor/reel/swing capability with a named reference solver and bounded planning.
-- **Non-goals:** No arbitrary rope physics completeness guarantee.
-- **Acceptance:** Attachment/range/occlusion/rope length and finite-body swing fixtures; unsupported solver cannot certify.
-- **Depends on:** ML-037 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [D4](docs/specifications/2026-10-16-maplab.md#d4-movement-contract-and-runtime-separation), [E2](docs/specifications/2026-10-16-maplab.md#e2-deterministic-graph-building-pipeline), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Author grapple anchor/range/occlusion, reel and swing parameters with named deterministic reference solver.
-  2. Bound planning state/sample budget, verify finite-body swing/contact witnesses and publish unsupported cases.
-  3. Create owned fixture(s): Anchor out of range, blocked line, rope length, pendulum collision and bad release.
-  4. Add executable checks: Repeat solver trace and never certify unsupported rope dynamics.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Preserved future reserved tasks
-
-<!-- future-queue:start -->
 ### ML-039 / P2
 
 - **Source scope:** Teleport, launch/knockback and temporary modifier solvers, effective-profile hashing.
@@ -84,6 +66,11 @@ Full evidence for each line lives in the delivery chain and the linked change re
   4. Add executable checks: Determinism, stateful route verification and forbidden destination cases.
 - **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
 
+<!-- active-queue:end -->
+
+## Preserved future reserved tasks
+
+<!-- future-queue:start -->
 ### ML-040 / P2
 
 - **Source scope:** Time/phase-aware periodic moving-platform navigation with wait/board/ride/exit.
