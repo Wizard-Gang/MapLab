@@ -1,7 +1,7 @@
 {
-  "id": "ML-038",
+  "id": "ML-039",
   "type": "FEATURE",
-  "title": "[ML-038] [FEATURE] Add bounded grapple attachment and swing witnesses",
-  "branch": "ml-038-grapple",
-  "record": "docs/changes/ML-038.md"
+  "title": "[ML-039] [FEATURE] Add stateful teleport launch and modifier witnesses",
+  "branch": "ml-039-stateful-solvers",
+  "record": "docs/changes/ML-039.md"
 }
