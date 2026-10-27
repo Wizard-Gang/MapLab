@@ -1,0 +1,64 @@
+{
+  "format": "maplab.grapple-fixtures",
+  "version": 1,
+  "license": "CC0-1.0",
+  "provenance": "Original MapLab ML-038 numeric geometry, profiles and independently authored integer equation checkpoints. No borrowed solver or artwork.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "7ce45f378e822f333dc341bac474419e78040b35a9cf5f4d4c26c4d890f02dca"
+    },
+    {
+      "path": "cases.json",
+      "sha256": "b6db46e310220e5da1497273dcd6636e2c2de83bec2be923dcb32090ec3b4f72"
+    },
+    {
+      "path": "contracts.json",
+      "sha256": "719a3eb1ed744c0320830dec9d533793e99c05a07ddeb95396a2b2d05c24b8db"
+    },
+    {
+      "path": "grapple.movement.json",
+      "sha256": "88d0f98ffa768f6164c9122ccae9a56a7b38f688a9ccb67bb9dc976e0597735d"
+    },
+    {
+      "path": "limited.movement.json",
+      "sha256": "283c3b6c2a68c193b8646fee6d7f2fc7c582c319784cd0676eb8828a3b82537f"
+    },
+    {
+      "path": "occluded.map.json",
+      "sha256": "f262d8749fca4caef9190e93cf5f34ccaf546af7d14e764f76273b8ddc23c466"
+    },
+    {
+      "path": "open.map.json",
+      "sha256": "8ed6a1a8821cf1c44437a0f0e46641021d152b0ba6a7a28fc50c04e5e5395325"
+    },
+    {
+      "path": "pendulum.map.json",
+      "sha256": "616bce0e30319c11be024a91e1bea21d3e34a3e6fd44e24cfc2fd496422b8b03"
+    },
+    {
+      "path": "short.movement.json",
+      "sha256": "09c0915197b7f21cd26ad4bff06076e930cbabbc4bd1add064ff77089837df70"
+    },
+    {
+      "path": "steps.json",
+      "sha256": "32e893e2a3c986cd41fedd3b68cbc5c8ba24a789a14f3222c3fc2d0038b64cf2"
+    },
+    {
+      "path": "thin.map.json",
+      "sha256": "32cc2cd0a67323ec557ae0dc9c799abe82880cec3cb2d903aa05ad37f554def6"
+    },
+    {
+      "path": "traces.json",
+      "sha256": "cdc93ef77fb8c13e8d13201a2565fef567789050fd50036356002773e5060cfb"
+    },
+    {
+      "path": "unknown.movement.json",
+      "sha256": "5560992c41f0336843115ee6135eec1b2caed585c9b8f43b1b35e97ac9a07166"
+    },
+    {
+      "path": "wide.movement.json",
+      "sha256": "66a0f7ebcab4f7d4820dc834cbd7f718838ac69292a8d8343393461f67b955ba"
+    }
+  ]
+}
