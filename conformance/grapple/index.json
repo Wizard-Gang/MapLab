@@ -6,7 +6,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "7ce45f378e822f333dc341bac474419e78040b35a9cf5f4d4c26c4d890f02dca"
+      "sha256": "34ce6f209f8bb3e8b6931894b437a9096fffe2335003dd3bbce2f8a4d0f534f8"
     },
     {
       "path": "cases.json",
@@ -26,15 +26,15 @@
     },
     {
       "path": "occluded.map.json",
-      "sha256": "f262d8749fca4caef9190e93cf5f34ccaf546af7d14e764f76273b8ddc23c466"
+      "sha256": "a25861a7c97f7524aa6eb4eb2eee7ffddb3487f7d79076487b232c91fd2652d1"
     },
     {
       "path": "open.map.json",
-      "sha256": "8ed6a1a8821cf1c44437a0f0e46641021d152b0ba6a7a28fc50c04e5e5395325"
+      "sha256": "05a5374137dd850dc58683fb8002eefe4fc968d5038a4d177ee1cdbce10a121a"
     },
     {
       "path": "pendulum.map.json",
-      "sha256": "616bce0e30319c11be024a91e1bea21d3e34a3e6fd44e24cfc2fd496422b8b03"
+      "sha256": "fd828d2505176bbd44a8836de443a7f799cc4f9bcfe0167e80c4eab65bca6250"
     },
     {
       "path": "short.movement.json",
@@ -46,7 +46,7 @@
     },
     {
       "path": "thin.map.json",
-      "sha256": "32cc2cd0a67323ec557ae0dc9c799abe82880cec3cb2d903aa05ad37f554def6"
+      "sha256": "6a3d1ec45f2727ef9f9e5457371ba032e0901d05b96a68aa986dc2e053782929"
     },
     {
       "path": "traces.json",

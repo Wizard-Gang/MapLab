@@ -3,7 +3,9 @@
 All geometry, profiles, inputs and checkpoints are original MapLab numeric work,
 dedicated to CC0-1.0. No external artwork or rope implementation is included.
 `index.json` pins final bytes, including the separate motor/geometry/planner
-identities in `contracts.json`. Export tests include every fixture map and profile.
+identities in `contracts.json`. Export tests include every supported fixture map
+and profile. The unknown-solver negative remains outside the accepted closure;
+substituting its required contract into an export is independently rejected.
 
 `maplab.reference-grapple@1` is a dedicated, fixed 60 Hz, safe-integer solver.
 Positions and rope length use su (256/WU). The harness is the actor's bottom
