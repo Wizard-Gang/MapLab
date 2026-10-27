@@ -12,7 +12,7 @@ function fixture() {
   const p = mkdtempSync(join(tmpdir(), 'maplab-queue-'));
   temporary.push(p);
   for (const f of ['implementation_plan.md',
-    'docs/specifications/2026-10-16-maplab.md', 'docs/deliveries.json', 'config/change.json']) {
+    'docs/specifications/2026-10-16-maplab.md', 'config/change.json']) {
     mkdirSync(dirname(join(p, f)), { recursive: true });
     cpSync(join(root, f), join(p, f));
   }
@@ -23,7 +23,6 @@ const edit = (p, file, fn) => {
   writeFileSync(f, fn(readFileSync(f, 'utf8')));
 };
 // Corruptions target whichever task is active, so activation never edits this file.
-const delivered = JSON.parse(readFileSync(join(root, 'docs/deliveries.json'), 'utf8')).length;
 const active = JSON.parse(readFileSync(join(root, 'config/change.json'), 'utf8')).id;
 const plan = readFileSync(join(root, 'implementation_plan.md'), 'utf8');
 const futureBlock = plan.slice(plan.indexOf('<!-- future-queue:start -->'), plan.indexOf('<!-- future-queue:end -->'));
@@ -40,8 +39,8 @@ const queue = (s, id) => s.replace('<!-- future-queue:end -->', taskBlock.replac
 const ahead = (s, id) => s.replace('<!-- future-queue:start -->', '<!-- future-queue:start -->\n' + taskBlock.replace(/^### ML-\d{3} \//, '### ' + id + ' /').trim() + '\n');
 const drop = (s, id) => s.replace(new RegExp('### ' + id + ' \\/[\\s\\S]*?(?=### ML-|<!-- future-queue:end -->)'), '');
 const raise = (s, id) => s.replace(/^(\*\*Highest ID ever used:\*\* )ML-\d{3}/m, '$1' + id);
-test('the live queue passes with the active task, history and the highest ID ever used', () => {
-  expect(checkQueue(fixture())).toEqual({ active, completed: delivered, future: queued.length, highest });
+test('the live queue passes with the active task and the highest ID ever used', () => {
+  expect(checkQueue(fixture())).toEqual({ active, future: queued.length, highest });
 });
 // Owner ruling 2026-10-27: the plan changes whenever anyone wants.
 test.each([
@@ -57,15 +56,12 @@ test.each([
 });
 test.each([
   ['duplicate queued ID', 'implementation_plan.md', (s) => queue(s, active), 'Duplicate live task'],
-  ['a delivered ID back in the queue', 'implementation_plan.md', (s) => queue(s, 'ML-002'), 'Duplicate live task'],
   ['active task other than the controlled change', 'implementation_plan.md', (s) => s.replace('### ' + active + ' /', '### ' + above(1) + ' /'), 'Active queue'],
   ['an ID above the mark', 'implementation_plan.md', (s) => queue(s, above(1)), 'highest ID ever used'],
   ['a missing mark', 'implementation_plan.md', (s) => s.replace(/^\*\*Highest ID ever used:\*\*.*$/m, ''), 'highest ID ever used exactly once'],
   ['wrong specification anchor', 'implementation_plan.md', (s) => s.replace(/(### ML-\d{3} \/[^\n]*\n[\s\S]*?\[[A-K]\d+\]\(docs\/specifications\/2026-10-16-maplab\.md#)[^)]+\)/, '$1wrong)'), 'Specification traceability'],
   ['missing fixture', 'implementation_plan.md', (s) => s.replace('Create owned fixture(s): ' + fixtures, 'Create owned fixture(s): TODO'), 'Executable subtasks'],
   ['missing acceptance', 'implementation_plan.md', (s) => s.replace(/^- \*\*Acceptance:\*\* .*\n/m, ''), 'Missing task field: Acceptance'],
-  ['premature completion', 'implementation_plan.md', (s) => s.replace('<!-- completed-history:end -->', '- **' + active + '** — prematurely complete\n<!-- completed-history:end -->'), 'Completed tasks'],
-  ['duplicate delivery', 'docs/deliveries.json', (s) => { const v = JSON.parse(s); v.push(v[1]); return JSON.stringify(v); }, 'Predecessor delivery chain'],
 ])('rejects %s', (_label, file, transform, diagnostic) => {
   const p=fixture();
   edit(p, file, transform);

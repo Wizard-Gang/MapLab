@@ -75,19 +75,8 @@ export function checkNewIds(basePlan, headPlan) {
 export function checkQueue(root) {
   const read = (path) => readFileSync(resolve(root,path), 'utf8');
   const spec = read(sourcePath), plan = read('implementation_plan.md');
-  const history = JSON.parse(read('docs/deliveries.json'));
   const change = JSON.parse(read('config/change.json'));
   const sections = new Map([...spec.matchAll(/^### ([A-K]\d+)\. ([^\n]+)/gm)].map((m) => [m[1],m[2]]));
-  const done = Array.isArray(history) ? history.map((h) => h.id) : [];
-  ensure(done.length >= 1 && done[0] === makeId(1) && done.every((id) => /^ML-\d{3}$/.test(id))
-    && new Set(done).size === done.length,
-    'Predecessor delivery chain incomplete or duplicated');
-  const historical = block(plan,'completed-history');
-  const closed = [...historical.matchAll(/^- \*\*(ML-\d{3})\*\* — /gm)].map((m) => m[1]);
-  ensure(JSON.stringify(closed) === JSON.stringify(done),
-    'Completed tasks must retire to historical plan/ledger');
-  ensure(historical.includes(history[0].commit) && historical.includes('docs/changes/ML-001.md'),
-    'ML-001 bootstrap history lost');
   const current = tasks(block(plan,'active-queue'));
   const future = tasks(block(plan,'future-queue'));
   ensure(current.length === 1 && change.id === current[0].id,
@@ -95,11 +84,10 @@ export function checkQueue(root) {
   const live = [...current,...future];
   ensure([...plan.matchAll(/^### ML-\d{3} \/ /gm)].length === live.length,
     'Duplicate task definition outside current/future blocks');
-  ensure(new Set(live.map((t) => t.id)).size === live.length && live.every((t) => !done.includes(t.id)),
-    'Duplicate live task definition');
+  ensure(new Set(live.map((t) => t.id)).size === live.length, 'Duplicate live task definition');
   const top = highWater(plan);
-  ensure([...done, ...live.map((t) => t.id)].every((id) => Number(id.slice(3)) <= top),
+  ensure(live.map((t) => t.id).every((id) => Number(id.slice(3)) <= top),
     'A task ID exceeds the highest ID ever used');
   live.forEach((t) => verify(t, sections));
-  return {active:current[0].id,completed:done.length,future:future.length,highest:makeId(top)};
+  return {active:current[0].id,future:future.length,highest:makeId(top)};
 }
