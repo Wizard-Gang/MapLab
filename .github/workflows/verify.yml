@@ -75,6 +75,13 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.project }}
       - name: Run the browser test shard
         run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}
+      - name: Preserve raw performance samples and memory snapshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: performance-${{ matrix.project }}-${{ strategy.job-index }}
+          path: test-results/**/performance.json
+          if-no-files-found: ignore
   # The required check: it runs even when a gate fails, so a skipped job can never read as a pass.
   verify:
     name: verify

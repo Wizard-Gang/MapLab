@@ -1,0 +1,104 @@
+import type { MapDocument } from '../contracts/document-types';
+import type { MovementDocument } from '../contracts/movement-types';
+import type { TilesetDocument, JsonValue } from '../contracts';
+import { normalize } from '../domain/model';
+import { PaintBuffer } from '../domain/paint';
+import { openDocument, commit, undo, redo } from '../editor/history';
+import { TerrainSession } from '../editor/terrain-session';
+import { ViewportSession } from '../editor/viewport';
+import { buildScene } from '../render/scene';
+import { PickIndex } from '../render/picking';
+import { CanvasViewport } from '../render/canvas';
+import { worldToCss, visibleWorld } from '../render/transform';
+import { overlaps } from '../render/picking';
+import { searchCostGraph } from '../navigation/search';
+import { CONTROLLER_SHA256 } from '../navigation/identity';
+import { createNavigationWorker } from '../navigation/client';
+import { materialize, costFixture, type Workload } from './fixture';
+export const summarize=(raw:readonly number[])=>{
+  if(raw.length!==5||raw.some(n=>!Number.isFinite(n)||n<0))throw Error('Expected five finite warm measurements');
+  const sorted=[...raw].sort((a,b)=>a-b);return {raw,p50:sorted[2]!,p95:sorted[4]!};
+};
+const frame=()=>new Promise<number>(resolve=>requestAnimationFrame(resolve));
+const wait=(ms:number)=>new Promise<void>(resolve=>setTimeout(resolve,ms));
+const heap=():number|null=>(performance as Performance & {memory?:{usedJSHeapSize:number}}).memory?.usedJSHeapSize??null;
+async function warm(fn:()=>void|Promise<unknown>) {
+  await fn();const raw:number[]=[];for(let i=0;i<5;i++){const start=performance.now();await fn();raw.push(performance.now()-start);}return summarize(raw);
+}
+async function navigation(map:MapDocument,profile:MovementDocument) {
+  const worker=new Worker(new URL('./worker.ts',import.meta.url),{type:'module'});
+  let stop=()=>{};
+  try {
+    await new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Worker startup timeout')),10000);worker.onmessage=e=>{if(e.data.kind==='ready'){clearTimeout(timer);resolve();}};});
+    const start=performance.now();
+    const result=new Promise<{status:string;ms:number}>((resolve,reject)=>{
+      const timer=setTimeout(()=>resolve({status:'timeout; terminated',ms:performance.now()-start}),20000);stop=()=>clearTimeout(timer);
+      worker.onmessage=e=>{if(e.data.kind==='result'){stop();if(!['candidate','budget'].includes(e.data.graph.status)){reject(Error(e.data.graph.diagnostics.join(';')));return;}resolve({status:e.data.graph.status,ms:performance.now()-start});}
+        else if(e.data.kind==='error'){stop();resolve({status:e.data.reason,ms:performance.now()-start});}};
+    });
+    worker.postMessage({kind:'build',job:1,revision:1,map,profile,settings:{maxSamples:4096,maxTicks:60}});
+    return await result;
+  } finally {stop();worker.terminate();}
+}
+async function hardCancel(map:MapDocument,profile:MovementDocument,phase:'identity'|'graph') {
+  let terminated=0;
+  const runtime=createNavigationWorker(()=>{const worker=new Worker(new URL('../navigation/worker.ts',import.meta.url),{type:'module'}),terminate=worker.terminate.bind(worker);worker.terminate=()=>{terminated++;terminate();};return worker;});
+  try {
+    const building=runtime.session.build(map,profile,1);
+    if(phase==='graph')await building;
+    await wait(20);const start=performance.now();runtime.session.invalidate();await building;await wait(0);
+    const ms=performance.now()-start;
+    if(!terminated||runtime.session.graph!==null)throw Error('Dense cancellation retained worker or stale graph');
+    return {ms,status:'cancelled; worker terminated',terminated};
+  } finally {runtime.dispose();}
+}
+export async function runBenchmarks(base:MapDocument,profile:MovementDocument,tileset:TilesetDocument,recipes:{standard:Workload;dense:Workload;baseline:Workload;multilevel:Workload}) {
+  const baselineHeap=heap(),map=materialize(base,recipes.standard),n=normalize(map as unknown as JsonValue);
+  if(!n.ok)throw Error(JSON.stringify(n.problems));
+  let state=openDocument(n.model),view=new ViewportSession();view.resize([1440,900],map.bounds);view.zoom([720,450],1);
+  const resetCamera=()=>{view.zoom([720,450],1);const c=view.getSnapshot().view.camera;view.pan([c[0]-720,c[1]-450]);};resetCamera();
+  const scene=buildScene(state.model,new Map([[tileset.id,tileset]])),pick=new PickIndex(state.model,scene);
+  const art=document.querySelector<HTMLCanvasElement>('#art')!,overlay=document.querySelector<HTMLCanvasElement>('#overlay')!;
+  const renderer=new CanvasViewport(art,overlay,scene,view.getSnapshot());
+  const session=new TerrainSession(()=>state.model,()=>tileset,tx=>{const r=commit(state,tx);state=r.state;return r.outcome==='recorded';},()=>true);
+  session.choose({tileId:'tile.grass',quarterTurns:0,mirrorX:false,mirrorY:false});
+  const input=await warm(()=>{const model=state.model;session.down([16,16]);session.move([48,16]);renderer.setTerrainPreview(session.getSnapshot().preview);if(state.model!==model)throw Error('Preview mutated document');session.cancel();});
+  const buffer=new PaintBuffer(state.model.terrain!.byLayer.get('layer.tiles')!.cells);
+  for(let i=0;i<10000;i++)buffer.write({column:i%100,row:100+Math.floor(i/100),cell:{tileId:'tile.grass',quarterTurns:0,mirrorX:false,mirrorY:false}});
+  const delta=buffer.delta()!;const committed=commit(state,{label:'Benchmark 10k paint',ops:[{op:'paint',layerId:'layer.tiles',delta}]});
+  if(committed.outcome!=='recorded')throw Error('Paint was refused');state=committed.state;
+  const history=await warm(()=>{state=redo(undo(state));if(state.bytes>state.budget)throw Error('History exceeded budget');});
+  const select=await warm(()=>{const hits=pick.pick(worldToCss(view.getSnapshot().view,[16,144]),view.getSnapshot(),'Objects');if(!hits.some(k=>k.id==='visual.0'))throw Error('Selection benchmark missed the intended object');});
+  const search=await warm(()=>{state.model.collections.get('visuals')!.order.filter(id=>state.model.collections.get('visuals')!.byId.get(id)!.name!.toString().includes('42'));});
+  const graph=costFixture(),query=await warm(async()=>{const r=await searchCostGraph(graph,'n0','n1999','astar');if(r.status!=='candidate'||r.cost!==1999)throw Error('Wrong graph result');});
+  const frames:number[][]=[],longTasks:number[][]=[],visibleObjects:number[]=[];
+  let tasks:number[]=[];const observer=typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes.includes('longtask')?new PerformanceObserver(list=>{tasks.push(...list.getEntries().map(e=>e.duration));}):null;
+  observer?.observe({type:'longtask'});
+  try {
+    // One discarded warm sweep, then five ten-second camera sweeps at the specified viewport/DPR.
+    for(let run=-1;run<5;run++){
+      resetCamera();const visible=visibleWorld(view.getSnapshot().view,[1440,900]);
+      const count=scene.art.reduce((n,l)=>n+l.commands.filter(p=>overlaps(p.bounds,visible)).length,0);
+      if(count<1||count>1000)throw Error('Camera workload must show 1..1000 objects');visibleObjects.push(count);
+      const raw:number[]=[];tasks=[];const start=performance.now();let previous=await frame();
+      do {view.pan([-2,0]);view.zoom([720,450],1+0.1*Math.sin((performance.now()-start)/1000));renderer.update(scene,view.getSnapshot());const now=await frame();raw.push(now-previous);previous=now;}while(performance.now()-start<(run<0?500:10000));
+      if(run>=0){frames.push(raw);longTasks.push(tasks);}
+    }
+  } finally {observer?.disconnect();renderer.dispose();session.cancel();}
+  const frameP95=frames.map(raw=>[...raw].sort((a,b)=>a-b)[Math.ceil(raw.length*0.95)-1]!);
+  const memory={baselineHeap,usedHeap:heap(),historyBytes:state.bytes,historyBudget:state.budget,scope:'JS heap snapshot only; browser/GPU working set unmeasured'};
+  const nav:Record<string,unknown>={};
+  for(const key of ['baseline','multilevel'] as const){const source=materialize(base,recipes[key]),raw=[],statuses:string[]=[];
+    for(let i=0;i<5;i++){const r=await navigation(source,profile);raw.push(r.ms);statuses.push(r.status);}nav[key]={...summarize(raw),statuses,measurement:'cold worker build; full warm graph gate deferred'};}
+  const dense=materialize(base,recipes.dense);
+  for(const phase of ['identity','graph'] as const){await hardCancel(dense,profile,phase);const raw=[],statuses:string[]=[];
+    for(let i=0;i<5;i++){const r=await hardCancel(dense,profile,phase);raw.push(r.ms);statuses.push(r.status);}nav[`cancel-${phase}`]={...summarize(raw),statuses,measurement:'warm main-thread cancel path; worker is destroyed by cancellation'};}
+  return {controller:CONTROLLER_SHA256,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,userAgent:navigator.userAgent,
+    counts:recipes.standard,input,history,select,search,query,camera:{...summarize(frameP95),frames,longTasks,visibleObjects,taskObservation:observer?'supported':'unavailable'},memory,nav,
+    scopeSplits:['CI browser build on Linux is not the Apple M1/16 GiB hardware-accelerated baseline or Safari.',
+      'Input measures synchronous preview preparation; end-to-end pointer-to-present latency remains unmeasured.',
+      '4096-sample graph jobs report budget honestly; full 100/300-support and incremental-edit targets remain unproven.',
+      'Baseline graph timings use cold worker realms; warm selected-region/graph targets require persistent worker measurements.',
+      '10 MiB validated plugin save and 100 MiB cancellable worker export require a separate storage workload.',
+      'JS heap excludes browser/GPU allocations; total 512 MiB working-set target remains unproven.']};
+}

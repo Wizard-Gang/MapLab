@@ -61,7 +61,7 @@ const browserRun = 'npm run test:browser -- --project=${{ matrix.project }} --sh
 // on task PRs into release/**, and change identity on both. No workflow runs on push.
 export const workflowPins = {
   verify: {
-    on: ['  pull_request:', '    branches: [main]', prTypes, '  workflow_dispatch:'], uses: 6,
+    on: ['  pull_request:', '    branches: [main]', prTypes, '  workflow_dispatch:'], uses: 7,
     jobs: {
       check: [[...setup, 'npm ci', 'npm run check'], 'Required CI job/command missing: check'],
       browser: [[...setup, 'npm ci', browserMirror, browserInstall, browserRun],
@@ -82,19 +82,25 @@ export const workflowPins = {
 };
 
 function checkWorkflows(read) {
+  const artifact = '      - name: Preserve raw performance samples and memory snapshots\n'
+    + '        if: ${{ always() }}\n'
+    + '        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n'
+    + '        with:\n          name: performance-${{ matrix.project }}-${{ strategy.job-index }}\n'
+    + '          path: test-results/**/performance.json\n          if-no-files-found: ignore\n';
   for (const [file, pin] of Object.entries(workflowPins)) {
     const workflow = read(`.github/workflows/${file}.yml`);
     const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
     demand(uses.length === pin.uses && uses.every((action) => [
       'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803',
       'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38',
+      'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02',
     ].includes(action)),
       'CI Actions must use immutable commit SHAs');
-    // The required verify job is the one place a condition may appear: it must run after a failed gate to report it.
+    // Conditions are allowed only on the aggregate and this exact artifact-preservation step.
     const aggregate = '    name: verify\n    needs: [check, browser]\n    if: ${{ always() }}\n';
     const checkouts = uses.filter((action) => action.startsWith('actions/checkout@')).length;
     const count = (text) => workflow.split(text).length - 1;
-    demand(workflow.includes('\npermissions:\n  contents: read\n') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(file === 'verify' ? workflow.replace(aggregate, '') : workflow)
+    demand(workflow.includes('\npermissions:\n  contents: read\n') && !/permissions:\s*write-all|contents:\s*write|pull_request_target|continue-on-error|^\s*(?:if|shell|defaults|working-directory):/m.test(file === 'verify' ? workflow.replace(aggregate, '').replace(artifact, '') : workflow)
       && count('persist-credentials: false') === checkouts
       && count('ref: ${{ github.event.pull_request.head.sha || github.sha }}') === checkouts
       && workflow.includes('  MAPLAB_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}\n'),
@@ -113,6 +119,7 @@ function checkWorkflows(read) {
         && JSON.stringify(runs) === JSON.stringify(commands), message);
     }
     if (file === 'verify') {
+      demand(jobs.browser.includes(artifact) && count('actions/upload-artifact@') === 1, 'CI must preserve exact-head performance artifacts');
       demand(jobs.browser.includes('        project: [chromium, webkit]\n') && jobs.browser.includes('        shard: [1/2, 2/2]\n'),
         'CI must install Chromium and WebKit outside npm, then run every shard of the browser tests');
       demand(jobs.verify === `${aggregate}    runs-on: ubuntu-24.04\n    timeout-minutes: 5\n    steps:\n`

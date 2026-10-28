@@ -1,6 +1,7 @@
 import type { MapDocument } from '../contracts/document-types';
 import type { MovementDocument } from '../contracts/movement-types';
-import { buildSurfaceGraph, identity, DEFAULT_SETTINGS, type Graph, type Settings } from './surface';
+import { buildSurfaceGraph, identity, DEFAULT_SETTINGS, type Graph, type Settings, type Identity } from './surface';
+import { GraphCache } from './cache';
 export type Request={readonly kind:'build';readonly job:number;readonly revision:number;readonly map:MapDocument;readonly profile:MovementDocument;readonly settings:Settings}|{readonly kind:'cancel';readonly job:number};
 export type Reply={readonly kind:'result';readonly job:number;readonly revision:number;readonly graph:Graph}|{readonly kind:'error';readonly job:number;readonly revision:number;readonly reason:string};
 /** Transport-independent worker endpoint. Cancellation can run while the builder yields. */
@@ -22,21 +23,22 @@ export class GraphSession {
  private serial=0;
  private pending:{job:number;revision:number;cacheKey:string}|null=null;
  private disposed=false;
- private cache=new Map<string,Graph>();
+ private cache=new GraphCache();
  private published:Graph|null=null;
  private readonly send:(request:Request)=>void;
- constructor(send:(request:Request)=>void){this.send=send;}
+ constructor(send:(request:Request)=>void,private readonly identify:(map:MapDocument,profile:MovementDocument,settings:Settings)=>Promise<Identity|null>=identity,private readonly cancelWork:()=>void=()=>{}){this.send=send;}
  get graph():Graph|null{return this.published;}
- invalidate():void{this.serial++;if(this.pending)this.send({kind:'cancel',job:this.pending.job});this.pending=null;this.published=null;}
+ get cacheUsage(){return {bytes:this.cache.bytes,budget:this.cache.budget,entries:this.cache.size};}
+ invalidate():void{this.serial++;this.cancelWork();if(this.pending)this.send({kind:'cancel',job:this.pending.job});this.pending=null;this.published=null;}
  dispose():void{this.invalidate();this.disposed=true;this.cache.clear();}
  async build(map:MapDocument,profile:MovementDocument,revision:number,settings:Settings=DEFAULT_SETTINGS):Promise<void>{
   if(this.disposed)throw new Error('disposed graph session');
   this.invalidate();const job=this.serial,snapshot=structuredClone(map),p=structuredClone(profile),s={...settings};
-  const id=await identity(snapshot,p,s);
-  if(this.disposed||job!==this.serial)return;
+  const id=await this.identify(snapshot,p,s);
+  if(!id||this.disposed||job!==this.serial)return;
   this.pending={job,revision,cacheKey:id.cacheKey};
   const cached=this.cache.get(id.cacheKey);
-  if(cached){this.cache.delete(id.cacheKey);this.cache.set(id.cacheKey,cached);this.published={...structuredClone(cached),revision};this.pending=null;return;}
+  if(cached){this.published={...cached,revision};this.pending=null;return;}
   this.send({kind:'build',job,revision,map:snapshot,profile:p,settings:s});
  }
  accept(reply:Reply):boolean{
@@ -45,7 +47,7 @@ export class GraphSession {
   if(reply.kind==='error'){this.pending=null;return false;}
   const g=reply.graph;if(g.revision!==p.revision||g.identity.cacheKey!==p.cacheKey||g.canCertify!==false)return false;
   this.pending=null;this.published=structuredClone(g);
-  if(g.status==='candidate'){this.cache.delete(p.cacheKey);this.cache.set(p.cacheKey,structuredClone(g));if(this.cache.size>4)this.cache.delete(this.cache.keys().next().value!);}
+  this.cache.put(g);
   return true;
  }
 }

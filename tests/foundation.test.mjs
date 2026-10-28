@@ -75,6 +75,8 @@ test.each([
     `stubbed ${name} command`, (p) => editJson(p, 'package.json', (v) => { v.scripts[name] = 'node -e "process.exit(0)"'; }), 'Required executable command',
   ]),
   ['floating browser runner', (p) => editJson(p, 'package.json', (v) => { v.devDependencies['@playwright/test'] = '^1.64.1'; }), 'dependency pins'],
+  ['floating benchmark artifact action', (p) => workflow(p, 'verify', (s) => s.replace('actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02', 'actions/upload-artifact@v4')), 'immutable commit SHAs'],
+  ['benchmark artifact path outside raw samples', (p) => workflow(p, 'verify', (s) => s.replace('test-results/**/performance.json', '**/*')), 'least privilege'],
   ['an unreviewed extra dependency', (p) => editJson(p, 'package.json', (v) => { v.devDependencies['left-pad'] = '1.3.0'; }), 'dependency pins'],
   ...['start', 'test:browser'].map((name) => [
     `stubbed ${name} command`, (p) => editJson(p, 'package.json', (v) => { v.scripts[name] = 'node -e "process.exit(0)"'; }), 'Required executable command',
