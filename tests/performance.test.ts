@@ -23,7 +23,8 @@ test('negative recipes refuse unsafe or out-of-scope allocations',()=>{
   for(const change of [{cells:100001},{cells:-1},{objects:5001},{bodies:5001},{footholds:10001},{layers:2},{cells:NaN}])expect(()=>materialize(base,{...recipes.standard,...change})).toThrow('Invalid bounded workload');
 });
 test('dense stress retains all bodies and footholds rather than silently truncating',()=>{
-  const map=materialize(base,recipes.dense);expect(map.bodies).toHaveLength(5000);expect(map.footholds).toHaveLength(10000);expect(new Set(map.footholds.map(f=>f.a.join(','))).size).toBe(100);
+  const map=materialize(base,recipes.dense);expect(map.bodies).toHaveLength(5000);expect(map.footholds).toHaveLength(10000);
+  expect(new Set(map.footholds.map(f=>f.a[1])).size).toBe(10000);expect(Math.max(...map.footholds.map(f=>f.a[1]))-Math.min(...map.footholds.map(f=>f.a[1]))).toBeLessThan(625);
 });
 test('300-support benchmark has multiple separated elevations',()=>{
   const map=materialize(base,recipes.multilevel);expect(map.footholds).toHaveLength(300);expect(new Set(map.footholds.map(f=>f.a[1])).size).toBe(30);

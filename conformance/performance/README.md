@@ -3,7 +3,7 @@
 Original MapLab CC0-1.0 numeric recipes. `cases.json` and `LICENSE.json` have SHA-256 entries in `index.json`.
 `src/benchmarks/fixture.ts` materializes ordinary source maps from the owned `conformance/surface/flat.map.json` template.
 The standard recipe has exactly 100,000 occupied cells, 20 layers, 5,000 visuals, 5,000 collision bodies and 10,000 footholds.
-Cells span 5,000 columns; objects/supports are distributed over multiple levels. Dense stress deliberately overlaps 10,000 supports and 5,000 bodies.
+Cells span 5,000 columns; objects/supports are distributed over multiple levels. Dense stress packs 10,000 supports and 5,000 bodies into a 73-WU-wide corridor with overlapping extents. Supports have distinct 1/16-WU elevations across less than 625 WU, preserving unambiguous ownership.
 The consumer process independently validates generated source bytes against the published map schema and counts every record.
 
 The scripted Chromium/WebKit runner is `tests/browser/performance.spec.ts`, using `/benchmarks/` at 1440×900 CSS pixels, DPR 2.
