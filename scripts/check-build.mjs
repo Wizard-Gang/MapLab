@@ -17,13 +17,23 @@ try {
   if (!html.includes('<title>MapLab</title>') || !html.includes('<div id="root"></div>')
     || /\/src\/|localhost|https?:\/\//.test(html)) throw new Error('Production HTML identity/locality failed');
   if (!entry?.isEntry || !html.includes(entry.file)) throw new Error('Production entry is not linked');
-  const js = readAsset(entry.file);
+  // Multiple production entries share the editor chunk; follow only manifest imports reachable from the shell.
+  const visited = new Set();
+  const linkedSource = (key) => {
+    if (visited.has(key)) return '';
+    visited.add(key);
+    const chunk = manifest[key];
+    if (!chunk) throw new Error(`Missing production import: ${key}`);
+    return readAsset(chunk.file) + (chunk.imports ?? []).map(linkedSource).join('\n');
+  };
+  const js = linkedSource('index.html');
   // The static build is the library client only: it calls the dev server's loopback endpoints and says when none answers.
   if (!js.includes('MapLab') || !js.includes('/__maplab/library') || !js.includes('no MapLab library server')) {
     throw new Error('Built shell identity/library client is missing');
   }
-  if (!entry.css?.length) throw new Error('Production stylesheet is missing');
-  for (const css of entry.css) {
+  const styles = new Set([...visited].flatMap(key => manifest[key].css ?? []));
+  if (!styles.size) throw new Error('Production stylesheet is missing');
+  for (const css of styles) {
     if (!html.includes(css) || !readAsset(css).trim()) throw new Error('Production stylesheet is not linked');
   }
   for (const chunk of Object.values(manifest)) {

@@ -11,28 +11,9 @@
 ## Active task
 
 <!-- active-queue:start -->
-### ML-041 / P1 hardening
-
-- **Source scope:** Large-world benchmarks, incremental indexes, cache/history budgets and targeted optimization.
-- **Non-goals:** No automatic renderer rewrite or unbounded streaming.
-- **Acceptance:** H5 measurements pass or documented scope split; dense-budget cancellation remains responsive.
-- **Depends on:** ML-040 completed and passing main CI, plus all named prerequisites in source scope; no parallel implementation.
-- **Specification:** [H5](docs/specifications/2026-10-16-maplab.md#h5-measurable-performance-targets), [E4](docs/specifications/2026-10-16-maplab.md#e4-search-costs-and-scalability), [I2](docs/specifications/2026-10-16-maplab.md#i2-fixture-matrix); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
-- **Subtasks:**
-  1. Materialize standard/stress fixtures and record hardware/OS/browser/controller/build identity and warm p50/p95.
-  2. Profile renderer/input/history/nav/storage against H5 budgets; implement only measured targeted culling/index/cache fixes.
-  3. Create owned fixture(s): 100,000 cells, 20 layers, 5,000 objects, 5,000 bodies, 10,000 footholds and dense cancellation.
-  4. Add executable checks: Publish raw timing/memory snapshots and scope-split any unmet H5 gate.
-- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check`, `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back. No merge without protected gates and successful predecessor main CI. Acceptance above must be demonstrably satisfied, not asserted.
-
-<!-- active-queue:end -->
-
-## Queued tasks
-
-<!-- future-queue:start -->
 ### ML-048 / P1 hardening (ML-041 scope split)
 
-- **Source scope:** Establish H5 editor performance on the Apple M1-class/16 GiB machine with stable hardware-accelerated Chromium and Safari; finish renderer, pointer-to-present, inspector and total working-set measurements against the owned standard fixture.
+- **Source scope:** Establish H5 editor performance on the owner-approved Apple M4/24 GB Mac baseline (2026-10-27) with stable hardware-accelerated Chromium and Safari; finish renderer, pointer-to-present, inspector and total working-set measurements against the owned standard fixture.
 - **Non-goals:** No automatic renderer rewrite or unmeasured optimization.
 - **Acceptance:** Five warm runs with exact hardware/OS/browser/controller/production-build identity meet H5/R1 H7 camera, input, history, select/search and memory targets; preserve raw samples, visible workload assertions and browser/GPU memory accounting. Any measured regression receives a targeted repair and rerun.
 - **Depends on:** ML-041 completed and passing release-branch CI; owner baseline machine/browser availability.
@@ -44,6 +25,11 @@
   4. Add executable checks: Raw timing/memory snapshots, negative workload guards and independent-consumer proof.
 - **Task gate:** Run clean `npm ci`, `npm run check` (met by CI), `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back, plus gate/change-id. No merge without protected gates. Agents run only the required non-test checks locally.
 
+<!-- active-queue:end -->
+
+## Queued tasks
+
+<!-- future-queue:start -->
 ### ML-049 / P1 hardening (ML-041 scope split)
 
 - **Source scope:** Full and incremental navigation benchmarks, physical dependency indexes, warm selected-region overlays and bounded progressive generation against H5/R1 E8.

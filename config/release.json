@@ -3,6 +3,7 @@
   "branch": "release/r003",
   "tasks": [
     "ML-040",
-    "ML-041"
+    "ML-041",
+    "ML-048"
   ]
 }

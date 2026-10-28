@@ -19,7 +19,7 @@ import { canRedo, canUndo, isDirty } from '../editor/history';
 import type { LibraryEntry, LibrarySnapshot } from '../library/protocol';
 import { LibraryStore, lockReason, type AppView, type OpenDoc } from './store';
 
-const store = new LibraryStore();
+export const store = new LibraryStore();
 
 const isField = (t: EventTarget | null): boolean => t instanceof HTMLElement && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 

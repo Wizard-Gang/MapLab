@@ -164,7 +164,7 @@ Unsaved edits are journaled to IndexedDB as drafts only (C2).
 | Navigation | E8 table |
 | Memory, standard fixture | ≤ 512 MiB editor working set with LRU budgets |
 
-The baseline machine is Apple M1-class, 16 GiB, Chromium stable, DPR 2, 1440×900, reporting p50
+The baseline machine (owner ruling, 2026-10-27) is Apple M4, 24 GB, Chromium stable, DPR 2, 1440×900, reporting p50
 and p95 over 5 warm runs. Safari is measured on the same machine.
 
 ## H8. Dev launcher and local operations (Added)

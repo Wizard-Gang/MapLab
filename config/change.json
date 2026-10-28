@@ -1,6 +1,6 @@
 {
-  "id": "ML-041",
+  "id": "ML-048",
   "type": "CHORE",
-  "title": "[ML-041] [CHORE] Measure large-world performance and bound benchmark claims",
-  "branch": "ml-041-large-world-benchmarks"
+  "title": "[ML-048] [CHORE] Measure production editor performance on the accepted Mac baseline",
+  "branch": "ml-048-baseline-editor-performance"
 }
