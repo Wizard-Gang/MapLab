@@ -1,6 +1,6 @@
 {
-  "id": "ML-040",
-  "type": "FEATURE",
-  "title": "[ML-040] [FEATURE] Add timed periodic-platform navigation witnesses",
-  "branch": "ml-040-timed-platform-navigation"
+  "id": "ML-041",
+  "type": "CHORE",
+  "title": "[ML-041] [CHORE] Measure large-world performance and bound benchmark claims",
+  "branch": "ml-041-large-world-benchmarks"
 }
