@@ -13,10 +13,10 @@ export function materialize(base: MapDocument, w: Workload): MapDocument {
     let c=chunks.get(key);if(!c){c={column,row,cells:Array<Cell|null>(1024).fill(null)};chunks.set(key,c);}
     (c.cells as (Cell|null)[])[(y%32)*32+x%32]=cell;
   }
-  return {...structuredClone(base),id:'map.performance',bounds:[0,0,200000,20000],
+  return {...structuredClone(base),id:'map.performance',bounds:[-80000,0,210000,20000],
     dependencies:w.cells?[{id:'tileset.forest',kind:'tileset',path:'tilesets/forest.tileset.json',required:true}]:[],
     layers:Array.from({length:w.layers},(_,i)=>i===0?{id:'layer.tiles',name:'Tiles',parentId:null,order:i,visible:true,opacity:1,kind:'tile' as const,occlusionFade:null}:i===w.layers-1?{id:'layer.actors',name:'Actors',parentId:null,order:i,visible:true,opacity:1,kind:'actors' as const}:{id:`layer.art${i}`,name:`Art ${i}`,parentId:null,order:i,visible:true,opacity:1,kind:'sprite' as const,occlusionFade:null}),
-    terrain:w.cells?[{layerId:'layer.tiles',tilesetId:'tileset.forest',origin:[0,0],cellSize:[32,32],chunkSize:32,chunks:[...chunks.values()],terrainIntent:[],rulesVersion:1,variationSeed:7}]:[],
+    terrain:w.cells?[{layerId:'layer.tiles',tilesetId:'tileset.forest',origin:[-80000,0],cellSize:[32,32],chunkSize:32,chunks:[...chunks.values()],terrainIntent:[],rulesVersion:1,variationSeed:7}]:[],
     visuals:Array.from({length:w.objects},(_,i)=>({id:`visual.${i}`,name:`Object ${i}`,layerId:`layer.art${1+i%(w.layers-2)}`,parentId:null,order:i,transform:{position:position(i),rotation:0,scale:[1,1],mirrorX:false,mirrorY:false},source:{kind:'shape',shape:{kind:'rect',rect:[0,0,32,32]},fill:'#80b090'},bodyId:null})),
     bodies:Array.from({length:w.bodies},(_,i)=>({...body,id:`body.${i}`,name:`Body ${i}`,position:position(i),shapes:[{id:`shape.${i}`,kind:'rect',rect:[0,0,64,16]}]})),
     footholds:Array.from({length:w.footholds},(_,i)=>{const [x,y]=position(i);return {...foothold,id:`fh.${i}`,name:`Support ${i}`,a:[x,y],b:[x+64,y],ownerBodyId:null,mode:'oneWay',solidEdge:null,dropAllowed:true,dropGroupId:`drop.${i}`,connections:{a:[],b:[]}};})};

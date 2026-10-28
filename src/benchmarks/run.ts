@@ -31,9 +31,9 @@ async function navigation(map:MapDocument,profile:MovementDocument) {
   try {
     await new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Worker startup timeout')),10000);worker.onmessage=e=>{if(e.data.kind==='ready'){clearTimeout(timer);resolve();}};});
     const start=performance.now();
-    const result=new Promise<{status:string;ms:number}>((resolve)=>{
+    const result=new Promise<{status:string;ms:number}>((resolve,reject)=>{
       const timer=setTimeout(()=>resolve({status:'timeout; terminated',ms:performance.now()-start}),20000);stop=()=>clearTimeout(timer);
-      worker.onmessage=e=>{if(e.data.kind==='result'){stop();resolve({status:e.data.graph.status,ms:performance.now()-start});}
+      worker.onmessage=e=>{if(e.data.kind==='result'){stop();if(!['candidate','budget'].includes(e.data.graph.status)){reject(Error(e.data.graph.diagnostics.join(';')));return;}resolve({status:e.data.graph.status,ms:performance.now()-start});}
         else if(e.data.kind==='error'){stop();resolve({status:e.data.reason,ms:performance.now()-start});}};
     });
     worker.postMessage({kind:'build',job:1,revision:1,map,profile,settings:{maxSamples:4096,maxTicks:60}});

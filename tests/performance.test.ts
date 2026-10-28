@@ -7,8 +7,12 @@ import {createHash} from 'node:crypto';
 import type {MapDocument} from '../src/contracts/document-types';
 import {materialize,costFixture} from '../src/benchmarks/fixture';
 import {searchCostGraph} from '../src/navigation/search';
+import {validateMapGeometry} from '../src/contracts/geometry';
 const read=(f:string)=>JSON.parse(readFileSync(f,'utf8'));
 const recipes=read('conformance/performance/cases.json'),base=read('conformance/surface/flat.map.json') as MapDocument;
+test('every workload passes semantic geometry validation within the coordinate contract',()=>{
+  for(const key of ['standard','dense','baseline','multilevel']){const result=validateMapGeometry(materialize(base,recipes[key]) as any);expect(result.ok,result.ok?'':JSON.stringify(result.diagnostics)).toBe(true);}
+});
 test('standard recipe materializes stable ordinary source bytes readable by an independent process',()=>{
   const map=materialize(base,recipes.standard),bytes=JSON.stringify(map);expect(JSON.stringify(materialize(base,recipes.standard))).toBe(bytes);
   const dir=mkdtempSync(join(tmpdir(),'maplab-performance-'));

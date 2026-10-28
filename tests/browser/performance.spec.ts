@@ -24,5 +24,6 @@ test('owned large-world workloads publish five warm raw samples and explicit H5 
     expect(report.counts).toMatchObject({cells:100000,layers:20,objects:5000,bodies:5000,footholds:10000});
     expect(report.scopeSplits.length).toBeGreaterThan(0);
     for(const phase of ['identity','graph']){const result=report.nav[`cancel-${phase}`] as {raw:number[];statuses:string[]};expect(result.statuses).toEqual(Array(5).fill('cancelled; worker terminated'));expect(result.raw.every(ms=>ms<=100)).toBe(true);}
+    for(const key of ['baseline','multilevel'])expect((report.nav[key] as {statuses:string[]}).statuses.every(s=>['candidate','budget'].includes(s))).toBe(true);
   } finally {await context.close();}
 });
