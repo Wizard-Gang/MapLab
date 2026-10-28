@@ -3,6 +3,27 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { cpus, totalmem, platform, release } from 'node:os';
 import { execFileSync } from 'node:child_process';
 const read=(file:string)=>JSON.parse(readFileSync(file,'utf8'));
+test('large hierarchy keeps collapsed DOM empty and every paged/search ID accessible',async({page})=>{
+  await page.goto('/benchmarks/');
+  await page.evaluate(async input=>{
+    const fixture='/src/benchmarks/fixture.ts',harness='/tests/browser/hierarchy-harness.tsx';
+    const {materialize}=await import(fixture),{mountHierarchy}=await import(harness);mountHierarchy(materialize(input.base,input.recipe));
+  },{base:read('conformance/surface/flat.map.json'),recipe:read('conformance/performance/cases.json').standard});
+  const search=page.getByRole('searchbox',{name:'Hierarchy search'}),rows=page.locator('ul[data-collection="visuals"] button');
+  await expect(search).toBeVisible();await expect(rows).toHaveCount(0);
+  await page.getByText('visuals (5000)',{exact:true}).click();await expect(rows).toHaveCount(200);
+  const seen:string[]=[];
+  for(let pageNumber=0;pageNumber<25;pageNumber++){
+    seen.push(...await rows.evaluateAll(buttons=>buttons.map(b=>b.getAttribute('aria-label')!.slice('Select '.length))));
+    const next=page.getByRole('button',{name:'Next visuals page',exact:true});
+    if(pageNumber<24)await next.click();else await expect(next).toBeDisabled();
+  }
+  expect(seen).toHaveLength(5000);expect(new Set(seen).size).toBe(5000);expect([...seen].sort()).toEqual(Array.from({length:5000},(_,i)=>`visual.${i}`).sort());
+  await search.fill('visual.4999');await expect(rows).toHaveCount(1);
+  const tail=page.getByRole('button',{name:'Select visual.4999',exact:true});await tail.click();await expect(tail).toHaveAttribute('aria-pressed','true');
+  await search.fill('absent.object');await expect(rows).toHaveCount(0);
+  await search.fill('');await expect(rows).toHaveCount(0);
+});
 test('owned large-world workloads publish five warm raw samples and explicit H5 scope splits',async({page,browser,baseURL},info)=>{
   test.setTimeout(300000);await page.setViewportSize({width:1440,height:900});
   // DPR must be set by the browser context, not approximated by canvas scaling.

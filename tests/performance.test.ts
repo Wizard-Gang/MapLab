@@ -5,11 +5,23 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import type {MapDocument} from '../src/contracts/document-types';
-import {materialize,costFixture} from '../src/benchmarks/fixture';
+import {materialize,costFixture,editorFixture} from '../src/benchmarks/fixture';
+import {validateSourceGraph,type JsonValue} from '../src/contracts';
 import {searchCostGraph} from '../src/navigation/search';
 import {validateMapGeometry} from '../src/contracts/geometry';
 const read=(f:string)=>JSON.parse(readFileSync(f,'utf8'));
 const recipes=read('conformance/performance/cases.json'),base=read('conformance/surface/flat.map.json') as MapDocument;
+test('complete editor fixture has a closed source graph and independent default-start consumer',()=>{
+  const profile=read('conformance/surface/enemy.movement.json'),tileset=read('placeholder-library/tilesets/forest.tileset.json');
+  const map=editorFixture(base,recipes.standard,profile),report=validateSourceGraph([map,profile,tileset] as unknown as JsonValue[]);
+  expect(report.ok,JSON.stringify(report.diagnostics)).toBe(true);
+  const dir=mkdtempSync(join(tmpdir(),'maplab-editor-performance-'));
+  try{const file=join(dir,'editor.map.json');writeFileSync(file,JSON.stringify(map));expect(JSON.parse(execFileSync(process.execPath,['tests/consumer/performance.mjs',file,'--editor'],{encoding:'utf8'})).defaultStart).toBe('start.performance');}
+  finally{rmSync(dir,{recursive:true,force:true});}
+  const bad=validateSourceGraph([{...map,entities:[]},profile,tileset] as unknown as JsonValue[]);
+  expect(bad.ok).toBe(false);expect(bad.diagnostics.some(d=>d.code==='map.default-start')).toBe(true);
+  expect(()=>editorFixture(base,{...recipes.standard,footholds:0},profile)).toThrow('requires a support');
+});
 test('every workload passes semantic geometry validation within the coordinate contract',()=>{
   for(const key of ['standard','dense','baseline','multilevel']){const result=validateMapGeometry(materialize(base,recipes[key]) as any);expect(result.ok,result.ok?'':JSON.stringify(result.diagnostics)).toBe(true);}
 });

@@ -5,14 +5,15 @@ import {gridOf} from '../editor/terrain';
 import {buildScene} from '../render/scene';
 import {PickIndex,overlaps} from '../render/picking';
 import {visibleWorld,worldToCss} from '../render/transform';
-import {ImageLru,IMAGE_BUDGET} from '../render/assets';
 import {CONTROLLER_SHA256} from '../navigation/identity';
+import {nativeInput} from './native-input';
+import {historyPressure,artPressure} from './pressure';
 import {summarize} from './run';
 const frame=()=>new Promise<number>(resolve=>requestAnimationFrame(resolve));
 const presented=async()=>{await frame();await frame();};
 const percentile=(raw:readonly number[],p=.95)=>[...raw].sort((a,b)=>a-b)[Math.ceil(raw.length*p)-1]!;
 const post=async(path:string,body:unknown)=>{const r=await fetch('/measurement/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw Error(await r.text());return r.json();};
-async function warm(fn:()=>void|Promise<void>){await fn();const raw=[];for(let i=0;i<5;i++){const start=performance.now();await fn();raw.push(performance.now()-start);}return summarize(raw);}
+async function warm(fn:()=>void|Promise<void>,prepare:()=>void|Promise<void>=()=>{}){await prepare();await fn();const raw=[];for(let i=0;i<5;i++){await prepare();const start=performance.now();await fn();raw.push(performance.now()-start);}return summarize(raw);}
 export async function runEditorMeasurements(store:LibraryStore,status:(message:string)=>void){
   const browser=/Version\/.+Safari\//.test(navigator.userAgent)?'safari':'chromium';
   const identity=await fetch('/measurement/identity').then(r=>r.json());
@@ -47,33 +48,38 @@ export async function runEditorMeasurements(store:LibraryStore,status:(message:s
     await new Promise(r=>setTimeout(r,0));if(run>=0)camera.push({frames:raw,p50:percentile(raw,.5),p95:percentile(raw),longTasks:[...tasks],before,after:visible()});
   }
   observer?.disconnect();reset();await presented();
+  await post('snapshot',{browser,label:'camera',viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,camera});
   status('Measuring indexed hit/miss lookup, selection inspector and hierarchy search…');
   const hit=()=>index.pick(worldToCss(viewport.getSnapshot().view,[16,144]),viewport.getSnapshot(),'Objects');
   const select=await warm(()=>{const found=hit();if(found[0]?.id!=='visual.0')throw Error('Indexed hit missed visual.0');
     const miss=index.pick(worldToCss(viewport.getSnapshot().view,[100000,10000]),viewport.getSnapshot(),'Objects');if(miss.length)throw Error('Indexed miss returned an object');});
   const inspector=await warm(async()=>{flushSync(()=>selection.select([{collection:'visuals',id:'visual.42'}]));await presented();
     if(!document.querySelector('[aria-label="Numeric inspector"]')?.textContent?.includes('visual.42'))throw Error('Inspector did not display selected ID');
-    flushSync(()=>selection.select([]));await presented();});
-  const input=document.querySelector<HTMLInputElement>('input[type="search"]')!;
-  const setSearch=async(value:string)=>{const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!;setter.call(input,value);
-    flushSync(()=>input.dispatchEvent(new Event('input',{bubbles:true})));await presented();};
+  },async()=>{flushSync(()=>selection.select([]));await presented();});
+  const searchInput=document.querySelector<HTMLInputElement>('input[type="search"]')!;
+  const setSearch=async(value:string)=>{const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!;setter.call(searchInput,value);
+    flushSync(()=>searchInput.dispatchEvent(new Event('input',{bubbles:true})));await presented();};
   const search=await warm(async()=>{await setSearch('Object 42');const matches=[...document.querySelectorAll<HTMLButtonElement>('ul[data-collection="visuals"] button')];
-    if(!matches.length||matches.some(b=>!b.textContent?.includes('Object 42')))throw Error('Inspector search result does not match the workload');await setSearch('');});
+    if(!matches.length||matches.some(b=>!b.textContent?.includes('Object 42')))throw Error('Inspector search result does not match the workload');},()=>setSearch(''));
+  await setSearch('');flushSync(()=>selection.select([]));await presented();
   status('Measuring 10,000-cell undo/redo, history pressure and decoded-art LRU pressure…');
   const buffer=new PaintBuffer(store.active()!.state.model.terrain!.byLayer.get('layer.tiles')!.cells);
   for(let i=0;i<10000;i++)buffer.write({column:i%100,row:100+Math.floor(i/100),cell:{tileId:'tile.grass',quarterTurns:0,mirrorX:false,mirrorY:false}});
-  if(!store.edit(doc.id,{label:'Owned 10k-cell workload',ops:[{op:'paint',layerId:'layer.tiles',delta:buffer.delta()!}]}))throw Error('10k paint was refused');await presented();
-  const history=await warm(async()=>{flushSync(()=>store.undo());await presented();flushSync(()=>store.redo());await presented();});
-  const cache=new ImageLru();let closed=0;
-  for(let i=0;i<=IMAGE_BUDGET/(1024*1024*4);i++){const surface=document.createElement('canvas');surface.width=surface.height=1024;
-    surface.getContext('2d')!.fillRect(0,0,1024,1024);cache.put(String(i),{source:surface,width:1024,height:1024,close(){closed++;surface.width=surface.height=0;}});}
-  if(!closed||cache.bytes>cache.budget||cache.get('0'))throw Error('Decoded-art pressure did not evict the oldest surface');
-  await presented();const cachePressure={bytes:cache.bytes,budget:cache.budget,closed};await post('snapshot',{browser,label:'cache-pressure'}).catch(()=>{});cache.clear();
+  if(!store.edit(doc.id,{label:'Owned 10k-cell workload',ops:[{op:'paint',layerId:'layer.tiles',delta:buffer.delta()!}]}))throw Error('10k paint was refused: '+selection.getSnapshot().message);await presented();
+  const undo=await warm(async()=>{flushSync(()=>store.undo());await presented();},async()=>{flushSync(()=>store.redo());await presented();});
+  const redo=await warm(async()=>{flushSync(()=>store.redo());await presented();},async()=>{flushSync(()=>store.undo());await presented();});
+  const history={...summarize(undo.raw.map((n,i)=>Math.max(n,redo.raw[i]!))),undo,redo};
+  await post('snapshot',{browser,label:'standard-memory'});
+  const pressure=await historyPressure(store.active()!.state.model),art=await artPressure();
+  await presented();const cachePressure={bytes:art.cache.bytes,budget:art.cache.budget,closed:art.closed};
+  await post('snapshot',{browser,label:'cache-pressure'});art.cache.clear();
   const state=store.active()!.state;
   const summary={camera:summarize(camera.map(r=>r.p95)),select,inspector,search,history};
+  await post('snapshot',{browser,label:'operations',summary});reset();await presented();
+  const input=await nativeInput(store,status);
   const report={browser,controller:CONTROLLER_SHA256,userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,
-    build:identity,startMemory,counts,camera,summary,historyPressure:{bytes:state.bytes,budget:state.budget,dropped:state.dropped},cachePressure,
-    limitations:['Input-to-presentation samples and history pressure saturation are not yet captured.','Safari has no Long Tasks observer; frame gaps are retained separately.'],
+    build:identity,startMemory,counts,camera,summary,input,historyPressure:{raw:pressure.raw,bytes:pressure.state.bytes,budget:pressure.state.budget,dropped:pressure.state.dropped,editorBytes:state.bytes},cachePressure,
+    limitations:['Safari has no Long Tasks observer; frame gaps are retained separately.','Native latency bounds the browser rendering opportunity after the overlay draw; raw event/draw/frame timestamps are retained.'],
     complete:false};
   return report;
 }

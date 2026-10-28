@@ -5,16 +5,16 @@ import {resolve,extname} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {platform,release,cpus,totalmem} from 'node:os';
-import {materialize} from '../src/benchmarks/fixture.ts';
+import {editorFixture} from '../src/benchmarks/fixture.ts';
 const port=Number(process.env.MAPLAB_BENCHMARK_PORT??4188),host=`127.0.0.1:${port}`;
 const output=resolve(process.env.MAPLAB_BENCHMARK_OUTPUT??'/private/tmp/maplab-editor-measurements');mkdirSync(output,{recursive:true});
 const read=file=>JSON.parse(readFileSync(file,'utf8')),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const map=materialize(read('conformance/surface/flat.map.json'),read('conformance/performance/cases.json').standard);
+const map=editorFixture(read('conformance/surface/flat.map.json'),read('conformance/performance/cases.json').standard,read('conformance/surface/enemy.movement.json'));
 const sources=[map,read('conformance/surface/enemy.movement.json'),read('placeholder-library/tilesets/forest.tileset.json')];
 const files=sources.map(value=>({id:value.id,path:`${value.format==='maplab.map'?'maps':value.format==='maplab.movement'?'movement':'tilesets'}/${value.id}.json`,text:JSON.stringify(value)})).map(file=>({...file,digest:hash(file.text)}));
 const identity={head:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),dirty:!!execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),
   cpu:cpus()[0]?.model,ramBytes:totalmem(),os:`${platform()} ${release()}`,node:process.version,
-  hardware:execFileSync('system_profiler',['SPHardwareDataType','-detailLevel','mini'],{encoding:'utf8'}),
+  hardware:execFileSync('system_profiler',['SPHardwareDataType','-detailLevel','mini'],{encoding:'utf8'}).split('\n').filter(line=>/^\s*(Model Name|Model Identifier|Chip|Total Number of Cores|Memory):/.test(line)).join('\n'),
   build:hash(readFileSync('dist/.vite/manifest.json')),mode:'Vite production build',baselineDecision:'Owner accepted Apple M4/24 GB on 2026-10-27'};
 const library={ok:true,label:'Owned performance fixture',readOnly:false,placeholder:false,projectId:'project.performance',name:'Performance',
   defaults:{tileSize:[32,32],snap:[32,32],movementId:sources[1].id},unindexed:[],diagnostics:[],
@@ -64,7 +64,10 @@ const server=createServer(async(req,res)=>{
         if(sampling)clearInterval(sampling);sampling=null;
         writeFileSync(resolve(output,'aborted.json'),JSON.stringify(input,null,2));return respond(res,{ok:true});
       }
-      if(url.pathname==='/measurement/snapshot'&&sampling)return respond(res,footprint(activeBrowser,String(input.label).replace(/[^a-z-]/g,'')));
+      if(url.pathname==='/measurement/snapshot'&&sampling){
+        const snapshot=footprint(activeBrowser,String(input.label).replace(/[^a-z-]/g,''));
+        writeFileSync(resolve(output,`${activeBrowser}-${input.label.replace(/[^a-z-]/g,'')}.json`),JSON.stringify({identity,...input,snapshot},null,2));return respond(res,snapshot);
+      }
       return respond(res,{ok:false,code:'measurement.readonly',message:'Measurement fixture server has no write operation'},403);
     }
     const path=resolve('dist','.'+decodeURIComponent(url.pathname)+(url.pathname.endsWith('/')?'index.html':''));

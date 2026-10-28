@@ -1,7 +1,15 @@
 // Original owned CC0 workload recipes; generated maps remain ordinary source documents.
 import type { MapDocument } from '../contracts/document-types';
 import type { TerrainChunk, Cell } from '../contracts';
+import type { MovementDocument } from '../contracts/movement-types';
 export interface Workload { readonly cells: number; readonly layers: number; readonly objects: number; readonly bodies: number; readonly footholds: number; readonly dense: boolean }
+/** The complete editor additionally requires one default start and its closed movement dependency. */
+export function editorFixture(base:MapDocument,w:Workload,profile:MovementDocument):MapDocument {
+  const map=materialize(base,w);if(!map.footholds.length)throw Error('Editor workload requires a support');
+  return {...map,dependencies:[...map.dependencies,{id:profile.id,kind:'movement',path:'movement/enemy.movement.json',required:true}],
+    entities:[{id:'start.performance',name:'Performance player start',anchor:{kind:'surface',footholdId:'fh.0',u:.25,normalOffset:0},enabled:true,
+      facing:'right',visualId:null,presentationId:null,kind:'playerStart',movementId:profile.id,default:true}]};
+}
 export function materialize(base: MapDocument, w: Workload): MapDocument {
   if (![w.cells,w.layers,w.objects,w.bodies,w.footholds].every(n=>Number.isSafeInteger(n)&&n>=0) || w.cells>100000 || w.layers<3 || w.layers>20 || w.objects>5000 || w.bodies>5000 || w.footholds>10000) throw Error('Invalid bounded workload');
   const body=base.bodies[0]!, foothold=base.footholds[0]!;

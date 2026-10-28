@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { moveSelection, numericEdit, numericLeaves, recordOf, type ObjectKey } from '../editor/editing';
 import type { MapModel } from '../domain/model';
 import type { SelectionSession } from '../editor/selection';
@@ -60,22 +60,33 @@ export function SelectionPanel({ model, session, locked, clipboard, setClipboard
   </section>;
 }
 
-export function Hierarchy({ ids, model, session }: { readonly ids: readonly (readonly [string, readonly string[]])[]; readonly model: MapModel; readonly session: SelectionSession }): ReactNode {
-  const s = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot), [query, setQuery] = useState('');
-  const selected = new Set(s.keys.map((k) => k.id)), search = query.trim().toLowerCase();
-  const matches = (collection: string, id: string): boolean => `${id} ${model.collections.get(collection as never)?.byId.get(id)?.name ?? ''}`.toLowerCase().includes(search);
-  return <section aria-label="Objects"><h3>Objects</h3><label>Hierarchy search <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
-    {ids.map(([collection, list]) => <details key={`${collection}/${Boolean(search)}`} open={search ? true : undefined}>
-      <summary>{collection} ({list.length})</summary>
-      <ul data-collection={collection} onKeyDown={(e) => {
+function HierarchyCollection({collection,list,model,session,search,selected}:{readonly collection:string;readonly list:readonly string[];readonly model:MapModel;readonly session:SelectionSession;readonly search:string;readonly selected:ReadonlySet<string>}):ReactNode {
+  const [expanded,setExpanded]=useState(false),[page,setPage]=useState(0),open=Boolean(search)||expanded;
+  const records=model.collections.get(collection as never);
+  const matches=useMemo(()=>open?[...list].sort().filter(id=>`${id} ${records?.byId.get(id)?.name??''}`.toLowerCase().includes(search)):[],[open,list,records,search]);
+  const last=Math.max(0,Math.ceil(matches.length/200)-1),at=Math.min(page,last),visible=matches.slice(at*200,(at+1)*200);
+  return <details open={open} onToggle={e=>setExpanded(e.currentTarget.open)}>
+    <summary>{collection} ({list.length})</summary>
+    {open&&<><ul data-collection={collection} onKeyDown={(e) => {
         if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
         const buttons = [...e.currentTarget.querySelectorAll('button')], i = buttons.indexOf(document.activeElement as HTMLButtonElement);
         const at = e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1 : Math.max(0, Math.min(buttons.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
         buttons[at]?.focus(); e.preventDefault();
-      }}>{[...list].sort().filter((id) => matches(collection, id)).map((id) => {
-        const r = model.collections.get(collection as never)?.byId.get(id), parent = r?.parentId ?? r?.layerId ?? r?.ownerBodyId;
+      }}>{visible.map((id) => {
+        const r = records?.byId.get(id), parent = r?.parentId ?? r?.layerId ?? r?.ownerBodyId;
         return <li key={id}><button type="button" aria-label={`Select ${id}`} aria-pressed={selected.has(id)} onClick={(e) => session.select([{ collection, id } as ObjectKey], e.shiftKey)}><code>{id}</code>{r?.name ? ` · ${r.name}` : ''}</button>{typeof parent === 'string' && <small> in {parent}</small>}</li>;
-      })}</ul>
-    </details>)}
+      })}</ul>{last>0&&<nav aria-label={`${collection} pages`}>
+        <button type="button" disabled={at===0} onClick={()=>setPage(at-1)}>Previous {collection} page</button>
+        <span> {at+1} / {last+1} · {matches.length} matches </span>
+        <button type="button" disabled={at===last} onClick={()=>setPage(at+1)}>Next {collection} page</button>
+      </nav>}</>}
+  </details>;
+}
+
+export function Hierarchy({ ids, model, session }: { readonly ids: readonly (readonly [string, readonly string[]])[]; readonly model: MapModel; readonly session: SelectionSession }): ReactNode {
+  const s=useSyncExternalStore(session.subscribe,session.getSnapshot,session.getSnapshot),[query,setQuery]=useState('');
+  const selected=new Set(s.keys.map(k=>k.id)),search=query.trim().toLowerCase();
+  return <section aria-label="Objects"><h3>Objects</h3><label>Hierarchy search <input type="search" value={query} onChange={e=>setQuery(e.target.value)}/></label>
+    {ids.map(([collection,list])=><HierarchyCollection key={`${collection}/${search}`} collection={collection} list={list} model={model} session={session} search={search} selected={selected}/>)}
   </section>;
 }
