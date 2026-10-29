@@ -4,7 +4,7 @@
 
 **Editing the plan (owner ruling, 2026-10-27):** any PR may add, edit, reorder or remove queued tasks at any time, whatever the queue holds. A PR that changes only this file is titled `[PLAN] Imperative summary` on a `plan-<summary>` branch into the open release branch; it takes no task ID and joins no release task list. IDs are unique and never recycled: a new task takes the ID above the mark below, which then rises to it, and a removed queued ID is retired for good, so IDs need not be contiguous.
 
-**Highest ID ever used:** ML-050.
+**Highest ID ever used:** ML-053.
 
 **Selection and retirement:** the active block holds exactly the controlled task in [config/change.json](config/change.json); any queued task may be the next one. After a verified protected squash into the open release branch on its green exact-head gate, the next activation drops it from the plan and moves its own task into the active block. GitHub's merged PRs and checks are the delivery record.
 
@@ -71,6 +71,48 @@
   3. Create owned fixture(s): Interrupted save, stale base, cancelled export and digest mismatch.
   4. Add executable checks: Raw timing/memory snapshots, negative cases and independent final-byte consumer proof.
 - **Task gate:** Run clean `npm ci`, `npm run check` (met by CI), `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back, plus gate/change-id. No merge without protected gates. Agents run only the required non-test checks locally.
+
+### ML-051 / P2 operations (baseline delivery contract)
+
+- **Source scope:** On 2026-10-29 the labs' copies of baseline's delivery scripts, launcher and workflows had drifted into two to four versions each, so baseline queued BASE-045…050 to host one shared copy under a pinned `contract/` lock. Vendor `contract/` from the merged baseline commit that holds BASE-045 and BASE-046, with its `contract/vendor.lock.json`, and replace MapLab's forked delivery scripts that the vendored copy covers (change and release checks, delivery verification, repository policy) with it, keeping MapLab-specific values in `config/` and the MapLab-only queue check (`scripts/check-queue.mjs`) local. Replace `repository-policy.mjs`, `policy:check` and `policy:apply` with the shared settings-as-code scripts. Remove `delivery:verify` and the "evidence package" wording, per the 2026-10-27 no-records ruling. Carry baseline `AGENTS.md` and `CONTRIBUTING.md` byte for byte, move MapLab's invariants (standalone boundary, source/derived/runtime separation, finite-body witness and qualified nav claims, semantic reference/ID stability, owned CC0 fixture provenance, negative tests and independent-consumer proof) to `README.md`, and drop the lab's own "Keep sessions cheap" section because the owner rulebook already covers it.
+- **Non-goals:** No change to the required check names, rulesets or strict current-with-base policy, no product code, no rewrite of specification text, and no hand edit of a vendored file.
+- **Acceptance:** The conformance `pin` check passes against the lock; MapLab's `gate`, `change-id`, `verify` and `security` keep their names and decisions; `AGENTS.md` matches baseline's hash; `delivery:verify`, `policy:check` and `policy:apply` are gone and no process document or script refers to them or to an evidence package.
+- **Depends on:** Baseline release r002 (BASE-045 and BASE-046) merged to baseline `main`; no parallel implementation with a task that edits the delivery scripts.
+- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [I3](docs/specifications/2026-10-16-maplab.md#i3-validation-layers-and-release-gates); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **Subtasks:**
+  1. Vendor `contract/` and `contract/vendor.lock.json` from the merged baseline commit, record that commit in `config/`, delete the superseded forks and point the `package.json` scripts at the vendored copies.
+  2. Swap `policy:check` and `policy:apply` for the shared settings-as-code scripts over `config/github-repository-settings.json`, remove `delivery:verify` and the evidence-package wording, and carry `AGENTS.md` and `CONTRIBUTING.md` from baseline byte for byte.
+  3. Create owned fixture(s): A tampered vendored file, a stale lock, a diverged `AGENTS.md` and a leftover `delivery:verify` reference, each of which must fail the `pin` or foundation check.
+  4. Add executable checks: Run the conformance `pin` check in the foundation gate, keep the existing change-id and release negative cases passing on the vendored scripts, and link-check the invariants moved to `README.md`.
+- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check` (met by CI), `npm run security`, exact PR-head `verify/change-id/security`, independent review and authenticated policy/delivery read-back, plus gate/change-id. No merge without protected gates. Agents run only the required non-test checks locally.
+
+### ML-052 / P2 operations (baseline dev launcher)
+
+- **Source scope:** MapLab's `npm start` runs `node scripts/dev.mjs` with `scripts/dev-lifecycle.mjs`, one of three different copies of the launcher across the labs; BASE-047 hosts one launcher in baseline's `contract/`. Replace both scripts with the vendored launcher, taking the repository name, port variable, default port and build steps from `config/`. Make `.gitignore` ignore only `.claude/worktrees/` and `.claude/settings.local.json`, and track a `.claude/launch.json` whose entry runs `npm start` with no absolute or `/tmp` path.
+- **Non-goals:** No change to what `npm start` does for the owner beyond the vendored launcher's behavior, no toolchain beyond the pinned Node and npm, and no hand edit of a vendored file.
+- **Acceptance:** `scripts/dev.mjs` and `scripts/dev-lifecycle.mjs` are gone and `npm start` runs the vendored launcher with MapLab's port and build steps; `.claude/launch.json` is tracked and passes the shared repository contract; the conformance `pin` check passes.
+- **Depends on:** ML-051 merged, so the lab holds the vendored `contract/`; BASE-047 released to baseline `main`.
+- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [I3](docs/specifications/2026-10-16-maplab.md#i3-validation-layers-and-release-gates); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **Subtasks:**
+  1. Re-vendor `contract/` and its lock from the baseline commit that holds BASE-047, then replace `scripts/dev.mjs` and `scripts/dev-lifecycle.mjs` with the vendored launcher configured from `config/`.
+  2. Narrow `.gitignore` to the two `.claude/` entries and add a tracked `.claude/launch.json` that runs `npm start`, with the README command map pointing at it.
+  3. Create owned fixture(s): A `.gitignore` that ignores all of `.claude/` and a `launch.json` with an absolute path and one with a `/tmp` path, each of which must fail the repository contract.
+  4. Add executable checks: Cover the launcher's configuration (port variable, default port, build steps) and the `launch.json` rule in the foundation gate, with the `pin` check passing on the re-vendored lock.
+- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check` (met by CI), `npm run security`, exact PR-head `verify/change-id/security`, independent review and the shared contract's settings read-back, plus gate/change-id. No merge without protected gates. Agents run only the required non-test checks locally.
+
+### ML-053 / P2 operations (baseline CI shape)
+
+- **Source scope:** MapLab's `gate.yml`, `change.yml` and `verify.yml` differ from the other labs' workflows, and BASE-048 picks one CI shape for `gate`, `change-id`, `verify` and `security`. Replace MapLab's four checks' workflow files with baseline's pinned files, byte for byte under the lock and with the required check names unchanged. MapLab-specific steps (the build, the chromium and webkit browser shards, fixtures) run through package scripts, never through workflow edits.
+- **Non-goals:** No change to the required check names, rulesets or strict current-with-base policy, to what the browser shards cover, or to any deploy or release workflow.
+- **Acceptance:** A task PR and a release PR pass on the shared shape with `gate`, `change-id`, `verify` and `security` unchanged; the shared workflow check accepts the files; a workflow that differs from its lock fails `pin`.
+- **Depends on:** ML-051 merged, so the lab holds the vendored `contract/`; BASE-048 released to baseline `main`.
+- **Specification:** [J1](docs/specifications/2026-10-16-maplab.md#j1-repository-and-change-governance), [I3](docs/specifications/2026-10-16-maplab.md#i3-validation-layers-and-release-gates); authoritative full contract: [2026-10-16-maplab.md](docs/specifications/2026-10-16-maplab.md).
+- **Subtasks:**
+  1. Re-vendor baseline's workflow files and lock from the commit that holds BASE-048, replacing MapLab's `gate.yml`, `change.yml` and `verify.yml` byte for byte.
+  2. Move every MapLab-specific workflow step into package scripts (build, browser shards, fixture setup) so the vendored files carry no MapLab edits, and keep the `security` job's advisory scripts intact.
+  3. Create owned fixture(s): A workflow edited after vendoring and a workflow that renames or drops a required check, each of which must fail the `pin` or workflow check.
+  4. Add executable checks: Run the shared workflow check and the `pin` check in the foundation gate, and read the required check names back from a task PR and a release PR on the new shape.
+- **Task gate:** Source scope and non-goals intact; fixture failures are negative tests; run clean `npm ci`, `npm run check` (met by CI), `npm run security`, exact PR-head `verify/change-id/security`, independent review and the shared contract's settings read-back, plus gate/change-id. No merge without protected gates. Agents run only the required non-test checks locally.
 
 ### ML-042 / P1 hardening
 
